@@ -1,0 +1,55 @@
+/* src/App.css */
+
+/* 1. 커스텀 애니메이션 정의 (App.jsx의 animate-fade-in-up 대응) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* 2. 스크롤바 커스텀 (다크 모드에 어울리는 디자인) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #18181b; /* zinc-950보다 약간 밝은 색 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46; /* zinc-700 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b; /* zinc-600 */
+}
+
+/* 3. 모바일 반응형 디자인 (화면 잘림 방지 필수 코드) */
+@media screen and (max-width: 768px) {
+  /* 전체 레이아웃 여백 조정 */
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* 입력창 하단 고정 스타일 조정 */
+  .sticky.bottom-4 {
+    bottom: 1rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
