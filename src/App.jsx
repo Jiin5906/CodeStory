@@ -29,7 +29,7 @@ const SYSTEM_PROMPT = `
 function App() {
     // -------------------------------------------------------------------------
     // 1. 상태 관리 (State Management)
-    
+
     // 사용자 인증 및 UI 모드 관련 상태
     const [user, setUser] = useState(null); // Firebase 사용자 객체
     const [isGuestMode, setIsGuestMode] = useState(false); // 게스트 모드 활성화 여부
@@ -56,6 +56,28 @@ function App() {
 
     // -------------------------------------------------------------------------
     // 2. Side Effects (useEffect)
+
+    // 카카오톡/인스타 인앱 브라우저 강제 탈출 및 안내
+    useEffect(() => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        // 카카오톡, 인스타그램, 네이버, 페이스북 앱 등인지 확인
+        const isInApp = userAgent.includes('kakaotalk') ||
+            userAgent.includes('instagram') ||
+            userAgent.includes('naver') ||
+            userAgent.includes('facebook');
+
+        if (isInApp) {
+            // 안드로이드라면: 크롬 브라우저로 강제 이동 시도
+            if (navigator.userAgent.match(/Android/i)) {
+                const url = window.location.href.replace(/https?:\/\//i, '');
+                // intent 스킴을 이용해 외부 브라우저 호출
+                window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+            } else {
+                // 아이폰(iOS)이라면: 강제 이동이 막혀있으므로 안내 메시지 띄우기
+                alert("Google 로그인은 보안 정책상\n앱 내부 브라우저에서 실행되지 않습니다.\n\n화면 우측 하단/상단의 점 3개(...)를 누르고\n[다른 브라우저로 열기]를 선택해주세요!");
+            }
+        }
+    }, []);
 
     // Firebase 인증 상태 변경 감지 리스너
     useEffect(() => {

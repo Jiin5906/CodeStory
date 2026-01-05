@@ -1,55 +1,95 @@
-/* src/App.css */
-
 /* 1. 커스텀 애니메이션 정의 (App.jsx의 animate-fade-in-up 대응) */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
+    animation: fadeInUp 0.6s ease-out forwards;
 }
 
 /* 2. 스크롤바 커스텀 (다크 모드에 어울리는 디자인) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #18181b; /* zinc-950보다 약간 밝은 색 */
+    background: #18181b;
+    /* zinc-950보다 약간 밝은 색 */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46; /* zinc-700 */
-  border-radius: 4px;
+    background: #3f3f46;
+    /* zinc-700 */
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b; /* zinc-600 */
+    background: #52525b;
+    /* zinc-600 */
 }
 
 /* 3. 모바일 반응형 디자인 (화면 잘림 방지 필수 코드) */
 @media screen and (max-width: 768px) {
-  /* 전체 레이아웃 여백 조정 */
-  main {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
 
-  /* 입력창 하단 고정 스타일 조정 */
-  .sticky.bottom-4 {
-    bottom: 1rem;
-    padding-left: 0;
-    padding-right: 0;
-  }
+    /* 전체 레이아웃 여백 조정 */
+    main {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* 입력창 하단 고정 스타일 조정 */
+    .sticky.bottom-4 {
+        bottom: 1rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* 1. 헤더 높이 줄이기 (상하 여백 축소) */
+header {
+    padding-top: 10px !important;
+    /* 위쪽 여백 줄임 */
+    padding-bottom: 10px !important;
+    /* 아래쪽 여백 줄임 */
+    height: auto !important;
+    /* 높이 자동 조절 */
+    min-height: 50px !important;
+    /* 최소 높이 확보 */
+}
+
+/* 2. 타이틀 글자 크기 줄이고 한 줄로 만들기 */
+header h1,
+header .font-bold,
+header div[class*="text-2xl"] {
+    font-size: 1.1rem !important;
+    /* 글자 크기 축소 */
+    line-height: 1.2 !important;
+    /* 줄 간격 좁힘 */
+    white-space: nowrap !important;
+    /* 절대 줄바꿈 하지 않음 (중요!) */
+}
+
+/* 3. 헤더 오른쪽 아이콘 간격 좁히기 */
+header .flex.gap-4 {
+    gap: 8px !important;
+    /* 아이콘 사이 간격 좁힘 */
+}
+
+/* 4. 헤더 안의 아이콘/버튼 크기 약간 줄이기 */
+header button,
+header svg {
+    transform: scale(0.9);
+    /* 버튼 크기 90%로 축소 */
 }
