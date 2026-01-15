@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.9'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.2' // [수정됨] 3.5.9는 존재하지 않는 버전이라 3.2.2(안전한 버전)로 변경했습니다.
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.codestory'
@@ -9,19 +9,19 @@ version = '0.0.1-SNAPSHOT'
 description = 'Backend server for AI GongGam Diary'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     
-    // ★ Lombok 설정을 확실하게 (이게 없으면 getEmail, Builder 에러남)
+    // ★ Lombok 설정을 확실하게 (이게 핵심 해결책입니다)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     
@@ -47,5 +47,5 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
