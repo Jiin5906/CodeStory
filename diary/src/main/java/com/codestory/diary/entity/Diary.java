@@ -1,40 +1,75 @@
 package com.codestory.diary.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
+@Table(name = "diary")
 @Getter
-@Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 public class Diary {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long userId;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(nullable = false)
     private LocalDate date;
-
-    private String emoji;
-
-    private String mood;    // 감정 분석 결과 (기쁨, 슬픔 등)
-    private Integer tension; // 긴장도 (0~100)
-    private Integer fun;     // 재미 (0~100)
-
-    private String tags;    // 태그 (#여행 #맛집)
+    
+    private String imageUrl;
 
     @Column(columnDefinition = "TEXT")
-    private String aiResponse; // AI의 조언/위로
-    private String imageUrl;   // 업로드한 이미지 경로
+    private String aiResponse;
+
+    @Builder.Default 
+    @Column(nullable = false)
+    private boolean isPublic = false; 
+
+    @ElementCollection
+    @CollectionTable(name = "diary_tags", joinColumns = @JoinColumn(name = "diary_id"))
+    @Column(name = "tag")
+    private List<String> tags;
+
+    private int tension;
+    private int mood;
+    private int fun;
+    private String emoji;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // [중요] 여기에 boolean isPublic 파라미터가 있어야 하고, 내부에서 this.isPublic에 대입해야 합니다!
+    public void update(String content, String emoji, int mood, int tension, int fun, 
+                       List<String> tags, String aiResponse, String imageUrl, boolean isPublic) {
+        this.content = content;
+        this.emoji = emoji;
+        this.mood = mood;
+        this.tension = tension;
+        this.fun = fun;
+        this.tags = tags;
+        this.aiResponse = aiResponse;
+        
+        // ★★★ 범인은 여기였습니다! 이 줄이 없으면 DB 값이 절대 안 바뀝니다. ★★★
+        this.isPublic = isPublic; 
+
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+    }
 }

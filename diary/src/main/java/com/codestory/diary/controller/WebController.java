@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class WebController {
 
-    @GetMapping(value = { "", "/", "/login", "/signup", "/write", "/diary/**", "/list" })
+    @GetMapping(value =  "/{path:[^\\.]*}")
     public String redirect() {
         return "forward:/index.html";
     }

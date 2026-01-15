@@ -2,25 +2,27 @@ package com.codestory.diary.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
+import java.util.List;
 
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiaryDto {
     private Long id;
     private Long userId;
-    private String content;
     private LocalDate date;
+    private String content;
     private String emoji;
-    private String mood;
-    private Integer tension;
-    private Integer fun;
-    private String tags;
+    private int mood;
+    private int tension;
+    private int fun;
+    private List<String> tags;
     private String aiResponse;
     private String imageUrl;
+
+    private boolean shared; 
 }

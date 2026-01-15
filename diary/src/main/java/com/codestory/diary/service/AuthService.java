@@ -17,35 +17,28 @@ public class AuthService {
 
     // 회원가입
     @Transactional
-    public String signup(AuthRequest request) {
-        // 1. 이메일 중복 검사
+    public Member signup(AuthRequest request) {
         if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 가입된 이메일입니다.");
+            throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
 
-        // 2. 멤버 생성 (Builder 사용)
         Member member = Member.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
-                // createdAt은 엔티티 내부에서 @PrePersist로 자동 생성되므로 안 넣어도 됨
                 .build();
 
-        // 3. 저장
-        memberRepository.save(member);
-
-        return "회원가입 성공";
+        return memberRepository.save(member);
     }
 
-    // 로그인
-    public String login(String email, String password) {
+    // 로그인 (성공 시 회원 정보 반환, 실패 시 예외)
+    public Member login(String email, String password) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("가입되지 않은 이메일입니다."));
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         if (!passwordEncoder.matches(password, member.getPassword())) {
-            throw new RuntimeException("비밀번호가 틀렸습니다.");
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
-
-        return "로그인 성공 (토큰 발급 대기중)";
+        return member;
     }
 }

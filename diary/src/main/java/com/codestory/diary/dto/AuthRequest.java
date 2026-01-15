@@ -1,14 +1,10 @@
 package com.codestory.diary.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class AuthRequest {
     private String email;
     private String password;
-    private String nickname;
+    private String nickname; // 회원가입 시에만 사용
 }

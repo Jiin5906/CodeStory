@@ -8,10 +8,10 @@ import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.DiaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.MediaType; // import 추가 확인
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-// [추가] 컨트롤러 레벨에서도 CORS 허용 (보험)
-@CrossOrigin(origins = {"http://localhost:5173", "http://logam.click", "https://logam.click"})
 public class ApiController {
 
     private final AuthService authService;
@@ -41,6 +39,7 @@ public class ApiController {
 
     // --- 일기 및 AI API ---
 
+    // [핵심] 주소가 프론트엔드와 동일하게 "/diaries/write"여야 합니다!
     @PostMapping(value = "/diaries/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveDiary(
             @RequestPart(value = "diary") DiaryRequestDto request,
@@ -50,6 +49,7 @@ public class ApiController {
         return ResponseEntity.ok(createdDiary);
     }
 
+    // 날짜별 일기 조회
     @GetMapping("/diaries")
     public ResponseEntity<?> getDiaries(@RequestParam Long userId) {
         List<Diary> diaries = diaryRepository.findAllByUserIdOrderByDateDesc(userId);
