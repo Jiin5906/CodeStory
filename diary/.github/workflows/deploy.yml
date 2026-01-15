@@ -14,6 +14,22 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Build React Frontend
+        run: |
+          cd frontend/CodeStory/codestory-chatbot
+          npm install
+          npm run build
+          
+          # 백엔드 정적 폴더 생성 및 파일 복사
+          # (Vite라서 dist 폴더를 복사합니다)
+          mkdir -p ../../../diary/src/main/resources/static
+          cp -r dist/* ../../../diary/src/main/resources/static/
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -21,10 +37,14 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: |
+          cd diary
+          chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew clean build -x test
+        run: |
+          cd diary
+          ./gradlew clean build -x test
 
       - name: Copy jar file to EC2
         uses: appleboy/scp-action@master
@@ -32,9 +52,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: "build/libs/*.jar"
+          source: "diary/build/libs/*.jar"
           target: "/home/ec2-user"
-          strip_components: 2
+          strip_components: 3
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -42,25 +62,21 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          envs: DB_USER, DB_PASSWORD, OPENAI_API_KEY
           script: |
-            # 1. 기존 서버 종료
             sudo fuser -k 8080/tcp || true
-            
-            # 2. 앱 폴더로 이동
             cd /home/ec2-user
-            
-            # 3. [중요] 실행 안 되는 껍데기 파일(*-plain.jar) 삭제
-            # 이 줄이 없으면 서버가 plain 파일을 실행하려다 에러가 납니다.
             rm -f *-plain.jar
             
-            # 4. GitHub Secrets를 환경 변수로 주입하며 서버 실행
-            # 이제 폴더에 실행 파일이 하나만 남았으므로 안심하고 *.jar 실행 가능
             nohup java -jar \
-              -Dspring.datasource.username=${{ secrets.DB_USER }} \
-              -Dspring.datasource.password=${{ secrets.DB_PASSWORD }} \
-              -Dopenai.api.key=${{ secrets.OPENAI_API_KEY }} \
+              -Dspring.datasource.username=$DB_USER \
+              -Dspring.datasource.password=$DB_PASSWORD \
+              -Dopenai.api.key=$OPENAI_API_KEY \
               *.jar > output.log 2>&1 &
             
-            # 5. 확인
             sleep 10
             ps -ef | grep java
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
