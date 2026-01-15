@@ -42,8 +42,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          # ▼▼▼ [핵심 수정 1] 사용할 변수 이름들을 등록합니다 ▼▼▼
-          envs: DB_USER, DB_PASSWORD, OPENAI_API_KEY
           script: |
             # 1. 기존 서버 종료
             sudo fuser -k 8080/tcp || true
@@ -51,23 +49,18 @@ jobs:
             # 2. 앱 폴더로 이동
             cd /home/ec2-user
             
-            # 3. 실행 안 되는 껍데기 파일 삭제
+            # 3. [중요] 실행 안 되는 껍데기 파일(*-plain.jar) 삭제
+            # 이 줄이 없으면 서버가 plain 파일을 실행하려다 에러가 납니다.
             rm -f *-plain.jar
             
-            # 4. 서버 실행
-            # ▼▼▼ [핵심 수정 2] ${{ secrets... }} 대신 $DB_USER 처럼 쉘 변수를 사용합니다.
-            # 이렇게 해야 '!' 같은 특수문자가 있어도 안전하게 들어갑니다.
+            # 4. GitHub Secrets를 환경 변수로 주입하며 서버 실행
+            # 이제 폴더에 실행 파일이 하나만 남았으므로 안심하고 *.jar 실행 가능
             nohup java -jar \
-              -Dspring.datasource.username=$DB_USER \
-              -Dspring.datasource.password=$DB_PASSWORD \
-              -Dopenai.api.key=$OPENAI_API_KEY \
+              -Dspring.datasource.username=${{ secrets.DB_USER }} \
+              -Dspring.datasource.password=${{ secrets.DB_PASSWORD }} \
+              -Dopenai.api.key=${{ secrets.OPENAI_API_KEY }} \
               *.jar > output.log 2>&1 &
             
             # 5. 확인
             sleep 10
             ps -ef | grep java
-        # ▼▼▼ [핵심 수정 3] 실제 비밀 값을 환경 변수에 매핑합니다 ▼▼▼
-        env:
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
