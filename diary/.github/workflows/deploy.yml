@@ -1,47 +1,11 @@
-name: Deploy to EC2
-
-on:
-  push:
-    branches:
-      - main
-      - master
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
-
-      - name: Copy jar file to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          source: "build/libs/*.jar"
-          target: "/home/ec2-user"
-          strip_components: 2
-
-      - name: Deploy to EC2
+- name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          # 1. 여기서 사용할 변수들의 이름을 나열합니다.
+          envs: DB_USER, DB_PASSWORD, OPENAI_API_KEY
           script: |
             # 1. 기존 서버 종료
             sudo fuser -k 8080/tcp || true
@@ -49,16 +13,22 @@ jobs:
             # 2. 앱 폴더로 이동
             cd /home/ec2-user
             
-            # 3. 실행 안 되는 껍데기 파일 삭제 (중요!)
+            # 3. 껍데기 파일 삭제
             rm -f *-plain.jar
             
-            # 4. 서버 실행
+            # 4. 서버 실행 (환경 변수 $DB_USER 등을 사용)
+            # 주의: ${{ secrets... }}가 아니라 $DB_USER 처럼 쉘 변수로 써야 합니다.
             nohup java -jar \
-              -Dspring.datasource.username=${{ secrets.DB_USER }} \
-              -Dspring.datasource.password=${{ secrets.DB_PASSWORD }} \
-              -Dopenai.api.key=${{ secrets.OPENAI_API_KEY }} \
+              -Dspring.datasource.username=$DB_USER \
+              -Dspring.datasource.password=$DB_PASSWORD \
+              -Dopenai.api.key=$OPENAI_API_KEY \
               *.jar > output.log 2>&1 &
             
             # 5. 확인
             sleep 10
             ps -ef | grep java
+        # 2. 실제 값을 여기서 매핑해줍니다.
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
