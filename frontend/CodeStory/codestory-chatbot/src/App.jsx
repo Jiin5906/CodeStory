@@ -88,7 +88,8 @@ function AppContent() {
         const fullDiaryData = {
             ...diaryDraft,
             ...emotionData,
-            userId: user.id
+            userId: user.id,
+            date: format(selectedDate, 'yyyy-MM-dd')
         };
 
         // api.js의 수정된 로직 호출
