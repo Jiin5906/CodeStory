@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// [핵심] 도메인(http://...)을 제거하고 상대 경로 '/api'만 사용합니다.
-// 이렇게 하면 http://logam.click 이든 https://logam.click 이든 알아서 따라갑니다.
+// 도메인 제거, 상대 경로 사용 (http/https 자동 호환)
 const API_BASE_URL = '/api';
 
 const api = axios.create({
@@ -20,14 +19,15 @@ export const authApi = {
 };
 
 export const diaryApi = {
+    // 1. 내 일기 목록 가져오기
     getDiaries: async (userId) => {
         const response = await api.get(`/diaries?userId=${userId}`);
         return response.data;
     },
 
+    // 2. 일기 저장하기
     saveDiary: async (diaryData, imageFile) => {
         const formData = new FormData();
-
         formData.append('userId', diaryData.userId);
         formData.append('date', diaryData.date);
         formData.append('content', diaryData.content);
@@ -49,13 +49,19 @@ export const diaryApi = {
         return response.data;
     },
 
-    // [수정] 공유 상태 변경 (MainDashboard에서 직접 fetch 쓰던 것을 여기로 통합)
+    // 3. [복구됨] 공유된 피드 목록 가져오기 (이게 없어서 에러가 났습니다!)
+    getFeed: async () => {
+        const response = await api.get('/feed');
+        return response.data;
+    },
+
+    // 4. 공유 상태 변경 (토글)
     toggleShare: async (id) => {
         const response = await api.post(`/diary/${id}/status`);
         return response.data;
     },
 
-    // [추가] 일기 삭제 (MainDashboard에서 직접 fetch 쓰던 것을 여기로 통합)
+    // 5. 일기 삭제
     deleteDiary: async (id) => {
         const response = await api.delete(`/diary/${id}`);
         return response.data;
