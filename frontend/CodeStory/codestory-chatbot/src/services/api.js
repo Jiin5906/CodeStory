@@ -1,9 +1,8 @@
 import axios from 'axios';
 
+// 도메인을 명시하지 않고 상대 경로를 사용하여 CORS 및 포트 문제를 방지합니다.
 const API_BASE_URL = '/api';
 
-// [수정] 기본 headers 설정을 삭제했습니다.
-// Axios가 데이터를 보고 알아서 Content-Type을 결정하도록 맡깁니다.
 const api = axios.create({
     baseURL: API_BASE_URL,
 });
@@ -28,20 +27,29 @@ export const diaryApi = {
     saveDiary: async (diaryData, imageFile) => {
         const formData = new FormData();
 
-        // 1. JSON 데이터 포장
-        // 백엔드가 @RequestPart("diary")로 받으므로 이름과 타입을 정확히 명시합니다.
-        const jsonBlob = new Blob([JSON.stringify(diaryData)], { type: "application/json" });
-        formData.append("diary", jsonBlob);
+        // [수정] Blob을 사용하지 않고 백엔드 @ModelAttribute 구조에 맞게 평면적으로 추가합니다.
+        // diaryData 객체 내부의 필드들을 직접 꺼내서 append 해야 백엔드 DTO에 바인딩됩니다.
+        formData.append('userId', diaryData.userId);
+        formData.append('date', diaryData.date);
+        formData.append('content', diaryData.content);
+        formData.append('mood', diaryData.mood);
+        formData.append('tension', diaryData.tension);
+        formData.append('fun', diaryData.fun);
+        formData.append('emoji', diaryData.emoji);
+        formData.append('isPublic', diaryData.isPublic);
+        
+        if (diaryData.tags) {
+            // 태그 배열 처리
+            diaryData.tags.forEach(tag => formData.append('tags', tag));
+        }
 
-        // 2. 이미지 파일 포장 (있을 경우만)
+        // [수정] 백엔드 @RequestPart("image")와 이름을 맞춥니다.
         if (imageFile) {
             formData.append("image", imageFile);
         }
 
-        // 3. 전송
-        // headers 설정을 아예 하지 않습니다. 
-        // FormData를 넣으면 Axios가 자동으로 'multipart/form-data; boundary=...' 헤더를 만들어줍니다.
-        const response = await api.post('/diaries/write', formData);
+        // 백엔드 엔드포인트 /diary (Controller 확인 결과)
+        const response = await api.post('/diary', formData);
         
         return response.data;
     },
