@@ -1,10 +1,9 @@
-/* MainDashboard.css */
+/* MainDashboard.css (최종 수정본) */
 
 .dashboard-container {
     padding: 20px 40px;
     max-width: 800px;
     margin: 0 auto;
-    /* 전체 텍스트 색상 제어 */
     color: var(--text-color);
 }
 
@@ -19,12 +18,12 @@
 .month-title {
     font-size: 24px;
     font-weight: 800;
-    color: var(--text-color); /* [수정] */
+    color: var(--text-color);
 }
 
 .user-badge {
     font-size: 14px;
-    color: var(--sub-text-color); /* [수정] */
+    color: var(--sub-text-color);
     font-weight: 600;
 }
 
@@ -34,7 +33,6 @@
     justify-content: center;
     align-items: center;
     gap: 30px;
-    /* [수정] 배경과 테두리 변수화 */
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     padding: 20px;
@@ -48,7 +46,7 @@
     border: none;
     cursor: pointer;
     font-size: 18px;
-    color: var(--sub-text-color); /* [수정] */
+    color: var(--sub-text-color);
 }
 
 .date-center {
@@ -60,13 +58,13 @@
 .big-day {
     font-size: 32px;
     font-weight: 900;
-    color: var(--accent-color); /* [수정] */
+    color: var(--accent-color);
     line-height: 1;
 }
 
 .day-label {
     font-size: 14px;
-    color: var(--sub-text-color); /* [수정] */
+    color: var(--sub-text-color);
     font-weight: 600;
     margin-top: 5px;
 }
@@ -76,7 +74,7 @@
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 20px;
-    color: var(--text-color); /* [수정] */
+    color: var(--text-color);
 }
 
 .diary-cards {
@@ -85,14 +83,12 @@
     gap: 25px;
 }
 
-/* --- 일기 카드 스타일 (핵심) --- */
+/* --- 일기 카드 스타일 --- */
 .diary-card {
-    /* [수정] 카드 배경색 변수 사용 */
     background: var(--card-bg);
     border-radius: 20px;
     padding: 25px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-    /* [수정] 테두리 색상 변수 사용 */
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
@@ -103,12 +99,27 @@
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid var(--border-color); /* [수정] */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mood-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mood-emoji {
+    font-size: 24px;
 }
 
 .mood-score {
     font-weight: 700;
-    color: var(--text-color); /* [수정] */
+    color: var(--text-color);
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
 }
 
 .action-btn {
@@ -124,18 +135,32 @@
     transition: 0.2s;
 }
 
-/* 공유 버튼 (기본 - 나만 보기) */
+/* --- [핵심] 공유 버튼 스타일 (순서 중요!) --- */
+
+/* 1. 기본 상태 (공유 안 함) */
 .share-btn { 
-    /* [수정] 배경을 투명하게 하거나 테마에 맞춤 */
     background: rgba(0,0,0,0.05); 
     color: var(--sub-text-color); 
+    border: 1px solid transparent; /* 테두리 공간 확보 */
 }
 
-/* 공유 중일 때 (초록색 유지) */
-.share-btn.active { 
-    background: #E6FCF5 !important; 
-    color: #087F5B !important;     
-    font-weight: 700;     
+/* 2. 공유됨(Active) 상태 - !important 제거하고 구체적으로 명시 */
+.share-btn.active {
+    background-color: rgba(46, 204, 113, 0.15) !important; /* 연한 초록 배경 */
+    color: #27ae60 !important; /* 진한 초록 글씨 */
+    border: 1px solid #2ecc71 !important;
+    font-weight: bold;
+}
+
+/* 3. 초록색 불(점) 스타일 */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #2ecc71;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #2ecc71; /* 야광 효과 */
+    display: inline-block;
+    margin-right: 4px; /* 글자와의 간격 */
 }
 
 .delete-btn {
@@ -143,18 +168,17 @@
     color: #FA5252;
 }
 
-/* 본문 */
+/* 본문 및 기타 */
 .diary-text {
     font-size: 15px;
     line-height: 1.6;
-    color: var(--text-color); /* [수정] */
+    color: var(--text-color);
     margin-bottom: 20px;
     white-space: pre-wrap;
 }
 
-/* AI 코멘트 박스 */
 .ai-comment-box {
-    background: rgba(0, 0, 0, 0.03); /* [수정] 연한 회색 대신 투명도 사용 */
+    background: rgba(0, 0, 0, 0.03);
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 15px;
@@ -164,32 +188,36 @@
 .ai-label {
     font-size: 12px;
     font-weight: 700;
-    color: var(--accent-color); /* [수정] */
+    color: var(--accent-color);
     display: block;
     margin-bottom: 5px;
 }
 
 .ai-text {
     font-size: 14px;
-    color: var(--sub-text-color); /* [수정] */
+    color: var(--sub-text-color);
 }
 
-/* 태그 */
+.card-footer {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .tag {
-    background: rgba(0, 0, 0, 0.05); /* [수정] */
-    color: var(--sub-text-color); /* [수정] */
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--sub-text-color);
     font-size: 12px;
     padding: 4px 10px;
     border-radius: 12px;
 }
 
-/* 빈 상태 */
 .empty-state {
     text-align: center;
     padding: 60px;
-    background: var(--card-bg); /* [수정] */
+    background: var(--card-bg);
     border-radius: 20px;
-    border: 2px dashed var(--border-color); /* [수정] */
+    border: 2px dashed var(--border-color);
 }
 
 /* 모바일 대응 */
@@ -197,30 +225,4 @@
     .dashboard-container {
         padding: 20px 15px;
     }
-}
-
-/* 공유 버튼 기본 스타일 */
-.share-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-/* [핵심] 공유됨(Active) 상태일 때 스타일 */
-.share-btn.active {
-    background-color: rgba(46, 204, 113, 0.15); /* 연한 초록 배경 */
-    color: #27ae60; /* 진한 초록 글씨 */
-    border: 1px solid #2ecc71;
-    font-weight: bold;
-}
-
-/* 초록색 불(점) 표시 */
-.status-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #2ecc71;
-    border-radius: 50%;
-    box-shadow: 0 0 5px #2ecc71; /* 야광 효과 */
-    display: inline-block;
 }
