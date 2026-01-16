@@ -198,3 +198,29 @@
         padding: 20px 15px;
     }
 }
+
+/* 공유 버튼 기본 스타일 */
+.share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+/* [핵심] 공유됨(Active) 상태일 때 스타일 */
+.share-btn.active {
+    background-color: rgba(46, 204, 113, 0.15); /* 연한 초록 배경 */
+    color: #27ae60; /* 진한 초록 글씨 */
+    border: 1px solid #2ecc71;
+    font-weight: bold;
+}
+
+/* 초록색 불(점) 표시 */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #2ecc71;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #2ecc71; /* 야광 효과 */
+    display: inline-block;
+}

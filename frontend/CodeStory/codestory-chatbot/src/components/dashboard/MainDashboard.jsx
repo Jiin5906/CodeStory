@@ -3,7 +3,7 @@ import { format, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaTrash, FaGlobe, FaLock, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './MainDashboard.css';
-import { diaryApi } from '../../services/api'; // [핵심] api.js import 확인
+import { diaryApi } from '../../services/api'; // api.js import 필수
 
 const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh }) => {
 
@@ -17,17 +17,13 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
         onDateChange(newDate);
     };
 
-    // [수정] localhost fetch 제거 -> diaryApi.deleteDiary 사용
     const handleDelete = async (id) => {
         if (window.confirm('정말 이 일기를 삭제하시겠습니까?')) {
             try {
                 await diaryApi.deleteDiary(id);
                 alert('삭제되었습니다.');
-                
-                // 목록 새로고침 (App.jsx에서 받은 함수가 있으면 쓰고, 없으면 강제 리로드)
                 if (onRefresh) onRefresh();
                 else window.location.reload();
-                
             } catch (e) {
                 console.error("삭제 실패:", e);
                 alert("삭제 중 오류가 발생했습니다.");
@@ -35,22 +31,30 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
         }
     };
 
-    // [수정] localhost fetch 제거 -> diaryApi.toggleShare 사용
-    const handleToggleShare = async (id, currentStatus) => {
+    // [핵심 수정] 공유 상태에 따른 스마트한 토글 핸들러
+    const handleToggleShare = async (id, isCurrentlyPublic) => {
+        // 1. 현재 상태에 따라 질문 멘트 결정
+        const confirmMessage = isCurrentlyPublic
+            ? "공유를 해제하시겠습니까?"  // 이미 공유 중일 때
+            : "일기를 커뮤니티에 공유하시겠습니까?"; // 공유 안 된 상태일 때
+
+        // 2. 사용자 확인
+        if (!window.confirm(confirmMessage)) return;
+
         try {
-            // api.js를 통해 서버 요청 (주소 문제 해결됨)
+            // 3. API 호출 (상태 변경)
             await diaryApi.toggleShare(id);
 
-            const willBePublic = !currentStatus;
-            alert(willBePublic ? '커뮤니티에 공유되었습니다! 🌏' : '나만 보기로 변경되었습니다. 🔒');
+            // 4. 완료 멘트 및 새로고침
+            // alert(isCurrentlyPublic ? "공유가 해제되었습니다." : "공유되었습니다!"); 
+            // (사용자 경험상 alert 없이 바로 화면이 바뀌는 게 더 세련되지만, 확실한 피드백을 위해 남겨둡니다.)
             
-            // 목록 새로고침
             if (onRefresh) onRefresh();
             else window.location.reload();
 
         } catch (e) {
-            console.error("공유 상태 변경 실패:", e);
-            alert("서버 연결 실패: 관리자에게 문의하세요.");
+            console.error("상태 변경 실패:", e);
+            alert("서버 연결에 실패했습니다.");
         }
     };
 
@@ -84,15 +88,28 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                     </div>
 
                                     <div className="card-actions">
+                                        {/* [핵심 수정] 버튼 UI 로직 */}
                                         <button
                                             className={`action-btn share-btn ${diary.isPublic ? 'active' : ''}`}
-                                            onClick={() => handleToggleShare(diary.id, diary.isPublic)}
-                                            title={diary.isPublic ? "클릭하면 비공개로 전환됩니다" : "클릭하면 커뮤니티에 공유됩니다"}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // 현재 상태(diary.isPublic)를 함수에 전달
+                                                handleToggleShare(diary.id, diary.isPublic);
+                                            }}
+                                            title={diary.isPublic ? "클릭하여 공유 해제" : "클릭하여 공유하기"}
                                         >
                                             {diary.isPublic ? (
-                                                <><FaGlobe /> 공유 중</>
+                                                // 공유 중일 때: 초록불 + '공유됨'
+                                                <>
+                                                    <span className="status-dot"></span>
+                                                    공유됨
+                                                </>
                                             ) : (
-                                                <><FaLock /> 공유하기</>
+                                                // 공유 안 했을 때: 자물쇠 + '공유하기'
+                                                <>
+                                                    <FaLock /> 
+                                                    공유하기
+                                                </>
                                             )}
                                         </button>
 
@@ -109,8 +126,7 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                 <div className="card-body">
                                     {diary.imageUrl && (
                                         <div className="diary-img-wrapper">
-                                            {/* [수정] http://localhost:8080 제거! 상대 경로 사용 */}
-                                            {/* 백엔드가 imageUrl에 '/images/파일명' 형태로 준다면 그대로 사용 */}
+                                            {/* 이미지 경로: 상대 경로 사용 */}
                                             <img src={`${diary.imageUrl}`} alt="diary" />
                                         </div>
                                     )}
