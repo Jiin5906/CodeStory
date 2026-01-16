@@ -1,10 +1,27 @@
-/* MainDashboard.css (최종 수정본) */
+/* MainDashboard.css - 스크롤 및 디자인 통합 수정본 */
 
 .dashboard-container {
     padding: 20px 40px;
     max-width: 800px;
     margin: 0 auto;
     color: var(--text-color);
+
+    /* [핵심] 스크롤 기능 활성화 */
+    height: 100%;           /* 부모 영역을 꽉 채움 */
+    overflow-y: auto;       /* 내용이 넘치면 스크롤 생성 */
+    box-sizing: border-box; /* 패딩 포함 높이 계산 */
+}
+
+/* [추가] 스크롤바 디자인 (크롬, 사파리 등) */
+.dashboard-container::-webkit-scrollbar {
+    width: 8px;
+}
+.dashboard-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+.dashboard-container::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* 상단 날짜 네비게이션 */
@@ -81,6 +98,7 @@
     display: flex;
     flex-direction: column;
     gap: 25px;
+    padding-bottom: 40px; /* 스크롤 끝부분 여백 확보 */
 }
 
 /* --- 일기 카드 스타일 --- */
@@ -135,32 +153,30 @@
     transition: 0.2s;
 }
 
-/* --- [핵심] 공유 버튼 스타일 (순서 중요!) --- */
-
-/* 1. 기본 상태 (공유 안 함) */
+/* --- 공유 버튼 스타일 (초록불 기능 포함) --- */
 .share-btn { 
     background: rgba(0,0,0,0.05); 
     color: var(--sub-text-color); 
-    border: 1px solid transparent; /* 테두리 공간 확보 */
+    border: 1px solid transparent; 
 }
 
-/* 2. 공유됨(Active) 상태 - !important 제거하고 구체적으로 명시 */
+/* 공유됨(Active) 상태 */
 .share-btn.active {
-    background-color: rgba(46, 204, 113, 0.15) !important; /* 연한 초록 배경 */
-    color: #27ae60 !important; /* 진한 초록 글씨 */
+    background-color: rgba(46, 204, 113, 0.15) !important; 
+    color: #27ae60 !important; 
     border: 1px solid #2ecc71 !important;
     font-weight: bold;
 }
 
-/* 3. 초록색 불(점) 스타일 */
+/* 초록색 불(점) */
 .status-dot {
     width: 8px;
     height: 8px;
     background-color: #2ecc71;
     border-radius: 50%;
-    box-shadow: 0 0 5px #2ecc71; /* 야광 효과 */
+    box-shadow: 0 0 5px #2ecc71;
     display: inline-block;
-    margin-right: 4px; /* 글자와의 간격 */
+    margin-right: 4px;
 }
 
 .delete-btn {
