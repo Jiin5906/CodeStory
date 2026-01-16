@@ -43,7 +43,6 @@ export const diaryApi = {
             diaryData.tags.forEach(tag => formData.append('tags', tag));
         }
 
-        // [수정] 백엔드 @RequestPart("image")와 이름을 맞춥니다.
         if (imageFile) {
             formData.append("image", imageFile);
         }
@@ -51,6 +50,10 @@ export const diaryApi = {
         // 백엔드 엔드포인트 /diary (Controller 확인 결과)
         const response = await api.post('/diary', formData);
         
+        return response.data;
+    },
+    toggleShare: async (id) => {
+        const response = await api.post(`/diary/${id}/status`);
         return response.data;
     },
 };
