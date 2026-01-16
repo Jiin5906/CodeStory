@@ -1,0 +1,80 @@
+/* src/components/layout/Sidebar.css */
+
+.sidebar {
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.logo-area {
+    margin-bottom: 40px;
+    padding-left: 10px;
+}
+
+.logo-area h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #6C5CE7; /* 브랜드 컬러 */
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 글쓰기 버튼 */
+.write-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #6C5CE7 0%, #a363d9 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    transition: transform 0.2s;
+    margin-bottom: 30px;
+}
+
+.write-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* 메뉴 리스트 */
+.nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu li {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 아이콘과 글자 간격 */
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    color: #636E72;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-menu li:hover {
+    background-color: #F1F3F5;
+    color: #2D3436;
+}
+
+/* 선택된 메뉴 강조 */
+.nav-menu li.active {
+    background-color: #F0F0FF; /* 연한 보라색 배경 */
+    color: #6C5CE7;
+    font-weight: 700;
+}
+
+.nav-menu li svg {
+    font-size: 18px; /* 아이콘 크기 고정 */
+}

@@ -1,0 +1,342 @@
+.report-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+}
+
+/* --- 1. 앨범 커버 카드 (클릭 가능) --- */
+.monthly-cover-card {
+    width: 100%;
+    height: 280px;
+    /* 기본 높이 */
+    border-radius: 24px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+    overflow: hidden;
+    cursor: pointer;
+    /* 클릭 가능 표시 */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.monthly-cover-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* 타임라인 열렸을 때 카드 작아짐 */
+.monthly-cover-card.minimized {
+    height: 120px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+}
+
+.monthly-cover-card.minimized .cover-month {
+    font-size: 32px;
+}
+
+.monthly-cover-card.minimized .click-guide-badge {
+    display: none;
+}
+
+.monthly-cover-card.minimized .cover-title {
+    opacity: 0;
+}
+
+.cover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+}
+
+.cover-month {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: font-size 0.3s;
+}
+
+.cover-year {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+.click-guide-badge {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: 10px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* --- 2. 요약 화면 (행복 키워드 & AI 총평) --- */
+.summary-view {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.summary-card {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #F1F3F5;
+}
+
+.card-title {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    color: #2D3436;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 키워드 칩 */
+.keyword-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.keyword-chip {
+    background: #FFF0F6;
+    color: #D6336C;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.keyword-chip .count {
+    background: white;
+    color: #D6336C;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+/* AI 총평 */
+.ai-card {
+    background: linear-gradient(135deg, #F3F0FF 0%, #FFFFFF 100%);
+    border: 1px solid #E5DBFF;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #5F3DC4;
+    font-weight: 500;
+    margin: 0;
+}
+
+.ai-decoration {
+    position: absolute;
+    bottom: -10px;
+    right: 10px;
+    font-size: 60px;
+    opacity: 0.1;
+    transform: rotate(15deg);
+}
+
+/* --- 3. 타임라인 화면 --- */
+.timeline-header-actions {
+    margin-bottom: 15px;
+}
+
+.back-btn-text {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+}
+
+.back-btn-text:hover {
+    color: #6C5CE7;
+}
+
+.timeline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 15px;
+}
+
+.timeline-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 45px;
+    padding-top: 5px;
+}
+
+.day-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: #2D3436;
+    line-height: 1;
+}
+
+.day-week {
+    font-size: 11px;
+    color: #B2BEC3;
+    font-weight: 600;
+}
+
+.timeline-content-card {
+    flex: 1;
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F3F5;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.mood-emoji {
+    font-size: 20px;
+}
+
+.card-tags {
+    font-size: 11px;
+    color: #6C5CE7;
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 13px;
+    color: #636E72;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.card-has-image {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #0984E3;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 애니메이션 */
+.animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ... 기존 CSS 아래에 추가 ... */
+
+/* --- 그래프 스타일 --- */
+.mood-graph-container {
+    width: 100%;
+}
+
+.graph-title {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #2D3436;
+    font-weight: 700;
+}
+
+.svg-wrapper {
+    position: relative;
+    padding: 10px 0;
+}
+
+.mood-svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    /* 점이 잘리지 않게 */
+}
+
+/* 데이터 포인트 애니메이션 */
+.mood-svg circle {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.mood-svg circle:hover {
+    r: 4;
+    stroke-width: 2;
+}
+
+.graph-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 11px;
+    color: #B2BEC3;
+    padding: 0 5px;
+}
+
+.no-graph-data {
+    text-align: center;
+    padding: 30px;
+    color: #dfe6e9;
+    font-size: 14px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}

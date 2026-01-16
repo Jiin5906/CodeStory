@@ -1,0 +1,57 @@
+/* src/App.css */
+
+/* 1. 전역 폰트 및 컬러 설정 */
+body, button, input, textarea, select {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* [핵심 수정] !important 제거하고 변수 사용 -> 다크모드 글자 보임 */
+    color: var(--text-color); 
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 2. 앱 최상위 컨테이너 */
+.app-root {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* 화면 전체 스크롤 방지 */
+    
+    /* 배경색 변수 적용 */
+    background: var(--bg-color);
+    color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* 3. 3단 레이아웃 컨테이너 (좌:사이드바 - 중:메인 - 우:패널) */
+.layout-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* 4. 메인 컨텐츠 영역 (가운데) */
+.content-area {
+    flex: 1; /* 남은 공간 모두 차지 */
+    overflow-y: auto; /* 세로 스크롤 허용 */
+    position: relative;
+    
+    /* [중요] Flex 자식 요소 찌그러짐 방지 */
+    min-width: 0; 
+    
+    /* 스크롤바 디자인 */
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+}
+
+/* 5. 애니메이션 */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

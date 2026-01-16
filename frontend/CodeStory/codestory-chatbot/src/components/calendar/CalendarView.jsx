@@ -1,0 +1,160 @@
+import React, { useState } from 'react';
+import { format, eachDayOfInterval, isSameDay, getDay } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import './CalendarView.css';
+
+const CalendarView = ({ user, diaries }) => {
+    const currentYear = new Date().getFullYear();
+    const startDate = new Date(currentYear, 0, 1);
+    const endDate = new Date(currentYear, 11, 31);
+    
+    const allDates = eachDayOfInterval({ start: startDate, end: endDate });
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
+    const getDiaryByDate = (date) => {
+        return diaries.find(d => isSameDay(new Date(d.date), date));
+    };
+
+    const weeks = [];
+    let currentWeek = [];
+    
+    const startDayIndex = getDay(startDate);
+    for (let i = 0; i < startDayIndex; i++) {
+        currentWeek.push(null);
+    }
+
+    allDates.forEach(date => {
+        currentWeek.push(date);
+        if (currentWeek.length === 7) {
+            weeks.push(currentWeek);
+            currentWeek = [];
+        }
+    });
+    
+    if (currentWeek.length > 0) {
+        while(currentWeek.length < 7) currentWeek.push(null);
+        weeks.push(currentWeek);
+    }
+
+    const selectedDiary = getDiaryByDate(selectedDate);
+    const thisYearDiaries = diaries.filter(d => d.date.startsWith(String(currentYear)));
+    const totalDiaries = thisYearDiaries.length;
+    const filledRate = Math.round((totalDiaries / allDates.length) * 100);
+
+    return (
+        <div className="calendar-view-container animate-fade-in">
+            <div className="calendar-header">
+                <div>
+                    <h2 className="calendar-title">{currentYear}년의 감정 지도</h2>
+                    <p className="calendar-subtitle">1월부터 12월까지, 당신의 1년을 한눈에 확인하세요.</p>
+                </div>
+                <div className="stats-row">
+                    <div className="stat-box">
+                        <span className="stat-label">올해 기록</span>
+                        <strong className="stat-value">{totalDiaries}개</strong>
+                    </div>
+                    <div className="stat-box">
+                        <span className="stat-label">진행률</span>
+                        <strong className="stat-value">{filledRate}%</strong>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- [핵심 수정] 구조 분리: 왼쪽(고정) + 오른쪽(스크롤) --- */}
+            <div className="grass-wrapper-card">
+                
+                {/* 1. 왼쪽: 고정된 요일 라벨 */}
+                <div className="grass-weekdays-fixed">
+                    <span>일</span>
+                    <span>월</span>
+                    <span>화</span>
+                    <span>수</span>
+                    <span>목</span>
+                    <span>금</span>
+                    <span>토</span>
+                </div>
+
+                {/* 2. 오른쪽: 스크롤 가능한 잔디밭 */}
+                <div className="grass-scroll-area">
+                    <div className="grass-columns">
+                        {weeks.map((week, wIdx) => {
+                            const showMonthLabel = week.some(d => d && d.getDate() === 1);
+                            
+                            return (
+                                <div key={wIdx} className="week-column">
+                                    {/* 월 라벨 */}
+                                    <div className="month-label-area">
+                                        {showMonthLabel && (
+                                            <span className="month-marker">
+                                                {format(week.find(d => d && d.getDate() === 1), 'M월')}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* 날짜 셀들 */}
+                                    <div className="days-stack">
+                                        {week.map((date, dIdx) => {
+                                            if (!date) return <div key={dIdx} className="day-cell empty"></div>;
+                                            
+                                            const diary = getDiaryByDate(date);
+                                            const level = diary ? 1 : 0;
+                                            const isSelected = isSameDay(date, selectedDate);
+                                            
+                                            return (
+                                                <div 
+                                                    key={dIdx}
+                                                    className={`day-cell level-${level} ${isSelected ? 'selected' : ''}`}
+                                                    onClick={() => setSelectedDate(date)}
+                                                    title={format(date, 'yyyy-MM-dd')}
+                                                ></div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* 하단 상세 보기 */}
+            <div className="diary-preview-section">
+                <h3 className="preview-date">
+                    {format(selectedDate, 'yyyy년 M월 d일 EEEE', { locale: ko })}
+                </h3>
+                
+                {selectedDiary ? (
+                    <div className="preview-card">
+                        <div className="preview-header">
+                            <span className="preview-emoji">{selectedDiary.emoji}</span>
+                            <div className="preview-meta">
+                                <span className="preview-mood">기분 {selectedDiary.mood}점</span>
+                                <div className="preview-tags">
+                                    {selectedDiary.tags.map((tag, i) => <span key={i}>#{tag}</span>)}
+                                </div>
+                            </div>
+                        </div>
+                        <p className="preview-content">{selectedDiary.content}</p>
+                        {selectedDiary.imageUrl && (
+                            <div className="diary-img-wrapper">
+                                <img src={`http://localhost:8080${selectedDiary.imageUrl}`} alt="diary" className="preview-image"/>
+                            </div>
+                        )}
+                         {selectedDiary.aiResponse && (
+                            <div className="preview-ai">
+                                <strong>AI의 공감:</strong> {selectedDiary.aiResponse}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="empty-preview">
+                        <div className="empty-circle">📝</div>
+                        <p>이 날 작성된 일기가 없어요.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default CalendarView;

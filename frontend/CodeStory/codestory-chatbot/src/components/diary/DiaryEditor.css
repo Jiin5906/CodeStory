@@ -1,0 +1,195 @@
+/* src/components/diary/DiaryEditor.css */
+
+.editor-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+/* 헤더 스타일 */
+.editor-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #F1F3F5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+}
+
+.header-title-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.date-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #2D3436;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.back-btn, .next-btn {
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 10px 16px;
+    transition: all 0.2s;
+}
+
+.back-btn { background: #F8F9FA; color: #495057; }
+.back-btn:hover { background: #E9ECEF; }
+
+.next-btn { background: #6C5CE7; color: white; }
+.next-btn:hover { background: #5B4CC4; transform: translateY(-2px); }
+
+
+/* [핵심] 2단 레이아웃 (PC) */
+.editor-body-split {
+    flex: 1;
+    display: flex;
+    overflow: hidden; /* 스크롤은 내부 패널에서 */
+}
+
+/* 왼쪽: 이미지 영역 */
+.editor-left-panel {
+    flex: 1; /* 1 비율 */
+    background: #F8F9FA;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #F1F3F5;
+}
+
+/* 오른쪽: 입력 영역 */
+.editor-right-panel {
+    flex: 1.2; /* 1.2 비율 (글쓰기가 더 넓게) */
+    padding: 40px;
+    overflow-y: auto; /* 내용 길어지면 스크롤 */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+
+/* 이미지 업로드 박스 스타일 */
+.image-upload-wrapper {
+    width: 100%;
+    height: 100%;
+    max-height: 500px;
+}
+
+.image-upload-box {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border: 2px dashed #D1D8E0;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-upload-box:hover {
+    border-color: #6C5CE7;
+    background: #F3F0FF;
+}
+
+.image-upload-box.has-image {
+    border: none;
+    background: black;
+}
+
+.image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 사진 비율 유지하며 다 보여주기 */
+}
+
+.image-placeholder { text-align: center; }
+.icon-circle {
+    width: 60px; height: 60px; background: #F0F2F5; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 15px;
+}
+.placeholder-text { font-weight: 700; color: #495057; display: block; margin-bottom: 5px; }
+.placeholder-sub { font-size: 12px; color: #ADB5BD; }
+
+.remove-img-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: rgba(0,0,0,0.6); color: white;
+    border: none; width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+
+/* 오른쪽 입력 필드 스타일 */
+.option-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 20px; background: #F8F9FA; border-radius: 12px;
+}
+.option-title { font-weight: 700; color: #2D3436; font-size: 15px; display: block; }
+.option-desc { font-size: 12px; color: #888; }
+
+.text-input-wrapper { flex: 1; min-height: 200px; }
+.diary-textarea {
+    width: 100%; height: 100%; border: none; resize: none;
+    font-size: 16px; line-height: 1.6; color: #2D3436;
+    outline: none; background: transparent;
+}
+
+.tag-input {
+    width: 100%; padding: 12px 0; border: none; border-bottom: 2px solid #F1F3F5;
+    font-size: 14px; margin-bottom: 15px; outline: none; transition: 0.3s;
+}
+.tag-input:focus { border-bottom-color: #6C5CE7; }
+
+.tags-display { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+.tag-chip {
+    background: #E3FAFC; color: #1098AD; font-weight: 600; font-size: 13px;
+    padding: 6px 12px; border-radius: 20px; cursor: default;
+}
+
+.recommend-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.recommend-chip {
+    background: white; border: 1px solid #E9ECEF; color: #868E96;
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s;
+}
+.recommend-chip:hover { border-color: #6C5CE7; color: #6C5CE7; }
+
+
+/* 토글 스위치 CSS (기존 유지) */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #6C5CE7; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+
+/* [반응형] 모바일 화면 (768px 이하)일 때 세로 배치로 자동 전환 */
+@media (max-width: 768px) {
+    .editor-body-split {
+        flex-direction: column; /* 세로 배치 */
+        overflow-y: auto;
+    }
+    .editor-left-panel, .editor-right-panel {
+        flex: none;
+        width: 100%;
+        padding: 20px;
+    }
+    .image-upload-wrapper { height: 250px; } /* 모바일에서 사진 높이 줄임 */
+}
