@@ -3,7 +3,7 @@ import { format, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaTrash, FaGlobe, FaLock, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './MainDashboard.css';
-import { diaryApi } from '../../services/api'; // api.js import 필수
+import { diaryApi } from '../../services/api';
 
 const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh }) => {
 
@@ -31,23 +31,17 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
         }
     };
 
-    // [핵심 수정] 공유 상태에 따른 스마트한 토글 핸들러
-    const handleToggleShare = async (id, isCurrentlyPublic) => {
+    // [핵심 수정] isPublic -> shared 로 변경
+    const handleToggleShare = async (id, currentStatus) => {
         // 1. 현재 상태에 따라 질문 멘트 결정
-        const confirmMessage = isCurrentlyPublic
-            ? "공유를 해제하시겠습니까?"  // 이미 공유 중일 때
-            : "일기를 커뮤니티에 공유하시겠습니까?"; // 공유 안 된 상태일 때
+        const confirmMessage = currentStatus
+            ? "공유를 해제하시겠습니까?" 
+            : "일기를 커뮤니티에 공유하시겠습니까?";
 
-        // 2. 사용자 확인
         if (!window.confirm(confirmMessage)) return;
 
         try {
-            // 3. API 호출 (상태 변경)
             await diaryApi.toggleShare(id);
-
-            // 4. 완료 멘트 및 새로고침
-            // alert(isCurrentlyPublic ? "공유가 해제되었습니다." : "공유되었습니다!"); 
-            // (사용자 경험상 alert 없이 바로 화면이 바뀌는 게 더 세련되지만, 확실한 피드백을 위해 남겨둡니다.)
             
             if (onRefresh) onRefresh();
             else window.location.reload();
@@ -88,24 +82,24 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                     </div>
 
                                     <div className="card-actions">
-                                        {/* [핵심 수정] 버튼 UI 로직 */}
+                                        {/* [핵심 수정] isPublic을 모두 shared로 변경했습니다! */}
                                         <button
-                                            className={`action-btn share-btn ${diary.isPublic ? 'active' : ''}`}
+                                            className={`action-btn share-btn ${diary.shared ? 'active' : ''}`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                // 현재 상태(diary.isPublic)를 함수에 전달
-                                                handleToggleShare(diary.id, diary.isPublic);
+                                                // 여기도 shared로 변경
+                                                handleToggleShare(diary.id, diary.shared);
                                             }}
-                                            title={diary.isPublic ? "클릭하여 공유 해제" : "클릭하여 공유하기"}
+                                            title={diary.shared ? "클릭하여 공유 해제" : "클릭하여 공유하기"}
                                         >
-                                            {diary.isPublic ? (
-                                                // 공유 중일 때: 초록불 + '공유됨'
+                                            {diary.shared ? (
+                                                // 공유 중일 때
                                                 <>
                                                     <span className="status-dot"></span>
                                                     공유됨
                                                 </>
                                             ) : (
-                                                // 공유 안 했을 때: 자물쇠 + '공유하기'
+                                                // 공유 안 했을 때
                                                 <>
                                                     <FaLock /> 
                                                     공유하기
@@ -126,7 +120,6 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                 <div className="card-body">
                                     {diary.imageUrl && (
                                         <div className="diary-img-wrapper">
-                                            {/* 이미지 경로: 상대 경로 사용 */}
                                             <img src={`${diary.imageUrl}`} alt="diary" />
                                         </div>
                                     )}
