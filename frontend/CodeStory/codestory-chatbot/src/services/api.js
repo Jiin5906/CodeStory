@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-// 도메인을 명시하지 않고 상대 경로를 사용하여 CORS 및 포트 문제를 방지합니다.
+// [핵심] 도메인(http://...)을 제거하고 상대 경로 '/api'만 사용합니다.
+// 이렇게 하면 http://logam.click 이든 https://logam.click 이든 알아서 따라갑니다.
 const API_BASE_URL = '/api';
 
 const api = axios.create({
@@ -27,8 +28,6 @@ export const diaryApi = {
     saveDiary: async (diaryData, imageFile) => {
         const formData = new FormData();
 
-        // [수정] Blob을 사용하지 않고 백엔드 @ModelAttribute 구조에 맞게 평면적으로 추가합니다.
-        // diaryData 객체 내부의 필드들을 직접 꺼내서 append 해야 백엔드 DTO에 바인딩됩니다.
         formData.append('userId', diaryData.userId);
         formData.append('date', diaryData.date);
         formData.append('content', diaryData.content);
@@ -39,7 +38,6 @@ export const diaryApi = {
         formData.append('isPublic', diaryData.isPublic);
         
         if (diaryData.tags) {
-            // 태그 배열 처리
             diaryData.tags.forEach(tag => formData.append('tags', tag));
         }
 
@@ -47,15 +45,21 @@ export const diaryApi = {
             formData.append("image", imageFile);
         }
 
-        // 백엔드 엔드포인트 /diary (Controller 확인 결과)
         const response = await api.post('/diary', formData);
-        
         return response.data;
     },
+
+    // [수정] 공유 상태 변경 (MainDashboard에서 직접 fetch 쓰던 것을 여기로 통합)
     toggleShare: async (id) => {
         const response = await api.post(`/diary/${id}/status`);
         return response.data;
     },
+
+    // [추가] 일기 삭제 (MainDashboard에서 직접 fetch 쓰던 것을 여기로 통합)
+    deleteDiary: async (id) => {
+        const response = await api.delete(`/diary/${id}`);
+        return response.data;
+    }
 };
 
 export default api;

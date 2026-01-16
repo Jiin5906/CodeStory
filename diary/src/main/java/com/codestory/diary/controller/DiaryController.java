@@ -25,7 +25,8 @@ import lombok.RequiredArgsConstructor;
 @CrossOrigin(origins = {
     "http://localhost:5173",
     "http://logam.click",
-    "http://43.202.111.91"
+    "http://43.202.111.91",
+    "https://logam.click"
 })
 public class DiaryController {
 
