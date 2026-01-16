@@ -82,47 +82,29 @@ function AppContent() {
     };
 
     const handleFinalSubmit = async (emotionData) => {
-        if (loading) return;
-        setLoading(true);
-        try {
-            if (!user?.id) throw new Error("로그인 정보가 없습니다.");
+    if (loading) return;
+    setLoading(true);
+    try {
+        const fullDiaryData = {
+            ...diaryDraft,
+            ...emotionData,
+            userId: user.id
+        };
 
-            const formData = new FormData();
-            // 백엔드 DiaryRequestDto 필드명과 1:1 매칭
-            formData.append('userId', user.id);
-            formData.append('date', format(selectedDate, 'yyyy-MM-dd'));
-            formData.append('content', diaryDraft.content);
-            formData.append('isPublic', diaryDraft.isPublic);
-            formData.append('mood', emotionData.mood);
-            formData.append('tension', emotionData.tension);
-            formData.append('fun', emotionData.fun);
-            formData.append('emoji', emotionData.emoji);
-            formData.append('aiResponse', emotionData.aiResponse || 'AI 응답 없음');
-            
-            if (diaryDraft.tags) {
-                diaryDraft.tags.forEach(tag => formData.append('tags', tag));
-            }
-            if (diaryDraft.imageFile) {
-                formData.append('image', diaryDraft.imageFile); // @RequestPart("image") 매칭
-            }
+        // api.js의 수정된 로직 호출
+        await diaryApi.saveDiary(fullDiaryData, diaryDraft.imageFile);
 
-            // fetch 주소를 '/api/diary'로 통일 (localhost 제거)
-            const response = await fetch('/api/diary', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) throw new Error('서버 저장 실패');
-
-            await fetchDiaries(user.id);
-            setShowEmotionModal(false);
-            setView('dashboard');
-        } catch (err) {
-            setError('일기 저장에 실패했습니다.');
-        } finally {
-            setLoading(false);
-        }
-    };
+        alert('일기가 저장되었습니다!');
+        fetchDiaries(user.id);
+        setShowEmotionModal(false);
+        setView('dashboard');
+    } catch (err) {
+        console.error('Save Error:', err);
+        setError('일기 저장에 실패했습니다. 로그를 확인하세요.');
+    } finally {
+        setLoading(false);
+    }
+};
 
     // ... (나머지 렌더링 로직은 기존과 동일)
     return (
