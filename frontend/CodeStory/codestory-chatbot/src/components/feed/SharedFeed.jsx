@@ -1,77 +1,78 @@
 import React, { useEffect, useState } from 'react';
-import './SharedFeed.css'; // CSS 파일 필요 (아래 제공)
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { diaryApi } from '../../services/api'; // [핵심] api.js import
+import './SharedFeed.css'; // CSS 파일이 있다면 유지
 
 const SharedFeed = () => {
     const [feedList, setFeedList] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        fetchFeed();
+        loadFeed();
     }, []);
 
-    const fetchFeed = async () => {
+    const loadFeed = async () => {
         try {
-            // 백엔드 API 호출 (GET /api/feed)
-            const response = await fetch('http://localhost:8080/api/feed');
-            if (response.ok) {
-                const data = await response.json();
-                setFeedList(data);
-            }
-        } catch (error) {
-            console.error("피드 불러오기 실패:", error);
+            setLoading(true);
+            const data = await diaryApi.getFeed(); 
+            setFeedList(data);
+        } catch (err) {
+            console.error("피드 불러오기 실패:", err);
+            setError('공유된 일기를 불러오지 못했습니다.');
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>로딩 중... ⏳</div>;
+    if (loading) return <div className="feed-loading">일기들을 불러오고 있어요... 📡</div>;
+    if (error) return <div className="feed-error">{error}</div>;
 
     return (
-        <div className="feed-container animate-fade-in">
-            <h2 className="feed-title">🌏 모두의 감정 저장소</h2>
-            <p className="feed-subtitle">다른 사람들의 하루를 통해 위로를 얻어보세요.</p>
+        <div className="shared-feed-container">
+            <h2 className="feed-title">🌏 모두의 일기장</h2>
+            <p className="feed-subtitle">다른 사람들은 오늘 어떤 하루를 보냈을까요?</p>
 
             <div className="feed-list">
-                {feedList.length > 0 ? (
+                {feedList.length === 0 ? (
+                    <div className="empty-feed">
+                        <p>아직 공유된 일기가 없어요.</p>
+                        <span>내 일기를 '공유하기'로 바꿔보세요!</span>
+                    </div>
+                ) : (
                     feedList.map((diary) => (
                         <div key={diary.id} className="feed-card">
-                            {/* 작성자 정보 */}
                             <div className="feed-header">
-                                <div className="user-avatar">👤</div>
-                                <div className="user-info">
-                                    <span className="username">익명의 사용자 {diary.userId}</span>
-                                    <span className="date">{diary.date}</span>
-                                </div>
+                                <span className="feed-user">{diary.nickname || '익명'}님의 하루</span>
+                                <span className="feed-date">
+                                    {format(new Date(diary.date), 'M월 d일', { locale: ko })}
+                                </span>
                             </div>
-
-                            {/* 이미지 (있으면 표시) */}
+                            
+                            {/* 이미지 경로 수정: http... 제거하고 상대 경로 사용 */}
                             {diary.imageUrl && (
                                 <div className="feed-image-wrapper">
-                                    <img 
-                                        src={`http://localhost:8080${diary.imageUrl}`} 
-                                        alt="diary-img" 
-                                        className="feed-image" 
-                                        onError={(e) => e.target.style.display = 'none'} // 이미지 깨짐 방지
-                                    />
+                                    <img src={`${diary.imageUrl}`} alt="Shared Diary" />
                                 </div>
                             )}
 
-                            {/* 내용 */}
                             <div className="feed-content">
-                                <div className="mood-badge">기분 {diary.mood}/5 {diary.emoji}</div>
-                                <p className="content-text">{diary.content}</p>
-                                <div className="tags">
-                                    {diary.tags?.map((tag, idx) => (
-                                        <span key={idx} className="hashtag">#{tag}</span>
-                                    ))}
+                                <div className="feed-mood">
+                                    <span className="emoji">{diary.emoji}</span>
+                                    <span className="mood-text">기분 {diary.mood}점</span>
                                 </div>
+                                <p className="feed-text">{diary.content}</p>
+                            </div>
+                            
+                            {/* 태그 표시 */}
+                            <div className="feed-tags">
+                                {diary.tags?.map((tag, index) => (
+                                    <span key={index} className="tag">#{tag}</span>
+                                ))}
                             </div>
                         </div>
                     ))
-                ) : (
-                    <div className="empty-feed">
-                        <p>아직 공유된 일기가 없어요. 가장 먼저 공유해보세요! 🙌</p>
-                    </div>
                 )}
             </div>
         </div>
