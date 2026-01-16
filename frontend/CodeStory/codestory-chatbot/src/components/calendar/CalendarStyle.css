@@ -1,0 +1,91 @@
+/* 달력 컨테이너 */
+.react-calendar {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    line-height: 1.125em;
+}
+
+/* 상단 네비게이션 (년/월 표시) */
+.react-calendar__navigation {
+    display: flex;
+    height: 44px;
+    margin-bottom: 1em;
+}
+
+.react-calendar__navigation button {
+    min-width: 44px;
+    background: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e4e4e7; /* text-zinc-200 */
+    border: none; /* 기존 버튼 테두리 제거 */
+}
+
+.react-calendar__navigation button:disabled {
+    opacity: 0.5;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* 요일 표시 (월, 화, 수...) */
+.react-calendar__month-view__weekdays {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 0.75em;
+    color: #71717a; /* text-zinc-500 */
+    margin-bottom: 0.5em;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+    padding: 0.5em;
+}
+
+/* 날짜 타일 공통 스타일 */
+.react-calendar__tile {
+    max-width: 100%;
+    padding: 10px 6.6667px;
+    background: none;
+    text-align: center;
+    line-height: 16px;
+    font-weight: 500;
+    color: #e4e4e7;
+    border-radius: 12px; /* 둥근 모서리 */
+    transition: all 0.2s;
+    border: none; /* 테두리 제거 */
+}
+
+.react-calendar__tile:disabled {
+    background-color: transparent;
+    color: #3f3f46; /* text-zinc-700 */
+}
+
+/* 마우스 호버 효과 */
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 현재 선택된 날짜 (오늘) */
+.react-calendar__tile--now {
+    background: rgba(236, 72, 153, 0.2) !important; /* 핑크색 배경 */
+    color: #f472b6 !important; /* 핑크색 텍스트 */
+    font-weight: bold;
+}
+
+/* 클릭해서 활성화된 날짜 */
+.react-calendar__tile--active {
+    background: #ec4899 !important; /* 진한 핑크 */
+    color: white !important;
+}
+
+/* 다른 달의 날짜 */
+.react-calendar__month-view__days__day--neighboringMonth {
+    color: #52525b; /* text-zinc-600 */
+}

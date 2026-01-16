@@ -1,0 +1,149 @@
+import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
+import './App.css';
+
+import { authApi, diaryApi } from './services/api';
+import Login from './components/auth/Login';
+import Sidebar from './components/layout/Sidebar';
+import MainDashboard from './components/dashboard/MainDashboard';
+import RightPanel from './components/layout/RightPanel';
+import DiaryEditor from './components/diary/DiaryEditor';
+import EmotionModal from './components/diary/EmotionModal';
+import ErrorBanner from './components/common/ErrorBanner';
+import CalendarView from './components/calendar/CalendarView';
+import MonthlyReport from './components/stats/MonthlyReport';
+import Settings from './components/layout/Settings';
+import SharedFeed from './components/feed/SharedFeed';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+
+function AppContent() {
+    const { currentTheme } = useTheme();
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [view, setView] = useState('login');
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [diaries, setDiaries] = useState([]);
+    const [diaryDraft, setDiaryDraft] = useState({ content: '', tags: [], imageFile: null, isPublic: false });
+    const [showEmotionModal, setShowEmotionModal] = useState(false);
+
+    const themeStyles = {
+        '--bg-color': currentTheme.bgColor,
+        '--card-bg': currentTheme.cardBg,
+        '--text-color': currentTheme.textColor,
+        '--sub-text-color': currentTheme.subTextColor,
+        '--sidebar-bg': currentTheme.sidebarBg,
+        '--accent-color': currentTheme.accentColor,
+        '--border-color': currentTheme.borderColor,
+        background: currentTheme.bgColor,
+        color: currentTheme.textColor,
+        minHeight: '100vh',
+        transition: 'all 0.3s ease',
+    };
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('diaryUser');
+        if (storedUser) {
+            try {
+                const parsed = JSON.parse(storedUser);
+                setUser(parsed);
+                fetchDiaries(parsed.id);
+                setView('dashboard');
+            } catch (e) {
+                setView('login');
+            }
+        } else {
+            setView('login');
+        }
+    }, []);
+
+    const fetchDiaries = async (userId) => {
+        if (!userId) return;
+        try {
+            const data = await diaryApi.getDiaries(userId);
+            setDiaries(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setDiaries([]);
+        }
+    };
+
+    const handleLoginSuccess = (userInfo) => {
+        setUser(userInfo);
+        localStorage.setItem('diaryUser', JSON.stringify(userInfo));
+        fetchDiaries(userInfo.id);
+        setView('dashboard');
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('diaryUser');
+        setUser(null);
+        setView('login');
+        setDiaries([]);
+    };
+
+    const handleFinalSubmit = async (emotionData) => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            if (!user?.id) throw new Error("로그인 정보가 없습니다.");
+
+            const formData = new FormData();
+            // 백엔드 DiaryRequestDto 필드명과 1:1 매칭
+            formData.append('userId', user.id);
+            formData.append('date', format(selectedDate, 'yyyy-MM-dd'));
+            formData.append('content', diaryDraft.content);
+            formData.append('isPublic', diaryDraft.isPublic);
+            formData.append('mood', emotionData.mood);
+            formData.append('tension', emotionData.tension);
+            formData.append('fun', emotionData.fun);
+            formData.append('emoji', emotionData.emoji);
+            formData.append('aiResponse', emotionData.aiResponse || 'AI 응답 없음');
+            
+            if (diaryDraft.tags) {
+                diaryDraft.tags.forEach(tag => formData.append('tags', tag));
+            }
+            if (diaryDraft.imageFile) {
+                formData.append('image', diaryDraft.imageFile); // @RequestPart("image") 매칭
+            }
+
+            // fetch 주소를 '/api/diary'로 통일 (localhost 제거)
+            const response = await fetch('/api/diary', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('서버 저장 실패');
+
+            await fetchDiaries(user.id);
+            setShowEmotionModal(false);
+            setView('dashboard');
+        } catch (err) {
+            setError('일기 저장에 실패했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ... (나머지 렌더링 로직은 기존과 동일)
+    return (
+        <div className="app-root" style={themeStyles}>
+            {view === 'login' && <Login onLogin={(e, p) => authApi.login(e,p).then(handleLoginSuccess)} onSignup={(e,p,n) => authApi.signup(e,p,n).then(handleLoginSuccess)} onGuestLogin={() => handleLoginSuccess({id:0, nickname:'게스트'})} />}
+            {view === 'editor' && <div className="animate-fade-in" style={{position:'fixed', inset:0, zIndex:100, background:'var(--bg-color)', display:'flex', justifyContent:'center', alignItems:'center'}}><div style={{width:'90%', maxWidth:'1100px', height:'85vh', background:'var(--card-bg)', borderRadius:'24px', overflow:'hidden', border:'1px solid var(--border-color)'}}><DiaryEditor selectedDate={selectedDate} onBack={() => setView('dashboard')} onNext={(d) => {setDiaryDraft(d); setShowEmotionModal(true);}} /></div></div>}
+            {view !== 'login' && view !== 'editor' && (
+                <div className="layout-container animate-fade-in">
+                    <Sidebar onWriteClick={() => {setSelectedDate(new Date()); setView('editor'); setDiaryDraft({content:'', tags:[], imageFile:null, isPublic:false});}} currentView={view} onChangeView={setView} />
+                    <div className="content-area" style={{flex:1, overflow:'hidden'}}>
+                        {view === 'dashboard' ? <MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onLogout={handleLogout} /> : view === 'calendar' ? <CalendarView user={user} diaries={diaries} /> : view === 'stats' ? <MonthlyReport diaries={diaries} currentMonth={selectedDate} /> : view === 'shared' ? <SharedFeed /> : <Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} />}
+                    </div>
+                    <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); setView('dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => setView('login')} />
+                </div>
+            )}
+            <ErrorBanner message={error} />
+            {loading && <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', zIndex:999, display:'flex', justifyContent:'center', alignItems:'center', color:'white'}}>저장 중...</div>}
+            {showEmotionModal && <EmotionModal onClose={() => setShowEmotionModal(false)} onSave={handleFinalSubmit} />}
+        </div>
+    );
+}
+
+function App() { return <ThemeProvider><AppContent /></ThemeProvider>; }
+export default App;
