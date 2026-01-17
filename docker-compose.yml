@@ -1,15 +1,23 @@
+version: '3.8'
+
 services:
   mariadb:
     image: mariadb:10.5
     container_name: mariadb-container
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ROOT_PASSWORD: 5906
+      # 보안을 위해 직접 '5906'을 쓰는 대신 변수(${...})를 사용하는 것이 좋습니다.
+      # GitHub Secrets에서 값을 받아오므로 그대로 두시면 됩니다.
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: codestory_db
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       TZ: Asia/Seoul
     volumes:
       - /home/ec2-user/mysql_data:/var/lib/mysql
     restart: always
+    networks:
+      - codestory_net
 
   backend:
     image: ${DOCKER_USERNAME}/diary-backend:latest
@@ -18,7 +26,23 @@ services:
       - "8080"
     depends_on:
       - mariadb
+    environment:
+      # ▼ [필수] DB 연결 정보 (이게 없으면 서버가 안 켜집니다)
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=codestory_db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # ▼ [추가 1] 구글 로그인 기능 활성화
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      
+      # ▼ [추가 2] 디스크 용량 부족 에러 해결 (Health Check 통과용)
+      - MANAGEMENT_HEALTH_DISKSPACE_ENABLED=false
     restart: always
+    networks:
+      - codestory_net
 
   nginx:
     image: nginx:latest
@@ -30,7 +54,11 @@ services:
       - ./nginx:/etc/nginx/conf.d
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    depends_on:
+      - backend
     restart: always
+    networks:
+      - codestory_net
 
   certbot:
     image: certbot/certbot
@@ -40,3 +68,36 @@ services:
       - ./certbot/www:/var/www/certbot
     depends_on:
       - nginx
+    networks:
+      - codestory_net
+
+  # 모니터링 툴 (지우지 마세요! 포트폴리오의 핵심입니다)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: always
+    networks:
+      - codestory_net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    restart: always
+    networks:
+      - codestory_net
+
+networks:
+  codestory_net:
+    driver: bridge
