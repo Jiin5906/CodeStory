@@ -89,3 +89,7 @@
 .react-calendar__month-view__days__day--neighboringMonth {
     color: #52525b; /* text-zinc-600 */
 }
+
+.gtm-nav-item * {
+    pointer-events: none;
+}

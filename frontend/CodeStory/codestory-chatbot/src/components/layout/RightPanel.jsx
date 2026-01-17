@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
     format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
     addDays, isSameMonth, isSameDay, addMonths, subMonths,
@@ -12,16 +12,13 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const today = startOfDay(new Date()); 
 
-    // --- 주간 감정 그래프 데이터 계산 ---
     const getWeeklyStats = () => {
         const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
-        
         const weekData = Array.from({ length: 7 }, (_, i) => {
             const day = addDays(weekStart, i);
             const dateStr = format(day, 'yyyy-MM-dd');
             const diary = diaries.find(d => d.date === dateStr);
             
-            // Mood 점수 안전장치 (데이터 없거나 0점이면 이모지로 추론)
             let moodScore = diary ? diary.mood : 0;
             if (diary && (!moodScore || moodScore === 0)) {
                 const emoji = diary.emoji || '';
@@ -33,6 +30,7 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
 
             return {
                 dayName: format(day, 'EEEEE', { locale: ko }), 
+                dateStr: dateStr, // ✅ GTM 추적을 위해 날짜 정보 추가
                 mood: moodScore, 
                 isToday: isSameDay(day, selectedDate), 
                 hasData: !!diary
@@ -72,8 +70,10 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                         key={day.toString()}
                         onClick={() => !isFuture && onDateSelect(cloneDay)}
                         style={isFuture ? { opacity: 0.3, cursor: 'default' } : {}}
+                        /* ✅ 미니 달력 날짜 클릭 추적: 고유 날짜 포함 */
+                        data-gtm={`mini-cal-date-${dateStr}`}
                     >
-                        <span>{formattedDate}</span>
+                        <span className="pointer-events-none">{formattedDate}</span>
                     </div>
                 );
                 day = addDays(day, 1);
@@ -85,9 +85,9 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
     };
 
     return (
-        <aside className="right-panel">
+        <aside className="right-panel" data-gtm="view-right-panel">
             {/* 프로필 위젯 */}
-            <div className="widget-box profile-widget">
+            <div className="widget-box profile-widget" data-gtm="widget-profile">
                 <div className="profile-img">
                     <FaUser />
                 </div>
@@ -95,7 +95,7 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                     <>
                         <h3>{user.nickname}</h3>
                         <p style={{ fontSize: '13px', color: '#888', marginTop: '5px' }}>오늘도 기록해볼까요?</p>
-                        <button className="logout-btn" onClick={onLogout}>로그아웃</button>
+                        <button className="logout-btn" onClick={onLogout} data-gtm="btn-profile-logout">로그아웃</button>
                     </>
                 ) : (
                     <>
@@ -105,6 +105,7 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                             className="logout-btn" 
                             onClick={onLogin}
                             style={{ color: '#6C5CE7', borderColor: '#6C5CE7', fontWeight: 'bold' }}
+                            data-gtm="btn-profile-login"
                         >
                             로그인 하기
                         </button>
@@ -113,17 +114,19 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
             </div>
 
             {/* 미니 달력 */}
-            <div className="widget-box">
+            <div className="widget-box" data-gtm="widget-mini-calendar">
                 <div className="widget-title">
                     <span>{format(currentMonth, 'yyyy. MM')}</span>
                     <div style={{display:'flex', gap:'10px'}}>
                         <FaChevronLeft 
                             style={{cursor:'pointer', color:'#888'}} 
                             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} 
+                            data-gtm="btn-mini-cal-prev-month"
                         />
                         <FaChevronRight 
                             style={{cursor:'pointer', color:'#888'}} 
                             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} 
+                            data-gtm="btn-mini-cal-next-month"
                         />
                     </div>
                 </div>
@@ -135,8 +138,8 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                 </div>
             </div>
 
-            {/* [수정됨] 주간 감정 흐름 그래프 */}
-            <div className="widget-box">
+            {/* 주간 감정 흐름 그래프 */}
+            <div className="widget-box" data-gtm="widget-weekly-chart">
                 <div className="widget-title">
                     <span>주간 감정 흐름</span>
                     <span style={{fontSize:'11px', color:'#ccc'}}>Mood</span>
@@ -144,13 +147,8 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                 
                 <div className="stats-chart" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '120px', paddingTop: '15px' }}>
                     {weeklyData.map((data, idx) => {
-                        // 높이 계산 (최대 80%)
                         let heightPercent = data.mood > 0 ? (data.mood / 5) * 80 : 5;
-                        
-                        // 색상 설정
-                        const barColor = data.hasData ? '#6C5CE7' : '#F1F3F5'; // 데이터 없으면 아주 연한 회색
-                        
-                        // 오늘 날짜 강조 (투명도 조절)
+                        const barColor = data.hasData ? '#6C5CE7' : '#F1F3F5';
                         const opacity = data.isToday ? 1 : 0.5;
 
                         return (
@@ -159,27 +157,28 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                                 flexDirection: 'column', 
                                 alignItems: 'center', 
                                 justifyContent: 'flex-end', 
-                                width: '14%', // 간격 확보를 위해 너비 약간 늘림
+                                width: '14%', 
                                 height: '100%' 
                             }}>
-                                {/* 막대 (Bar) */}
                                 <div 
                                     className="bar" 
+                                    onClick={() => data.hasData && onDateSelect(new Date(data.dateStr))}
                                     style={{
-                                        // [핵심 디자인 수정] 얇고 둥글게
                                         width: '8px',
                                         height: `${heightPercent}%`, 
                                         backgroundColor: barColor,
-                                        borderRadius: '10px',     // 완전 둥근 모양 (알약 형태)
+                                        borderRadius: '10px',
                                         opacity: opacity,
                                         transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                                         marginBottom: '8px',
-                                        boxShadow: data.isToday ? '0 2px 8px rgba(108, 92, 231, 0.3)' : 'none' // 오늘 날짜엔 은은한 그림자
+                                        boxShadow: data.isToday ? '0 2px 8px rgba(108, 92, 231, 0.3)' : 'none',
+                                        cursor: data.hasData ? 'pointer' : 'default'
                                     }}
+                                    /* ✅ 주간 그래프 막대 클릭 추적: 요일별 고유 ID */
+                                    data-gtm={`chart-bar-${data.dayName}`}
                                     title={`${data.mood}점`} 
                                 ></div>
                                 
-                                {/* 요일 라벨 */}
                                 <div className="bar-label" style={{ 
                                     fontSize: '11px', 
                                     color: data.isToday ? '#6C5CE7' : '#ADB5BD', 

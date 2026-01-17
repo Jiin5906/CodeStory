@@ -5,16 +5,24 @@ const Header = ({ user, onLogout, onLoginRedirect }) => {
     const isGuest = user?.id === 0;
 
     return (
-        <header className="flex justify-between items-center px-5 py-6">
+        <header className="flex justify-between items-center px-5 py-6" data-gtm="view-header">
             {/* 로고 */}
-            <div className="text-2xl font-bold tracking-wider font-serif text-white">
+            <div className="text-2xl font-bold tracking-wider font-serif text-white" data-gtm="header-logo">
                 Codestory
             </div>
 
             {/* 우측 아이콘 및 버튼 영역 */}
             <div className="flex items-center gap-5 text-zinc-400">
-                <FaSearch className="text-xl cursor-pointer hover:text-white transition-colors" />
-                <FaRegBell className="text-xl cursor-pointer hover:text-white transition-colors" />
+                <FaSearch 
+                    className="text-xl cursor-pointer hover:text-white transition-colors" 
+                    /* ✅ 검색 아이콘 식별 */
+                    data-gtm="header-btn-search"
+                />
+                <FaRegBell 
+                    className="text-xl cursor-pointer hover:text-white transition-colors" 
+                    /* ✅ 알림 아이콘 식별 */
+                    data-gtm="header-btn-notification"
+                />
 
                 {/* 구분선 */}
                 <div className="w-px h-4 bg-zinc-700 mx-1"></div>
@@ -25,9 +33,11 @@ const Header = ({ user, onLogout, onLoginRedirect }) => {
                     <button 
                         onClick={onLoginRedirect}
                         className="flex items-center gap-2 text-sm font-bold text-[#00C896] hover:text-[#00E0A8] transition-colors"
+                        /* ✅ 로그인 유도 버튼 식별 */
+                        data-gtm="header-btn-login-redirect"
                     >
-                        <span>로그인</span>
-                        <FaSignInAlt />
+                        <span className="pointer-events-none">로그인</span>
+                        <FaSignInAlt className="pointer-events-none" />
                     </button>
                 ) : (
                     // 2. 회원일 때 -> 로그아웃 버튼 표시
@@ -35,9 +45,11 @@ const Header = ({ user, onLogout, onLoginRedirect }) => {
                         onClick={onLogout}
                         className="flex items-center gap-2 text-sm text-zinc-400 hover:text-red-400 transition-colors"
                         title="로그아웃"
+                        /* ✅ 로그아웃 버튼 식별 */
+                        data-gtm="header-btn-logout"
                     >
-                        <span className="hidden sm:inline">{user?.nickname}님</span>
-                        <FaSignOutAlt />
+                        <span className="hidden sm:inline pointer-events-none">{user?.nickname}님</span>
+                        <FaSignOutAlt className="pointer-events-none" />
                     </button>
                 )}
             </div>

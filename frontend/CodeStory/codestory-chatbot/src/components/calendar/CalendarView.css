@@ -156,3 +156,7 @@
 .preview-ai { background: rgba(0,0,0,0.03); padding: 20px; border-radius: 12px; font-size: 14px; color: var(--sub-text-color); border-left: 4px solid var(--accent-color); }
 .empty-preview { padding: 40px; text-align: center; color: var(--sub-text-color); border: 2px dashed var(--border-color); border-radius: 16px; background: var(--card-bg); }
 .empty-circle { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
+
+.gtm-nav-item * {
+    pointer-events: none;
+}

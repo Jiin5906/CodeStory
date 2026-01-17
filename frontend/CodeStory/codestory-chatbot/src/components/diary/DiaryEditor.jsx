@@ -14,7 +14,6 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
     const [tagInput, setTagInput] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
-    // [삭제됨] const [isPublic, setIsPublic] = useState(false); // 이제 안 씁니다.
 
     const handleTagKeyDown = (e) => {
         if (e.key === 'Enter' && tagInput.trim()) {
@@ -45,38 +44,66 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
             alert('일기 내용을 입력해주세요.');
             return;
         }
-        // [수정] isPublic은 항상 false(비공개)로 넘깁니다.
         onNext({ content, tags, imageFile: selectedImage, isPublic: false });
     };
 
     return (
-        <div className="editor-container">
-            {/* 상단 헤더 (기존 동일) */}
+        <div className="editor-container" data-gtm="view-diary-editor">
+            {/* 상단 헤더 */}
             <div className="editor-header">
-                <button onClick={onBack} className="back-btn"><FaArrowLeft /></button>
+                <button 
+                    onClick={onBack} 
+                    className="back-btn"
+                    data-gtm="editor-back-button"
+                >
+                    <FaArrowLeft />
+                </button>
                 <div className="header-title-area">
                     <span className="date-title">
                         {selectedDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })}
                     </span>
                     <span className="subtitle">오늘의 하루를 기록해보세요</span>
                 </div>
-                <button onClick={handleNextClick} className="next-btn">저장하기</button>
+                <button 
+                    onClick={handleNextClick} 
+                    className="next-btn"
+                    data-gtm="editor-save-button"
+                >
+                    저장하기
+                </button>
             </div>
 
             <div className="editor-body-split">
-                {/* 왼쪽: 이미지 업로드 (기존 동일) */}
+                {/* 왼쪽: 이미지 업로드 */}
                 <div className="editor-left-panel">
                     <div className="image-upload-wrapper">
-                        <input type="file" accept="image/*" id="image-upload" style={{ display: 'none' }} onChange={handleImageChange} />
-                        <label htmlFor="image-upload" className={`image-upload-box ${previewUrl ? 'has-image' : ''}`}>
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            id="image-upload" 
+                            style={{ display: 'none' }} 
+                            onChange={handleImageChange} 
+                        />
+                        <label 
+                            htmlFor="image-upload" 
+                            className={`image-upload-box ${previewUrl ? 'has-image' : ''}`}
+                            data-gtm="editor-image-upload-label"
+                            data-gtm-has-image={previewUrl ? "true" : "false"}
+                        >
                             {previewUrl ? (
                                 <>
                                     <img src={previewUrl} alt="preview" className="image-preview" />
-                                    <button className="remove-img-btn" onClick={(e) => {
-                                        e.preventDefault();
-                                        setPreviewUrl('');
-                                        setSelectedImage(null);
-                                    }}><FaTimes /></button>
+                                    <button 
+                                        className="remove-img-btn" 
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setPreviewUrl('');
+                                            setSelectedImage(null);
+                                        }}
+                                        data-gtm="editor-image-remove-button"
+                                    >
+                                        <FaTimes />
+                                    </button>
                                 </>
                             ) : (
                                 <div className="image-placeholder">
@@ -91,11 +118,8 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
 
                 {/* 오른쪽: 입력 영역 */}
                 <div className="editor-right-panel">
-                    
-                    {/* [삭제됨] 커뮤니티 공유 스위치 영역 */}
-
-                    {/* [이동됨] 태그 입력 섹션 (위로 올라옴) */}
-                    <div className="tag-section" style={{ marginBottom: '20px' }}>
+                    {/* 태그 입력 섹션 */}
+                    <div className="tag-section" style={{ marginBottom: '20px' }} data-gtm="editor-tag-section">
                         <input 
                             type="text" 
                             placeholder="#태그 입력 (Enter로 추가)" 
@@ -103,28 +127,43 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
                             onChange={(e) => setTagInput(e.target.value)} 
                             onKeyDown={handleTagKeyDown} 
                             className="tag-input" 
+                            data-gtm="editor-tag-input-field"
                         />
                         <div className="tags-display">
                             {tags.map(tag => (
-                                <span key={tag} className="tag-chip">#{tag} <span onClick={() => removeTag(tag)} className="tag-remove">×</span></span>
+                                <span key={tag} className="tag-chip" data-gtm="editor-added-tag-chip">
+                                    #{tag} 
+                                    <span 
+                                        onClick={() => removeTag(tag)} 
+                                        className="tag-remove"
+                                        data-gtm="editor-tag-remove-x"
+                                    >×</span>
+                                </span>
                             ))}
                         </div>
                         <div className="recommend-tags">
                             {RECOMMENDED_TAGS.map(tag => (
-                                <button key={tag.id} onClick={() => addRecommendedTag(tag.name)} className="recommend-chip">
+                                <button 
+                                    key={tag.id} 
+                                    onClick={() => addRecommendedTag(tag.name)} 
+                                    className="recommend-chip"
+                                    data-gtm="editor-recommend-tag-button"
+                                    data-gtm-tag-name={tag.name}
+                                >
                                     #{tag.name}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* 내용 입력 (아래로 내려감) */}
+                    {/* 내용 입력 */}
                     <div className="text-input-wrapper">
                         <textarea 
                             className="diary-textarea" 
                             placeholder="오늘 하루는 어떠셨나요? 사소한 이야기라도 좋아요." 
                             value={content} 
                             onChange={(e) => setContent(e.target.value)} 
+                            data-gtm="editor-content-textarea"
                         />
                     </div>
                 </div>

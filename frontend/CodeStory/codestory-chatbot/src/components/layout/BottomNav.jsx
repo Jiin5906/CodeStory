@@ -2,19 +2,34 @@ import { FaPen, FaHome, FaRegCalendarAlt, FaChartPie, FaCog } from 'react-icons/
 
 const BottomNav = ({ onWriteClick }) => {
     return (
-        <div className="bottom-nav-container">
+        <div className="bottom-nav-container" data-gtm="view-bottom-nav">
             <div className="bottom-nav">
-                <div className="nav-item active"><FaHome /></div>
-                <div className="nav-item"><FaRegCalendarAlt /></div>
+                {/* 각 메뉴 아이템에 고유한 data-gtm을 부여했습니다. */}
+                <div className="nav-item active" data-gtm="nav-bottom-home">
+                    <FaHome className="pointer-events-none" />
+                </div>
+                <div className="nav-item" data-gtm="nav-bottom-calendar">
+                    <FaRegCalendarAlt className="pointer-events-none" />
+                </div>
                 
+                {/* 중앙 글쓰기 버튼을 위한 빈 공간 */}
                 <div style={{ width: '60px' }}></div> 
                 
-                <div className="nav-item"><FaChartPie /></div>
-                <div className="nav-item"><FaCog /></div>
+                <div className="nav-item" data-gtm="nav-bottom-stats">
+                    <FaChartPie className="pointer-events-none" />
+                </div>
+                <div className="nav-item" data-gtm="nav-bottom-settings">
+                    <FaCog className="pointer-events-none" />
+                </div>
             </div>
 
-            <button className="fab-btn" onClick={onWriteClick}>
-                <FaPen />
+            {/* 핵심 액션: 글쓰기 버튼 (Floating Action Button) */}
+            <button 
+                className="fab-btn" 
+                onClick={onWriteClick}
+                data-gtm="nav-bottom-write-fab"
+            >
+                <FaPen className="pointer-events-none" />
             </button>
         </div>
     );

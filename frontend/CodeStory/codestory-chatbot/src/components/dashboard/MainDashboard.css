@@ -242,3 +242,7 @@
         padding: 20px 15px;
     }
 }
+
+.gtm-nav-item * {
+    pointer-events: none;
+}

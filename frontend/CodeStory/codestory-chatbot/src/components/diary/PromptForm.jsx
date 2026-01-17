@@ -6,18 +6,27 @@ const OpenAIIcon = ({ className }) => (
     </svg>
 );
 
-const UploadButton = ({ Icon, inputRef, accept, onChange, title, iconClass, }) => (
-    <label className="inline-flex items-center gap-2 px-3 py-2 bg-zinc-900/80
-    border border-zinc-700 text-sm text-zinc-200 shadow-inner cursor-pointer shrink-0 self-start" title={title}>
+const UploadButton = ({ Icon, inputRef, accept, onChange, title, iconClass, gtmId }) => (
+    <label 
+        className="inline-flex items-center gap-2 px-3 py-2 bg-zinc-900/80 border border-zinc-700 text-sm text-zinc-200 shadow-inner cursor-pointer shrink-0 self-start" 
+        title={title}
+        /* ✅ 첨부 버튼 구분 (이미지/파일) */
+        data-gtm={gtmId}
+    >
         <Icon className={`w-4 h-4 ${iconClass || ''}`} />
         <input type="file" ref={inputRef} accept={accept} onChange={onChange} className="hidden" />
         <span className="sr-only">{title}</span>
     </label>
 );
 
-const RemoveButton = ({ onClick }) => (
-    <button className="p-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-zinc-300" type='button'
-        onClick={onClick}>
+const RemoveButton = ({ onClick, gtmId }) => (
+    <button 
+        className="p-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-zinc-300" 
+        type='button'
+        onClick={onClick}
+        /* ✅ 첨부 취소 버튼 구분 */
+        data-gtm={gtmId}
+    >
         <FaTimes className='w-3 h-3' />
     </button>
 )
@@ -46,18 +55,20 @@ const PromptForm = ({
     const disableClear = !prompt.trim() && !imageData && !fileAttachment;
 
     return (
-        <div className="bg-linear-to-br from-zinc-900/90 to-zinc-800/90 border border-zinc-700/50
-        rounded-2xl p-4 backdrop-blur-sm shadow-2xl sm:p-6">
+        <div className="bg-linear-to-br from-zinc-900/90 to-zinc-800/90 border border-zinc-700/50 rounded-2xl p-4 backdrop-blur-sm shadow-2xl sm:p-6" data-gtm="prompt-form-container">
             <form onSubmit={onSubmit}>
                 <div className="relative">
-                    <textarea value={prompt}
+                    <textarea 
+                        value={prompt}
                         onChange={(e) => onPromptChange(e.target.value)}
                         placeholder="오늘 하루 어떤 일이 있었나요? 편하게 털어놓아 보세요..."
-                        className="w-full bg-transparent border-none 
-                    outline-none text-zinc-200 placeholder-zinc-500 resize-none text-sm
-                    leading-relaxed min-h-15 max-h-27.5 focus:placeholder-zinc-600 transition-colors sm:text-base sm:min-h-20"
-                        onKeyDown={(e) => e.key === 'Enter' && (e.metaKey || e.ctrlKey) && onSubmit(e)}>
+                        className="w-full bg-transparent border-none outline-none text-zinc-200 placeholder-zinc-500 resize-none text-sm leading-relaxed min-h-15 max-h-27.5 focus:placeholder-zinc-600 transition-colors sm:text-base sm:min-h-20"
+                        onKeyDown={(e) => e.key === 'Enter' && (e.metaKey || e.ctrlKey) && onSubmit(e)}
+                        /* ✅ 텍스트 영역 식별 */
+                        data-gtm="prompt-textarea"
+                    >
                     </textarea>
+                    
                     <div className="mt-3 mb-2 flex flex-row items-center gap-3 flex-wrap">
                         {isVisionModel && (
                             <UploadButton
@@ -67,6 +78,7 @@ const PromptForm = ({
                                 onChange={onImageChange}
                                 title="이미지 첨부"
                                 iconClass="text-blue-300"
+                                gtmId="btn-attach-image"
                             />
                         )}
 
@@ -78,8 +90,10 @@ const PromptForm = ({
                                 onChange={onFileChange}
                                 title="파일 첨부"
                                 iconClass="text-amber-300"
+                                gtmId="btn-attach-file"
                             />
                         )}
+                        
                         {imageData && (
                             <div className="flex items-center gap-2">
                                 <div className="w-16 h-16 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900">
@@ -89,30 +103,31 @@ const PromptForm = ({
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
-                                <RemoveButton onClick={clearImage} />
+                                <RemoveButton onClick={clearImage} gtmId="btn-remove-image" />
                             </div>
                         )}
 
                         {fileAttachment && (
                             <div className="flex items-center gap-2">
-                                <div className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-xs 
-                                text-zinc-300 max-w-50 truncate">
+                                <div className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-xs text-zinc-300 max-w-50 truncate">
                                     {fileAttachment.name}
                                 </div>
-                                <RemoveButton onClick={clearFile} />
+                                <RemoveButton onClick={clearFile} gtmId="btn-remove-file" />
                             </div>
                         )}
                     </div>
+
                     <div className="flex flex-col justify-between pt-4 border-t border-zinc-700/50 gap-3 sm:flex-row sm:items-center sm:gap-0">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                            <label className="flex items-center gap-2 px-3 py-2 bg-zinc-900/80 border border-zinc-700/50
-                            rounded-xl text-sm text-zinc-200 shadow-inner w-full sm:w-auto">
+                            <label className="flex items-center gap-2 px-3 py-2 bg-zinc-900/80 border border-zinc-700/50 rounded-xl text-sm text-zinc-200 shadow-inner w-full sm:w-auto">
                                 <OpenAIIcon className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
                                 <select
                                     value={selectedModel.id}
                                     onChange={(e) => onModelChange(e.target.value)}
-                                    className="bg-transparent border-none focus:outline-none text-sm text-zinc-200 pr-2
-                                    cursor-pointer flex-1 min-w-0">
+                                    className="bg-transparent border-none focus:outline-none text-sm text-zinc-200 pr-2 cursor-pointer flex-1 min-w-0"
+                                    /* ✅ 모델 선택 박스 식별 */
+                                    data-gtm="select-ai-model"
+                                >
                                     {models.map((model) => (
                                         <option value={model.id} key={model.id} className="bg-zinc-900 text-zinc-200">
                                             {model.shortLabel}
@@ -121,9 +136,7 @@ const PromptForm = ({
                                 </select>
                             </label>
                             <div className="text-xs text-zinc-500 hidden sm:block">
-                                <kbd className="px-1.5 py-0 bg-zinc-800 border border-zinc-700 rounded 
-                                text-zinc-400">Ctrl</kbd> + <kbd className="px-1.5 py-0 bg-zinc-800 border 
-                                border-zinc-700 rounded text-zinc-400">Enter</kbd> 로 전송
+                                <kbd className="px-1.5 py-0 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">Ctrl</kbd> + <kbd className="px-1.5 py-0 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">Enter</kbd> 로 전송
                             </div>
                         </div>
 
@@ -132,11 +145,11 @@ const PromptForm = ({
                                 type="button"
                                 onClick={onClearAll}
                                 disabled={disableClear}
-                                className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700
-                                disabled:bg-zinc-800 disabled:opacity-50 border border-zinc-700
-                                rounded-xl text-zinc-400 hover:text-zinc-200 transition-all 
-                                duration-200 disabled:cursor-not-allowed font-medium sm:flex-none sm:px-6"
-                                title="초기화">
+                                className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800 disabled:opacity-50 border border-zinc-700 rounded-xl text-zinc-400 hover:text-zinc-200 transition-all duration-200 disabled:cursor-not-allowed font-medium sm:flex-none sm:px-6"
+                                title="초기화"
+                                /* ✅ 초기화 버튼 식별 */
+                                data-gtm="btn-prompt-clear"
+                            >
                                 <div className="flex items-center justify-center gap-2">
                                     <FaTrash className="w-4 h-4" />
                                     <span className="hidden sm:inline">지우기</span>
@@ -145,12 +158,10 @@ const PromptForm = ({
                             <button
                                 type="submit"
                                 disabled={disableSubmit}
-                                className="flex-1 px-4 py-2 bg-linear-to-r
-                                from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500
-                                disabled:from-zinc-700 disabled:to-zinc-800 disabled:opacity-50
-                                border border-zinc-700 disabled:border-zinc-700
-                                rounded-xl text-white font-medium transition-all duration-200
-                                shadow-lg hover:shadow-xl disabled:cursor-not-allowed">
+                                className="flex-1 px-4 py-2 bg-linear-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-zinc-700 disabled:to-zinc-800 disabled:opacity-50 border border-zinc-700 disabled:border-zinc-700 rounded-xl text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+                                /* ✅ 전송 버튼 식별 */
+                                data-gtm="btn-prompt-send"
+                            >
                                 {loading ? (
                                     <div className="flex items-center justify-center gap-2">
                                         <FaRobot className="w-4 h-4 animate-spin" />
@@ -163,14 +174,12 @@ const PromptForm = ({
                                     </div>
                                 )}
                             </button>
-
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     )
-
 }
 
 export default PromptForm;

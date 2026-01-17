@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { diaryApi } from '../../services/api'; // [핵심] api.js import
-import './SharedFeed.css'; // CSS 파일이 있다면 유지
+import { diaryApi } from '../../services/api';
+import './SharedFeed.css';
 
 const SharedFeed = () => {
     const [feedList, setFeedList] = useState([]);
@@ -26,49 +26,49 @@ const SharedFeed = () => {
         }
     };
 
-    if (loading) return <div className="feed-loading">일기들을 불러오고 있어요... 📡</div>;
-    if (error) return <div className="feed-error">{error}</div>;
+    if (loading) return <div className="feed-loading" data-gtm="view-feed-loading">일기들을 불러오고 있어요... 📡</div>;
+    if (error) return <div className="feed-error" data-gtm="view-feed-error">{error}</div>;
 
     return (
-        <div className="shared-feed-container">
+        <div className="shared-feed-container" data-gtm="view-shared-feed">
             <h2 className="feed-title">🌏 모두의 일기장</h2>
             <p className="feed-subtitle">다른 사람들은 오늘 어떤 하루를 보냈을까요?</p>
 
             <div className="feed-list">
                 {feedList.length === 0 ? (
-                    <div className="empty-feed">
+                    <div className="empty-feed" data-gtm="feed-empty-state">
                         <p>아직 공유된 일기가 없어요.</p>
                         <span>내 일기를 '공유하기'로 바꿔보세요!</span>
                     </div>
                 ) : (
                     feedList.map((diary) => (
-                        <div key={diary.id} className="feed-card">
+                        /* ✅ 각 피드 카드를 diary.id로 구분하여 친구가 특정 일기 클릭을 추적하기 쉽게 했습니다. */
+                        <div key={diary.id} className="feed-card" data-gtm={`feed-card-item-${diary.id}`}>
                             <div className="feed-header">
-                                <span className="feed-user">{diary.nickname || '익명'}님의 하루</span>
+                                <span className="feed-user" data-gtm="feed-item-nickname">{diary.nickname || '익명'}님의 하루</span>
                                 <span className="feed-date">
                                     {format(new Date(diary.date), 'M월 d일', { locale: ko })}
                                 </span>
                             </div>
                             
-                            {/* 이미지 경로 수정: http... 제거하고 상대 경로 사용 */}
                             {diary.imageUrl && (
-                                <div className="feed-image-wrapper">
+                                <div className="feed-image-wrapper" data-gtm="feed-item-image">
                                     <img src={`${diary.imageUrl}`} alt="Shared Diary" />
                                 </div>
                             )}
 
                             <div className="feed-content">
-                                <div className="feed-mood">
+                                <div className="feed-mood" data-gtm="feed-item-mood-badge">
                                     <span className="emoji">{diary.emoji}</span>
                                     <span className="mood-text">기분 {diary.mood}점</span>
                                 </div>
-                                <p className="feed-text">{diary.content}</p>
+                                <p className="feed-text" data-gtm="feed-item-content-text">{diary.content}</p>
                             </div>
                             
-                            {/* 태그 표시 */}
                             <div className="feed-tags">
                                 {diary.tags?.map((tag, index) => (
-                                    <span key={index} className="tag">#{tag}</span>
+                                    /* ✅ 태그 개별 식별 */
+                                    <span key={index} className="tag" data-gtm="feed-item-tag-unit">#{tag}</span>
                                 ))}
                             </div>
                         </div>

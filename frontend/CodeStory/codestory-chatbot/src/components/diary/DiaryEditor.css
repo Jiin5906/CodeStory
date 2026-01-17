@@ -193,3 +193,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     }
     .image-upload-wrapper { height: 250px; } /* 모바일에서 사진 높이 줄임 */
 }
+
+.gtm-nav-item * {
+    pointer-events: none;
+}

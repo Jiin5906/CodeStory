@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaTimes, FaCheck } from 'react-icons/fa';
 
 const EmotionModal = ({ onClose, onSave }) => {
     const [selectedEmoji, setSelectedEmoji] = useState('🙂');
     
-    // [수정] 감정 수치 상태 (0~5점 척도)
     const [stats, setStats] = useState({
         mood: 3,    // 기분
         tension: 3, // 텐션
@@ -12,14 +11,13 @@ const EmotionModal = ({ onClose, onSave }) => {
     });
 
     const emotions = [
-        { icon: '🥰', label: '행복', preset: { mood: 5, tension: 4, fun: 4 } },
-        { icon: '🙂', label: '평범', preset: { mood: 3, tension: 3, fun: 3 } },
-        { icon: '😫', label: '피곤', preset: { mood: 2, tension: 1, fun: 1 } },
-        { icon: '😢', label: '우울', preset: { mood: 1, tension: 2, fun: 1 } },
-        { icon: '🔥', label: '열정', preset: { mood: 5, tension: 5, fun: 5 } },
+        { icon: '🥰', label: '행복', id: 'happy', preset: { mood: 5, tension: 4, fun: 4 } },
+        { icon: '🙂', label: '평범', id: 'neutral', preset: { mood: 3, tension: 3, fun: 3 } },
+        { icon: '😫', label: '피곤', id: 'tired', preset: { mood: 2, tension: 1, fun: 1 } },
+        { icon: '😢', label: '우울', id: 'sad', preset: { mood: 1, tension: 2, fun: 1 } },
+        { icon: '🔥', label: '열정', id: 'passionate', preset: { mood: 5, tension: 5, fun: 5 } },
     ];
 
-    // [핵심 기능] 이모지 변경 시 기본값 자동 적용
     const handleEmojiClick = (emotion) => {
         setSelectedEmoji(emotion.icon);
         setStats(emotion.preset);
@@ -37,21 +35,23 @@ const EmotionModal = ({ onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" data-gtm="view-emotion-modal">
             <div className="bg-white w-full max-w-sm rounded-[30px] p-8 shadow-2xl relative">
                 
                 <h2 className="text-xl font-bold text-center mb-6 text-gray-800">오늘의 감정은 어떤가요?</h2>
                 
-                {/* 1. 이모티콘 선택 */}
+                {/* 1. 이모티콘 선택 - 각 이모지별로 고유한 값을 부여했습니다 */}
                 <div className="flex justify-between mb-8 px-2">
                     {emotions.map((em) => (
                         <div 
                             key={em.label}
                             className={`flex flex-col items-center gap-2 cursor-pointer transition-transform hover:scale-110 ${selectedEmoji === em.icon ? 'scale-110' : 'opacity-60'}`}
                             onClick={() => handleEmojiClick(em)}
+                            /* ✅ 친구가 구분하기 가장 쉽게 각각 'emotion-happy', 'emotion-sad' 등으로 분리했습니다 */
+                            data-gtm={`emotion-select-${em.id}`}
                         >
-                            <span className="text-4xl drop-shadow-md">{em.icon}</span>
-                            <span className={`text-xs font-bold ${selectedEmoji === em.icon ? 'text-[#6C5CE7]' : 'text-gray-400'}`}>
+                            <span className="text-4xl drop-shadow-md pointer-events-none">{em.icon}</span>
+                            <span className={`text-xs font-bold pointer-events-none ${selectedEmoji === em.icon ? 'text-[#6C5CE7]' : 'text-gray-400'}`}>
                                 {em.label}
                             </span>
                         </div>
@@ -70,6 +70,7 @@ const EmotionModal = ({ onClose, onSave }) => {
                             value={stats.mood} 
                             onChange={(e) => handleSliderChange('mood', e.target.value)}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
+                            data-gtm="slider-mood-adjust"
                         />
                     </div>
 
@@ -83,6 +84,7 @@ const EmotionModal = ({ onClose, onSave }) => {
                             value={stats.tension} 
                             onChange={(e) => handleSliderChange('tension', e.target.value)}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
+                            data-gtm="slider-tension-adjust"
                         />
                     </div>
 
@@ -96,6 +98,7 @@ const EmotionModal = ({ onClose, onSave }) => {
                             value={stats.fun} 
                             onChange={(e) => handleSliderChange('fun', e.target.value)}
                             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
+                            data-gtm="slider-fun-adjust"
                         />
                     </div>
                 </div>
@@ -105,12 +108,14 @@ const EmotionModal = ({ onClose, onSave }) => {
                     <button 
                         onClick={onClose}
                         className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-500 font-bold hover:bg-gray-200"
+                        data-gtm="btn-emotion-cancel"
                     >
                         취소
                     </button>
                     <button 
                         onClick={handleSave}
                         className="flex-[2] py-3 rounded-xl bg-[#6C5CE7] text-white font-bold hover:bg-[#5a4ad1] shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                        data-gtm="btn-emotion-save"
                     >
                         <span>저장하기</span> <FaCheck />
                     </button>
