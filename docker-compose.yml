@@ -1,0 +1,42 @@
+services:
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb-container
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: 5906
+      MYSQL_DATABASE: codestory_db
+      TZ: Asia/Seoul
+    volumes:
+      - /home/ec2-user/mysql_data:/var/lib/mysql
+    restart: always
+
+  backend:
+    image: ${DOCKER_USERNAME}/diary-backend:latest
+    container_name: spring-backend
+    expose:
+      - "8080"
+    depends_on:
+      - mariadb
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    restart: always
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - nginx
