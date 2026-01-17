@@ -71,7 +71,7 @@ jobs:
             # 5. 불필요한 이미지 정리
             docker image prune -f
 
-      # 4. 배포 검증 (Health Check)
+     # 4. 배포 검증 (Health Check) - 더 여유 있게 수정
       - name: 🏥 Health Check
         uses: appleboy/ssh-action@master
         with:
@@ -79,17 +79,22 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            echo "⏳ Waiting for Server to Start..."
-            sleep 30  # 30초 대기
+            echo "⏳ Waiting for Server to stabilize..."
+            sleep 60  # 대기 시간을 30초에서 60초로 늘립니다.
             
-            # Actuator Health Endpoint 찌르기
-            # (만약 curl이 실패하면 로그를 보여주고 배포 실패 처리)
-            HEALTH_STATUS=$(docker exec spring-backend curl -s http://localhost:8080/actuator/health | grep "UP")
-            
-            if [ -z "$HEALTH_STATUS" ]; then
-              echo "❌ Deployment Failed! Server is NOT UP."
-              docker logs --tail 50 spring-backend
-              exit 1
-            else
-              echo "✅ Deployment Successful! Server is UP."
-            fi
+            # 응답 확인 시도 (최대 3번 반복)
+            for i in {1..3}; do
+              echo "Attempt $i: Checking health..."
+              HEALTH_STATUS=$(docker exec spring-backend curl -s http://localhost:8080/actuator/health | grep "UP")
+              
+              if [ ! -z "$HEALTH_STATUS" ]; then
+                echo "✅ Deployment Successful! Server is UP."
+                exit 0
+              fi
+              echo "Retrying in 10 seconds..."
+              sleep 10
+            done
+
+            echo "❌ Deployment Failed! Server is not responding properly."
+            docker logs --tail 50 spring-backend
+            exit 1
