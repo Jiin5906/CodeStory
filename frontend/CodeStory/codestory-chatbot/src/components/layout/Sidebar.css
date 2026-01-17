@@ -78,3 +78,7 @@
 .nav-menu li svg {
     font-size: 18px; /* 아이콘 크기 고정 */
 }
+
+.gtm-nav-item * {
+    pointer-events: none;
+}

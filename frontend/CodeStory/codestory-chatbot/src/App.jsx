@@ -17,7 +17,7 @@ import Settings from './components/layout/Settings';
 import SharedFeed from './components/feed/SharedFeed';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
-function AppContent() {
+function AppContent() {ㅞ
     const { currentTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
