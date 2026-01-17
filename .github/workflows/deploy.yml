@@ -11,7 +11,27 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 1. Java 빌드
+      # 1. 프론트엔드 빌드 (Node.js 설정 및 빌드)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        env:
+          VITE_GTM_ID: ${{ secrets.VITE_GTM_ID }}
+        run: |
+          cd frontend/CodeStory/codestory-chatbot
+          npm install
+          npm run build
+
+      # 2. 빌드된 프론트엔드 파일을 백엔드 static 폴더로 복사 (매우 중요)
+      - name: Copy Frontend Build to Spring Boot
+        run: |
+          mkdir -p diary/src/main/resources/static
+          cp -r frontend/CodeStory/codestory-chatbot/dist/* diary/src/main/resources/static/
+
+      # 3. Java 빌드 (프론트 파일이 포함된 상태로 패키징)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -24,7 +44,7 @@ jobs:
           chmod +x gradlew
           ./gradlew clean bootJar -x test
 
-      # 2. 도커 이미지 빌드 & 푸시
+      # 4. 도커 이미지 빌드 & 푸시
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -37,10 +57,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          # [중요] docker-compose.yml에 적힌 이미지 이름과 똑같아야 합니다!
           tags: ${{ secrets.DOCKER_USERNAME }}/diary-backend:latest
 
-      # 3. EC2 접속 및 배포 (Docker Compose 사용)
+      # 5. EC2 접속 및 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -49,11 +68,9 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd CodeStory
-            
-            # 1. 최신 설정 파일(docker-compose.yml) 가져오기
             git pull origin main
             
-            # 2. 환경변수 파일(.env) 생성 (Secrets 내용을 서버 파일로 굽기)
+            # .env 파일 생성
             echo "DB_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
             echo "DB_NAME=codestory_db" >> .env
             echo "DB_USER=${{ secrets.DB_USER }}" >> .env
@@ -62,11 +79,7 @@ jobs:
             echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
             
-            # 3. 최신 이미지 받아오기
             docker-compose pull backend
-            
-            # 4. 컨테이너 재시작 (변경된 'backend'만 새로고침 됩니다)
             docker-compose up -d backend
-            
-            # 5. 불필요한 이미지 정리
             docker image prune -f
+            echo "🚀 배포가 완료되었습니다!"

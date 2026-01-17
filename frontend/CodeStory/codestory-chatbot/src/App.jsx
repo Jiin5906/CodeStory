@@ -27,20 +27,21 @@ function AppContent() {
     const [diaryDraft, setDiaryDraft] = useState({ content: '', tags: [], imageFile: null, isPublic: false });
     const [showEmotionModal, setShowEmotionModal] = useState(false);
 
-    const themeStyles = {
-        '--bg-color': currentTheme.bgColor,
-        '--card-bg': currentTheme.cardBg,
-        '--text-color': currentTheme.textColor,
-        '--sub-text-color': currentTheme.subTextColor,
-        '--sidebar-bg': currentTheme.sidebarBg,
-        '--accent-color': currentTheme.accentColor,
-        '--border-color': currentTheme.borderColor,
-        background: currentTheme.bgColor,
-        color: currentTheme.textColor,
-        minHeight: '100vh',
-        transition: 'all 0.3s ease',
-    };
+    // ✅ 1. View 변경 감지 및 GA4 페이지뷰 전송
+    useEffect(() => {
+        const gtmId = import.meta.env.VITE_GTM_ID;
+        if (gtmId) {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'pageview',
+                page_path: `/${view}`,
+                page_title: view.toUpperCase()
+            });
+            console.log(`📊 GA4 추적 중: ${view}`);
+        }
+    }, [view]);
 
+    // ✅ 2. 초기 사용자 로드 및 데이터 페칭
     useEffect(() => {
         const storedUser = localStorage.getItem('diaryUser');
         if (storedUser) {
@@ -81,37 +82,64 @@ function AppContent() {
         setDiaries([]);
     };
 
+    // ✅ 3. 일기 최종 제출 (중복 제거 및 GA4 이벤트 통합)
     const handleFinalSubmit = async (emotionData) => {
-    if (loading) return;
-    setLoading(true);
-    try {
-        const fullDiaryData = {
-            ...diaryDraft,
-            ...emotionData,
-            userId: user.id,
-            date: format(selectedDate, 'yyyy-MM-dd')
-        };
+        if (loading) return;
+        setLoading(true);
+        try {
+            const fullDiaryData = {
+                ...diaryDraft,
+                ...emotionData,
+                userId: user.id,
+                date: format(selectedDate, 'yyyy-MM-dd')
+            };
 
-        // api.js의 수정된 로직 호출
-        await diaryApi.saveDiary(fullDiaryData, diaryDraft.imageFile);
+            await diaryApi.saveDiary(fullDiaryData, diaryDraft.imageFile);
 
-        alert('일기가 저장되었습니다!');
-        fetchDiaries(user.id);
-        setShowEmotionModal(false);
-        setView('dashboard');
-    } catch (err) {
-        console.error('Save Error:', err);
-        setError('일기 저장에 실패했습니다. 로그를 확인하세요.');
-    } finally {
-        setLoading(false);
-    }
-};
+            // ✨ GA4 전송: 일기 저장 성공 이벤트
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    event: 'diary_save_complete',
+                    userId: user.id
+                });
+            }
 
-    // ... (나머지 렌더링 로직은 기존과 동일)
+            alert('일기가 저장되었습니다!');
+            fetchDiaries(user.id);
+            setShowEmotionModal(false);
+            setView('dashboard');
+        } catch (err) {
+            console.error('Save Error:', err);
+            setError('일기 저장에 실패했습니다. 로그를 확인하세요.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const themeStyles = {
+        '--bg-color': currentTheme.bgColor,
+        '--card-bg': currentTheme.cardBg,
+        '--text-color': currentTheme.textColor,
+        '--sub-text-color': currentTheme.subTextColor,
+        '--sidebar-bg': currentTheme.sidebarBg,
+        '--accent-color': currentTheme.accentColor,
+        '--border-color': currentTheme.borderColor,
+        background: currentTheme.bgColor,
+        color: currentTheme.textColor,
+        minHeight: '100vh',
+        transition: 'all 0.3s ease',
+    };
+
     return (
         <div className="app-root" style={themeStyles}>
             {view === 'login' && <Login onLogin={(e, p) => authApi.login(e,p).then(handleLoginSuccess)} onSignup={(e,p,n) => authApi.signup(e,p,n).then(handleLoginSuccess)} onGuestLogin={() => handleLoginSuccess({id:0, nickname:'게스트'})} />}
-            {view === 'editor' && <div className="animate-fade-in" style={{position:'fixed', inset:0, zIndex:100, background:'var(--bg-color)', display:'flex', justifyContent:'center', alignItems:'center'}}><div style={{width:'90%', maxWidth:'1100px', height:'85vh', background:'var(--card-bg)', borderRadius:'24px', overflow:'hidden', border:'1px solid var(--border-color)'}}><DiaryEditor selectedDate={selectedDate} onBack={() => setView('dashboard')} onNext={(d) => {setDiaryDraft(d); setShowEmotionModal(true);}} /></div></div>}
+            {view === 'editor' && (
+                <div className="animate-fade-in" style={{position:'fixed', inset:0, zIndex:100, background:'var(--bg-color)', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                    <div style={{width:'90%', maxWidth:'1100px', height:'85vh', background:'var(--card-bg)', borderRadius:'24px', overflow:'hidden', border:'1px solid var(--border-color)'}}>
+                        <DiaryEditor selectedDate={selectedDate} onBack={() => setView('dashboard')} onNext={(d) => {setDiaryDraft(d); setShowEmotionModal(true);}} />
+                    </div>
+                </div>
+            )}
             {view !== 'login' && view !== 'editor' && (
                 <div className="layout-container animate-fade-in">
                     <Sidebar onWriteClick={() => {setSelectedDate(new Date()); setView('editor'); setDiaryDraft({content:'', tags:[], imageFile:null, isPublic:false});}} currentView={view} onChangeView={setView} />
