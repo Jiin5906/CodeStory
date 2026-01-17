@@ -1,20 +1,17 @@
-name: Deploy to EC2 with Docker
+name: Deploy to EC2 with Docker Compose
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 1. Java 빌드 (GitHub Actions가 대신 일해줍니다)
+      # 1. Java 빌드
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -27,7 +24,7 @@ jobs:
           chmod +x gradlew
           ./gradlew clean bootJar -x test
 
-      # 2. 도커 허브 로그인 및 이미지 푸시 (새로 추가된 핵심 단계)
+      # 2. 도커 이미지 빌드 & 푸시
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -40,9 +37,10 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/codestory-backend:latest
+          # [중요] docker-compose.yml에 적힌 이미지 이름과 똑같아야 합니다!
+          tags: ${{ secrets.DOCKER_USERNAME }}/diary-backend:latest
 
-      # 3. EC2 접속 및 배포 (파일 복사 없이 '명령'만 내립니다)
+      # 3. EC2 접속 및 배포 (Docker Compose 사용)
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -50,27 +48,48 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            # 도커 로그인
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            cd CodeStory
             
-            # 1. 최신 이미지 Pull
-            docker pull ${{ secrets.DOCKER_USERNAME }}/codestory-backend:latest
+            # 1. 최신 설정 파일(docker-compose.yml) 가져오기
+            git pull origin main
             
-            # 2. 기존 컨테이너 중지 및 삭제 (확인된 컨테이너명: spring-backend)
-            docker stop spring-backend || true
-            docker rm spring-backend || true
+            # 2. 환경변수 파일(.env) 생성 (Secrets 내용을 서버 파일로 굽기)
+            echo "DB_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+            echo "DB_NAME=codestory_db" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+            echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
             
-            # 3. 새 도커 컨테이너 실행 (네트워크: ec2-user_default)
-            docker run -d \
-              --name spring-backend \
-              -p 80:8080 \
-              --network ec2-user_default \
-              -e DB_USER=${{ secrets.DB_USER }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-              --restart always \
-              ${{ secrets.DOCKER_USERNAME }}/codestory-backend:latest
+            # 3. 최신 이미지 받아오기
+            docker-compose pull backend
             
-            # 4. 사용하지 않는 이미지 정리
+            # 4. 컨테이너 재시작 (변경된 'backend'만 새로고침 됩니다)
+            docker-compose up -d backend
+            
+            # 5. 불필요한 이미지 정리
             docker image prune -f
+
+      # 4. 배포 검증 (Health Check)
+      - name: 🏥 Health Check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "⏳ Waiting for Server to Start..."
+            sleep 30  # 30초 대기
+            
+            # Actuator Health Endpoint 찌르기
+            # (만약 curl이 실패하면 로그를 보여주고 배포 실패 처리)
+            HEALTH_STATUS=$(docker exec spring-backend curl -s http://localhost:8080/actuator/health | grep "UP")
+            
+            if [ -z "$HEALTH_STATUS" ]; then
+              echo "❌ Deployment Failed! Server is NOT UP."
+              docker logs --tail 50 spring-backend
+              exit 1
+            else
+              echo "✅ Deployment Successful! Server is UP."
+            fi
