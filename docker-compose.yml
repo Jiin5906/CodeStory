@@ -6,8 +6,6 @@ services:
     container_name: mariadb-container
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      # 보안을 위해 직접 '5906'을 쓰는 대신 변수(${...})를 사용하는 것이 좋습니다.
-      # GitHub Secrets에서 값을 받아오므로 그대로 두시면 됩니다.
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: codestory_db
       MYSQL_USER: ${DB_USER}
@@ -18,6 +16,11 @@ services:
     restart: always
     networks:
       - codestory_net
+    logging: &default-logging # 반복 설정을 위한 앵커
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     image: ${DOCKER_USERNAME}/diary-backend:latest
@@ -27,22 +30,18 @@ services:
     depends_on:
       - mariadb
     environment:
-      # ▼ [필수] DB 연결 정보 (이게 없으면 서버가 안 켜집니다)
       - DB_HOST=mariadb
       - DB_PORT=3306
       - DB_NAME=codestory_db
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      
-      # ▼ [추가 1] 구글 로그인 기능 활성화
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      
-      # ▼ [추가 2] 디스크 용량 부족 에러 해결 (Health Check 통과용)
       - MANAGEMENT_HEALTH_DISKSPACE_ENABLED=false
     restart: always
     networks:
       - codestory_net
+    logging: *default-logging # 위 설정을 그대로 재사용
 
   nginx:
     image: nginx:latest
@@ -59,6 +58,7 @@ services:
     restart: always
     networks:
       - codestory_net
+    logging: *default-logging
 
   certbot:
     image: certbot/certbot
@@ -70,8 +70,8 @@ services:
       - nginx
     networks:
       - codestory_net
+    logging: *default-logging
 
-  # 모니터링 툴 (지우지 마세요! 포트폴리오의 핵심입니다)
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -84,6 +84,7 @@ services:
     restart: always
     networks:
       - codestory_net
+    logging: *default-logging
 
   grafana:
     image: grafana/grafana:latest
@@ -97,6 +98,7 @@ services:
     restart: always
     networks:
       - codestory_net
+    logging: *default-logging
 
 networks:
   codestory_net:
