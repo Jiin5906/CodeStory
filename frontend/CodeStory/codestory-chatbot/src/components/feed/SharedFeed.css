@@ -70,21 +70,26 @@
     white-space: nowrap;
     transition: all 0.2s;
     cursor: pointer;
-    border: 1px solid var(--border-color);
-    background: var(--card-bg);
+    /* 비활성 탭: 명확한 구분을 위해 약간 어두운 배경과 진한 테두리 */
+    border: 2px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.03);
     color: var(--sub-text-color);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .feed-tab-button:hover {
-    background: var(--bg-color);
+    /* hover 시 더 명확한 배경 변화 */
+    background: rgba(0, 0, 0, 0.06);
     color: var(--text-color);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .feed-tab-button.active {
     background: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
-    box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3), 0 2px 4px -1px rgba(139, 92, 246, 0.2);
 }
 
 /* ==================== Grid Container ==================== */
