@@ -15,7 +15,7 @@ const Settings = ({ user, onNicknameChange }) => {
     const handleNicknameSave = () => {
         if (nickname.trim() && onNicknameChange) {
             onNicknameChange(nickname);
-            alert('닉네임이 변경되었습니다! 🎉');
+            alert('닉네임이 변경되었습니다.');
         }
     };
 
@@ -25,9 +25,9 @@ const Settings = ({ user, onNicknameChange }) => {
 
             {/* --- 섹션 1: 테마 변경 --- */}
             <div className="settings-section" data-gtm="settings-section-theme">
-                <h3>🎨 테마 변경</h3>
+                <h3>테마 변경</h3>
                 <p className="settings-desc">나만의 감성에 맞는 분위기를 선택해보세요.</p>
-                
+
                 <div className="theme-grid">
                     {Object.values(themes).map((theme) => (
                         <button
@@ -37,8 +37,8 @@ const Settings = ({ user, onNicknameChange }) => {
                             /* ✅ 테마별 고유 식별자 부여 (예: theme-select-dark, theme-select-light 등) */
                             data-gtm={`theme-select-${theme.id}`}
                         >
-                            <div 
-                                className="theme-preview" 
+                            <div
+                                className="theme-preview"
                                 style={{ background: theme.bgColor }}
                             >
                                 {currentTheme.id === theme.id && <span className="check-mark">✔</span>}
@@ -55,15 +55,15 @@ const Settings = ({ user, onNicknameChange }) => {
                 <div className="input-group">
                     <label>닉네임</label>
                     <div className="nickname-row">
-                        <input 
-                            type="text" 
-                            value={nickname} 
+                        <input
+                            type="text"
+                            value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             className="settings-input"
                             data-gtm="input-settings-nickname"
                         />
-                        <button 
-                            onClick={handleNicknameSave} 
+                        <button
+                            onClick={handleNicknameSave}
                             className="save-btn"
                             data-gtm="btn-save-nickname"
                         >
@@ -84,9 +84,9 @@ const Settings = ({ user, onNicknameChange }) => {
                     </label>
                 </div>
             </div>
-            
-             {/* --- 섹션 4: 계정 정보 --- */}
-             <div className="settings-section" data-gtm="settings-section-account">
+
+            {/* --- 섹션 4: 계정 정보 --- */}
+            <div className="settings-section" data-gtm="settings-section-account">
                 <h3>계정 정보</h3>
                 <p className="email-info">로그인된 이메일: <strong>{user?.email || '게스트'}</strong></p>
             </div>
