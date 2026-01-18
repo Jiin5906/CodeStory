@@ -8,7 +8,7 @@ const SharedFeed = () => {
     const [feedList, setFeedList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('all');
+    const [activeTab, setActiveTab] = useState('all'); // 'following', 'popular', 'all'
 
     useEffect(() => {
         loadFeed();
@@ -27,42 +27,46 @@ const SharedFeed = () => {
         }
     };
 
-    // 감정별 그라디언트 매핑
+    // 감정별 그라디언트 매핑 (텍스트 일기용 배경 - 라이트 모드에 맞는 파스텔 톤)
     const getEmotionGradient = (mood) => {
         const moodScore = mood || 5;
-        if (moodScore >= 8) return 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #fb923c 100%)';
-        if (moodScore >= 6) return 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #14b8a6 100%)';
-        if (moodScore >= 4) return 'linear-gradient(135deg, #64748b 0%, #475569 50%, #3b82f6 100%)';
-        if (moodScore >= 2) return 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #6366f1 100%)';
-        return 'linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #8b5cf6 100%)';
+        if (moodScore >= 8) return 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)'; // Violet (Happy)
+        if (moodScore >= 6) return 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'; // Blue (Content)
+        if (moodScore >= 4) return 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)'; // Slate (Neutral)
+        if (moodScore >= 2) return 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'; // Amber (Sad/Warm)
+        return 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'; // Red (Angry/Very Sad)
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0f1729] flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-[#fbbf24] border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-[#0f1729] flex items-center justify-center text-red-400">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center text-red-500">
                 {error}
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#0f1729] pb-20 text-sans">
-            {/* Header */}
-            <div className="sticky top-0 z-30 bg-[#0f1729]/95 backdrop-blur-xl border-b border-[#1e3a5f]/50">
+        <div className="min-h-screen bg-slate-50 pb-20 font-sans">
+            {/* Header Section */}
+            <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-md border-b border-slate-200">
                 <div className="max-w-7xl mx-auto px-4 pt-6 pb-4">
-                    <h1 className="text-3xl font-bold text-[#fef3c7] mb-1 font-serif">감정 갤러리</h1>
-                    <p className="text-[#94a3b8] text-sm mb-6">오늘 다른 사람들의 하루는 어땠을까요?</p>
-                    
-                    {/* Tabs */}
-                    <div className="flex gap-2">
+                    <div className="flex justify-between items-end mb-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900 mb-1">감정 갤러리</h1>
+                            <p className="text-slate-500 text-sm">오늘 다른 사람들의 하루는 어땠을까요?</p>
+                        </div>
+                    </div>
+
+                    {/* Tab Navigation */}
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                         {[
                             { id: 'all', label: '전체', icon: <FaFire /> },
                             { id: 'popular', label: '인기', icon: <FaHeart /> },
@@ -71,11 +75,14 @@ const SharedFeed = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                    activeTab === tab.id 
-                                    ? 'bg-[#fbbf24] text-[#0f1729] shadow-lg shadow-amber-500/20' 
-                                    : 'bg-[#1e293b] text-[#94a3b8] hover:bg-[#334155]'
-                                }`}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap
+                                    ${activeTab === tab.id 
+                                        ? 'bg-violet-600 text-white shadow-md shadow-violet-200' 
+                                        : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100 hover:text-slate-700'
+                                    }
+                                `}
+                                data-gtm={`shared-feed-tab-click-${tab.id}`}
                             >
                                 {tab.icon}
                                 <span>{tab.label}</span>
@@ -85,21 +92,26 @@ const SharedFeed = () => {
                 </div>
             </div>
 
-            {/* Grid Feed */}
+            {/* Feed Grid */}
             <div className="max-w-7xl mx-auto px-4 mt-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {feedList.map((diary, index) => (
-                        <FeedCard 
-                            key={diary.id} 
-                            diary={diary} 
-                            index={index} 
-                            getEmotionGradient={getEmotionGradient} 
-                        />
-                    ))}
-                </div>
-                {feedList.length === 0 && (
-                    <div className="text-center py-20 text-[#64748b]">
-                        아직 공유된 일기가 없습니다.
+                {feedList.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm mt-4">
+                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FaComment className="text-3xl text-slate-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">아직 공유된 일기가 없어요</h3>
+                        <p className="text-slate-500">가장 먼저 일기를 공유해보세요!</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {feedList.map((diary, index) => (
+                            <FeedCard 
+                                key={diary.id} 
+                                diary={diary} 
+                                index={index} 
+                                getEmotionGradient={getEmotionGradient} 
+                            />
+                        ))}
                     </div>
                 )}
             </div>
@@ -111,70 +123,91 @@ const SharedFeed = () => {
 const FeedCard = ({ diary, index, getEmotionGradient }) => {
     const [isHovered, setIsHovered] = useState(false);
     
-    // Masonry-like height variation based on index
+    // Masonry-like height variation
     const heightClass = index % 3 === 0 ? 'aspect-[3/4]' : 'aspect-square';
 
     return (
         <div 
-            className={`group relative rounded-2xl overflow-hidden cursor-pointer bg-[#1e293b] shadow-lg transition-transform duration-300 hover:-translate-y-1 ${heightClass}`}
+            className={`group relative rounded-2xl overflow-hidden cursor-pointer bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ring-1 ring-slate-100 ${heightClass}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            data-gtm={`shared-feed-card-click-${diary.id}`}
         >
             {/* Background: Image or Gradient */}
             <div className="absolute inset-0 w-full h-full">
                 {diary.imageUrl ? (
-                    <img 
-                        src={diary.imageUrl} 
-                        alt="Diary" 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                    <>
+                        <img 
+                            src={diary.imageUrl} 
+                            alt="Diary" 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            data-gtm="shared-feed-image-view"
+                        />
+                        {/* Gradient Overlay for Text Readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-60 group-hover:opacity-70 transition-opacity" />
+                    </>
                 ) : (
                     <div 
-                        className="w-full h-full flex items-center justify-center p-6"
+                        className="w-full h-full flex items-center justify-center p-6 relative overflow-hidden"
                         style={{ background: getEmotionGradient(diary.mood) }}
                     >
-                        <p className="text-white/90 text-sm font-medium line-clamp-4 text-center leading-relaxed">
-                            {diary.content}
+                        {/* Decorative Circle */}
+                        <div className="absolute top-[-20%] right-[-20%] w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                        
+                        <p className="text-white font-medium text-sm text-center leading-relaxed line-clamp-5 drop-shadow-md relative z-10">
+                            "{diary.content}"
                         </p>
                     </div>
                 )}
-                {/* Dark Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
             </div>
 
-            {/* Top Badge: Date & Mood */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
-                <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
-                    <FaClock className="text-white/70 text-[10px]" />
-                    <span className="text-white text-[10px] font-medium">
+            {/* Top Badge: Date */}
+            <div className="absolute top-3 left-3 z-10">
+                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow-sm">
+                    <FaClock className="text-white text-[10px]" />
+                    <span className="text-white text-[10px] font-semibold tracking-wide">
                         {diary.date ? format(new Date(diary.date), 'MM.dd', { locale: ko }) : 'Today'}
                     </span>
                 </div>
             </div>
 
-            {/* Bottom Info */}
-            <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-1 group-hover:translate-y-0 transition-transform">
+            {/* Bottom Info Area */}
+            <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300 z-10">
                 <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl drop-shadow-md filter">{diary.emoji || '😊'}</span>
-                    <div className="flex flex-col">
-                        <span className="text-white text-sm font-bold truncate pr-2 shadow-black drop-shadow-md">
+                    {/* Emoji Bubble */}
+                    <div 
+                        className="bg-white/20 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center border border-white/10 shadow-sm"
+                        data-gtm="shared-feed-mood-badge"
+                    >
+                        <span className="text-lg filter drop-shadow-sm">{diary.emoji || '😊'}</span>
+                    </div>
+                    
+                    <div className="flex flex-col text-white">
+                        <span className="text-sm font-bold truncate shadow-black drop-shadow-md leading-tight">
                             {diary.nickname || '익명'}
                         </span>
-                        <span className="text-white/60 text-[10px] font-light">
-                            기분 점수 {diary.mood || 5}점
+                        <span className="text-[10px] opacity-90 font-medium">
+                            기분 온도 {diary.mood ? diary.mood * 10 : 50}°C
                         </span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-white/80 text-xs">
-                    <div className="flex items-center gap-1">
-                        <FaFire className="text-amber-400" />
+                {/* Metrics */}
+                <div className="flex items-center gap-3 text-white/90 text-xs font-medium pl-1">
+                    <button 
+                        className="flex items-center gap-1 group/btn hover:text-white transition-colors"
+                        data-gtm={`shared-feed-like-click-${diary.id}`}
+                    >
+                        <FaFire className="text-orange-400 drop-shadow-sm group-hover/btn:scale-110 transition-transform" />
                         <span>{Math.floor(Math.random() * 50)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <FaComment className="text-blue-400" />
+                    </button>
+                    <button 
+                        className="flex items-center gap-1 group/btn hover:text-white transition-colors"
+                        data-gtm={`shared-feed-comment-click-${diary.id}`}
+                    >
+                        <FaComment className="text-blue-300 drop-shadow-sm group-hover/btn:scale-110 transition-transform" />
                         <span>{Math.floor(Math.random() * 10)}</span>
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>
