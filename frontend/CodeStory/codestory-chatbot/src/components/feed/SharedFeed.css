@@ -76,25 +76,33 @@
     /* 비활성 탭: 명확한 회색 배경으로 구분성 강화 */
     border: 2px solid #e2e8f0;
     background: #f1f5f9;
-    color: #64748b;
+    color: #334155; /* 더 진한 회색으로 가독성 향상 */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .feed-tab-button:hover {
     /* hover 시 더 진한 배경과 보라색 힌트 */
     background: #e2e8f0;
-    color: #475569;
+    color: #1e293b; /* 더 진한 색상으로 가시성 강화 */
     border-color: #c7d2fe;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px);
 }
 
 .feed-tab-button.active {
-    background: var(--accent-color);
+    /* 더 진한 보라색으로 white 텍스트와의 대비 강화 */
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     color: white;
-    border-color: var(--accent-color);
-    box-shadow: 0 4px 8px rgba(139, 92, 246, 0.35), 0 2px 4px rgba(139, 92, 246, 0.2);
+    border-color: #7c3aed;
+    box-shadow: 0 4px 8px rgba(124, 58, 237, 0.4), 0 2px 4px rgba(109, 40, 217, 0.3);
     transform: translateY(-1px);
+    font-weight: 700; /* 활성 상태에서 텍스트 더 두껍게 */
+}
+
+/* 아이콘 크기 및 가시성 개선 */
+.feed-tab-button svg {
+    font-size: 0.875rem;
+    flex-shrink: 0;
 }
 
 /* ==================== Grid Container ==================== */
