@@ -112,9 +112,16 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                             title={diary.shared ? "클릭하여 공유 해제" : "클릭하여 공유하기"}
                                         >
                                             {diary.shared ? (
-                                                <><span className="status-dot"></span>공유됨</>
+                                                <>
+                                                    <span className="status-dot"></span>
+                                                    <FaGlobe style={{ marginRight: '4px' }} />
+                                                    공유됨
+                                                </>
                                             ) : (
-                                                <><FaLock /> 공유하기</>
+                                                <>
+                                                    <FaLock style={{ marginRight: '4px' }} />
+                                                    공유하기
+                                                </>
                                             )}
                                         </button>
 

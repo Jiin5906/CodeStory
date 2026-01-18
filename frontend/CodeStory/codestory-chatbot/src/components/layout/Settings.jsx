@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext'; // 테마 훅 가져오기
+import { FaSun, FaMoon } from 'react-icons/fa'; // 테마 아이콘
 import './Settings.css';
 
 const Settings = ({ user, onNicknameChange }) => {
@@ -29,23 +30,31 @@ const Settings = ({ user, onNicknameChange }) => {
                 <p className="settings-desc">나만의 감성에 맞는 분위기를 선택해보세요.</p>
 
                 <div className="theme-grid">
-                    {Object.values(themes).map((theme) => (
-                        <button
-                            key={theme.id}
-                            className={`theme-card ${currentTheme.id === theme.id ? 'active' : ''}`}
-                            onClick={() => changeTheme(theme.id)}
-                            /* ✅ 테마별 고유 식별자 부여 (예: theme-select-dark, theme-select-light 등) */
-                            data-gtm={`theme-select-${theme.id}`}
-                        >
-                            <div
-                                className="theme-preview"
-                                style={{ background: theme.bgColor }}
+                    {Object.values(themes).map((theme) => {
+                        const ThemeIcon = theme.id === 'light' ? FaSun : FaMoon;
+                        const iconColor = theme.id === 'light' ? '#F59E0B' : '#A29BFE';
+
+                        return (
+                            <button
+                                key={theme.id}
+                                className={`theme-card ${currentTheme.id === theme.id ? 'active' : ''}`}
+                                onClick={() => changeTheme(theme.id)}
+                                data-gtm={`theme-select-${theme.id}`}
                             >
-                                {currentTheme.id === theme.id && <span className="check-mark">✔</span>}
-                            </div>
-                            <span className="theme-name">{theme.name}</span>
-                        </button>
-                    ))}
+                                <div className="theme-preview">
+                                    <ThemeIcon
+                                        style={{
+                                            fontSize: '32px',
+                                            color: iconColor,
+                                            transition: 'transform 0.3s'
+                                        }}
+                                    />
+                                </div>
+                                {currentTheme.id === theme.id && <span className="check-mark">✓</span>}
+                                <span className="theme-name">{theme.name}</span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

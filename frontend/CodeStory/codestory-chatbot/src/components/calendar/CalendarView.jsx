@@ -15,6 +15,17 @@ const CalendarView = ({ user, diaries }) => {
         return diaries.find(d => isSameDay(new Date(d.date), date));
     };
 
+    // 감정 기반 색상 결정 함수
+    const getEmotionClass = (diary) => {
+        if (!diary) return 'emotion-none';
+
+        const mood = diary.mood || 5;
+
+        if (mood >= 7) return 'emotion-happy';  // 긍정/최고 - 초록색
+        if (mood <= 3) return 'emotion-angry';  // 분노 - 빨간색
+        return 'emotion-sad';  // 우울/슬픔 - 파란색 (4-6)
+    };
+
     const weeks = [];
     let currentWeek = [];
     
@@ -84,22 +95,23 @@ const CalendarView = ({ user, diaries }) => {
                                     <div className="days-stack">
                                         {week.map((date, dIdx) => {
                                             if (!date) return <div key={dIdx} className="day-cell empty"></div>;
-                                            
+
                                             const diary = getDiaryByDate(date);
-                                            const level = diary ? 1 : 0;
+                                            const emotionClass = getEmotionClass(diary);
                                             const isSelected = isSameDay(date, selectedDate);
                                             const dateStr = format(date, 'yyyy-MM-dd');
-                                            
+
                                             return (
-                                                <div 
+                                                <div
                                                     key={dIdx}
-                                                    className={`day-cell level-${level} ${isSelected ? 'selected' : ''}`}
+                                                    className={`day-cell ${emotionClass} ${isSelected ? 'selected' : ''}`}
                                                     onClick={() => setSelectedDate(date)}
                                                     title={dateStr}
                                                     /* ✅ 날짜 셀 추적: 어떤 날짜인지, 일기가 있는 날인지 없는 날인지 구분 가능 */
                                                     data-gtm="calendar-day-cell"
                                                     data-gtm-date={dateStr}
                                                     data-gtm-has-diary={diary ? "true" : "false"}
+                                                    data-gtm-emotion={diary ? emotionClass : "none"}
                                                 ></div>
                                             );
                                         })}

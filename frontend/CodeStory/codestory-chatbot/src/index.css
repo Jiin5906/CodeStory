@@ -9,11 +9,16 @@ body{
   background: #020617;
   color: #e2e8f0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* 모바일 스크롤 허용 */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #root{
   min-height: 100vh;
   width: 100%;
+  /* 모바일에서 자연스러운 스크롤 */
+  overflow-x: hidden;
 }
 
 *,
