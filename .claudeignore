@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+.gradle/
+build/
+dist/
+out/
+
+# Environment & Secrets
+.env
+.DS_Store
+*.log
+
+# Git
+.git/

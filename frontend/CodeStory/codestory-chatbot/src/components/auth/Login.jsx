@@ -9,6 +9,7 @@ const Login = ({ onLogin, onSignup, onGuestLogin }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // 로그인/회원가입 로직 연결 (중요: 파라미터 순서 유지)
         if (isSignup) {
             onSignup(email, password, nickname);
         } else {
@@ -17,92 +18,103 @@ const Login = ({ onLogin, onSignup, onGuestLogin }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-            {/* 배경 효과: 잉크 번짐 느낌 */}
-            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-900/20 rounded-full blur-[100px] pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-pink-900/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#0a0e1a]">
+            {/* Background Effects */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#f59e0b]/10 rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-[-15%] right-[-8%] w-[500px] h-[500px] bg-[#3b82f6]/10 rounded-full blur-[120px]"></div>
+                <div className="absolute inset-0 opacity-[0.03] bg-paper-grain"></div>
+            </div>
 
-            <div className="bg-zinc-900/80 border border-zinc-800 p-8 sm:p-12 rounded-3xl shadow-2xl backdrop-blur-xl max-w-md w-full relative z-10">
-                
-                {/* 로고 영역 */}
-                <div className="text-center mb-10">
-                    <div className="w-16 h-16 bg-zinc-800 rounded-full mx-auto flex items-center justify-center mb-4 border border-zinc-700 shadow-inner">
-                        <FaPenNib className="text-2xl text-pink-400" />
-                    </div>
-                    <h2 className="text-3xl font-serif font-bold text-white mb-2">
-                        {isSignup ? '새로운 기록 시작' : '공감 일기'}
-                    </h2>
-                    <p className="text-zinc-400 font-serif text-sm tracking-widest">
-                        MY EMOTIONAL JOURNAL
-                    </p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* 이메일 입력 */}
-                    <div className="relative">
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email Address"
-                            className="w-full bg-transparent border-b border-zinc-700 px-2 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors font-serif placeholder-zinc-600"
-                            required
-                        />
-                    </div>
-
-                    {/* 비밀번호 입력 */}
-                    <div className="relative">
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
-                            className="w-full bg-transparent border-b border-zinc-700 px-2 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors font-serif placeholder-zinc-600"
-                            required
-                        />
-                    </div>
-
-                    {/* 닉네임 입력 (회원가입 시에만 등장) */}
-                    {isSignup && (
-                        <div className="relative animate-fade-in-up">
-                            <input
-                                type="text"
-                                value={nickname}
-                                onChange={(e) => setNickname(e.target.value)}
-                                placeholder="Your Nickname"
-                                className="w-full bg-transparent border-b border-zinc-700 px-2 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors font-serif placeholder-zinc-600"
-                                required
-                            />
+            {/* Main Card */}
+            <div className="relative z-10 w-full max-w-md">
+                <div className="relative bg-[#0f1729]/90 border border-[#1e3a5f] rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.1)] backdrop-blur-xl">
+                    
+                    {/* Header Section */}
+                    <div className="p-10 pb-0 text-center">
+                        <div className="relative inline-block mb-6">
+                            <div className="w-20 h-20 bg-gradient-to-br from-[#1e3a5f] to-[#0f1729] rounded-full flex items-center justify-center border border-[#2563eb]/30 shadow-lg mx-auto">
+                                <FaPenNib className="text-3xl text-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                            </div>
                         </div>
-                    )}
+                        <h2 className="text-4xl font-bold text-[#fef3c7] mb-2 font-handwritten tracking-wide">
+                            {isSignup ? '새로운 기록 시작' : '공감 일기'}
+                        </h2>
+                        <p className="text-[#64748b] text-xs tracking-[0.3em] uppercase font-mono mb-8">
+                            My Emotional Journal
+                        </p>
+                    </div>
 
-                    {/* 메인 액션 버튼 */}
-                    <button
-                        type="submit"
-                        className="w-full bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-zinc-200 transition-all active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.1)] mt-4"
-                    >
-                        {isSignup ? <FaUserPlus /> : <FaSignInAlt />}
-                        <span>{isSignup ? '다이어리 만들기' : '일기장 펼치기'}</span>
-                    </button>
-                </form>
+                    {/* Form Section */}
+                    <div className="p-10 pt-4">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Email Input */}
+                            <div className="group">
+                                <label className="block text-[#94a3b8] text-xs uppercase tracking-wider mb-2 font-mono">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-[#1e293b]/50 border border-[#334155] rounded-lg px-4 py-3 text-[#fef3c7] focus:outline-none focus:border-[#fbbf24] focus:ring-1 focus:ring-[#fbbf24] transition-all placeholder-[#475569]"
+                                    placeholder="your@email.com"
+                                    required
+                                />
+                            </div>
 
-                {/* 하단 전환 링크 */}
-                <div className="mt-8 flex flex-col items-center gap-4">
-                    <button
-                        onClick={() => setIsSignup(!isSignup)}
-                        className="text-zinc-500 text-sm hover:text-pink-300 transition-colors font-serif underline underline-offset-4"
-                    >
-                        {isSignup ? '이미 일기장이 있으신가요? 로그인' : '처음 오셨나요? 회원가입'}
-                    </button>
+                            {/* Password Input */}
+                            <div className="group">
+                                <label className="block text-[#94a3b8] text-xs uppercase tracking-wider mb-2 font-mono">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-[#1e293b]/50 border border-[#334155] rounded-lg px-4 py-3 text-[#fef3c7] focus:outline-none focus:border-[#fbbf24] focus:ring-1 focus:ring-[#fbbf24] transition-all placeholder-[#475569]"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
 
-                    <div className="w-full h-px bg-zinc-800"></div>
+                            {/* Nickname Input (Signup only) */}
+                            {isSignup && (
+                                <div className="group animate-fade-in-up">
+                                    <label className="block text-[#94a3b8] text-xs uppercase tracking-wider mb-2 font-mono">Nickname</label>
+                                    <input
+                                        type="text"
+                                        value={nickname}
+                                        onChange={(e) => setNickname(e.target.value)}
+                                        className="w-full bg-[#1e293b]/50 border border-[#334155] rounded-lg px-4 py-3 text-[#fef3c7] focus:outline-none focus:border-[#fbbf24] focus:ring-1 focus:ring-[#fbbf24] transition-all placeholder-[#475569]"
+                                        placeholder="Your Nickname"
+                                        required
+                                    />
+                                </div>
+                            )}
 
-                    <button
-                        onClick={onGuestLogin}
-                        className="text-zinc-600 text-xs hover:text-zinc-400 transition-colors"
-                    >
-                        게스트로 둘러보기
-                    </button>
+                            {/* Submit Button */}
+                            <button
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-[#0f1729] font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] transition-all active:scale-[0.98] mt-6"
+                            >
+                                {isSignup ? <FaUserPlus /> : <FaSignInAlt />}
+                                <span>{isSignup ? '다이어리 만들기' : '일기장 펼치기'}</span>
+                            </button>
+                        </form>
+
+                        {/* Footer Actions */}
+                        <div className="mt-8 flex flex-col items-center gap-4 border-t border-[#1e3a5f] pt-6">
+                            <button
+                                onClick={() => setIsSignup(!isSignup)}
+                                className="text-[#94a3b8] text-sm hover:text-[#fbbf24] transition-colors"
+                            >
+                                {isSignup ? '이미 계정이 있으신가요? 로그인' : '처음이신가요? 회원가입'}
+                            </button>
+                            <button
+                                onClick={onGuestLogin}
+                                className="text-[#64748b] text-xs hover:text-[#94a3b8] transition-colors font-mono"
+                            >
+                                게스트로 둘러보기
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
