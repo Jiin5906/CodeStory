@@ -1,15 +1,20 @@
+/* MonthlyReport.css - 테마 시스템 연동 및 디자인 통합 */
+
 .report-container {
     padding: 20px;
     max-width: 600px;
     margin: 0 auto;
     padding-bottom: 80px;
+    background: var(--bg-color); /* [수정] 테마 배경 적용 */
+    min-height: 100vh;
+    color: var(--text-color); /* [수정] 테마 텍스트 적용 */
+    transition: background 0.3s, color 0.3s;
 }
 
 /* --- 1. 앨범 커버 카드 (클릭 가능) --- */
 .monthly-cover-card {
     width: 100%;
     height: 280px;
-    /* 기본 높이 */
     border-radius: 24px;
     background-size: cover;
     background-position: center;
@@ -18,7 +23,6 @@
     margin-bottom: 30px;
     overflow: hidden;
     cursor: pointer;
-    /* 클릭 가능 표시 */
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -49,12 +53,13 @@
 .cover-overlay {
     position: absolute;
     inset: 0;
+    /* 이미지는 항상 어두운 오버레이가 필요하므로 하드코딩 유지 */
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%);
     padding: 24px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    color: white;
+    color: white; /* 이미지 위 텍스트는 항상 흰색 */
 }
 
 .cover-month {
@@ -83,15 +88,8 @@
 }
 
 @keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-3px);
-    }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
 }
 
 /* --- 2. 요약 화면 (행복 키워드 & AI 총평) --- */
@@ -102,20 +100,21 @@
 }
 
 .summary-card {
-    background: white;
+    background: var(--card-bg); /* [수정] 카드 배경 변수 */
     padding: 24px;
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-    border: 1px solid #F1F3F5;
+    border: 1px solid var(--border-color); /* [수정] 테두리 변수 */
 }
 
 .card-title {
     margin: 0 0 16px 0;
     font-size: 16px;
-    color: #2D3436;
+    color: var(--text-color); /* [수정] */
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: 700;
 }
 
 /* 키워드 칩 */
@@ -126,8 +125,9 @@
 }
 
 .keyword-chip {
-    background: #FFF0F6;
-    color: #D6336C;
+    /* [수정] 핑크색 -> 브랜드 컬러(보라색) 톤앤매너 적용 + 투명도 사용으로 다크모드 대응 */
+    background: rgba(124, 58, 237, 0.1); /* Violet tint */
+    color: var(--accent-color);
     padding: 8px 16px;
     border-radius: 12px;
     font-weight: 700;
@@ -135,11 +135,12 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .keyword-chip .count {
-    background: white;
-    color: #D6336C;
+    background: var(--card-bg); /* [수정] */
+    color: var(--accent-color);
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -147,12 +148,14 @@
     align-items: center;
     justify-content: center;
     font-size: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 /* AI 총평 */
 .ai-card {
-    background: linear-gradient(135deg, #F3F0FF 0%, #FFFFFF 100%);
-    border: 1px solid #E5DBFF;
+    /* [수정] 그라디언트를 테마 변수와 결합 */
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, var(--card-bg) 100%);
+    border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
 }
@@ -160,7 +163,7 @@
 .ai-text {
     font-size: 15px;
     line-height: 1.6;
-    color: #5F3DC4;
+    color: var(--text-color); /* [수정] */
     font-weight: 500;
     margin: 0;
 }
@@ -172,6 +175,7 @@
     font-size: 60px;
     opacity: 0.1;
     transform: rotate(15deg);
+    color: var(--accent-color);
 }
 
 /* --- 3. 타임라인 화면 --- */
@@ -182,7 +186,7 @@
 .back-btn-text {
     background: none;
     border: none;
-    color: #888;
+    color: var(--sub-text-color); /* [수정] */
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -193,7 +197,7 @@
 }
 
 .back-btn-text:hover {
-    color: #6C5CE7;
+    color: var(--accent-color);
 }
 
 .timeline-list {
@@ -218,23 +222,23 @@
 .day-num {
     font-size: 22px;
     font-weight: 800;
-    color: #2D3436;
+    color: var(--text-color); /* [수정] */
     line-height: 1;
 }
 
 .day-week {
     font-size: 11px;
-    color: #B2BEC3;
+    color: var(--sub-text-color); /* [수정] */
     font-weight: 600;
 }
 
 .timeline-content-card {
     flex: 1;
-    background: white;
+    background: var(--card-bg); /* [수정] */
     padding: 16px;
     border-radius: 16px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-    border: 1px solid #F1F3F5;
+    border: 1px solid var(--border-color); /* [수정] */
 }
 
 .card-header {
@@ -249,13 +253,13 @@
 
 .card-tags {
     font-size: 11px;
-    color: #6C5CE7;
+    color: var(--accent-color); /* [수정] */
     font-weight: 600;
 }
 
 .card-text {
     font-size: 13px;
-    color: #636E72;
+    color: var(--text-color); /* [수정] */
     line-height: 1.5;
     margin: 0;
 }
@@ -263,7 +267,7 @@
 .card-has-image {
     margin-top: 8px;
     font-size: 11px;
-    color: #0984E3;
+    color: #0984E3; /* 링크색은 유지하거나 accent로 변경 가능 */
     display: flex;
     align-items: center;
     gap: 4px;
@@ -279,14 +283,11 @@
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
-
-/* ... 기존 CSS 아래에 추가 ... */
 
 /* --- 그래프 스타일 --- */
 .mood-graph-container {
@@ -296,7 +297,7 @@
 .graph-title {
     margin: 0 0 15px 0;
     font-size: 16px;
-    color: #2D3436;
+    color: var(--text-color); /* [수정] */
     font-weight: 700;
 }
 
@@ -309,13 +310,13 @@
     width: 100%;
     height: auto;
     overflow: visible;
-    /* 점이 잘리지 않게 */
 }
 
 /* 데이터 포인트 애니메이션 */
 .mood-svg circle {
     transition: all 0.3s ease;
     cursor: pointer;
+    /* 그래프 점 색상은 JS에서 fill로 제어되거나 여기서 지정 필요 */
 }
 
 .mood-svg circle:hover {
@@ -328,15 +329,15 @@
     justify-content: space-between;
     margin-top: 5px;
     font-size: 11px;
-    color: #B2BEC3;
+    color: var(--sub-text-color); /* [수정] */
     padding: 0 5px;
 }
 
 .no-graph-data {
     text-align: center;
     padding: 30px;
-    color: #dfe6e9;
+    color: var(--sub-text-color); /* [수정] */
     font-size: 14px;
-    background: #f8f9fa;
+    background: rgba(0,0,0,0.03); /* [수정] 투명도 배경 */
     border-radius: 12px;
 }

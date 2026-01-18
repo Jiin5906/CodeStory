@@ -1,18 +1,17 @@
-/* MainDashboard.css - 스크롤 및 디자인 통합 수정본 */
+/* MainDashboard.css - 테마 시스템 연동 및 날짜 정렬 수정본 */
 
 .dashboard-container {
     padding: 20px 40px;
     max-width: 800px;
     margin: 0 auto;
     color: var(--text-color);
-
-    /* [핵심] 스크롤 기능 활성화 */
-    height: 100%;           /* 부모 영역을 꽉 채움 */
-    overflow-y: auto;       /* 내용이 넘치면 스크롤 생성 */
-    box-sizing: border-box; /* 패딩 포함 높이 계산 */
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+    transition: background 0.3s, color 0.3s; /* 테마 전환 시 부드럽게 */
 }
 
-/* [추가] 스크롤바 디자인 (크롬, 사파리 등) */
+/* 스크롤바 디자인 */
 .dashboard-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -24,69 +23,106 @@
     background: transparent;
 }
 
-/* 상단 날짜 네비게이션 */
+/* ==================== 상단 날짜 네비게이션 ==================== */
+
 .date-navigation-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    padding: 0 10px;
 }
 
 .month-title {
     font-size: 24px;
     font-weight: 800;
-    color: var(--text-color);
+    color: var(--text-color); /* [수정] 테마 변수 적용 */
+    font-family: 'Manrope', sans-serif;
 }
 
 .user-badge {
     font-size: 14px;
-    color: var(--sub-text-color);
+    color: var(--sub-text-color); /* [수정] 테마 변수 적용 */
     font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.user-badge:hover {
+    color: var(--accent-color);
 }
 
-/* 주간 캘린더 스트립 */
+/* ==================== 주간 캘린더 스트립 (테마 적용) ==================== */
+
 .weekly-calendar-strip {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    padding: 20px;
-    border-radius: 20px;
+    gap: 4rem; 
+    /* [핵심 수정] 하드코딩된 #f8fafc 대신 카드 배경 변수 사용 */
+    background: var(--card-bg); 
+    border: 1px solid var(--border-color); /* [수정] 테두리도 변수 사용 */
+    padding: 25px 20px;
+    border-radius: 24px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     margin-bottom: 30px;
+    transition: background 0.3s, border-color 0.3s;
 }
 
+/* 화살표 버튼 디자인 */
 .nav-arrow {
-    background: none;
-    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    /* [핵심 수정] 버튼 배경을 페이지 배경색으로 설정하여 카드와 대비를 줌 */
+    background: var(--bg-color); 
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     color: var(--sub-text-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
 }
 
+.nav-arrow:hover {
+    /* Hover 시 배경을 카드 배경이나 약간 밝게/어둡게 처리 */
+    background: var(--card-bg); 
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 날짜 텍스트 중앙 고정 */
 .date-center {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    min-width: 140px; 
+    text-align: center;
 }
 
 .big-day {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 900;
-    color: var(--accent-color);
+    /* [핵심 수정] 테마에 따라 흰색/검은색 자동 변경 */
+    color: var(--text-color); 
     line-height: 1;
+    letter-spacing: -1px;
 }
 
 .day-label {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--sub-text-color);
     font-weight: 600;
-    margin-top: 5px;
+    margin-top: 6px;
 }
 
-/* 리스트 섹션 */
+/* ==================== 리스트 섹션 ==================== */
+
 .section-title {
     font-size: 18px;
     font-weight: 700;
@@ -98,16 +134,16 @@
     display: flex;
     flex-direction: column;
     gap: 25px;
-    padding-bottom: 40px; /* 스크롤 끝부분 여백 확보 */
+    padding-bottom: 40px;
 }
 
 /* --- 일기 카드 스타일 --- */
 .diary-card {
-    background: var(--card-bg);
+    background: var(--card-bg); /* 테마 변수 */
     border-radius: 20px;
     padding: 25px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-color); /* 테마 변수 */
     transition: all 0.3s ease;
 }
 
@@ -153,9 +189,9 @@
     transition: 0.2s;
 }
 
-/* --- 공유 버튼 스타일 (초록불 기능 포함) --- */
+/* --- 공유 버튼 스타일 --- */
 .share-btn { 
-    background: rgba(0,0,0,0.05); 
+    background: rgba(0,0,0,0.05); /* 투명도 기반이라 다크모드에서도 자연스러움 */
     color: var(--sub-text-color); 
     border: 1px solid transparent; 
 }
@@ -180,7 +216,7 @@
 }
 
 .delete-btn {
-    background: #FFF5F5;
+    background: rgba(250, 82, 82, 0.1); /* 옅은 빨강 배경 */
     color: #FA5252;
 }
 
@@ -193,8 +229,22 @@
     white-space: pre-wrap;
 }
 
+.diary-img-wrapper {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.diary-img-wrapper img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+}
+
 .ai-comment-box {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(0, 0, 0, 0.03); /* 투명도 기반이라 테마 적응형 */
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 15px;
@@ -234,6 +284,13 @@
     background: var(--card-bg);
     border-radius: 20px;
     border: 2px dashed var(--border-color);
+    color: var(--sub-text-color);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
 }
 
 /* 모바일 대응 */
@@ -241,8 +298,13 @@
     .dashboard-container {
         padding: 20px 15px;
     }
-}
-
-.gtm-nav-item * {
-    pointer-events: none;
+    
+    .weekly-calendar-strip {
+        gap: 2rem;
+        padding: 20px 10px;
+    }
+    
+    .date-center {
+        min-width: 100px;
+    }
 }
