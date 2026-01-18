@@ -1,0 +1,198 @@
+/* ==================== Mobile Bottom Navigation ==================== */
+
+/* Container - Hidden on desktop, visible on mobile */
+.bottom-nav-container {
+    display: none; /* Hidden by default on desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+/* Bottom Navigation Bar */
+.bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+    backdrop-filter: blur(12px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Navigation Item */
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 56px; /* Minimum 56px for touch target */
+    min-width: 64px;
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--sub-text-color);
+    position: relative;
+    border-radius: 12px;
+}
+
+/* Navigation Icon */
+.nav-icon {
+    font-size: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Navigation Label */
+.nav-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover State */
+.nav-item:hover {
+    background: rgba(108, 92, 231, 0.05);
+}
+
+.nav-item:hover .nav-icon {
+    transform: translateY(-2px);
+}
+
+/* Active State */
+.nav-item.active {
+    color: #6C5CE7;
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.1);
+}
+
+.nav-item.active .nav-label {
+    font-weight: 700;
+}
+
+/* Active Indicator */
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: linear-gradient(90deg, #6C5CE7 0%, #a363d9 100%);
+    border-radius: 0 0 3px 3px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Spacer for FAB */
+.nav-spacer {
+    width: 72px;
+    flex-shrink: 0;
+}
+
+/* Floating Action Button */
+.fab-btn {
+    position: absolute;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6C5CE7 0%, #a363d9 100%);
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow:
+        0 8px 16px rgba(108, 92, 231, 0.3),
+        0 4px 8px rgba(108, 92, 231, 0.2),
+        0 0 0 4px var(--bg-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101;
+}
+
+.fab-icon {
+    font-size: 1.25rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* FAB Hover State */
+.fab-btn:hover {
+    transform: translateX(-50%) scale(1.05) rotate(3deg);
+    box-shadow:
+        0 12px 24px rgba(108, 92, 231, 0.4),
+        0 6px 12px rgba(108, 92, 231, 0.3),
+        0 0 0 4px var(--bg-color);
+}
+
+/* FAB Active State */
+.fab-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+/* ==================== Mobile Responsive Display ==================== */
+
+/* Show on mobile (768px and below) */
+@media (max-width: 768px) {
+    .bottom-nav-container {
+        display: block;
+    }
+}
+
+/* Extra polish for very small screens */
+@media (max-width: 360px) {
+    .nav-label {
+        font-size: 0.625rem;
+    }
+
+    .nav-icon {
+        font-size: 1.125rem;
+    }
+
+    .fab-btn {
+        width: 56px;
+        height: 56px;
+        bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    }
+
+    .fab-icon {
+        font-size: 1.125rem;
+    }
+
+    .nav-spacer {
+        width: 64px;
+    }
+}
+
+/* Support for devices with notches/safe areas */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .bottom-nav {
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    }
+
+    .fab-btn {
+        bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+}

@@ -82,3 +82,37 @@
 .gtm-nav-item * {
     pointer-events: none;
 }
+
+/* ==================== Mobile Responsive ==================== */
+
+/* Hide sidebar on mobile (768px and below) */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+}
+
+/* Optional: Slide-in animation if you want to show sidebar with hamburger menu later */
+@media (max-width: 768px) {
+    .sidebar.mobile-menu-open {
+        display: flex;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        background: var(--card-bg);
+        z-index: 200;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        animation: slideInFromLeft 0.3s ease-out;
+    }
+
+    @keyframes slideInFromLeft {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+}

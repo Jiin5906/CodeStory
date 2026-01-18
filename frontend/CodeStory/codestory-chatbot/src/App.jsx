@@ -6,6 +6,7 @@ import './App.css';
 import { authApi, diaryApi } from './services/api';
 import Login from './components/auth/Login';
 import Sidebar from './components/layout/Sidebar';
+import BottomNav from './components/layout/BottomNav';
 import MainDashboard from './components/dashboard/MainDashboard';
 import RightPanel from './components/layout/RightPanel';
 import DiaryEditor from './components/diary/DiaryEditor';
@@ -134,7 +135,7 @@ function AppContent() {
                 <Route path="/*" element={
                     <div className="layout-container animate-fade-in" data-gtm="main-layout-wrapper">
                         <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />
-                        
+
                         <main className="content-area" style={{flex:1, overflow:'hidden'}} data-gtm="page-content-main">
                             <Routes>
                                 <Route path="dashboard" element={<MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />} />
@@ -147,6 +148,13 @@ function AppContent() {
                         </main>
 
                         <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />
+
+                        {/* Mobile Bottom Navigation */}
+                        <BottomNav
+                            currentView={location.pathname.substring(1) || 'dashboard'}
+                            onNavigate={(v) => navigate(`/${v}`)}
+                            onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}}
+                        />
                     </div>
                 } />
             </Routes>

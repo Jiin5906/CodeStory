@@ -141,3 +141,40 @@
     font-size: 10px;
     color: #999;
 }
+
+/* ==================== Mobile Responsive ==================== */
+
+/* Hide right panel on mobile (768px and below) */
+@media (max-width: 768px) {
+    .right-panel {
+        display: none;
+    }
+}
+
+/* Optional: Show as modal/drawer on mobile if needed */
+@media (max-width: 768px) {
+    .right-panel.mobile-drawer-open {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 85%;
+        max-width: 320px;
+        background: var(--card-bg);
+        z-index: 200;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        animation: slideInFromRight 0.3s ease-out;
+        overflow-y: auto;
+    }
+
+    @keyframes slideInFromRight {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+}
