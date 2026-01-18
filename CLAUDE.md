@@ -333,6 +333,7 @@ Configure Prometheus to scrape Spring Boot Actuator metrics if needed.
 - **수정 후 즉시 검증:** 코드를 수정한 후에는 사용자에게 묻지 말고 관련 검증 명령어를 **스스로** 실행하세요.
   - Backend 수정 시: `./gradlew clean bootJar -x test` (빌드 확인)
   - Frontend 수정 시: `npm run lint` (문법 확인)
+  - Frontend, Backend 연동이 잘 되는지 검증을 해주세요. Frontend코드를 무작정 바꾸지 말고 항상 Backend의 코드와 비교해서 잘 연동이 되도록 코드를 작성해주세요
 - **오류 자동 복구:** 검증 실패 시 로그를 분석하여 1회까지는 스스로 수정(Self-correction)을 시도하세요.
 
 ### 3. Context Optimization (컨텍스트 최적화)
@@ -347,3 +348,7 @@ Configure Prometheus to scrape Spring Boot Actuator metrics if needed.
 1. **UI/UX Design:** 디자인 변경 요청 시 수동 코딩 대신 **`frontend-design`** 플러그인을 최우선으로 사용할 것.
 2. **Complex Features:** 복잡한 기능 구현 시 **`feature-dev`** 플러그인을 사용하여 분석-구현-테스트 파이프라인을 탈 것.
 3. **Refactoring:** 코드 정리 시 **`code-simplifier`**를 사용할 것.
+
+## 코드 정리
+1. 프론트 엔드에는 현재 data-gtm을 통해 사용자가 어디서 이탈하는지, 어디서 많이 머무는지를 알아보고 있습니다. 따라서 data-gtm이 없으면
+우선적으로 이걸 코드에 추가해 주시고 data-gtm이 존재하면 바꾸지 말고 놔두셔야 합니다.
