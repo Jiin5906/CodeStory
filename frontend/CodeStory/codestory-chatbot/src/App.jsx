@@ -22,7 +22,7 @@ function AppContent() {
     const { currentTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -30,6 +30,18 @@ function AppContent() {
     const [diaries, setDiaries] = useState([]);
     const [diaryDraft, setDiaryDraft] = useState({ content: '', tags: [], imageFile: null, isPublic: false });
     const [showEmotionModal, setShowEmotionModal] = useState(false);
+
+    // CSS 변수를 document.documentElement에 설정하여 전역에서 사용 가능하게 함
+    useEffect(() => {
+        const root = document.documentElement;
+        root.style.setProperty('--bg-color', currentTheme.bgColor);
+        root.style.setProperty('--card-bg', currentTheme.cardBg);
+        root.style.setProperty('--text-color', currentTheme.textColor);
+        root.style.setProperty('--sub-text-color', currentTheme.subTextColor);
+        root.style.setProperty('--sidebar-bg', currentTheme.sidebarBg);
+        root.style.setProperty('--accent-color', currentTheme.accentColor);
+        root.style.setProperty('--border-color', currentTheme.borderColor);
+    }, [currentTheme]);
 
     // ✅ GA4/GTM 페이지뷰 전송 (기존 유지 및 보완)
     useEffect(() => {
@@ -120,7 +132,7 @@ function AppContent() {
     };
 
     return (
-        <div className="app-root" style={themeStyles} data-gtm="app-root-container">
+        <div className="app-root" style={themeStyles} data-theme={currentTheme.id} data-gtm="app-root-container">
             <Routes>
                 <Route path="/login" element={<Login onLogin={(e, p) => authApi.login(e,p).then(handleLoginSuccess)} onSignup={(e,p,n) => authApi.signup(e,p,n).then(handleLoginSuccess)} onGuestLogin={() => handleLoginSuccess({id:0, nickname:'게스트'})} />} />
                 

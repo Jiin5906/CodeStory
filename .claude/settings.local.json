@@ -3,7 +3,8 @@
     "allow": [
       "Skill(frontend-design)",
       "Bash(npm run lint)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }
