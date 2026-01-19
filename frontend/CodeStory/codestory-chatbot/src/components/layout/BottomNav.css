@@ -14,12 +14,11 @@
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Bottom Navigation Bar - Flex Layout */
+/* Bottom Navigation Bar - Grid Layout (2:FAB:2) */
 .bottom-nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 60px 1fr 1fr; /* Left 2 items, FAB space, Right 2 items */
     align-items: center;
-    justify-content: space-around;
-    flex-wrap: nowrap; /* CRITICAL: Prevent wrapping */
 
     height: 60px; /* Fixed height */
     background: var(--card-bg);
@@ -29,9 +28,8 @@
     position: relative;
 }
 
-/* Navigation Item - Equal Distribution */
+/* Navigation Item - Grid Cell */
 .nav-item {
-    flex: 1; /* Equal width distribution */
     display: flex;
     flex-direction: column;
     align-items: center;

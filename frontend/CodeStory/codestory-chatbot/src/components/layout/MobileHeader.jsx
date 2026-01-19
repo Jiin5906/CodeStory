@@ -57,8 +57,6 @@ const MobileHeader = ({ user, onLogout }) => {
             if (window.confirm('로그아웃 하시겠습니까?')) {
                 onLogout();
             }
-        } else if (action === 'profile') {
-            navigate('/settings'); // Or dedicated profile page
         }
     };
 
@@ -112,15 +110,6 @@ const MobileHeader = ({ user, onLogout }) => {
                             </div>
 
                             <div className="dropdown-divider"></div>
-
-                            <button
-                                className="dropdown-item"
-                                onClick={() => handleMenuItemClick('profile')}
-                                data-gtm="dropdown-item-profile"
-                            >
-                                <FaUser className="dropdown-icon" />
-                                <span>마이페이지</span>
-                            </button>
 
                             <button
                                 className="dropdown-item"
