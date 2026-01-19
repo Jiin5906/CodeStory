@@ -31,4 +31,5 @@ public class DiaryDto {
 
     private List<CommentDto> comments;
     private int likeCount;
+    private int commentCount;
 }

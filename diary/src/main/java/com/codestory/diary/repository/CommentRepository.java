@@ -10,4 +10,5 @@ import com.codestory.diary.entity.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByDiaryIdOrderByCreatedAtDesc(Long diaryId);
+    int countByDiaryId(Long diaryId);
 }

@@ -6,7 +6,9 @@ import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
 import com.codestory.diary.entity.Diary;
 import com.codestory.diary.entity.Member;
+import com.codestory.diary.repository.CommentRepository;
 import com.codestory.diary.repository.DiaryRepository;
+import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.DiaryService;
@@ -30,6 +32,8 @@ public class ApiController {
     private final DiaryService diaryService;
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
+    private final LikesRepository likesRepository;
+    private final CommentRepository commentRepository;
 
     // --- 인증 API ---
 
@@ -70,11 +74,16 @@ public class ApiController {
                         .orElse("익명");
             }
 
+            // Get like and comment counts
+            int likeCount = likesRepository.countByDiaryId(d.getId());
+            int commentCount = commentRepository.countByDiaryId(d.getId());
+
             return DiaryDto.builder()
                     .id(d.getId())
                     .userId(d.getUserId())
                     .content(d.getContent())
                     .date(d.getDate())
+                    .title(d.getTitle())
                     .emoji(d.getEmoji())
                     .mood(d.getMood())
                     .tension(d.getTension())
@@ -85,6 +94,8 @@ public class ApiController {
                     .shared(d.isPublic())
                     .anonymous(d.isAnonymous())
                     .nickname(authorNickname)
+                    .likeCount(likeCount)
+                    .commentCount(commentCount)
                     .build();
         }).collect(Collectors.toList());
 

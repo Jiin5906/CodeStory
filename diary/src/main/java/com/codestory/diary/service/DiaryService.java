@@ -176,6 +176,10 @@ public class DiaryService {
                     .orElse("익명");
         }
 
+        // 좋아요 개수와 댓글 개수 조회
+        int likeCount = likesRepository.countByDiaryId(diary.getId());
+        int commentCount = commentRepository.countByDiaryId(diary.getId());
+
         return DiaryDto.builder()
                 .id(diary.getId())
                 .userId(diary.getUserId())
@@ -192,6 +196,8 @@ public class DiaryService {
                 .shared(diary.isPublic())
                 .anonymous(diary.isAnonymous())
                 .nickname(authorNickname)
+                .likeCount(likeCount)
+                .commentCount(commentCount)
                 .build();
     }
 
@@ -209,11 +215,7 @@ public class DiaryService {
                 .build())
                 .collect(Collectors.toList());
 
-        // 좋아요 개수 추가
-        int likeCount = likesRepository.countByDiaryId(diary.getId());
-
         dto.setComments(comments);
-        dto.setLikeCount(likeCount);
 
         return dto;
     }

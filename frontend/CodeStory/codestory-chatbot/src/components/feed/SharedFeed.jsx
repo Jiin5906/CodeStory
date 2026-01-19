@@ -230,14 +230,14 @@ const FeedCard = ({ diary, index, getEmotionGradient, navigate }) => {
                         data-gtm={`shared-feed-like-click-${diary.id}`}
                     >
                         <FaFire className="metric-icon fire" />
-                        <span>{Math.floor(Math.random() * 50)}</span>
+                        <span>{diary.likeCount || 0}</span>
                     </button>
                     <button
                         className="feed-card-metric-button"
                         data-gtm={`shared-feed-comment-click-${diary.id}`}
                     >
                         <FaComment className="metric-icon comment" />
-                        <span>{Math.floor(Math.random() * 10)}</span>
+                        <span>{diary.commentCount || 0}</span>
                     </button>
                 </div>
             </div>
