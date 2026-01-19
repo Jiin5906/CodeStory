@@ -1,4 +1,4 @@
-/* ==================== Mobile Bottom Navigation ==================== */
+/* ==================== Mobile Bottom Navigation - Grid-Based ==================== */
 
 /* Container - Hidden on desktop, visible on mobile */
 .bottom-nav-container {
@@ -8,83 +8,92 @@
     left: 0;
     right: 0;
     z-index: 100;
+    /* Add safe area padding */
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Bottom Navigation Bar */
+/* Bottom Navigation Bar - Grid Layout */
 .bottom-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 equal columns, each 20% */
+    align-items: end; /* Align items to bottom for consistent baseline */
     background: var(--card-bg);
     border-top: 1px solid var(--border-color);
-    padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+    padding: 0.5rem 0;
     backdrop-filter: blur(12px);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    min-height: 64px; /* Ensure enough height for FAB overlap */
 }
 
-/* Navigation Item */
+/* Navigation Item - Compact Grid Cell */
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    min-height: 56px; /* Minimum 56px for touch target */
-    min-width: 64px;
-    padding: 0.5rem 0.75rem;
+    justify-content: flex-end;
+    gap: 4px; /* Reduced from 0.25rem to 4px for compactness */
+    min-height: 56px; /* Minimum touch target */
+    padding: 0.375rem 0.25rem 0.5rem; /* Reduced horizontal padding */
     background: none;
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--sub-text-color);
     position: relative;
-    border-radius: 12px;
+    /* Remove border-radius to maximize grid cell usage */
 }
 
 /* Navigation Icon */
 .nav-icon {
-    font-size: 1.25rem;
+    font-size: 1.125rem; /* Slightly smaller for better proportion */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
 }
 
-/* Navigation Label */
+/* Navigation Label - Compact Typography */
 .nav-label {
-    font-size: 0.6875rem;
+    font-size: 10px; /* Reduced to fit long text like "감정 공유" */
     font-weight: 600;
-    letter-spacing: 0.025em;
+    letter-spacing: -0.01em; /* Slight negative spacing for compactness */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap; /* CRITICAL: Prevent text wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%; /* Ensure it stays within grid cell */
+    text-align: center;
 }
 
-/* Hover State */
+/* Hover State - Subtle Highlight */
 .nav-item:hover {
     background: rgba(108, 92, 231, 0.05);
 }
 
 .nav-item:hover .nav-icon {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
 }
 
-/* Active State */
+/* Active State - Accent Color */
 .nav-item.active {
     color: #6C5CE7;
 }
 
 .nav-item.active .nav-icon {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .nav-item.active .nav-label {
     font-weight: 700;
 }
 
-/* Active Indicator */
+/* Active Indicator - Top Bar */
 .nav-item.active::before {
     content: '';
     position: absolute;
-    top: -0.5rem;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 24px;
+    width: 32px;
     height: 3px;
     background: linear-gradient(90deg, #6C5CE7 0%, #a363d9 100%);
     border-radius: 0 0 3px 3px;
@@ -102,54 +111,69 @@
     }
 }
 
-/* Spacer for FAB */
+/* Remove spacer - no longer needed with grid */
 .nav-spacer {
-    width: 72px;
-    flex-shrink: 0;
+    display: none;
 }
 
-/* Floating Action Button */
+/* Floating Action Button - Grid-Positioned */
 .fab-btn {
-    position: absolute;
-    bottom: calc(1.5rem + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 64px;
-    height: 64px;
+    /* Position in center grid cell (3rd column) */
+    grid-column: 3 / 4;
+    grid-row: 1;
+
+    /* Float upward from grid cell */
+    align-self: center;
+    justify-self: center;
+    transform: translateY(-20px); /* Float above nav bar */
+
+    /* Button styling */
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: linear-gradient(135deg, #6C5CE7 0%, #a363d9 100%);
     border: none;
     color: white;
-    font-size: 1.25rem;
     cursor: pointer;
+
+    /* Shadow for depth */
     box-shadow:
-        0 8px 16px rgba(108, 92, 231, 0.3),
-        0 4px 8px rgba(108, 92, 231, 0.2),
-        0 0 0 4px var(--bg-color);
+        0 8px 16px rgba(108, 92, 231, 0.35),
+        0 4px 8px rgba(108, 92, 231, 0.25),
+        0 0 0 4px var(--bg-color),
+        0 0 0 5px rgba(108, 92, 231, 0.1);
+
+    /* Smooth transitions */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Center icon */
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 101;
+
+    /* Ensure it's above nav items */
+    z-index: 10;
+    position: relative;
 }
 
 .fab-icon {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-/* FAB Hover State */
+/* FAB Hover State - Enhanced Lift */
 .fab-btn:hover {
-    transform: translateX(-50%) scale(1.05) rotate(3deg);
+    transform: translateY(-24px) scale(1.05);
     box-shadow:
         0 12px 24px rgba(108, 92, 231, 0.4),
         0 6px 12px rgba(108, 92, 231, 0.3),
-        0 0 0 4px var(--bg-color);
+        0 0 0 4px var(--bg-color),
+        0 0 0 5px rgba(108, 92, 231, 0.15);
 }
 
-/* FAB Active State */
+/* FAB Active State - Press Down */
 .fab-btn:active {
-    transform: translateX(-50%) scale(0.95);
+    transform: translateY(-18px) scale(0.95);
 }
 
 /* ==================== Mobile Responsive Display ==================== */
@@ -161,10 +185,47 @@
     }
 }
 
-/* Extra polish for very small screens */
+/* Optimization for small screens (360px and below) */
 @media (max-width: 360px) {
     .nav-label {
-        font-size: 0.625rem;
+        font-size: 9px; /* Further reduce for very small screens */
+        letter-spacing: -0.02em;
+    }
+
+    .nav-icon {
+        font-size: 1rem; /* Slightly smaller icons */
+    }
+
+    .fab-btn {
+        width: 52px;
+        height: 52px;
+        transform: translateY(-18px); /* Slightly less float for smaller screens */
+    }
+
+    .fab-icon {
+        font-size: 1rem;
+    }
+
+    .bottom-nav {
+        min-height: 60px; /* Reduce min-height on small screens */
+    }
+}
+
+/* Optimization for medium small screens (361px - 400px) */
+@media (min-width: 361px) and (max-width: 400px) {
+    .nav-label {
+        font-size: 10px;
+    }
+
+    .nav-icon {
+        font-size: 1.0625rem;
+    }
+}
+
+/* Optimization for larger mobile screens (401px+) */
+@media (min-width: 401px) {
+    .nav-label {
+        font-size: 11px; /* Slightly larger for readability */
     }
 
     .nav-icon {
@@ -172,27 +233,73 @@
     }
 
     .fab-btn {
-        width: 56px;
-        height: 56px;
-        bottom: calc(1.25rem + env(safe-area-inset-bottom));
-    }
-
-    .fab-icon {
-        font-size: 1.125rem;
-    }
-
-    .nav-spacer {
-        width: 64px;
+        width: 58px;
+        height: 58px;
+        transform: translateY(-22px);
     }
 }
 
-/* Support for devices with notches/safe areas */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
+/* ==================== Dark Mode Adjustments ==================== */
+
+@media (prefers-color-scheme: dark) {
     .bottom-nav {
-        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
     }
 
     .fab-btn {
-        bottom: calc(1.5rem + env(safe-area-inset-bottom));
+        box-shadow:
+            0 8px 16px rgba(108, 92, 231, 0.4),
+            0 4px 8px rgba(108, 92, 231, 0.3),
+            0 0 0 4px var(--bg-color),
+            0 0 0 5px rgba(108, 92, 231, 0.15);
     }
+}
+
+/* ==================== Accessibility & Touch Optimization ==================== */
+
+/* Ensure adequate touch targets */
+@media (pointer: coarse) {
+    .nav-item {
+        min-height: 58px; /* Slightly larger for touch */
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .nav-item.active {
+        text-decoration: underline;
+    }
+
+    .bottom-nav {
+        border-top: 2px solid var(--border-color);
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .nav-item,
+    .nav-icon,
+    .nav-label,
+    .fab-btn {
+        transition: none;
+    }
+
+    .nav-item.active::before {
+        animation: none;
+    }
+}
+
+/* ==================== Performance Optimizations ==================== */
+
+/* Force GPU acceleration for smooth animations */
+.nav-item,
+.fab-btn {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Optimize rendering */
+.bottom-nav {
+    contain: layout style;
 }
