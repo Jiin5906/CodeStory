@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaTrash, FaGlobe, FaLock, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -6,8 +6,15 @@ import './MainDashboard.css';
 import { diaryApi } from '../../services/api';
 
 const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh }) => {
+    // Local state for optimistic updates
+    const [localDiaries, setLocalDiaries] = useState(diaries);
 
-    const dailyDiaries = diaries
+    // Sync local state with prop changes
+    useEffect(() => {
+        setLocalDiaries(diaries);
+    }, [diaries]);
+
+    const dailyDiaries = localDiaries
         .filter(d => isSameDay(new Date(d.date), selectedDate))
         .sort((a, b) => b.id - a.id);
 
@@ -33,18 +40,29 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
 
     const handleToggleShare = async (id, currentStatus) => {
         const confirmMessage = currentStatus
-            ? "공유를 해제하시겠습니까?" 
+            ? "공유를 해제하시겠습니까?"
             : "일기를 커뮤니티에 공유하시겠습니까?";
 
         if (!window.confirm(confirmMessage)) return;
 
+        // Optimistic update: immediately update local state
+        setLocalDiaries(prevDiaries =>
+            prevDiaries.map(diary =>
+                diary.id === id
+                    ? { ...diary, shared: !currentStatus }
+                    : diary
+            )
+        );
+
         try {
             await diaryApi.toggleShare(id);
+            // Refresh from server to ensure consistency
             if (onRefresh) onRefresh();
-            else window.location.reload();
         } catch (e) {
             console.error("상태 변경 실패:", e);
             alert("서버 연결에 실패했습니다.");
+            // Revert optimistic update on error
+            setLocalDiaries(diaries);
         }
     };
 

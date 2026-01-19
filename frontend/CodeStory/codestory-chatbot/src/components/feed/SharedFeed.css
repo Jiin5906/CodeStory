@@ -116,19 +116,22 @@
 .feed-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 1.5rem;
+    /* Ensure proper spacing and prevent overlap */
+    align-items: start;
 }
 
 @media (min-width: 768px) {
     .feed-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+        gap: 2rem;
     }
 }
 
 @media (min-width: 1024px) {
     .feed-grid {
         grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
     }
 }
 
@@ -147,6 +150,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* 컨텐츠와 info 영역을 양 끝에 배치 */
+    /* Prevent cards from overlapping each other */
+    isolation: isolate;
 }
 
 .feed-card:hover {
@@ -530,7 +535,7 @@
     /* 그리드 1열 레이아웃 */
     .feed-grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 1.5rem;
     }
 
     /* 카드 높이 자연스럽게 조정 */

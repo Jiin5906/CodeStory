@@ -208,12 +208,12 @@ body[data-theme='dark'] .save-btn {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* [수정 핵심] 활성화 상태 가시성 확보 */
+/* [수정 핵심] 활성화 상태 가시성 확보 - 강조색 적용 */
 input:checked + .slider {
-    background-color: var(--accent-color); /* 보라색 */
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* 초록색 그라데이션 */
     /* 활성화 시 테두리와 그림자로 강조 */
-    border-color: rgba(0,0,0,0.1); 
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2); /* 외곽 글로우 */
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 4px 8px rgba(16, 185, 129, 0.3); /* 외곽 글로우 강화 */
 }
 
 input:checked + .slider:before {

@@ -32,9 +32,13 @@ public class Diary {
     @Column(columnDefinition = "TEXT")
     private String aiResponse;
 
-    @Builder.Default 
+    @Builder.Default
     @Column(nullable = false)
-    private boolean isPublic = false; 
+    private boolean isPublic = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isAnonymous = false;
 
     @ElementCollection
     @CollectionTable(name = "diary_tags", joinColumns = @JoinColumn(name = "diary_id"))
@@ -54,9 +58,9 @@ public class Diary {
         this.createdAt = LocalDateTime.now();
     }
 
-    // [중요] 여기에 boolean isPublic 파라미터가 있어야 하고, 내부에서 this.isPublic에 대입해야 합니다!
-    public void update(String content, String emoji, int mood, int tension, int fun, 
-                       List<String> tags, String aiResponse, String imageUrl, boolean isPublic) {
+    // [중요] 여기에 boolean isPublic, isAnonymous 파라미터가 있어야 하고, 내부에서 this.isPublic, this.isAnonymous에 대입해야 합니다!
+    public void update(String content, String emoji, int mood, int tension, int fun,
+                       List<String> tags, String aiResponse, String imageUrl, boolean isPublic, boolean isAnonymous) {
         this.content = content;
         this.emoji = emoji;
         this.mood = mood;
@@ -64,9 +68,10 @@ public class Diary {
         this.fun = fun;
         this.tags = tags;
         this.aiResponse = aiResponse;
-        
+
         // ★★★ 범인은 여기였습니다! 이 줄이 없으면 DB 값이 절대 안 바뀝니다. ★★★
-        this.isPublic = isPublic; 
+        this.isPublic = isPublic;
+        this.isAnonymous = isAnonymous;
 
         if (imageUrl != null) {
             this.imageUrl = imageUrl;

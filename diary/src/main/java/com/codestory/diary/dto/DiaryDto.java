@@ -24,5 +24,7 @@ public class DiaryDto {
     private String aiResponse;
     private String imageUrl;
 
-    private boolean shared; 
+    private boolean shared;
+    private boolean anonymous;
+    private String nickname; // Author nickname (or "익명" if anonymous)
 }

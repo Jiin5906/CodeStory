@@ -22,5 +22,6 @@ public class DiaryRequestDto {
 
     // 인스타 기능
     private Boolean isPublic; // 공개 여부
+    private Boolean isAnonymous; // 익명 여부
     private MultipartFile image; // 업로드할 이미지 파일
 }

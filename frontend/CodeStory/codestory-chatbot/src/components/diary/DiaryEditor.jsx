@@ -15,6 +15,12 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
+    // Load anonymous setting from localStorage (set in Settings page)
+    const getAnonymousDefault = () => {
+        const savedPreference = localStorage.getItem('anonymousDefault');
+        return savedPreference === 'true';
+    };
+
     const handleTagKeyDown = (e) => {
         if (e.key === 'Enter' && tagInput.trim()) {
             e.preventDefault();
@@ -44,7 +50,8 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
             alert('일기 내용을 입력해주세요.');
             return;
         }
-        onNext({ content, tags, imageFile: selectedImage, isPublic: false });
+        // Use the default anonymous setting from Settings page
+        onNext({ content, tags, imageFile: selectedImage, isPublic: false, isAnonymous: getAnonymousDefault() });
     };
 
     return (

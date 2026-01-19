@@ -4,7 +4,9 @@ import com.codestory.diary.dto.AuthRequest;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
 import com.codestory.diary.entity.Diary;
+import com.codestory.diary.entity.Member;
 import com.codestory.diary.repository.DiaryRepository;
+import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.DiaryService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ApiController {
     private final AuthService authService;
     private final DiaryService diaryService;
     private final DiaryRepository diaryRepository;
+    private final MemberRepository memberRepository;
 
     // --- 인증 API ---
 
@@ -54,19 +57,33 @@ public class ApiController {
     public ResponseEntity<?> getDiaries(@RequestParam Long userId) {
         List<Diary> diaries = diaryRepository.findAllByUserIdOrderByDateDesc(userId);
 
-        List<DiaryDto> dtos = diaries.stream().map(d -> DiaryDto.builder()
-                .id(d.getId())
-                .userId(d.getUserId())
-                .content(d.getContent())
-                .date(d.getDate())
-                .emoji(d.getEmoji())
-                .mood(d.getMood())
-                .tension(d.getTension())
-                .fun(d.getFun())
-                .tags(d.getTags())
-                .aiResponse(d.getAiResponse())
-                .imageUrl(d.getImageUrl())
-                .build()).collect(Collectors.toList());
+        List<DiaryDto> dtos = diaries.stream().map(d -> {
+            // Get author nickname
+            String authorNickname = "익명"; // Default to anonymous
+            if (!d.isAnonymous()) {
+                // Only fetch nickname if not anonymous
+                authorNickname = memberRepository.findById(d.getUserId())
+                        .map(Member::getNickname)
+                        .orElse("익명");
+            }
+
+            return DiaryDto.builder()
+                    .id(d.getId())
+                    .userId(d.getUserId())
+                    .content(d.getContent())
+                    .date(d.getDate())
+                    .emoji(d.getEmoji())
+                    .mood(d.getMood())
+                    .tension(d.getTension())
+                    .fun(d.getFun())
+                    .tags(d.getTags())
+                    .aiResponse(d.getAiResponse())
+                    .imageUrl(d.getImageUrl())
+                    .shared(d.isPublic())
+                    .anonymous(d.isAnonymous())
+                    .nickname(authorNickname)
+                    .build();
+        }).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }

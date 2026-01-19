@@ -1,11 +1,12 @@
 import React from 'react';
-import { FaPen, FaHome, FaRegCalendarAlt, FaChartPie, FaCog } from 'react-icons/fa';
+import { FaPen, FaHome, FaRegCalendarAlt, FaChartPie, FaCog, FaShareAlt } from 'react-icons/fa';
 import './BottomNav.css';
 
 const BottomNav = ({ currentView, onNavigate, onWriteClick }) => {
     const navItems = [
         { id: 'dashboard', icon: FaHome, label: '홈' },
         { id: 'calendar', icon: FaRegCalendarAlt, label: '캘린더' },
+        { id: 'shared', icon: FaShareAlt, label: '감정 공유' },
         { id: 'stats', icon: FaChartPie, label: '통계' },
         { id: 'settings', icon: FaCog, label: '설정' }
     ];

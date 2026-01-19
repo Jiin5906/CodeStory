@@ -28,24 +28,30 @@ export const diaryApi = {
     // 2. 일기 저장하기
     saveDiary: async (diaryData, imageFile) => {
         const formData = new FormData();
-        formData.append('userId', diaryData.userId);
-        formData.append('date', diaryData.date);
-        formData.append('content', diaryData.content);
-        formData.append('mood', diaryData.mood);
-        formData.append('tension', diaryData.tension);
-        formData.append('fun', diaryData.fun);
-        formData.append('emoji', diaryData.emoji);
-        formData.append('isPublic', diaryData.isPublic);
-        
-        if (diaryData.tags) {
-            diaryData.tags.forEach(tag => formData.append('tags', tag));
-        }
 
+        // Create diary object (excluding imageFile)
+        const diaryDto = {
+            userId: diaryData.userId,
+            date: diaryData.date,
+            content: diaryData.content,
+            mood: diaryData.mood,
+            tension: diaryData.tension,
+            fun: diaryData.fun,
+            emoji: diaryData.emoji,
+            isPublic: diaryData.isPublic,
+            isAnonymous: diaryData.isAnonymous || false,
+            tags: diaryData.tags || []
+        };
+
+        // Append diary as JSON blob
+        formData.append('diary', new Blob([JSON.stringify(diaryDto)], { type: 'application/json' }));
+
+        // Append image if exists
         if (imageFile) {
-            formData.append("image", imageFile);
+            formData.append('image', imageFile);
         }
 
-        const response = await api.post('/diary', formData);
+        const response = await api.post('/diaries/write', formData);
         return response.data;
     },
 

@@ -3,7 +3,9 @@ package com.codestory.diary.service;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
 import com.codestory.diary.entity.Diary;
+import com.codestory.diary.entity.Member;
 import com.codestory.diary.repository.DiaryRepository;
+import com.codestory.diary.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
+    private final MemberRepository memberRepository;
     private final AiService aiService;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
@@ -67,6 +70,7 @@ public class DiaryService {
                 .aiResponse(aiReply)
                 .imageUrl(savedImageUrl)
                 .isPublic(request.getIsPublic() != null && request.getIsPublic())
+                .isAnonymous(request.getIsAnonymous() != null && request.getIsAnonymous())
                 .build();
         
         Diary saved = diaryRepository.save(newDiary);
@@ -84,10 +88,10 @@ public class DiaryService {
                 .orElseThrow(() -> new IllegalArgumentException("일기가 존재하지 않습니다."));
         
         boolean newStatus = !diary.isPublic();
-        
+
         // 엔티티 업데이트
-        diary.update(diary.getContent(), diary.getEmoji(), diary.getMood(), diary.getTension(), 
-                     diary.getFun(), diary.getTags(), diary.getAiResponse(), diary.getImageUrl(), newStatus);
+        diary.update(diary.getContent(), diary.getEmoji(), diary.getMood(), diary.getTension(),
+                     diary.getFun(), diary.getTags(), diary.getAiResponse(), diary.getImageUrl(), newStatus, diary.isAnonymous());
         
         // [중요] DB 저장 필수
         diaryRepository.save(diary); 
@@ -103,6 +107,15 @@ public class DiaryService {
     }
 
     private DiaryDto convertToDto(Diary diary) {
+        // Get author nickname
+        String authorNickname = "익명"; // Default to anonymous
+        if (!diary.isAnonymous()) {
+            // Only fetch nickname if not anonymous
+            authorNickname = memberRepository.findById(diary.getUserId())
+                    .map(Member::getNickname)
+                    .orElse("익명");
+        }
+
         return DiaryDto.builder()
                 .id(diary.getId())
                 .userId(diary.getUserId())
@@ -116,7 +129,9 @@ public class DiaryService {
                 .aiResponse(diary.getAiResponse())
                 .imageUrl(diary.getImageUrl())
                 // [핵심] 엔티티의 isPublic 값을 DTO의 shared에 담습니다.
-                .shared(diary.isPublic()) 
+                .shared(diary.isPublic())
+                .anonymous(diary.isAnonymous())
+                .nickname(authorNickname)
                 .build();
     }
 }

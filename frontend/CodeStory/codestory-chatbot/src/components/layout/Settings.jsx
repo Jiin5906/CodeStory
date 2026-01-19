@@ -6,10 +6,16 @@ import './Settings.css';
 const Settings = ({ user, onNicknameChange }) => {
     const { currentTheme, changeTheme, themes } = useTheme();
     const [nickname, setNickname] = useState('');
+    const [isAnonymousDefault, setIsAnonymousDefault] = useState(false);
 
     useEffect(() => {
         if (user && user.nickname) {
             setNickname(user.nickname);
+        }
+        // Load anonymous preference from localStorage
+        const savedPreference = localStorage.getItem('anonymousDefault');
+        if (savedPreference !== null) {
+            setIsAnonymousDefault(savedPreference === 'true');
         }
     }, [user]);
 
@@ -17,6 +23,19 @@ const Settings = ({ user, onNicknameChange }) => {
         if (nickname.trim() && onNicknameChange) {
             onNicknameChange(nickname);
             alert('닉네임이 변경되었습니다.');
+        }
+    };
+
+    const handleAnonymousToggle = (e) => {
+        const newValue = e.target.checked;
+        setIsAnonymousDefault(newValue);
+        localStorage.setItem('anonymousDefault', newValue.toString());
+
+        // Optional: Show confirmation
+        if (newValue) {
+            console.log('✅ 익명 모드 활성화: 앞으로 일기는 기본적으로 익명으로 공유됩니다.');
+        } else {
+            console.log('✅ 익명 모드 비활성화: 앞으로 일기는 기본적으로 닉네임과 함께 공유됩니다.');
         }
     };
 
@@ -82,13 +101,25 @@ const Settings = ({ user, onNicknameChange }) => {
                 </div>
             </div>
 
-            {/* --- 섹션 3: 알림 설정 --- */}
-            <div className="settings-section" data-gtm="settings-section-notification">
-                <h3>🔔 알림 설정</h3>
+            {/* --- 섹션 3: 익명 설정 --- */}
+            <div className="settings-section" data-gtm="settings-section-anonymous">
+                <h3>🎭 일기 업로드 방식 설정</h3>
+                <p className="settings-desc">일기 공유 시 기본적으로 익명으로 올릴지 선택하세요.</p>
                 <div className="toggle-row">
-                    <span>일기 작성 알림 받기</span>
-                    <label className="switch" data-gtm="switch-notification-diary">
-                        <input type="checkbox" defaultChecked />
+                    <div>
+                        <span style={{ fontWeight: 600 }}>익명으로 올리기</span>
+                        <p style={{ fontSize: '13px', color: 'var(--sub-text-color)', marginTop: '4px' }}>
+                            {isAnonymousDefault
+                                ? '✅ 일기가 기본적으로 익명으로 공유됩니다'
+                                : '✅ 일기가 기본적으로 닉네임과 함께 공유됩니다'}
+                        </p>
+                    </div>
+                    <label className="switch" data-gtm="switch-anonymous-default">
+                        <input
+                            type="checkbox"
+                            checked={isAnonymousDefault}
+                            onChange={handleAnonymousToggle}
+                        />
                         <span className="slider round"></span>
                     </label>
                 </div>

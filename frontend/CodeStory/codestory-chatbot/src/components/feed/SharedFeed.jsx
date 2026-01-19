@@ -179,7 +179,7 @@ const FeedCard = ({ diary, index, getEmotionGradient }) => {
 
                     <div className="feed-card-author-details">
                         <span className="feed-card-author-name">
-                            {diary.nickname || '익명'}
+                            {diary.anonymous ? '익명' : (diary.nickname || '익명')}
                         </span>
                         <span className="feed-card-mood-temp">
                             기분 온도 {diary.mood ? diary.mood * 10 : 50}°C
