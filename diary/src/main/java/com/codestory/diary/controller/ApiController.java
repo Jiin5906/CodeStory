@@ -129,13 +129,6 @@ public class ApiController {
         return ResponseEntity.ok(Map.of("liked", liked));
     }
 
-    // 공유 피드 조회
-    @GetMapping("/feed")
-    public ResponseEntity<?> getFeed() {
-        List<DiaryDto> feed = diaryService.getPublicFeed();
-        return ResponseEntity.ok(feed);
-    }
-
     // Helper: 클라이언트 IP 추출
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");

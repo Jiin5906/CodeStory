@@ -1,5 +1,18 @@
 package com.codestory.diary.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.codestory.diary.dto.CommentDto;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
@@ -11,19 +24,8 @@ import com.codestory.diary.repository.CommentRepository;
 import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -42,12 +44,16 @@ public class DiaryService {
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 File uploadDir = new File(UPLOAD_DIR);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
                 String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
                 Path path = Paths.get(UPLOAD_DIR + fileName);
                 Files.write(path, imageFile.getBytes());
                 savedImageUrl = "/images/" + fileName;
-            } catch (IOException e) { e.printStackTrace(); }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         String systemPrompt = """
@@ -59,8 +65,8 @@ public class DiaryService {
             """;
 
         String userMessage = String.format(
-            "오늘의 일기:\n- 내용: %s\n- 기분: %d점\n- 태그: %s",
-            request.getContent(), request.getMood(), request.getTags()
+                "오늘의 일기:\n- 내용: %s\n- 기분: %d점\n- 태그: %s",
+                request.getContent(), request.getMood(), request.getTags()
         );
 
         String aiReply = aiService.getMultimodalResponse(systemPrompt, userMessage, imageFile);
@@ -80,7 +86,7 @@ public class DiaryService {
                 .isPublic(request.getIsPublic() != null && request.getIsPublic())
                 .isAnonymous(request.getIsAnonymous() != null && request.getIsAnonymous())
                 .build();
-        
+
         Diary saved = diaryRepository.save(newDiary);
         return convertToDto(saved);
     }
@@ -94,16 +100,16 @@ public class DiaryService {
     public DiaryDto toggleShareStatus(Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("일기가 존재하지 않습니다."));
-        
+
         boolean newStatus = !diary.isPublic();
 
         // 엔티티 업데이트
         diary.update(diary.getTitle(), diary.getContent(), diary.getEmoji(), diary.getMood(), diary.getTension(),
-                     diary.getFun(), diary.getTags(), diary.getAiResponse(), diary.getImageUrl(), newStatus, diary.isAnonymous());
-        
+                diary.getFun(), diary.getTags(), diary.getAiResponse(), diary.getImageUrl(), newStatus, diary.isAnonymous());
+
         // [중요] DB 저장 필수
-        diaryRepository.save(diary); 
-        
+        diaryRepository.save(diary);
+
         return convertToDto(diary);
     }
 
@@ -196,11 +202,11 @@ public class DiaryService {
         List<CommentDto> comments = commentRepository.findByDiaryIdOrderByCreatedAtDesc(diary.getId())
                 .stream()
                 .map(c -> CommentDto.builder()
-                        .id(c.getId())
-                        .content(c.getContent())
-                        .author(c.getAuthor())
-                        .createdAt(c.getCreatedAt())
-                        .build())
+                .id(c.getId())
+                .content(c.getContent())
+                .author(c.getAuthor())
+                .createdAt(c.getCreatedAt())
+                .build())
                 .collect(Collectors.toList());
 
         // 좋아요 개수 추가
