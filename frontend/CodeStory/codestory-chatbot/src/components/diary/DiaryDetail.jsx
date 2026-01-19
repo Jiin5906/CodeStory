@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaHeart, FaRegHeart } from 'react-icons/fa';
 import api from '../../services/api';
@@ -9,14 +9,13 @@ const DiaryDetail = () => {
     const [diary, setDiary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [commentContent, setCommentContent] = useState('');
-    const [commentAuthor, setCommentAuthor] = useState('');
     const [liked, setLiked] = useState(false);
 
-    useEffect(() => {
-        fetchDiaryDetail();
-    }, [id]);
+    // localStorage에서 사용자 정보 가져오기
+    const user = JSON.parse(localStorage.getItem('diaryUser') || '{}');
+    const userNickname = user?.nickname || '익명';
 
-    const fetchDiaryDetail = async () => {
+    const fetchDiaryDetail = useCallback(async () => {
         try {
             const response = await api.get(`/diary/${id}`);
             setDiary(response.data);
@@ -25,7 +24,11 @@ const DiaryDetail = () => {
             console.error('일기 불러오기 실패:', error);
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchDiaryDetail();
+    }, [fetchDiaryDetail]);
 
     const handleLikeToggle = async () => {
         try {
@@ -46,10 +49,9 @@ const DiaryDetail = () => {
         try {
             await api.post(`/diary/${id}/comment`, {
                 content: commentContent,
-                author: commentAuthor.trim() || '익명'
+                author: userNickname
             });
             setCommentContent('');
-            setCommentAuthor('');
             fetchDiaryDetail(); // 댓글 목록 갱신
         } catch (error) {
             console.error('댓글 작성 실패:', error);
@@ -241,22 +243,14 @@ const DiaryDetail = () => {
                     gap: '12px',
                     marginBottom: '24px'
                 }} data-gtm="diary-detail-comment-form">
-                    <input
-                        type="text"
-                        placeholder="닉네임 (선택)"
-                        value={commentAuthor}
-                        onChange={(e) => setCommentAuthor(e.target.value)}
-                        style={{
-                            padding: '10px 14px',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '8px',
-                            background: 'var(--bg-color)',
-                            color: 'var(--text-color)',
-                            fontSize: '14px',
-                            outline: 'none'
-                        }}
-                        data-gtm="diary-detail-comment-author-input"
-                    />
+                    {/* 현재 사용자 닉네임 표시 */}
+                    <div style={{
+                        fontSize: '13px',
+                        color: 'var(--sub-text-color)',
+                        marginBottom: '4px'
+                    }}>
+                        <strong>{userNickname}</strong>님으로 댓글 작성
+                    </div>
                     <textarea
                         placeholder="댓글을 입력하세요..."
                         value={commentContent}
