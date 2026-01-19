@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaFire, FaComment, FaUser, FaHeart, FaClock } from 'react-icons/fa';
@@ -6,6 +7,7 @@ import { diaryApi } from '../../services/api';
 import './SharedFeed.css';
 
 const SharedFeed = () => {
+    const navigate = useNavigate();
     const [feedList, setFeedList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -107,6 +109,7 @@ const SharedFeed = () => {
                                 diary={diary}
                                 index={index}
                                 getEmotionGradient={getEmotionGradient}
+                                navigate={navigate}
                             />
                         ))}
                     </div>
@@ -117,17 +120,24 @@ const SharedFeed = () => {
 };
 
 // Feed Card Component
-const FeedCard = ({ diary, index, getEmotionGradient }) => {
+const FeedCard = ({ diary, index, getEmotionGradient, navigate }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     // Masonry-like height variation
     const heightClass = index % 3 === 0 ? 'card-height-tall' : 'card-height-square';
+
+    // 카드 클릭 핸들러
+    const handleCardClick = () => {
+        navigate(`/diary/${diary.id}`);
+    };
 
     return (
         <div
             className={`feed-card ${heightClass}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={handleCardClick}
+            style={{ cursor: 'pointer' }}
             data-gtm={`shared-feed-card-click-${diary.id}`}
         >
             {/* Background: Image or Gradient */}
@@ -142,6 +152,24 @@ const FeedCard = ({ diary, index, getEmotionGradient }) => {
                         />
                         {/* Gradient Overlay for Text Readability */}
                         <div className={`feed-card-overlay ${isHovered ? 'hovered' : ''}`} />
+                        {/* Title Overlay */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '80px',
+                            left: '20px',
+                            right: '20px',
+                            color: 'white',
+                            fontSize: '1.1rem',
+                            fontWeight: '600',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                        }}>
+                            {diary.title || '제목 없음'}
+                        </div>
                     </>
                 ) : (
                     <div
@@ -151,8 +179,16 @@ const FeedCard = ({ diary, index, getEmotionGradient }) => {
                         {/* Decorative Circle */}
                         <div className="feed-card-gradient-circle" />
 
-                        <p className="feed-card-content-text">
-                            "{diary.content}"
+                        <p className="feed-card-content-text" style={{
+                            fontSize: '1.1rem',
+                            fontWeight: '600',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical'
+                        }}>
+                            {diary.title || '제목 없음'}
                         </p>
                     </div>
                 )}

@@ -182,6 +182,17 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                             <img src={`${diary.imageUrl}`} alt="diary" />
                                         </div>
                                     )}
+                                    {diary.title && (
+                                        <h3 className="diary-title" style={{
+                                            fontSize: '1.25rem',
+                                            fontWeight: '700',
+                                            marginBottom: '12px',
+                                            color: 'var(--text-color)',
+                                            lineHeight: '1.4'
+                                        }} data-gtm="dashboard-diary-title">
+                                            {diary.title}
+                                        </h3>
+                                    )}
                                     <p className="diary-text">{diary.content}</p>
 
                                     {diary.aiResponse && (
