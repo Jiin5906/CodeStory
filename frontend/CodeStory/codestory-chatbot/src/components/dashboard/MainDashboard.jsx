@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { format, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaTrash, FaGlobe, FaLock, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import Lottie from 'lottie-react';
 import './MainDashboard.css';
 import { diaryApi } from '../../services/api';
+import mongleAnimation from '../../assets/mongleIDLE.json';
 
 const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh }) => {
     // Local state for optimistic updates
@@ -74,6 +76,25 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                 <div className="user-badge" data-gtm="dashboard-user-profile">
                     {user?.nickname || '게스트'}님 ➜
                 </div>
+            </div>
+
+            {/* 몽글이 캐릭터 애니메이션 */}
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    marginBottom: '20px'
+                }}
+                data-gtm="dashboard-mongle-animation"
+            >
+                <Lottie
+                    animationData={mongleAnimation}
+                    loop={true}
+                    autoplay={true}
+                    style={{ width: 200, height: 200 }}
+                />
             </div>
 
             {/* 날짜 이동 컨트롤 */}

@@ -114,7 +114,7 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
                                 </>
                             ) : (
                                 <div className="image-placeholder">
-                                    <div className="icon-circle"><FaCamera size={28} color="#6C5CE7" /></div>
+                                    <div className="icon-circle"><FaCamera size={28} className="camera-icon" /></div>
                                     <span className="placeholder-text">오늘의 특별한 순간을<br/>사진으로 남겨보세요</span>
                                     <span className="placeholder-sub">클릭하여 업로드</span>
                                 </div>
