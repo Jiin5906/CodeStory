@@ -7,6 +7,7 @@ import { authApi, diaryApi } from './services/api';
 import Login from './components/auth/Login';
 import Sidebar from './components/layout/Sidebar';
 import BottomNav from './components/layout/BottomNav';
+import MobileHeader from './components/layout/MobileHeader';
 import MainDashboard from './components/dashboard/MainDashboard';
 import RightPanel from './components/layout/RightPanel';
 import DiaryEditor from './components/diary/DiaryEditor';
@@ -146,6 +147,9 @@ function AppContent() {
 
                 <Route path="/*" element={
                     <>
+                        {/* Mobile Header - Fixed at top, shown only on mobile (max-width: 768px) */}
+                        <MobileHeader user={user} onLogout={handleLogout} />
+
                         <div className="layout-container animate-fade-in" data-gtm="main-layout-wrapper">
                             <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />
 

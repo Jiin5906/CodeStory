@@ -1,6 +1,6 @@
-/* ==================== Mobile Bottom Navigation - Grid-Based ==================== */
+/* ==================== Mobile Bottom Navigation - FIXED LAYOUT ==================== */
 
-/* Container - Hidden on desktop, visible on mobile */
+/* Container - Fixed Height to Prevent Wrapping */
 .bottom-nav-container {
     display: none; /* Hidden by default on desktop */
     position: fixed;
@@ -8,63 +8,71 @@
     left: 0;
     right: 0;
     z-index: 100;
-    /* Add safe area padding */
+
+    /* CRITICAL: Fixed height prevents two-row wrapping */
+    height: calc(60px + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Bottom Navigation Bar - Grid Layout */
+/* Bottom Navigation Bar - Flex Layout */
 .bottom-nav {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 equal columns, each 20% */
-    align-items: end; /* Align items to bottom for consistent baseline */
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: nowrap; /* CRITICAL: Prevent wrapping */
+
+    height: 60px; /* Fixed height */
     background: var(--card-bg);
     border-top: 1px solid var(--border-color);
-    padding: 0.5rem 0;
     backdrop-filter: blur(12px);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     position: relative;
-    min-height: 64px; /* Ensure enough height for FAB overlap */
 }
 
-/* Navigation Item - Compact Grid Cell */
+/* Navigation Item - Equal Distribution */
 .nav-item {
+    flex: 1; /* Equal width distribution */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    gap: 4px; /* Reduced from 0.25rem to 4px for compactness */
-    min-height: 56px; /* Minimum touch target */
-    padding: 0.375rem 0.25rem 0.5rem; /* Reduced horizontal padding */
+    justify-content: center;
+    gap: 3px; /* Compact spacing */
+    height: 100%; /* Full height */
+
     background: none;
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--sub-text-color);
     position: relative;
-    /* Remove border-radius to maximize grid cell usage */
+
+    /* Ensure no padding causes overflow */
+    padding: 0;
 }
 
 /* Navigation Icon */
 .nav-icon {
-    font-size: 1.125rem; /* Slightly smaller for better proportion */
+    font-size: 1.125rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 }
 
-/* Navigation Label - Compact Typography */
+/* Navigation Label - CRITICAL: Prevent Wrapping */
 .nav-label {
-    font-size: 10px; /* Reduced to fit long text like "감정 공유" */
+    font-size: 10px; /* Small but readable */
     font-weight: 600;
-    letter-spacing: -0.01em; /* Slight negative spacing for compactness */
+    letter-spacing: -0.01em;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    white-space: nowrap; /* CRITICAL: Prevent text wrapping */
+
+    /* CRITICAL: Prevent text wrapping */
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%; /* Ensure it stays within grid cell */
+    max-width: 100%;
     text-align: center;
 }
 
-/* Hover State - Subtle Highlight */
+/* Hover State */
 .nav-item:hover {
     background: rgba(108, 92, 231, 0.05);
 }
@@ -73,7 +81,7 @@
     transform: translateY(-2px) scale(1.05);
 }
 
-/* Active State - Accent Color */
+/* Active State */
 .nav-item.active {
     color: #6C5CE7;
 }
@@ -111,21 +119,13 @@
     }
 }
 
-/* Remove spacer - no longer needed with grid */
-.nav-spacer {
-    display: none;
-}
-
-/* Floating Action Button - Grid-Positioned */
+/* Floating Action Button - ABSOLUTE POSITIONING */
 .fab-btn {
-    /* Position in center grid cell (3rd column) */
-    grid-column: 3 / 4;
-    grid-row: 1;
-
-    /* Float upward from grid cell */
-    align-self: center;
-    justify-self: center;
-    transform: translateY(-20px); /* Float above nav bar */
+    /* CRITICAL: Position absolutely to float above nav bar */
+    position: absolute;
+    left: 50%;
+    bottom: 25px; /* Float 25px above bottom */
+    transform: translateX(-50%);
 
     /* Button styling */
     width: 56px;
@@ -153,7 +153,6 @@
 
     /* Ensure it's above nav items */
     z-index: 10;
-    position: relative;
 }
 
 .fab-icon {
@@ -161,9 +160,9 @@
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-/* FAB Hover State - Enhanced Lift */
+/* FAB Hover State */
 .fab-btn:hover {
-    transform: translateY(-24px) scale(1.05);
+    transform: translateX(-50%) translateY(-4px) scale(1.05);
     box-shadow:
         0 12px 24px rgba(108, 92, 231, 0.4),
         0 6px 12px rgba(108, 92, 231, 0.3),
@@ -171,9 +170,9 @@
         0 0 0 5px rgba(108, 92, 231, 0.15);
 }
 
-/* FAB Active State - Press Down */
+/* FAB Active State */
 .fab-btn:active {
-    transform: translateY(-18px) scale(0.95);
+    transform: translateX(-50%) translateY(0) scale(0.95);
 }
 
 /* ==================== Mobile Responsive Display ==================== */
@@ -189,7 +188,6 @@
 @media (max-width: 360px) {
     .nav-label {
         font-size: 9px; /* Further reduce for very small screens */
-        letter-spacing: -0.02em;
     }
 
     .nav-icon {
@@ -199,15 +197,11 @@
     .fab-btn {
         width: 52px;
         height: 52px;
-        transform: translateY(-18px); /* Slightly less float for smaller screens */
+        bottom: 23px; /* Adjust float height */
     }
 
     .fab-icon {
         font-size: 1rem;
-    }
-
-    .bottom-nav {
-        min-height: 60px; /* Reduce min-height on small screens */
     }
 }
 
@@ -235,7 +229,7 @@
     .fab-btn {
         width: 58px;
         height: 58px;
-        transform: translateY(-22px);
+        bottom: 27px;
     }
 }
 
@@ -260,7 +254,7 @@
 /* Ensure adequate touch targets */
 @media (pointer: coarse) {
     .nav-item {
-        min-height: 58px; /* Slightly larger for touch */
+        /* Touch targets are met by 60px height container */
     }
 }
 
