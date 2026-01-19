@@ -1,10 +1,24 @@
 package com.codestory.diary.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "diary")
@@ -21,12 +35,15 @@ public class Diary {
     @Column(nullable = false)
     private Long userId;
 
+    @Column(length = 200)
+    private String title;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Column(nullable = false)
     private LocalDate date;
-    
+
     private String imageUrl;
 
     @Column(columnDefinition = "TEXT")
@@ -59,8 +76,9 @@ public class Diary {
     }
 
     // [중요] 여기에 boolean isPublic, isAnonymous 파라미터가 있어야 하고, 내부에서 this.isPublic, this.isAnonymous에 대입해야 합니다!
-    public void update(String content, String emoji, int mood, int tension, int fun,
-                       List<String> tags, String aiResponse, String imageUrl, boolean isPublic, boolean isAnonymous) {
+    public void update(String title, String content, String emoji, int mood, int tension, int fun,
+            List<String> tags, String aiResponse, String imageUrl, boolean isPublic, boolean isAnonymous) {
+        this.title = title;
         this.content = content;
         this.emoji = emoji;
         this.mood = mood;

@@ -9,6 +9,7 @@ import java.util.List;
 @Getter @Setter
 public class DiaryRequestDto {
     private Long userId;
+    private String title;
     private String content;
     private LocalDate date;
     

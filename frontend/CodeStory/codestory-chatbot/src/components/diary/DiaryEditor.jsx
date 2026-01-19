@@ -9,6 +9,7 @@ const RECOMMENDED_TAGS = [
 ];
 
 const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
+    const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [tags, setTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
@@ -46,12 +47,16 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
     };
 
     const handleNextClick = () => {
+        if (!title.trim()) {
+            alert('일기 제목을 입력해주세요.');
+            return;
+        }
         if (!content.trim()) {
             alert('일기 내용을 입력해주세요.');
             return;
         }
         // Use the default anonymous setting from Settings page
-        onNext({ content, tags, imageFile: selectedImage, isPublic: false, isAnonymous: getAnonymousDefault() });
+        onNext({ title, content, tags, imageFile: selectedImage, isPublic: false, isAnonymous: getAnonymousDefault() });
     };
 
     return (
@@ -125,6 +130,29 @@ const DiaryEditor = ({ selectedDate, onBack, onNext }) => {
 
                 {/* 오른쪽: 입력 영역 */}
                 <div className="editor-right-panel">
+                    {/* 제목 입력 섹션 */}
+                    <div className="title-section" style={{ marginBottom: '20px' }} data-gtm="editor-title-section">
+                        <input
+                            type="text"
+                            placeholder="제목을 입력하세요"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="title-input"
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                fontSize: '20px',
+                                fontWeight: '600',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
+                                background: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                outline: 'none'
+                            }}
+                            data-gtm="editor-title-input-field"
+                        />
+                    </div>
+
                     {/* 태그 입력 섹션 */}
                     <div className="tag-section" style={{ marginBottom: '20px' }} data-gtm="editor-tag-section">
                         <input 

@@ -11,6 +11,7 @@ import MobileHeader from './components/layout/MobileHeader';
 import MainDashboard from './components/dashboard/MainDashboard';
 import RightPanel from './components/layout/RightPanel';
 import DiaryEditor from './components/diary/DiaryEditor';
+import DiaryDetail from './components/diary/DiaryDetail';
 import EmotionModal from './components/diary/EmotionModal';
 import ErrorBanner from './components/common/ErrorBanner';
 import CalendarView from './components/calendar/CalendarView';
@@ -159,6 +160,7 @@ function AppContent() {
                                     <Route path="calendar" element={<CalendarView user={user} diaries={diaries} />} />
                                     <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
                                     <Route path="shared" element={<SharedFeed />} />
+                                    <Route path="diary/:id" element={<DiaryDetail />} />
                                     <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} />} />
                                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                                 </Routes>

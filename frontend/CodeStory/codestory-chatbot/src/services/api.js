@@ -33,6 +33,7 @@ export const diaryApi = {
         const diaryDto = {
             userId: diaryData.userId,
             date: diaryData.date,
+            title: diaryData.title || '',
             content: diaryData.content,
             mood: diaryData.mood,
             tension: diaryData.tension,
@@ -70,6 +71,24 @@ export const diaryApi = {
     // 5. 일기 삭제
     deleteDiary: async (id) => {
         const response = await api.delete(`/diary/${id}`);
+        return response.data;
+    },
+
+    // 6. 특정 일기 상세 조회
+    getDiaryDetail: async (id) => {
+        const response = await api.get(`/diary/${id}`);
+        return response.data;
+    },
+
+    // 7. 댓글 작성
+    addComment: async (id, content, author) => {
+        const response = await api.post(`/diary/${id}/comment`, { content, author });
+        return response.data;
+    },
+
+    // 8. 좋아요 토글
+    toggleLike: async (id) => {
+        const response = await api.post(`/diary/${id}/like`);
         return response.data;
     }
 };

@@ -1,10 +1,15 @@
 package com.codestory.diary.service;
 
+import com.codestory.diary.dto.CommentDto;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
+import com.codestory.diary.entity.Comment;
 import com.codestory.diary.entity.Diary;
+import com.codestory.diary.entity.Likes;
 import com.codestory.diary.entity.Member;
+import com.codestory.diary.repository.CommentRepository;
 import com.codestory.diary.repository.DiaryRepository;
+import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,8 @@ public class DiaryService {
 
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
+    private final LikesRepository likesRepository;
     private final AiService aiService;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
@@ -61,6 +68,7 @@ public class DiaryService {
         Diary newDiary = Diary.builder()
                 .userId(request.getUserId())
                 .date(request.getDate())
+                .title(request.getTitle())
                 .content(request.getContent())
                 .emoji(request.getEmoji())
                 .mood(request.getMood())
@@ -90,7 +98,7 @@ public class DiaryService {
         boolean newStatus = !diary.isPublic();
 
         // 엔티티 업데이트
-        diary.update(diary.getContent(), diary.getEmoji(), diary.getMood(), diary.getTension(),
+        diary.update(diary.getTitle(), diary.getContent(), diary.getEmoji(), diary.getMood(), diary.getTension(),
                      diary.getFun(), diary.getTags(), diary.getAiResponse(), diary.getImageUrl(), newStatus, diary.isAnonymous());
         
         // [중요] DB 저장 필수
@@ -106,11 +114,57 @@ public class DiaryService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public DiaryDto getDiaryDetail(Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("일기가 존재하지 않습니다."));
+        return convertToDtoWithDetails(diary);
+    }
+
+    @Transactional
+    public CommentDto addComment(Long diaryId, String content, String author) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("일기가 존재하지 않습니다."));
+
+        Comment comment = Comment.builder()
+                .content(content)
+                .author(author)
+                .diary(diary)
+                .build();
+
+        Comment saved = commentRepository.save(comment);
+
+        return CommentDto.builder()
+                .id(saved.getId())
+                .content(saved.getContent())
+                .author(saved.getAuthor())
+                .createdAt(saved.getCreatedAt())
+                .build();
+    }
+
+    @Transactional
+    public boolean toggleLike(Long diaryId, String userIp) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("일기가 존재하지 않습니다."));
+
+        var existingLike = likesRepository.findByUserIpAndDiaryId(userIp, diaryId);
+
+        if (existingLike.isPresent()) {
+            likesRepository.deleteByUserIpAndDiaryId(userIp, diaryId);
+            return false; // unliked
+        } else {
+            Likes like = Likes.builder()
+                    .userIp(userIp)
+                    .diary(diary)
+                    .build();
+            likesRepository.save(like);
+            return true; // liked
+        }
+    }
+
     private DiaryDto convertToDto(Diary diary) {
-        // Get author nickname
-        String authorNickname = "익명"; // Default to anonymous
+        String authorNickname = "익명";
         if (!diary.isAnonymous()) {
-            // Only fetch nickname if not anonymous
             authorNickname = memberRepository.findById(diary.getUserId())
                     .map(Member::getNickname)
                     .orElse("익명");
@@ -120,6 +174,7 @@ public class DiaryService {
                 .id(diary.getId())
                 .userId(diary.getUserId())
                 .date(diary.getDate())
+                .title(diary.getTitle())
                 .content(diary.getContent())
                 .emoji(diary.getEmoji())
                 .mood(diary.getMood())
@@ -128,10 +183,32 @@ public class DiaryService {
                 .tags(diary.getTags())
                 .aiResponse(diary.getAiResponse())
                 .imageUrl(diary.getImageUrl())
-                // [핵심] 엔티티의 isPublic 값을 DTO의 shared에 담습니다.
                 .shared(diary.isPublic())
                 .anonymous(diary.isAnonymous())
                 .nickname(authorNickname)
                 .build();
+    }
+
+    private DiaryDto convertToDtoWithDetails(Diary diary) {
+        DiaryDto dto = convertToDto(diary);
+
+        // 댓글 목록 추가
+        List<CommentDto> comments = commentRepository.findByDiaryIdOrderByCreatedAtDesc(diary.getId())
+                .stream()
+                .map(c -> CommentDto.builder()
+                        .id(c.getId())
+                        .content(c.getContent())
+                        .author(c.getAuthor())
+                        .createdAt(c.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        // 좋아요 개수 추가
+        int likeCount = likesRepository.countByDiaryId(diary.getId());
+
+        dto.setComments(comments);
+        dto.setLikeCount(likeCount);
+
+        return dto;
     }
 }

@@ -15,6 +15,7 @@ public class DiaryDto {
     private Long id;
     private Long userId;
     private LocalDate date;
+    private String title;
     private String content;
     private String emoji;
     private int mood;
@@ -27,4 +28,7 @@ public class DiaryDto {
     private boolean shared;
     private boolean anonymous;
     private String nickname; // Author nickname (or "익명" if anonymous)
+
+    private List<CommentDto> comments;
+    private int likeCount;
 }

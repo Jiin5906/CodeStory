@@ -1,6 +1,7 @@
 package com.codestory.diary.controller;
 
 import com.codestory.diary.dto.AuthRequest;
+import com.codestory.diary.dto.CommentDto;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
 import com.codestory.diary.entity.Diary;
@@ -9,6 +10,7 @@ import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.DiaryService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -86,5 +89,65 @@ public class ApiController {
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
+    }
+
+    // 특정 일기 상세 조회 (댓글 및 좋아요 포함)
+    @GetMapping("/diary/{id}")
+    public ResponseEntity<?> getDiaryDetail(@PathVariable Long id) {
+        DiaryDto diary = diaryService.getDiaryDetail(id);
+        return ResponseEntity.ok(diary);
+    }
+
+    // 댓글 작성
+    @PostMapping("/diary/{id}/comment")
+    public ResponseEntity<?> addComment(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request
+    ) {
+        String content = request.get("content");
+        String author = request.get("author");
+
+        if (content == null || content.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("댓글 내용을 입력해주세요.");
+        }
+        if (author == null || author.trim().isEmpty()) {
+            author = "익명";
+        }
+
+        CommentDto comment = diaryService.addComment(id, content, author);
+        return ResponseEntity.ok(comment);
+    }
+
+    // 좋아요 토글
+    @PostMapping("/diary/{id}/like")
+    public ResponseEntity<?> toggleLike(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+        String userIp = getClientIp(request);
+        boolean liked = diaryService.toggleLike(id, userIp);
+        return ResponseEntity.ok(Map.of("liked", liked));
+    }
+
+    // 공유 피드 조회
+    @GetMapping("/feed")
+    public ResponseEntity<?> getFeed() {
+        List<DiaryDto> feed = diaryService.getPublicFeed();
+        return ResponseEntity.ok(feed);
+    }
+
+    // Helper: 클라이언트 IP 추출
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 }
