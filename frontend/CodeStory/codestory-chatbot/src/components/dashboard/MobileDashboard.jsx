@@ -1,7 +1,7 @@
-import React from 'react';
-import { format } from 'date-fns';
+import React, { useState, useMemo, useEffect } from 'react';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isAfter, startOfDay, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { FaChevronRight } from 'react-icons/fa';
+import { FaChevronRight, FaChevronLeft, FaTimes } from 'react-icons/fa';
 import Lottie from 'lottie-react';
 import mongleAnimation from '../../assets/mongleIDLE.json';
 
@@ -17,15 +17,131 @@ const fireStyle = `
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 `;
 
-const MobileDashboard = ({ user, diaries, onWriteClick }) => {
-    // Streak 데이터 (가라 데이터, 추후 실제 props로 연결)
-    const streakDays = 5;
+const MobileDashboard = ({ user, diaries, onWriteClick, onDateSelect }) => {
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const today = startOfDay(new Date());
+
+    // 스트릭(연속 작성일) 계산 로직
+    const streakDays = useMemo(() => {
+        if (!diaries || diaries.length === 0) return 0;
+
+        // 일기 날짜를 Date 객체로 변환하고 정렬
+        const sortedDates = diaries
+            .map(d => startOfDay(parseISO(d.date)))
+            .sort((a, b) => b - a); // 최신순 정렬
+
+        if (sortedDates.length === 0) return 0;
+
+        // 오늘 또는 어제부터 시작하는지 확인
+        const latestDate = sortedDates[0];
+        const daysDiff = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
+
+        // 오늘이나 어제가 아니면 스트릭 끊김
+        if (daysDiff > 1) return 0;
+
+        // 연속 일수 계산
+        let streak = 1;
+        let currentDate = latestDate;
+
+        for (let i = 1; i < sortedDates.length; i++) {
+            const prevDate = sortedDates[i];
+            const diff = Math.floor((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+
+            if (diff === 1) {
+                streak++;
+                currentDate = prevDate;
+            } else if (diff === 0) {
+                // 같은 날 여러 일기 - 스킵
+                continue;
+            } else {
+                // 연속 끊김
+                break;
+            }
+        }
+
+        return streak;
+    }, [diaries, today]);
+
     const maxStreak = 7;
     const fillPercentage = Math.min((streakDays / maxStreak) * 100, 100);
 
     // 요일 배열 (월~일)
     const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
-    const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1; // 0(일) -> 6, 1(월) -> 0
+    const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+
+    // Prevent body scroll when calendar modal is open
+    useEffect(() => {
+        if (isCalendarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isCalendarOpen]);
+
+    // 캘린더 렌더링 로직
+    const renderCalendar = () => {
+        const monthStart = startOfMonth(currentMonth);
+        const monthEnd = endOfMonth(monthStart);
+        const startDate = startOfWeek(monthStart);
+        const endDate = endOfWeek(monthEnd);
+
+        const rows = [];
+        let days = [];
+        let day = startDate;
+
+        while (day <= endDate) {
+            for (let i = 0; i < 7; i++) {
+                const cloneDay = day;
+                const dateStr = format(day, 'yyyy-MM-dd');
+                const hasDiary = diaries.some(d => d.date === dateStr);
+                const isFuture = isAfter(day, today);
+                const isSelected = false; // 선택 기능은 onDateSelect로 처리
+                const isCurrentMonth = isSameMonth(day, monthStart);
+
+                days.push(
+                    <div
+                        key={day.toString()}
+                        onClick={() => {
+                            if (!isFuture && hasDiary) {
+                                onDateSelect(cloneDay);
+                                setIsCalendarOpen(false);
+                            }
+                        }}
+                        className={`
+                            h-12 w-full flex items-center justify-center rounded-lg text-sm font-medium transition-all relative
+                            ${!isCurrentMonth ? "opacity-30" : ""}
+                            ${isFuture ? "opacity-30 cursor-default" : hasDiary ? "cursor-pointer" : "cursor-default"}
+                        `}
+                        style={{
+                            color: isCurrentMonth ? 'var(--text-color)' : 'var(--sub-text-color)',
+                            backgroundColor: 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!isFuture && hasDiary && isCurrentMonth) {
+                                e.currentTarget.style.backgroundColor = 'rgba(124, 113, 245, 0.1)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                    >
+                        {format(day, "d")}
+                        {hasDiary && (
+                            <div className="absolute bottom-1 w-1.5 h-1.5 bg-[#7C71F5] rounded-full"></div>
+                        )}
+                    </div>
+                );
+                day = addDays(day, 1);
+            }
+            rows.push(<div className="grid grid-cols-7 gap-1" key={day.toString()}>{days}</div>);
+            days = [];
+        }
+        return rows;
+    };
 
     return (
         <div
@@ -39,15 +155,16 @@ const MobileDashboard = ({ user, diaries, onWriteClick }) => {
                 {/* 1. Streak Section: 불꽃 기록 위젯 */}
                 <section className="mt-2 mb-6">
                     <div
-                        className="rounded-3xl p-5 shadow-sm relative overflow-hidden"
+                        className="rounded-3xl p-5 shadow-sm relative overflow-hidden cursor-pointer"
                         style={{
                             backgroundColor: 'var(--card-bg, white)',
                             border: '1px solid var(--border-color, #F3F4F6)'
                         }}
+                        onClick={() => setIsCalendarOpen(true)}
                         data-gtm="mobile-streak-widget"
                     >
 
-                        <div className="flex justify-between items-center mb-4 cursor-pointer group">
+                        <div className="flex justify-between items-center mb-4 group">
                             <div className="flex items-center gap-3">
                                 {/* 불꽃 아이콘 Wrapper */}
                                 <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center border border-orange-100 relative">
@@ -63,12 +180,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick }) => {
                                 </div>
 
                                 <div className="flex flex-col">
-                                    <span className="text-xs text-orange-400 font-bold">Great! 잘하고 있어요</span>
+                                    <span className="text-xs text-orange-400 font-bold">
+                                        {streakDays > 0 ? 'Great! 잘하고 있어요' : '오늘부터 시작해보세요!'}
+                                    </span>
                                     <span
                                         className="font-bold text-lg leading-none"
                                         style={{ color: 'var(--text-color, #1F2937)' }}
                                     >
-                                        {streakDays}일 연속 기록 중
+                                        {streakDays > 0 ? `${streakDays}일 연속 기록 중` : '연속 기록 없음'}
                                     </span>
                                 </div>
                             </div>
@@ -187,40 +306,143 @@ const MobileDashboard = ({ user, diaries, onWriteClick }) => {
                     </div>
 
                     <div className="flex gap-3 overflow-x-auto pb-6 snap-x hide-scrollbar px-1">
-                        {/* 더미 데이터 매핑 (실제 diaries 데이터 연동 필요) */}
-                        {[
-                            { date: '1월 18일', mood: 3, emoji: '🙂', color: 'bg-yellow-50' },
-                            { date: '1월 17일', mood: 5, emoji: '🥰', color: 'bg-pink-50' },
-                            { date: '1월 16일', mood: 2, emoji: '💧', color: 'bg-blue-50' },
-                        ].map((item, idx) => (
+                        {/* 실제 diaries 데이터 매핑 */}
+                        {diaries && diaries.length > 0 ? (
+                            diaries.slice(0, 5).map((diary, idx) => (
+                                <div
+                                    key={idx}
+                                    className="min-w-[120px] p-4 rounded-2xl shadow-sm snap-center flex flex-col items-center"
+                                    style={{
+                                        backgroundColor: 'var(--card-bg, white)',
+                                        border: '1px solid var(--border-color, #F9FAFB)'
+                                    }}
+                                    data-gtm="mobile-memory-card"
+                                >
+                                    <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-xl mb-3">
+                                        {diary.emoji || '📝'}
+                                    </div>
+                                    <span
+                                        className="font-bold text-sm"
+                                        style={{ color: 'var(--text-color, #1F2937)' }}
+                                    >
+                                        {format(parseISO(diary.date), 'M월 d일')}
+                                    </span>
+                                    <span
+                                        className="text-xs mt-1"
+                                        style={{ color: 'var(--sub-text-color, #9CA3AF)' }}
+                                    >
+                                        기분 {diary.mood || 3}점
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
                             <div
-                                key={idx}
-                                className="min-w-[120px] p-4 rounded-2xl shadow-sm snap-center flex flex-col items-center"
-                                style={{
-                                    backgroundColor: 'var(--card-bg, white)',
-                                    border: '1px solid var(--border-color, #F9FAFB)'
-                                }}
-                                data-gtm="mobile-memory-card"
+                                className="w-full text-center py-8"
+                                style={{ color: 'var(--sub-text-color, #9CA3AF)' }}
                             >
-                                <div className={`w-10 h-10 ${item.color} rounded-full flex items-center justify-center text-xl mb-3`}>{item.emoji}</div>
-                                <span
-                                    className="font-bold text-sm"
-                                    style={{ color: 'var(--text-color, #1F2937)' }}
-                                >
-                                    {item.date}
-                                </span>
-                                <span
-                                    className="text-xs mt-1"
-                                    style={{ color: 'var(--sub-text-color, #9CA3AF)' }}
-                                >
-                                    기분 {item.mood}점
-                                </span>
+                                아직 기록된 일기가 없어요
                             </div>
-                        ))}
+                        )}
                     </div>
                 </section>
 
             </main>
+
+            {/* 미니 캘린더 모달 */}
+            {isCalendarOpen && (
+                <>
+                    {/* 오버레이 */}
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 z-[60] transition-opacity"
+                        onClick={() => setIsCalendarOpen(false)}
+                        data-gtm="calendar-modal-overlay"
+                    ></div>
+
+                    {/* 모달 */}
+                    <div
+                        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[70] w-[90%] max-w-md rounded-3xl p-6 shadow-2xl"
+                        style={{ backgroundColor: 'var(--card-bg, white)' }}
+                        data-gtm="calendar-modal"
+                    >
+                        {/* 헤더 */}
+                        <div className="flex justify-between items-center mb-6">
+                            <h3
+                                className="text-xl font-bold"
+                                style={{ color: 'var(--text-color, #1F2937)' }}
+                            >
+                                {format(currentMonth, 'yyyy년 M월')}
+                            </h3>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                                    className="p-2 rounded-full transition-colors"
+                                    style={{ color: 'var(--sub-text-color)' }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                    }}
+                                >
+                                    <FaChevronLeft size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                                    className="p-2 rounded-full transition-colors"
+                                    style={{ color: 'var(--sub-text-color)' }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                    }}
+                                >
+                                    <FaChevronRight size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setIsCalendarOpen(false)}
+                                    className="p-2 rounded-full transition-colors"
+                                    style={{ color: 'var(--text-color)' }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                    }}
+                                >
+                                    <FaTimes size={20} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 요일 헤더 */}
+                        <div
+                            className="grid grid-cols-7 gap-1 mb-2 text-xs font-bold text-center"
+                            style={{ color: 'var(--sub-text-color)' }}
+                        >
+                            <span className="text-red-400">일</span>
+                            <span>월</span>
+                            <span>화</span>
+                            <span>수</span>
+                            <span>목</span>
+                            <span>금</span>
+                            <span>토</span>
+                        </div>
+
+                        {/* 캘린더 */}
+                        <div>{renderCalendar()}</div>
+
+                        {/* 안내 문구 */}
+                        <div
+                            className="mt-6 text-center text-sm"
+                            style={{ color: 'var(--sub-text-color, #9CA3AF)' }}
+                        >
+                            <span className="inline-block w-2 h-2 bg-[#7C71F5] rounded-full mr-2"></span>
+                            일기가 있는 날을 선택하세요
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 };
