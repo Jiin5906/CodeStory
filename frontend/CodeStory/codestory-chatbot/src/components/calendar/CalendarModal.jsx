@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom'; // ★ Portal을 위해 추가됨
+import ReactDOM from 'react-dom';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from 'date-fns';
 import { FaChevronLeft, FaChevronRight, FaTimes, FaFire, FaTint } from 'react-icons/fa';
 
 const CalendarModal = ({ isOpen, onClose, selectedDate, onDateSelect, diaries = [], streakDays = 0, dewdropCount = 0 }) => {
-    // 내부 상태
+    // 내부 상태 관리
     const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
     const today = new Date();
 
-    // 모달이 열릴 때 스크롤 막기 (배경 스크롤 방지)
+    // 모달이 열릴 때 배경 스크롤 방지
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -18,20 +18,27 @@ const CalendarModal = ({ isOpen, onClose, selectedDate, onDateSelect, diaries = 
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // 모달이 닫혀있으면 렌더링 하지 않음
     if (!isOpen) return null;
 
     // --- 렌더링 헬퍼 함수들 ---
+
     const renderHeader = () => (
-        <div className="flex justify-between items-center mb-4 px-2">
-            <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 text-gray-400 hover:text-[#7C71F5]">
+        // [수정 포인트] mt-6를 추가하여 상단 닫기 버튼과의 간격을 확실히 확보했습니다.
+        <div className="flex justify-between items-center mb-4 px-2 mt-6">
+            <button
+                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                className="p-2 text-gray-400 hover:text-[#7C71F5] transition-colors"
+            >
                 <FaChevronLeft />
             </button>
             <div className="flex flex-col items-center">
                 <span className="text-xs text-gray-400 font-medium mb-1">{format(currentMonth, 'yyyy')}</span>
                 <span className="text-2xl font-bold text-gray-800">{format(currentMonth, 'M')}</span>
             </div>
-            <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 text-gray-400 hover:text-[#7C71F5]">
+            <button
+                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                className="p-2 text-gray-400 hover:text-[#7C71F5] transition-colors"
+            >
                 <FaChevronRight />
             </button>
         </div>
@@ -93,15 +100,17 @@ const CalendarModal = ({ isOpen, onClose, selectedDate, onDateSelect, diaries = 
                     <div
                         key={day.toString()}
                         className={`relative h-10 w-full flex items-center justify-center text-sm cursor-pointer rounded-lg transition-all
-                            ${!isCurrentMonth ? 'text-gray-200' : 'text-gray-700'}
+                            ${!isCurrentMonth ? 'text-gray-200 pointer-events-none' : 'text-gray-700'}
                             ${isSelected ? 'bg-[#7C71F5]/10 text-[#7C71F5] font-bold border border-[#7C71F5]' : ''}
                         `}
                         onClick={() => { if (isCurrentMonth) onDateSelect(cloneDay); }}
                     >
                         <span>{formattedDate}</span>
+                        {/* 오늘 날짜 표시 */}
                         {isToday && !isSelected && (
-                             <span className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-[#7C71F5] rounded-full"></span>
+                            <span className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-[#7C71F5] rounded-full"></span>
                         )}
+                        {/* 일기 작성된 날 표시 */}
                         {hasDiary && isCurrentMonth && (
                             <div className="absolute bottom-1 text-[6px] text-blue-400">●</div>
                         )}
@@ -115,24 +124,22 @@ const CalendarModal = ({ isOpen, onClose, selectedDate, onDateSelect, diaries = 
         return <div className="mb-2">{rows}</div>;
     };
 
-    // ★ 핵심 수정: ReactDOM.createPortal 사용
-    // 모달을 'root' div가 아닌 'document.body'에 직접 렌더링하여 부모 스타일(transform 등)의 영향을 받지 않게 함
+    // React Portal을 사용하여 body에 직접 렌더링 (화면 중앙 정렬 보장)
     return ReactDOM.createPortal(
-        <div 
+        <div
             className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 w-screen h-[100dvh]"
-            onClick={onClose} // 배경 클릭 시 닫기
+            onClick={onClose}
         >
-            {/* 모달 컨텐츠 */}
-            <div 
+            <div
                 className="bg-white w-full max-w-[340px] rounded-[2rem] p-5 shadow-2xl relative animate-scale-up overflow-hidden"
-                onClick={(e) => e.stopPropagation()} // 내부 클릭 시 닫힘 방지
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* 닫기 버튼 */}
-                <button 
+                {/* [수정 포인트] 닫기 버튼 위치를 더 우상단으로 이동 (top-4 right-4) */}
+                <button
                     onClick={onClose}
-                    className="absolute top-5 right-5 text-gray-300 hover:text-gray-600 transition-colors z-10"
+                    className="absolute top-4 right-4 text-gray-300 hover:text-gray-600 transition-colors z-20 p-2"
                 >
-                    <FaTimes size={18} />
+                    <FaTimes size={20} />
                 </button>
 
                 {renderHeader()}
@@ -144,7 +151,7 @@ const CalendarModal = ({ isOpen, onClose, selectedDate, onDateSelect, diaries = 
                 </div>
             </div>
         </div>,
-        document.body // Portal의 목적지
+        document.body
     );
 };
 
