@@ -9,6 +9,7 @@ import Sidebar from './components/layout/Sidebar';
 import BottomNav from './components/layout/BottomNav';
 import MobileHeader from './components/layout/MobileHeader';
 import MainDashboard from './components/dashboard/MainDashboard';
+import MobileDashboard from './components/dashboard/MobileDashboard';
 import RightPanel from './components/layout/RightPanel';
 import DiaryEditor from './components/diary/DiaryEditor';
 import DiaryDetail from './components/diary/DiaryDetail';
@@ -32,6 +33,16 @@ function AppContent() {
     const [diaries, setDiaries] = useState([]);
     const [diaryDraft, setDiaryDraft] = useState({ content: '', tags: [], imageFile: null, isPublic: false });
     const [showEmotionModal, setShowEmotionModal] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    // 화면 크기 변경 감지
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // CSS 변수를 document.documentElement에 설정하여 전역에서 사용 가능하게 함
     useEffect(() => {
@@ -156,7 +167,11 @@ function AppContent() {
 
                             <main className="content-area" style={{flex:1, overflow:'hidden'}} data-gtm="page-content-main">
                                 <Routes>
-                                    <Route path="dashboard" element={<MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />} />
+                                    <Route path="dashboard" element={
+                                        isMobile
+                                            ? <MobileDashboard user={user} diaries={diaries} onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} />
+                                            : <MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />
+                                    } />
                                     <Route path="calendar" element={<CalendarView user={user} diaries={diaries} />} />
                                     <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
                                     <Route path="shared" element={<SharedFeed />} />

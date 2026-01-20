@@ -1,46 +1,34 @@
 import React, { useState } from 'react';
-import { 
-    format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
-    addDays, isSameMonth, isSameDay, addMonths, subMonths,
-    isAfter, startOfDay
-} from 'date-fns';
-import { ko } from 'date-fns/locale'; 
-import { FaChevronLeft, FaChevronRight, FaUser } from 'react-icons/fa6';
-import './RightPanel.css';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isAfter, startOfDay } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { FaChevronLeft, FaChevronRight, FaUserCircle } from 'react-icons/fa';
 
 const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLogin }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const today = startOfDay(new Date()); 
+    const today = startOfDay(new Date());
 
+    // 주간 데이터 계산 로직
     const getWeeklyStats = () => {
         const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
-        const weekData = Array.from({ length: 7 }, (_, i) => {
+        return Array.from({ length: 7 }, (_, i) => {
             const day = addDays(weekStart, i);
             const dateStr = format(day, 'yyyy-MM-dd');
             const diary = diaries.find(d => d.date === dateStr);
-            
             let moodScore = diary ? diary.mood : 0;
-            if (diary && (!moodScore || moodScore === 0)) {
-                const emoji = diary.emoji || '';
-                if (emoji.match(/🥰|😊|행복|🔥|열정/)) moodScore = 5;
-                else if (emoji.match(/🙂|보통/)) moodScore = 3;
-                else if (emoji.match(/😢|😭|우울|😫|피곤/)) moodScore = 1;
-                else moodScore = 3;
-            }
+            if (diary && (!moodScore || moodScore === 0)) moodScore = 3; // 기본값 처리
 
             return {
-                dayName: format(day, 'EEEEE', { locale: ko }), 
-                dateStr: dateStr, // ✅ GTM 추적을 위해 날짜 정보 추가
-                mood: moodScore, 
-                isToday: isSameDay(day, selectedDate), 
+                dayName: format(day, 'EEEEE', { locale: ko }),
+                dateStr,
+                mood: moodScore,
+                isToday: isSameDay(day, selectedDate),
                 hasData: !!diary
             };
         });
-        return weekData;
     };
-
     const weeklyData = getWeeklyStats();
 
+    // 캘린더 렌더링 로직
     const renderCalendar = () => {
         const monthStart = startOfMonth(currentMonth);
         const monthEnd = endOfMonth(monthStart);
@@ -53,144 +41,215 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
 
         while (day <= endDate) {
             for (let i = 0; i < 7; i++) {
-                const formattedDate = format(day, "d");
                 const cloneDay = day;
                 const dateStr = format(day, 'yyyy-MM-dd');
                 const hasDiary = diaries.some(d => d.date === dateStr);
                 const isFuture = isAfter(day, today);
+                const isSelected = isSameDay(day, selectedDate);
+                const isCurrentMonth = isSameMonth(day, monthStart);
 
                 days.push(
                     <div
-                        className={`cal-cell 
-                            ${!isSameMonth(day, monthStart) ? "faded" : ""}
-                            ${isSameDay(day, selectedDate) ? "selected" : ""}
-                            ${hasDiary ? "has-diary" : ""}
-                            ${isFuture ? "disabled-date" : ""} 
-                        `}
                         key={day.toString()}
                         onClick={() => !isFuture && onDateSelect(cloneDay)}
-                        style={isFuture ? { opacity: 0.3, cursor: 'default' } : {}}
-                        /* ✅ 미니 달력 날짜 클릭 추적: 고유 날짜 포함 */
+                        className={`
+                            h-9 w-9 flex items-center justify-center rounded-full text-sm font-medium transition-all cursor-pointer relative
+                            ${!isCurrentMonth ? "opacity-30" : ""}
+                            ${isSelected ? "bg-[#7C71F5] text-white shadow-md shadow-purple-200 scale-110 z-10" : ""}
+                            ${isFuture ? "opacity-30 cursor-default" : ""}
+                        `}
+                        style={{
+                            color: isSelected ? 'white' : 'var(--text-color)',
+                            backgroundColor: isSelected ? '#7C71F5' : 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!isSelected && !isFuture) {
+                                e.currentTarget.style.backgroundColor = 'var(--bg-color, rgba(0,0,0,0.05))';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!isSelected) {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                            }
+                        }}
                         data-gtm={`mini-cal-date-${dateStr}`}
                     >
-                        <span className="pointer-events-none">{formattedDate}</span>
+                        {format(day, "d")}
+                        {/* 일기 있는 날 표시 (선택 안됐을 때만) */}
+                        {hasDiary && !isSelected && (
+                            <div className="absolute bottom-1 w-1 h-1 bg-[#7C71F5] rounded-full"></div>
+                        )}
                     </div>
                 );
                 day = addDays(day, 1);
             }
-            rows.push(<div className="cal-grid" key={day.toString()}>{days}</div>);
+            rows.push(<div className="flex justify-between mb-2" key={day.toString()}>{days}</div>);
             days = [];
         }
         return rows;
     };
 
     return (
-        <aside className="right-panel" data-gtm="view-right-panel">
-            {/* 프로필 위젯 */}
-            <div className="widget-box profile-widget" data-gtm="widget-profile">
-                <div className="profile-img">
-                    <FaUser />
+        <aside
+            className="hidden md:flex w-[340px] h-screen sticky top-0 p-8 flex-col gap-8 overflow-y-auto"
+            style={{
+                backgroundColor: 'var(--card-bg)',
+                borderLeft: '1px solid var(--border-color)'
+            }}
+            data-gtm="view-right-panel"
+        >
+
+            {/* 1. 프로필 & 연속 기록 카드 */}
+            <div
+                className="rounded-[2rem] p-6 text-center"
+                style={{ backgroundColor: 'rgba(124, 113, 245, 0.05)' }}
+                data-gtm="widget-profile"
+            >
+                <div className="relative inline-block mb-3">
+                    <div
+                        className="w-20 h-20 rounded-full flex items-center justify-center shadow-sm text-4xl overflow-hidden mx-auto"
+                        style={{
+                            backgroundColor: 'var(--card-bg)',
+                            color: 'var(--sub-text-color)'
+                        }}
+                    >
+                        <FaUserCircle />
+                    </div>
+                    {/* 로그인 상태일 때만 불꽃 아이콘 표시 */}
+                    {user && user.id !== 0 && (
+                        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md border border-orange-100">
+                            <span className="text-lg">🔥</span>
+                        </div>
+                    )}
                 </div>
+
+                <h3
+                    className="text-xl font-bold mb-1"
+                    style={{ color: 'var(--text-color)' }}
+                >
+                    {user?.nickname || '게스트'}
+                </h3>
+                <p
+                    className="text-xs mb-4"
+                    style={{ color: 'var(--sub-text-color)' }}
+                >
+                    {user?.id !== 0 ? '오늘도 힘차게 기록해봐요!' : '로그인하고 기록을 시작하세요'}
+                </p>
+
                 {user && user.id !== 0 ? (
-                    <>
-                        <h3>{user.nickname}</h3>
-                        <p style={{ fontSize: '13px', color: '#888', marginTop: '5px' }}>오늘도 기록해볼까요?</p>
-                        <button className="logout-btn" onClick={onLogout} data-gtm="btn-profile-logout">로그아웃</button>
-                    </>
+                    <button
+                        onClick={onLogout}
+                        className="text-xs underline decoration-1 underline-offset-2 transition-colors"
+                        style={{ color: 'var(--sub-text-color)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#FA5252'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--sub-text-color)'; }}
+                        data-gtm="btn-profile-logout"
+                    >
+                        로그아웃
+                    </button>
                 ) : (
-                    <>
-                        <h3>게스트</h3>
-                        <p style={{ fontSize: '13px', color: '#888', marginTop: '5px' }}>로그인이 필요해요</p>
-                        <button 
-                            className="logout-btn" 
-                            onClick={onLogin}
-                            style={{ color: '#6C5CE7', borderColor: '#6C5CE7', fontWeight: 'bold' }}
-                            data-gtm="btn-profile-login"
-                        >
-                            로그인 하기
-                        </button>
-                    </>
+                    <button
+                        onClick={onLogin}
+                        className="w-full bg-[#7C71F5] text-white py-2 rounded-xl text-sm font-bold shadow-md shadow-purple-200"
+                        data-gtm="btn-profile-login"
+                    >
+                        로그인 하기
+                    </button>
                 )}
             </div>
 
-            {/* 미니 달력 */}
-            <div className="widget-box" data-gtm="widget-mini-calendar">
-                <div className="widget-title">
-                    <span>{format(currentMonth, 'yyyy. MM')}</span>
-                    <div style={{display:'flex', gap:'10px'}}>
-                        <FaChevronLeft 
-                            style={{cursor:'pointer', color:'#888'}} 
-                            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} 
+            {/* 2. 미니 캘린더 위젯 */}
+            <div data-gtm="widget-mini-calendar">
+                <div className="flex justify-between items-center mb-6 px-2">
+                    <h4
+                        className="text-lg font-bold"
+                        style={{ color: 'var(--text-color)' }}
+                    >
+                        {format(currentMonth, 'yyyy년 M월')}
+                    </h4>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                            className="p-1.5 rounded-full transition-colors"
+                            style={{ color: 'var(--sub-text-color)' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-color, rgba(0,0,0,0.05))'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             data-gtm="btn-mini-cal-prev-month"
-                        />
-                        <FaChevronRight 
-                            style={{cursor:'pointer', color:'#888'}} 
-                            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} 
+                        >
+                            <FaChevronLeft size={12} />
+                        </button>
+                        <button
+                            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                            className="p-1.5 rounded-full transition-colors"
+                            style={{ color: 'var(--sub-text-color)' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-color, rgba(0,0,0,0.05))'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             data-gtm="btn-mini-cal-next-month"
-                        />
+                        >
+                            <FaChevronRight size={12} />
+                        </button>
                     </div>
                 </div>
-                <div className="mini-calendar">
-                    <div className="cal-header">
-                        <span style={{color:'#ff6b6b'}}>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
-                    </div>
-                    {renderCalendar()}
+                <div
+                    className="mb-4 flex justify-between px-2 text-xs font-bold"
+                    style={{ color: 'var(--sub-text-color)' }}
+                >
+                    <span className="w-9 text-center text-red-400">일</span>
+                    <span className="w-9 text-center">월</span>
+                    <span className="w-9 text-center">화</span>
+                    <span className="w-9 text-center">수</span>
+                    <span className="w-9 text-center">목</span>
+                    <span className="w-9 text-center">금</span>
+                    <span className="w-9 text-center">토</span>
                 </div>
+                <div>{renderCalendar()}</div>
             </div>
 
-            {/* 주간 감정 흐름 그래프 */}
-            <div className="widget-box" data-gtm="widget-weekly-chart">
-                <div className="widget-title">
-                    <span>주간 감정 흐름</span>
-                    <span style={{fontSize:'11px', color:'#ccc'}}>Mood</span>
-                </div>
-                
-                <div className="stats-chart" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '120px', paddingTop: '15px' }}>
+            {/* 3. 주간 감정 흐름 위젯 */}
+            <div data-gtm="widget-weekly-chart">
+                <h4
+                    className="text-lg font-bold mb-6 px-2"
+                    style={{ color: 'var(--text-color)' }}
+                >
+                    주간 감정 흐름
+                </h4>
+                <div className="flex justify-between items-end h-32 px-2">
                     {weeklyData.map((data, idx) => {
-                        let heightPercent = data.mood > 0 ? (data.mood / 5) * 80 : 5;
-                        const barColor = data.hasData ? '#6C5CE7' : '#F1F3F5';
-                        const opacity = data.isToday ? 1 : 0.5;
-
+                        const heightPercent = data.mood > 0 ? (data.mood / 5) * 100 : 10;
                         return (
-                            <div key={idx} className="bar-wrap" style={{ 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                alignItems: 'center', 
-                                justifyContent: 'flex-end', 
-                                width: '14%', 
-                                height: '100%' 
-                            }}>
-                                <div 
-                                    className="bar" 
-                                    onClick={() => data.hasData && onDateSelect(new Date(data.dateStr))}
-                                    style={{
-                                        width: '8px',
-                                        height: `${heightPercent}%`, 
-                                        backgroundColor: barColor,
-                                        borderRadius: '10px',
-                                        opacity: opacity,
-                                        transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                        marginBottom: '8px',
-                                        boxShadow: data.isToday ? '0 2px 8px rgba(108, 92, 231, 0.3)' : 'none',
-                                        cursor: data.hasData ? 'pointer' : 'default'
+                            <div
+                                key={idx}
+                                className="flex flex-col items-center gap-2 group cursor-pointer w-8"
+                                onClick={() => data.hasData && onDateSelect(new Date(data.dateStr))}
+                                data-gtm={`chart-bar-${data.dayName}`}
+                            >
+                                <div
+                                    className="w-full relative h-24 flex items-end justify-center rounded-t-lg overflow-hidden transition-colors"
+                                    style={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(124, 113, 245, 0.1)';
                                     }}
-                                    /* ✅ 주간 그래프 막대 클릭 추적: 요일별 고유 ID */
-                                    data-gtm={`chart-bar-${data.dayName}`}
-                                    title={`${data.mood}점`} 
-                                ></div>
-                                
-                                <div className="bar-label" style={{ 
-                                    fontSize: '11px', 
-                                    color: data.isToday ? '#6C5CE7' : '#ADB5BD', 
-                                    fontWeight: data.isToday ? '800' : '400' 
-                                }}>
-                                    {data.dayName}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                                    }}
+                                >
+                                    <div
+                                        className={`w-3 rounded-t-full transition-all duration-500 ${data.isToday ? 'bg-[#7C71F5]' : data.hasData ? 'bg-purple-300' : 'bg-gray-200'}`}
+                                        style={{ height: `${heightPercent}%` }}
+                                    ></div>
                                 </div>
+                                <span
+                                    className={`text-xs font-medium ${data.isToday ? 'font-bold' : ''}`}
+                                    style={{ color: data.isToday ? '#7C71F5' : 'var(--sub-text-color)' }}
+                                >
+                                    {data.dayName}
+                                </span>
                             </div>
                         );
                     })}
                 </div>
             </div>
+
         </aside>
     );
 };
