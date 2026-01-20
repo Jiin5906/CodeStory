@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaBars, FaTimes, FaSun, FaMoon, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaBars, FaTimes, FaSun, FaMoon, FaSignOutAlt, FaUserCircle, FaCog, FaBell, FaBullhorn, FaEnvelope, FaChevronRight } from 'react-icons/fa';
 import { useTheme } from '../../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 const MobileHeader = ({ user, onLogout, notificationCount = 1 }) => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const { currentTheme, changeTheme, themes } = useTheme();
+    const navigate = useNavigate();
 
     // Prevent body scroll when drawer is open
     useEffect(() => {
@@ -152,6 +154,117 @@ const MobileHeader = ({ user, onLogout, notificationCount = 1 }) => {
                             >
                                 {user?.email || '로그인되지 않음'}
                             </p>
+                        </div>
+                    </div>
+
+                    {/* 설정 메뉴 리스트 */}
+                    <div className="px-6 py-4">
+                        <div
+                            className="rounded-2xl overflow-hidden"
+                            style={{
+                                backgroundColor: 'var(--bg-color, #F5F7FA)',
+                                border: '1px solid var(--border-color, #F3F4F6)'
+                            }}
+                        >
+                            {/* 계정 설정 */}
+                            <button
+                                onClick={() => {
+                                    setIsDrawerOpen(false);
+                                    navigate('/settings');
+                                }}
+                                className="w-full flex items-center justify-between p-4 transition-colors border-b"
+                                style={{
+                                    borderColor: 'var(--border-color, #F3F4F6)',
+                                    color: 'var(--text-color, #1F2937)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                                data-gtm="mobile-drawer-account-settings"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <FaCog className="text-[#7C71F5]" />
+                                    <span className="font-medium">계정 설정</span>
+                                </div>
+                                <FaChevronRight className="text-gray-300" size={14} />
+                            </button>
+
+                            {/* 알림 설정 */}
+                            <button
+                                onClick={() => {
+                                    alert('알림 설정 기능은 추후 제공될 예정입니다.');
+                                }}
+                                className="w-full flex items-center justify-between p-4 transition-colors border-b"
+                                style={{
+                                    borderColor: 'var(--border-color, #F3F4F6)',
+                                    color: 'var(--text-color, #1F2937)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                                data-gtm="mobile-drawer-notification-settings"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <FaBell className="text-yellow-500" />
+                                    <span className="font-medium">알림 설정</span>
+                                </div>
+                                <FaChevronRight className="text-gray-300" size={14} />
+                            </button>
+
+                            {/* 공지사항 */}
+                            <button
+                                onClick={() => {
+                                    alert('공지사항 기능은 추후 제공될 예정입니다.');
+                                }}
+                                className="w-full flex items-center justify-between p-4 transition-colors border-b"
+                                style={{
+                                    borderColor: 'var(--border-color, #F3F4F6)',
+                                    color: 'var(--text-color, #1F2937)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                                data-gtm="mobile-drawer-notice"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <FaBullhorn className="text-orange-500" />
+                                    <span className="font-medium">공지사항</span>
+                                </div>
+                                <FaChevronRight className="text-gray-300" size={14} />
+                            </button>
+
+                            {/* 문의하기 */}
+                            <button
+                                onClick={() => {
+                                    alert('문의하기 기능은 추후 제공될 예정입니다.');
+                                }}
+                                className="w-full flex items-center justify-between p-4 transition-colors"
+                                style={{
+                                    color: 'var(--text-color, #1F2937)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                                data-gtm="mobile-drawer-contact"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <FaEnvelope className="text-blue-500" />
+                                    <span className="font-medium">문의하기</span>
+                                </div>
+                                <FaChevronRight className="text-gray-300" size={14} />
+                            </button>
                         </div>
                     </div>
 

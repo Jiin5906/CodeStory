@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isAfter, startOfDay, parseISO } from 'date-fns';
+import { format, startOfDay, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { FaChevronRight, FaChevronLeft, FaTimes } from 'react-icons/fa';
+import { FaChevronRight } from 'react-icons/fa';
 import Lottie from 'lottie-react';
 import mongleAnimation from '../../assets/mongleIDLE.json';
+import CalendarModal from '../calendar/CalendarModal';
 
 // 불꽃 애니메이션 스타일 정의 (CSS-in-JS)
 const fireStyle = `
@@ -19,7 +20,7 @@ const fireStyle = `
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onDateSelect }) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(new Date());
     const today = startOfDay(new Date());
 
     // 스트릭(연속 작성일) 계산 로직
@@ -70,77 +71,16 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onDateSelect }) => {
     const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
     const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
-    // Prevent body scroll when calendar modal is open
-    useEffect(() => {
-        if (isCalendarOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
+    // 이슬비 개수 계산 (추후 실제 로직으로 변경 가능)
+    const dewdropCount = diaries ? diaries.length : 0;
+
+    // 날짜 선택 핸들러
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
+        if (onDateSelect) {
+            onDateSelect(date);
         }
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isCalendarOpen]);
-
-    // 캘린더 렌더링 로직
-    const renderCalendar = () => {
-        const monthStart = startOfMonth(currentMonth);
-        const monthEnd = endOfMonth(monthStart);
-        const startDate = startOfWeek(monthStart);
-        const endDate = endOfWeek(monthEnd);
-
-        const rows = [];
-        let days = [];
-        let day = startDate;
-
-        while (day <= endDate) {
-            for (let i = 0; i < 7; i++) {
-                const cloneDay = day;
-                const dateStr = format(day, 'yyyy-MM-dd');
-                const hasDiary = diaries.some(d => d.date === dateStr);
-                const isFuture = isAfter(day, today);
-                const isSelected = false; // 선택 기능은 onDateSelect로 처리
-                const isCurrentMonth = isSameMonth(day, monthStart);
-
-                days.push(
-                    <div
-                        key={day.toString()}
-                        onClick={() => {
-                            if (!isFuture && hasDiary) {
-                                onDateSelect(cloneDay);
-                                setIsCalendarOpen(false);
-                            }
-                        }}
-                        className={`
-                            h-12 w-full flex items-center justify-center rounded-lg text-sm font-medium transition-all relative
-                            ${!isCurrentMonth ? "opacity-30" : ""}
-                            ${isFuture ? "opacity-30 cursor-default" : hasDiary ? "cursor-pointer" : "cursor-default"}
-                        `}
-                        style={{
-                            color: isCurrentMonth ? 'var(--text-color)' : 'var(--sub-text-color)',
-                            backgroundColor: 'transparent'
-                        }}
-                        onMouseEnter={(e) => {
-                            if (!isFuture && hasDiary && isCurrentMonth) {
-                                e.currentTarget.style.backgroundColor = 'rgba(124, 113, 245, 0.1)';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                    >
-                        {format(day, "d")}
-                        {hasDiary && (
-                            <div className="absolute bottom-1 w-1.5 h-1.5 bg-[#7C71F5] rounded-full"></div>
-                        )}
-                    </div>
-                );
-                day = addDays(day, 1);
-            }
-            rows.push(<div className="grid grid-cols-7 gap-1" key={day.toString()}>{days}</div>);
-            days = [];
-        }
-        return rows;
+        setIsCalendarOpen(false);
     };
 
     return (
@@ -348,101 +288,16 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onDateSelect }) => {
 
             </main>
 
-            {/* 미니 캘린더 모달 */}
-            {isCalendarOpen && (
-                <>
-                    {/* 오버레이 */}
-                    <div
-                        className="fixed inset-0 bg-black bg-opacity-50 z-[60] transition-opacity"
-                        onClick={() => setIsCalendarOpen(false)}
-                        data-gtm="calendar-modal-overlay"
-                    ></div>
-
-                    {/* 모달 */}
-                    <div
-                        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[70] w-[90%] max-w-md rounded-3xl p-6 shadow-2xl"
-                        style={{ backgroundColor: 'var(--card-bg, white)' }}
-                        data-gtm="calendar-modal"
-                    >
-                        {/* 헤더 */}
-                        <div className="flex justify-between items-center mb-6">
-                            <h3
-                                className="text-xl font-bold"
-                                style={{ color: 'var(--text-color, #1F2937)' }}
-                            >
-                                {format(currentMonth, 'yyyy년 M월')}
-                            </h3>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                                    className="p-2 rounded-full transition-colors"
-                                    style={{ color: 'var(--sub-text-color)' }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                    }}
-                                >
-                                    <FaChevronLeft size={16} />
-                                </button>
-                                <button
-                                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                                    className="p-2 rounded-full transition-colors"
-                                    style={{ color: 'var(--sub-text-color)' }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                    }}
-                                >
-                                    <FaChevronRight size={16} />
-                                </button>
-                                <button
-                                    onClick={() => setIsCalendarOpen(false)}
-                                    className="p-2 rounded-full transition-colors"
-                                    style={{ color: 'var(--text-color)' }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                    }}
-                                >
-                                    <FaTimes size={20} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 요일 헤더 */}
-                        <div
-                            className="grid grid-cols-7 gap-1 mb-2 text-xs font-bold text-center"
-                            style={{ color: 'var(--sub-text-color)' }}
-                        >
-                            <span className="text-red-400">일</span>
-                            <span>월</span>
-                            <span>화</span>
-                            <span>수</span>
-                            <span>목</span>
-                            <span>금</span>
-                            <span>토</span>
-                        </div>
-
-                        {/* 캘린더 */}
-                        <div>{renderCalendar()}</div>
-
-                        {/* 안내 문구 */}
-                        <div
-                            className="mt-6 text-center text-sm"
-                            style={{ color: 'var(--sub-text-color, #9CA3AF)' }}
-                        >
-                            <span className="inline-block w-2 h-2 bg-[#7C71F5] rounded-full mr-2"></span>
-                            일기가 있는 날을 선택하세요
-                        </div>
-                    </div>
-                </>
-            )}
+            {/* 캘린더 모달 */}
+            <CalendarModal
+                isOpen={isCalendarOpen}
+                onClose={() => setIsCalendarOpen(false)}
+                selectedDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                diaries={diaries}
+                streakDays={streakDays}
+                dewdropCount={dewdropCount}
+            />
         </div>
     );
 };
