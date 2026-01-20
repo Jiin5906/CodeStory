@@ -1,37 +1,78 @@
-import React from 'react';
-import { FaBars } from 'react-icons/fa';
+import React, { useState } from 'react';
+import MainRoom from './MainRoom';
+import BottomSheet from './BottomSheet';
 
-const MobileHeader = ({ user, onMenuClick, notificationCount = 1 }) => {
+const MobileDashboard = () => {
+    // 1. 상태 관리
+    const [latestLog, setLatestLog] = useState(''); // 방금 쓴 글 (MainRoom 부유 효과용)
+    const [aiResponse, setAiResponse] = useState(''); // 현재 AI의 한마디 (MainRoom 구름용)
+    const [isAiThinking, setIsAiThinking] = useState(false); // 로딩 상태
+    
+    // 2. 일기 데이터 (초기값은 더미, 나중에 API로 교체)
+    const [diaries, setDiaries] = useState([
+        { date: '2026-01-19', emoji: '☁️', content: '비도 오고 그냥 아무것도 하기 싫다.', aiComment: '그래, 가끔은 정적이 최고의 휴식이지.' },
+        { date: '2026-01-18', emoji: '🔥', content: '진짜 너무 화가 나는데 어디 말할 곳도 없고...', aiComment: '그런 날은 매운 거 먹고 확 풀어버리자!' },
+    ]);
+
+    // 3. 일기 작성 핸들러 (핵심 로직)
+    const handleWrite = async (text) => {
+        // (1) UI 즉시 반영: 글자가 둥둥 떠오름
+        setLatestLog(text);
+        setIsAiThinking(true);
+        setAiResponse(''); 
+
+        try {
+            // (2) TODO: 여기에 실제 AI API 호출 코드 작성
+            // const response = await api.post('/diary', { content: text });
+            // const aiResult = response.data.reply;
+            
+            // [API 시뮬레이션] 2초 뒤에 AI가 응답한다고 가정
+            setTimeout(() => {
+                const mockAiReply = "무슨 마음인지 알 것 같아. 내가 곁에 있어줄게.";
+                
+                // (3) 상태 업데이트
+                setAiResponse(mockAiReply); // 몽글이가 말함
+                setIsAiThinking(false);
+
+                // (4) 일기장에 저장
+                const newDiary = {
+                    date: new Date().toISOString(),
+                    emoji: '✨', // 감정 분석 결과에 따라 변경 가능
+                    content: text,
+                    aiComment: mockAiReply
+                };
+                setDiaries([newDiary, ...diaries]); // 최신 글이 위로 오게 추가
+
+            }, 2000);
+
+        } catch (error) {
+            console.error("AI 응답 실패:", error);
+            setIsAiThinking(false);
+            setAiResponse("잠시 연결이 불안정한가 봐요. 다시 이야기해줄래요?");
+        }
+    };
+
     return (
-        <header 
-            className="sticky top-0 z-50 flex justify-between items-center px-5 py-4 bg-[#F5F7FA]/90 backdrop-blur-sm transition-all duration-300"
-            data-gtm="view-mobile-header"
-        >
-            {/* 좌측: 햄버거 메뉴 (사이드바 열기용) */}
-            <button 
-                onClick={onMenuClick}
-                className="p-2 -ml-2 hover:bg-gray-200/50 rounded-full transition-colors text-gray-700"
-                aria-label="메뉴 열기"
-            >
-                <FaBars className="w-6 h-6" />
-            </button>
+        <div className="relative h-screen bg-[#F5E6D3] flex justify-center overflow-hidden">
+            <div className="w-full max-w-md h-full bg-white relative flex flex-col shadow-2xl overflow-hidden">
+                
+                {/* 상단: 시각적 피드백 영역 */}
+                <MainRoom 
+                    latestLog={latestLog} 
+                    aiResponse={aiResponse}
+                    isAiThinking={isAiThinking}
+                />
 
-            {/* 중앙: 앱 타이틀 */}
-            <h1 className="text-lg font-bold text-gray-800 tracking-tight">나의 공감 일기</h1>
-
-            {/* 우측: 알림 아이콘 */}
-            <div className="relative cursor-pointer active:scale-95 transition-transform">
-                <div className="p-2 bg-white rounded-full shadow-sm text-yellow-400 border border-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                    </svg>
-                </div>
-                {notificationCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white shadow-sm"></span>
-                )}
+                {/* 하단: 입력 및 기록 영역 */}
+                <BottomSheet 
+                    onWrite={handleWrite} 
+                    diaries={diaries} 
+                    streakDays={3}
+                />
+                
             </div>
-        </header>
+        </div>
     );
 };
 
-export default MobileHeader;
+export default MobileDashboard;

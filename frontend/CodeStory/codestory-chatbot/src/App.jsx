@@ -6,8 +6,6 @@ import './App.css';
 import { authApi, diaryApi } from './services/api';
 import Login from './components/auth/Login';
 import Sidebar from './components/layout/Sidebar';
-import BottomNav from './components/layout/BottomNav';
-import MobileHeader from './components/layout/MobileHeader';
 import MainDashboard from './components/dashboard/MainDashboard';
 import MobileDashboard from './components/dashboard/MobileDashboard';
 import RightPanel from './components/layout/RightPanel';
@@ -80,7 +78,9 @@ function AppContent() {
                 if (location.pathname === '/' || location.pathname === '/login') {
                     navigate('/dashboard');
                 }
-            } catch (e) { navigate('/login'); }
+            } catch {
+                navigate('/login');
+            }
         } else if (location.pathname !== '/login') {
             navigate('/login');
         }
@@ -91,7 +91,9 @@ function AppContent() {
         try {
             const data = await diaryApi.getDiaries(userId);
             setDiaries(Array.isArray(data) ? data : []);
-        } catch (err) { setDiaries([]); }
+        } catch {
+            setDiaries([]);
+        }
     };
 
     const handleLoginSuccess = (userInfo) => {
@@ -159,11 +161,8 @@ function AppContent() {
 
                 <Route path="/*" element={
                     <>
-                        {/* Mobile Header - Fixed at top, shown only on mobile (max-width: 768px) */}
-                        <MobileHeader user={user} onLogout={handleLogout} />
-
                         <div className="layout-container animate-fade-in" data-gtm="main-layout-wrapper">
-                            <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />
+                            {!isMobile && <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />}
 
                             <main className="content-area" style={{flex:1, overflow:'hidden'}} data-gtm="page-content-main">
                                 <Routes>
@@ -181,15 +180,8 @@ function AppContent() {
                                 </Routes>
                             </main>
 
-                            <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />
+                            {!isMobile && <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />}
                         </div>
-
-                        {/* Mobile Bottom Navigation - Outside layout-container for proper fixed positioning */}
-                        <BottomNav
-                            currentView={location.pathname.substring(1) || 'dashboard'}
-                            onNavigate={(v) => navigate(`/${v}`)}
-                            onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}}
-                        />
                     </>
                 } />
             </Routes>
