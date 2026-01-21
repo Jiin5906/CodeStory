@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Lottie from 'lottie-react';
 // import mongleAnimation from '../../assets/mongleIDLE.json'; // 실제 Lottie 파일 경로
 
-const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
+const MainRoom = ({ latestLog, aiResponse, isAiThinking, conversations = [] }) => {
     const [floatingTexts, setFloatingTexts] = useState([]);
     const [showAiThought, setShowAiThought] = useState(false);
+    const conversationEndRef = useRef(null);
 
     // 1. 사용자가 글을 쓰면 -> 공기 중으로 흩어지는 애니메이션 (Visual Effect)
     useEffect(() => {
@@ -44,9 +45,16 @@ const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
         }
     }, [aiResponse]);
 
+    // 3. 대화 히스토리 자동 스크롤
+    useEffect(() => {
+        if (conversationEndRef.current && conversations.length > 0) {
+            conversationEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+    }, [conversations]);
+
     return (
-        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500 bg-gradient-to-br from-[#FFF1EB] via-[#FFD1A9] to-[#FFE4D0]">
-            
+        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500 bg-gradient-to-br from-[#FFF1EB] via-[#FFD1A9] to-[#FFE4D0]" data-gtm="mainroom-container">
+
             {/* 헤더 (날짜) */}
             <header className="absolute top-0 w-full z-20 flex justify-between items-center px-8 py-8">
                 <div className="flex flex-col opacity-70">
@@ -59,6 +67,33 @@ const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
                     <i className="far fa-bell text-[#5D4037]"></i>
                 </div>
             </header>
+
+            {/* 대화 히스토리 영역 (상단) */}
+            {conversations.length > 0 && (
+                <div className="absolute top-32 w-full px-6 max-h-[35vh] overflow-y-auto z-10 hide-scrollbar" data-gtm="mainroom-conversation-history">
+                    <div className="space-y-3 pb-4">
+                        {conversations.map((conv, idx) => (
+                            <div key={idx} className="space-y-2 animate-fade-in">
+                                {/* 사용자 메시지 */}
+                                <div className="flex justify-end" data-gtm="mainroom-user-message">
+                                    <div className="bg-white/80 backdrop-blur-sm px-5 py-3 rounded-[20px] rounded-tr-sm max-w-[75%] shadow-sm border border-white/50">
+                                        <p className="text-[#5D4037] text-base leading-relaxed">{conv.userMessage}</p>
+                                    </div>
+                                </div>
+                                {/* AI 답변 */}
+                                {conv.aiResponse && (
+                                    <div className="flex justify-start" data-gtm="mainroom-ai-message">
+                                        <div className="bg-[#8D6E63]/10 backdrop-blur-sm px-5 py-3 rounded-[20px] rounded-tl-sm max-w-[75%] shadow-sm border border-[#8D6E63]/20">
+                                            <p className="text-[#5D4037] text-sm leading-relaxed">{conv.aiResponse}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                        <div ref={conversationEndRef} />
+                    </div>
+                </div>
+            )}
 
             {/* 중앙 캐릭터 영역 */}
             <div className="flex-1 flex flex-col items-center justify-center pb-20 relative">

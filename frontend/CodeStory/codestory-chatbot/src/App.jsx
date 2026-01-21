@@ -173,7 +173,7 @@ function AppContent() {
                                             ? <MobileDashboard
                                                 user={user}
                                                 diaries={diaries}
-                                                onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}}
+                                                onWriteClick={() => fetchDiaries(user?.id)}
                                                 onCalendarClick={() => setShowCalendarModal(true)}
                                                 onFeedClick={() => navigate('/shared')}
                                                 onStatsClick={() => navigate('/stats')}
