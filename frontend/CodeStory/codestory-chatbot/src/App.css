@@ -116,29 +116,25 @@ select {
     .app-root {
         /* fixed를 제거하고 자연스러운 스크롤 허용 */
         position: relative;
-        width: 100%;
-        min-height: 100vh; /* 고정 높이가 아닌 최소 높이 */
-        overflow-x: hidden; /* 가로 스크롤만 방지 */
-        overflow-y: auto; /* 세로 스크롤 허용 */
+        width: 100vw;
+        height: 100dvh; /* 동적 뷰포트 높이 사용 */
+        overflow: hidden; /* 모바일에서는 오버플로우 방지 */
     }
 
     /* Adjust main layout for mobile */
     .layout-container {
         flex-direction: column;
-        min-height: 100vh; /* height 대신 min-height */
-        overflow: visible; /* overflow hidden 제거 */
+        height: 100dvh; /* 동적 뷰포트 높이 */
+        overflow: hidden;
     }
 
     /* Content area takes full width on mobile */
     .content-area {
         width: 100%;
+        height: 100dvh;
         padding: 0;
         margin: 0;
-        overflow-y: auto;
-        /* Add bottom padding to account for bottom nav */
-        padding-bottom: 80px; /* Space for bottom nav + FAB */
-        /* 최소 높이 보장으로 스크롤 가능하게 */
-        min-height: calc(100vh - 60px);
+        overflow: hidden; /* MobileDashboard에서 자체적으로 관리 */
 
         /* Ensure smooth scrolling */
         -webkit-overflow-scrolling: touch;

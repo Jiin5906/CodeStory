@@ -8,7 +8,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
-    const [conversations, setConversations] = useState([]);
     const today = startOfDay(new Date());
 
     // 스트릭(연속 작성일) 계산 로직
@@ -52,19 +51,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
         return streak;
     }, [diaries, today]);
 
-    // 대화 핸들러
+    // 일기 작성 및 AI 응답 핸들러
     const handleWrite = async (content) => {
         setLatestLog(content);
         setIsAiThinking(true);
         setAiResponse(null);
-
-        // 즉시 사용자 메시지를 대화 히스토리에 추가
-        const newConversation = {
-            userMessage: content,
-            aiResponse: null,
-            timestamp: new Date()
-        };
-        setConversations(prev => [...prev, newConversation]);
 
         try {
             // 기본 감정 데이터 설정
@@ -82,24 +73,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                 tags: []
             };
 
-            // AI 응답 받기
+            // AI 응답 받기 및 일기 저장
             const response = await diaryApi.saveDiary(diaryData, null);
 
             if (response && response.aiResponse) {
                 setAiResponse(response.aiResponse);
-
-                // 대화 히스토리 업데이트
-                setConversations(prev => {
-                    const updated = [...prev];
-                    const lastIdx = updated.length - 1;
-                    if (lastIdx >= 0) {
-                        updated[lastIdx] = {
-                            ...updated[lastIdx],
-                            aiResponse: response.aiResponse
-                        };
-                    }
-                    return updated;
-                });
             }
 
             // 부모 컴포넌트에 알림 (diaries 목록 갱신용)
@@ -108,21 +86,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
             }
         } catch (error) {
             console.error('일기 작성 실패:', error);
-            const errorMsg = '죄송해요, 지금은 답변을 드릴 수 없어요. 잠시 후 다시 시도해주세요.';
-            setAiResponse(errorMsg);
-
-            // 에러 메시지도 대화 히스토리에 추가
-            setConversations(prev => {
-                const updated = [...prev];
-                const lastIdx = updated.length - 1;
-                if (lastIdx >= 0) {
-                    updated[lastIdx] = {
-                        ...updated[lastIdx],
-                        aiResponse: errorMsg
-                    };
-                }
-                return updated;
-            });
+            setAiResponse('죄송해요, 지금은 답변을 드릴 수 없어요. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsAiThinking(false);
         }
@@ -130,14 +94,13 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
 
     return (
         <div
-            className="relative w-full h-screen overflow-hidden flex flex-col"
+            className="relative w-full h-[100dvh] overflow-hidden flex flex-col bg-[#FFFAF0]"
             data-gtm="view-mobile-dashboard-new"
         >
             <MainRoom
                 latestLog={latestLog}
                 aiResponse={aiResponse}
                 isAiThinking={isAiThinking}
-                conversations={conversations}
             />
             <BottomSheet
                 onWrite={handleWrite}
