@@ -140,6 +140,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                 isOpen={isMindRecordOpen}
                 onClose={() => setIsMindRecordOpen(false)}
                 userName={user?.nickname}
+                diaries={diaries}
                 data-gtm="mind-record-screen"
             />
         </div>

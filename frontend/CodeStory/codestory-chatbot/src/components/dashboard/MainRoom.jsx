@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Lottie from 'lottie-react';
-// import mongleAnimation from '../../assets/mongleIDLE.json'; // 실제 Lottie 파일 경로
+import mongleAnimation from '../../assets/mongleIDLE.json';
 
 const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
     const [floatingTexts, setFloatingTexts] = useState([]);
@@ -49,32 +49,35 @@ const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
 
             {/* 중앙 캐릭터 영역 (헤더는 MobileDashboard로 이동) */}
             <div className="flex-1 flex flex-col items-center justify-center pb-20 pt-32 relative" data-gtm="mainroom-character-area">
-                
-                {/* (1) 몽글이의 말풍선 (AI 상태에 따라 표시) */}
-                <div
-                    className={`absolute top-0 flex flex-col items-center z-10 transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
-                    data-gtm="mainroom-mongle-speech-bubble"
-                >
-                    <div className="relative mb-8 px-8 py-4 text-center max-w-[85%]">
-                        <div className="absolute inset-0 bg-white/40 blur-xl rounded-full"></div>
-                        <p className="relative text-lg md:text-xl font-medium leading-relaxed text-slate-800 break-keep drop-shadow-sm">
-                            {isAiThinking ? "공감하는 중..." : `"${aiResponse}"`}
-                        </p>
-                    </div>
-                </div>
 
-                {/* (2) 몽글이 캐릭터 */}
-                <div className="relative w-72 h-72 md:w-96 md:h-96 transition-transform duration-500 hover:scale-105 cursor-pointer group" data-gtm="mainroom-character">
-                    <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                    <lottie-player
-                        src="https://lottie.host/6e641353-8652-4737-927a-244da2278952/8y51lFz5c.json"
-                        background="transparent"
-                        speed="0.8"
-                        style={{ width: '100%', height: '100%' }}
-                        loop
-                        autoplay
-                        class="drop-shadow-2xl animate-float filter saturate-[1.1]"
-                    ></lottie-player>
+                {/* 캐릭터와 말풍선을 하나의 컨테이너로 묶기 */}
+                <div className="flex flex-col items-center gap-6 relative">
+                    {/* (1) 몽글이의 말풍선 (AI 상태에 따라 표시) */}
+                    <div
+                        className={`transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
+                        data-gtm="mainroom-mongle-speech-bubble"
+                    >
+                        <div className="relative px-6 py-4 text-center max-w-[280px] sm:max-w-[320px]">
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-md rounded-3xl shadow-lg border border-white/40"></div>
+                            <p className="relative text-base sm:text-lg font-medium leading-relaxed text-slate-800 break-keep">
+                                {isAiThinking ? "공감하는 중..." : `"${aiResponse}"`}
+                            </p>
+                            {/* 말풍선 꼬리 */}
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white/60 backdrop-blur-md rotate-45 border-r border-b border-white/40"></div>
+                        </div>
+                    </div>
+
+                    {/* (2) 몽글이 캐릭터 */}
+                    <div className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-transform duration-500 hover:scale-105 cursor-pointer group" data-gtm="mainroom-character">
+                        <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <Lottie
+                            animationData={mongleAnimation}
+                            loop={true}
+                            autoplay={true}
+                            className="w-full h-full drop-shadow-2xl"
+                            style={{ filter: 'saturate(1.1)' }}
+                        />
+                    </div>
                 </div>
 
                 {/* (3) 플로팅 텍스트 (사용자 입력) */}

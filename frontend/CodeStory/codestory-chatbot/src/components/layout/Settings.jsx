@@ -40,7 +40,8 @@ const Settings = ({ user, onNicknameChange }) => {
     };
 
     return (
-        <div className="settings-container" data-gtm="view-settings">
+        <div className="w-full min-h-[100dvh] overflow-y-auto bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3]" data-gtm="view-settings-wrapper">
+            <div className="settings-container" data-gtm="view-settings">
             <h2 className="settings-title">환경 설정</h2>
 
             {/* --- 섹션 1: 테마 변경 --- */}
@@ -129,6 +130,7 @@ const Settings = ({ user, onNicknameChange }) => {
             <div className="settings-section" data-gtm="settings-section-account">
                 <h3>계정 정보</h3>
                 <p className="email-info">로그인된 이메일: <strong>{user?.email || '게스트'}</strong></p>
+            </div>
             </div>
         </div>
     );

@@ -1,19 +1,58 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { FaArrowLeft, FaPaperPlane, FaCog } from 'react-icons/fa';
+import { format, parseISO } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 // MindRecord: 채팅 형식으로 과거 기록을 보고 대화하는 컴포넌트
-const MindRecord = ({ isOpen, onClose, userName = "사용자" }) => {
-    // 닫힘 상태일 때 렌더링 최적화 (선택사항)
-    if (!isOpen) return null;
+const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
+    // diaries를 메시지 형식으로 변환
+    const initialMessages = useMemo(() => {
+        if (!diaries || diaries.length === 0) {
+            return [
+                { id: 1, type: 'ai', text: '안녕하세요! 대화를 시작해 보세요! 😊\n오늘 하루는 어떠셨나요?', time: format(new Date(), 'a h:mm', { locale: ko }) }
+            ];
+        }
 
-    const [messages, setMessages] = useState([
-        { id: 1, type: 'date', text: '2026년 1월 20일 화요일' },
-        { id: 2, type: 'ai', text: '어제는 잠을 잘 못 잤다고 했지? 오늘은 컨디션이 좀 어때?', time: '오전 10:23' },
-        { id: 3, type: 'user', text: '아직 조금 피곤해.. 🫠\n그래도 따뜻한 차 한 잔 마시니까 조금 낫네.', time: '오전 10:25' },
-        { id: 4, type: 'ai', text: '다행이다. 🍵\n너무 무리하지 말고, 틈틈이 쉬어주는 거 잊지 마. 내가 항상 여기 있을게.', time: '오전 10:26' },
-        { id: 5, type: 'date', text: '오늘' },
-        { id: 6, type: 'ai', text: '오늘 하루도 정말 고생 많았어.\n너의 짐을 나에게 조금 나눠줄래?', time: '오후 8:00' },
-    ]);
+        const messages = [];
+        let lastDate = null;
+        let messageId = 1;
+
+        // 날짜순으로 정렬 (오래된 것부터)
+        const sortedDiaries = [...diaries].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        sortedDiaries.forEach((diary) => {
+            const diaryDate = parseISO(diary.date);
+            const dateStr = format(diaryDate, 'yyyy년 M월 d일 EEEE', { locale: ko });
+
+            // 날짜가 바뀌면 날짜 구분선 추가
+            if (lastDate !== dateStr) {
+                messages.push({ id: messageId++, type: 'date', text: dateStr });
+                lastDate = dateStr;
+            }
+
+            // 사용자 메시지 (일기 내용)
+            messages.push({
+                id: messageId++,
+                type: 'user',
+                text: diary.content,
+                time: format(diaryDate, 'a h:mm', { locale: ko })
+            });
+
+            // AI 응답
+            if (diary.aiResponse) {
+                messages.push({
+                    id: messageId++,
+                    type: 'ai',
+                    text: diary.aiResponse,
+                    time: format(diaryDate, 'a h:mm', { locale: ko })
+                });
+            }
+        });
+
+        return messages;
+    }, [diaries]);
+
+    const [messages, setMessages] = useState(initialMessages);
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef(null);
 
@@ -25,6 +64,9 @@ const MindRecord = ({ isOpen, onClose, userName = "사용자" }) => {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    // 닫힘 상태일 때 렌더링 최적화 (hooks 호출 후 체크)
+    if (!isOpen) return null;
 
     const handleSend = () => {
         if (!inputValue.trim()) return;

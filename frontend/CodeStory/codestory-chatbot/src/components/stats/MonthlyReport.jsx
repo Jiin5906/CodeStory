@@ -20,13 +20,6 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
         return diaryWithImage ? `http://localhost:8080${diaryWithImage.imageUrl}` : null;
     }, [monthlyDiaries]);
 
-    const topEmoji = useMemo(() => {
-        if (monthlyDiaries.length === 0) return '😶';
-        const counts = {};
-        monthlyDiaries.forEach(d => { counts[d.emoji] = (counts[d.emoji] || 0) + 1; });
-        return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-    }, [monthlyDiaries]);
-
     const happinessKeywords = useMemo(() => {
         const tags = {};
         monthlyDiaries
@@ -51,7 +44,8 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
     }, [monthlyDiaries]);
 
     return (
-        <div className="report-container animate-fade-in" data-gtm="view-monthly-report">
+        <div className="w-full h-[100dvh] overflow-y-auto bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3]" data-gtm="view-monthly-report-wrapper">
+            <div className="report-container animate-fade-in" data-gtm="view-monthly-report" style={{ background: 'transparent' }}>
             {/* --- [1] 상단 앨범 커버 (클릭 시 타임라인 토글) --- */}
             <div
                 className={`monthly-cover-card ${showTimeline ? 'minimized' : ''}`}
@@ -167,6 +161,7 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                         </div>
                     </div>
                 )}
+            </div>
             </div>
         </div>
     );
