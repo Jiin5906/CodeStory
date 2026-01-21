@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay, parseISO, format } from 'date-fns';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
+import MindRecord from '../../change/MindRecord';
 import { diaryApi } from '../../services/api';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
+    const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
     const today = startOfDay(new Date());
 
     // 스트릭(연속 작성일) 계산 로직
@@ -94,9 +96,30 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
 
     return (
         <div
-            className="relative w-full h-[100dvh] overflow-hidden flex flex-col bg-[#FFFAF0]"
+            className="relative w-full h-[100dvh] overflow-hidden bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3] text-slate-700 font-gowun selection:bg-rose-200"
             data-gtm="view-mobile-dashboard-new"
         >
+            {/* Background Blob Decorations */}
+            <div className="absolute top-[-10%] left-[-20%] w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-[100px] animate-blob mix-blend-multiply pointer-events-none" data-gtm="blob-decoration-1"></div>
+            <div className="absolute bottom-[-10%] right-[-20%] w-[500px] h-[500px] bg-rose-200/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-multiply pointer-events-none" data-gtm="blob-decoration-2"></div>
+
+            {/* Header */}
+            <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-6 pt-12" data-gtm="mobile-dashboard-header">
+                <div className="flex flex-col animate-fade-in-up">
+                    <span className="text-4xl font-bold text-slate-800 tracking-tight font-nunito">
+                        {format(new Date(), 'd')}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest font-nunito">
+                        {format(new Date(), 'EEEE', { locale: { localize: { day: (n) => ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][n] } } })}
+                    </span>
+                </div>
+                <div className="group flex items-center gap-2 px-4 py-2 bg-white/30 backdrop-blur-md rounded-full border border-white/40 shadow-sm hover:bg-white/50 transition-all cursor-pointer animate-fade-in-up" data-gtm="mobile-dashboard-streak-indicator">
+                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                    <span className="text-lg">🔥</span>
+                    <span className="text-sm font-bold text-slate-700 font-nunito">{streakDays}일</span>
+                </div>
+            </div>
+
             <MainRoom
                 latestLog={latestLog}
                 aiResponse={aiResponse}
@@ -107,9 +130,17 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                 diaries={diaries}
                 streakDays={streakDays}
                 onCalendarClick={onCalendarClick}
-                onFeedClick={onFeedClick}
+                onMindRecordClick={() => setIsMindRecordOpen(true)}
                 onStatsClick={onStatsClick}
                 onSettingsClick={onSettingsClick}
+            />
+
+            {/* 마음 기록 화면 (전체 화면 오버레이) */}
+            <MindRecord
+                isOpen={isMindRecordOpen}
+                onClose={() => setIsMindRecordOpen(false)}
+                userName={user?.nickname}
+                data-gtm="mind-record-screen"
             />
         </div>
     );

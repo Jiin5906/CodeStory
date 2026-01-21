@@ -45,55 +45,36 @@ const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
     }, [aiResponse]);
 
     return (
-        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500 bg-gradient-to-br from-[#FFF1EB] via-[#FFD1A9] to-[#FFE4D0] overflow-hidden" data-gtm="mainroom-container">
+        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500 overflow-hidden" data-gtm="mainroom-container">
 
-            {/* 헤더 (날짜) */}
-            <header className="absolute top-0 w-full z-20 flex justify-between items-center px-8 py-8">
-                <div className="flex flex-col opacity-70">
-                    <span className="text-sm text-[#5D4037] tracking-widest font-bold">TODAY</span>
-                    <span className="text-3xl text-[#5D4037] font-serif">
-                        {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
-                    </span>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-white/40 flex items-center justify-center cursor-pointer hover:bg-white/60 transition-colors backdrop-blur-sm">
-                    <i className="far fa-bell text-[#5D4037]"></i>
-                </div>
-            </header>
-
-            {/* 중앙 캐릭터 영역 */}
-            <div className="flex-1 flex flex-col items-center justify-center pb-20 relative">
+            {/* 중앙 캐릭터 영역 (헤더는 MobileDashboard로 이동) */}
+            <div className="flex-1 flex flex-col items-center justify-center pb-20 pt-32 relative" data-gtm="mainroom-character-area">
                 
                 {/* (1) 몽글이의 말풍선 (AI 상태에 따라 표시) */}
                 <div
-                    className={`absolute top-20 flex flex-col items-center z-10 transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
+                    className={`absolute top-0 flex flex-col items-center z-10 transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
                     data-gtm="mainroom-mongle-speech-bubble"
                 >
-                    <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-[24px] shadow-lg border border-white/50 max-w-[280px]">
-                        <span className="text-[#5D4037] text-base font-medium leading-relaxed block text-center">
-                            {isAiThinking ? "공감하는 중..." : aiResponse}
-                        </span>
-                    </div>
-                    <div className="flex gap-1 mt-2">
-                        <div className="w-2 h-2 rounded-full bg-white/60 animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-white/60 translate-y-2 animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-1 h-1 rounded-full bg-white/60 translate-y-3 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="relative mb-8 px-8 py-4 text-center max-w-[85%]">
+                        <div className="absolute inset-0 bg-white/40 blur-xl rounded-full"></div>
+                        <p className="relative text-lg md:text-xl font-medium leading-relaxed text-slate-800 break-keep drop-shadow-sm">
+                            {isAiThinking ? "공감하는 중..." : `"${aiResponse}"`}
+                        </p>
                     </div>
                 </div>
 
                 {/* (2) 몽글이 캐릭터 */}
-                <div className="w-80 h-80 relative cursor-pointer active:scale-95 transition-transform duration-500 animate-[float_6s_ease-in-out_infinite]">
-                    {/* Lottie Player 자리 (실제 파일 연결 필요) */}
-                    <lottie-player 
-                        src="https://lottie.host/6e641353-8652-4737-927a-244da2278952/8y51lFz5c.json" 
-                        background="transparent" 
-                        speed="0.8" 
-                        style={{ width: '100%', height: '100%', filter: 'sepia(20%) saturate(120%)' }} 
-                        loop 
+                <div className="relative w-72 h-72 md:w-96 md:h-96 transition-transform duration-500 hover:scale-105 cursor-pointer group" data-gtm="mainroom-character">
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <lottie-player
+                        src="https://lottie.host/6e641353-8652-4737-927a-244da2278952/8y51lFz5c.json"
+                        background="transparent"
+                        speed="0.8"
+                        style={{ width: '100%', height: '100%' }}
+                        loop
                         autoplay
+                        class="drop-shadow-2xl animate-float filter saturate-[1.1]"
                     ></lottie-player>
-                    
-                    {/* 바닥 그림자 */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-40 h-6 bg-[#8D6E63] blur-[25px] opacity-20 rounded-full animate-pulse"></div>
                 </div>
 
                 {/* (3) 플로팅 텍스트 (사용자 입력) */}
