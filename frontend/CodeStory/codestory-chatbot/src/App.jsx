@@ -14,6 +14,7 @@ import DiaryDetail from './components/diary/DiaryDetail';
 import EmotionModal from './components/diary/EmotionModal';
 import ErrorBanner from './components/common/ErrorBanner';
 import CalendarView from './components/calendar/CalendarView';
+import CalendarModal from './components/calendar/CalendarModal';
 import MonthlyReport from './components/stats/MonthlyReport';
 import Settings from './components/layout/Settings';
 import SharedFeed from './components/feed/SharedFeed';
@@ -32,6 +33,7 @@ function AppContent() {
     const [diaryDraft, setDiaryDraft] = useState({ content: '', tags: [], imageFile: null, isPublic: false });
     const [showEmotionModal, setShowEmotionModal] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [showCalendarModal, setShowCalendarModal] = useState(false);
 
     // 화면 크기 변경 감지
     useEffect(() => {
@@ -168,7 +170,15 @@ function AppContent() {
                                 <Routes>
                                     <Route path="dashboard" element={
                                         isMobile
-                                            ? <MobileDashboard user={user} diaries={diaries} onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} />
+                                            ? <MobileDashboard
+                                                user={user}
+                                                diaries={diaries}
+                                                onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}}
+                                                onCalendarClick={() => setShowCalendarModal(true)}
+                                                onFeedClick={() => navigate('/shared')}
+                                                onStatsClick={() => navigate('/stats')}
+                                                onSettingsClick={() => navigate('/settings')}
+                                            />
                                             : <MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />
                                     } />
                                     <Route path="calendar" element={<CalendarView user={user} diaries={diaries} />} />
@@ -199,6 +209,22 @@ function AppContent() {
             
             {showEmotionModal && (
                 <EmotionModal onClose={() => setShowEmotionModal(false)} onSave={handleFinalSubmit} />
+            )}
+
+            {showCalendarModal && (
+                <CalendarModal
+                    isOpen={showCalendarModal}
+                    onClose={() => setShowCalendarModal(false)}
+                    selectedDate={selectedDate}
+                    onDateSelect={(date) => {
+                        setSelectedDate(date);
+                        setShowCalendarModal(false);
+                        navigate('/dashboard');
+                    }}
+                    diaries={diaries}
+                    streakDays={0}
+                    dewdropCount={0}
+                />
             )}
         </div>
     );

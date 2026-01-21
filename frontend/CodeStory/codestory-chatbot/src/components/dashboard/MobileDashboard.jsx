@@ -4,7 +4,7 @@ import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import { diaryApi } from '../../services/api';
 
-const MobileDashboard = ({ user, diaries, onWriteClick }) => {
+const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
@@ -57,12 +57,23 @@ const MobileDashboard = ({ user, diaries, onWriteClick }) => {
         setIsAiThinking(true);
 
         try {
-            // AI 응답 받기
-            const response = await diaryApi.create({
+            // 기본 감정 데이터 설정
+            const diaryData = {
                 userId: user.id,
                 content: content,
-                date: new Date().toISOString().split('T')[0]
-            });
+                date: new Date().toISOString().split('T')[0],
+                title: '',
+                mood: 5,
+                tension: 5,
+                fun: 5,
+                emoji: '✨',
+                isPublic: false,
+                isAnonymous: false,
+                tags: []
+            };
+
+            // AI 응답 받기
+            const response = await diaryApi.saveDiary(diaryData, null);
 
             if (response && response.aiResponse) {
                 setAiResponse(response.aiResponse);
@@ -94,6 +105,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick }) => {
                 onWrite={handleWrite}
                 diaries={diaries}
                 streakDays={streakDays}
+                onCalendarClick={onCalendarClick}
+                onFeedClick={onFeedClick}
+                onStatsClick={onStatsClick}
+                onSettingsClick={onSettingsClick}
             />
         </div>
     );
