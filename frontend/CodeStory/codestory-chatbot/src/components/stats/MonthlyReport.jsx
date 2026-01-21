@@ -2,10 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaQuoteLeft, FaImage, FaListUl, FaHashtag, FaRobot, FaArrowLeft } from 'react-icons/fa6';
+import { useNavigate } from 'react-router-dom';
 import './MonthlyReport.css';
 import MoodGraph from './MoodGraph';
 
 const MonthlyReport = ({ diaries, currentMonth }) => {
+    const navigate = useNavigate();
     const [showTimeline, setShowTimeline] = useState(false);
 
     const monthlyDiaries = useMemo(() => {
@@ -44,7 +46,23 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
     }, [monthlyDiaries]);
 
     return (
-        <div className="w-full h-[100dvh] overflow-y-auto bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3]" data-gtm="view-monthly-report-wrapper">
+        <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3] overflow-y-auto" data-gtm="view-monthly-report-wrapper">
+            {/* 헤더 */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 px-6 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm" data-gtm="stats-header">
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    className="text-2xl text-slate-600 hover:scale-110 transition-transform p-2"
+                    data-gtm="stats-back-button"
+                >
+                    <FaArrowLeft />
+                </button>
+                <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-slate-800">통계</span>
+                    <span className="text-xs text-slate-500 tracking-wider">STATISTICS</span>
+                </div>
+                <div className="w-10"></div>
+            </div>
+
             <div className="report-container animate-fade-in" data-gtm="view-monthly-report" style={{ background: 'transparent' }}>
             {/* --- [1] 상단 앨범 커버 (클릭 시 타임라인 토글) --- */}
             <div

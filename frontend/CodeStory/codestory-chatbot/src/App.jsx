@@ -185,7 +185,7 @@ function AppContent() {
                                     <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
                                     <Route path="shared" element={<SharedFeed />} />
                                     <Route path="diary/:id" element={<DiaryDetail />} />
-                                    <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} />} />
+                                    <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} onLogout={handleLogout} />} />
                                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                                 </Routes>
                             </main>
