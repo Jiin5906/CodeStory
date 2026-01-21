@@ -56,17 +56,48 @@ public class DiaryService {
             }
         }
 
+        // 과거 일기 최근 5개 조회
+        List<Diary> recentDiaries = diaryRepository.findAllByUserIdOrderByDateDesc(request.getUserId())
+                .stream()
+                .limit(5)
+                .collect(Collectors.toList());
+
+        // 과거 일기 컨텍스트 생성
+        StringBuilder contextBuilder = new StringBuilder();
+        if (!recentDiaries.isEmpty()) {
+            contextBuilder.append("\n\n## 사용자의 최근 일기 기록 (참고용):\n");
+            for (int i = 0; i < recentDiaries.size(); i++) {
+                Diary d = recentDiaries.get(i);
+                contextBuilder.append(String.format("%d. [%s] %s\n",
+                        i + 1,
+                        d.getDate(),
+                        d.getContent().length() > 50 ? d.getContent().substring(0, 50) + "..." : d.getContent()
+                ));
+            }
+            contextBuilder.append("\n위 기록을 참고하여 사용자의 성향과 과거 맥락을 반영한 개인화된 답변을 제공하세요.\n");
+        }
+
         String systemPrompt = """
             # Role
-            당신은 사용자의 하루를 경청하고 깊이 공감해주는 따뜻한 감성을 가진 'Cozy Diary'의 AI 친구입니다.
-            # Tone & Manner
-            - 말투: 부드럽고 다정한 '해요체'를 사용하세요.
-            - 길이: 3~4문장 내외로 간결하지만 진심이 느껴지게 작성하세요.
+            당신은 사용자의 감정을 공감하는 따뜻한 AI 친구 '몽글이'입니다.
+
+            # 핵심 제약 조건 (절대 준수)
+            - **답변 길이: 반드시 최대 2줄 이내로 작성**
+            - 구구절절한 설명 금지, 핵심적인 위로와 공감만 전달
+            - 말투: 부드럽고 다정한 '해요체'
+            - 한 문장은 짧고 간결하게 (20자 이내 권장)
+
+            # 예시
+            - 좋은 예: "오늘 많이 힘드셨네요. 충분히 쉬어가세요."
+            - 나쁜 예: "오늘 정말 많이 힘드셨을 것 같아요. 그런 날도 있는 거니까 너무 자책하지 마시고 충분히 쉬면서 마음을 추스르는 시간을 가져보세요."
             """;
 
         String userMessage = String.format(
-                "오늘의 일기:\n- 내용: %s\n- 기분: %d점\n- 태그: %s",
-                request.getContent(), request.getMood(), request.getTags()
+                "오늘의 일기:\n- 내용: %s\n- 기분: %d점\n- 태그: %s%s",
+                request.getContent(),
+                request.getMood(),
+                request.getTags(),
+                contextBuilder.toString()
         );
 
         String aiReply = aiService.getMultimodalResponse(systemPrompt, userMessage, imageFile);
