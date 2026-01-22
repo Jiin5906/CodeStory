@@ -36,6 +36,7 @@ public class DiaryService {
     private final CommentRepository commentRepository;
     private final LikesRepository likesRepository;
     private final AiService aiService;
+    private final MemoryService memoryService;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
     @Transactional
@@ -56,39 +57,41 @@ public class DiaryService {
             }
         }
 
-        // 과거 일기 최근 5개 조회
-        List<Diary> recentDiaries = diaryRepository.findAllByUserIdOrderByDateDesc(request.getUserId())
-                .stream()
-                .limit(5)
-                .collect(Collectors.toList());
+        // RAG: 벡터 유사도 기반 과거 기억 검색
+        String userId = String.valueOf(request.getUserId());
+        String currentDiaryText = request.getContent();
+        List<String> relatedMemories = memoryService.findRelatedMemories(userId, currentDiaryText);
 
-        // 과거 일기 컨텍스트 생성
-        StringBuilder contextBuilder = new StringBuilder();
-        if (!recentDiaries.isEmpty()) {
-            contextBuilder.append("\n\n## 사용자의 최근 일기 기록 (참고용):\n");
-            for (int i = 0; i < recentDiaries.size(); i++) {
-                Diary d = recentDiaries.get(i);
-                contextBuilder.append(String.format("%d. [%s] %s\n",
+        // 과거 기억 컨텍스트 생성
+        StringBuilder memoryContext = new StringBuilder();
+        if (!relatedMemories.isEmpty()) {
+            memoryContext.append("\n\n## 당신이 기억하는 과거의 비슷한 순간들:\n");
+            for (int i = 0; i < relatedMemories.size(); i++) {
+                String memory = relatedMemories.get(i);
+                memoryContext.append(String.format("%d. %s\n",
                         i + 1,
-                        d.getDate(),
-                        d.getContent().length() > 50 ? d.getContent().substring(0, 50) + "..." : d.getContent()
+                        memory.length() > 80 ? memory.substring(0, 80) + "..." : memory
                 ));
             }
-            contextBuilder.append("\n위 기록을 참고하여 사용자의 성향과 과거 맥락을 반영한 개인화된 답변을 제공하세요.\n");
+            memoryContext.append("\n위 기억들을 바탕으로, 사용자가 과거에 비슷한 경험을 했다는 것을 자연스럽게 언급하며 공감해주세요.\n");
+            memoryContext.append("(예: \"저번에도 이런 일 있었죠?\", \"그때도 힘들어하셨는데...\", \"예전에도 이야기했던 것처럼...\")\n");
         }
 
         String systemPrompt = """
             # Role
             당신은 사용자의 감정을 공감하는 따뜻한 AI 친구 '몽글이'입니다.
+            사용자의 과거 일기와 경험을 기억하고 있으며, 그것을 자연스럽게 언급하며 공감합니다.
 
             # 핵심 제약 조건 (절대 준수)
             - **답변 길이: 반드시 최대 2줄 이내로 작성**
             - 구구절절한 설명 금지, 핵심적인 위로와 공감만 전달
             - 말투: 부드럽고 다정한 '해요체'
             - 한 문장은 짧고 간결하게 (20자 이내 권장)
+            - 과거 기억이 있다면 자연스럽게 언급하며 "오래 알아온 친구처럼" 말하기
 
             # 예시
-            - 좋은 예: "오늘 많이 힘드셨네요. 충분히 쉬어가세요."
+            - 좋은 예 (기억 없음): "오늘 많이 힘드셨네요. 충분히 쉬어가세요."
+            - 좋은 예 (기억 있음): "저번에도 이런 일 있었죠? 이번에도 잘 이겨낼 거예요."
             - 나쁜 예: "오늘 정말 많이 힘드셨을 것 같아요. 그런 날도 있는 거니까 너무 자책하지 마시고 충분히 쉬면서 마음을 추스르는 시간을 가져보세요."
             """;
 
@@ -97,10 +100,18 @@ public class DiaryService {
                 request.getContent(),
                 request.getMood(),
                 request.getTags(),
-                contextBuilder.toString()
+                memoryContext.toString()
         );
 
         String aiReply = aiService.getMultimodalResponse(systemPrompt, userMessage, imageFile);
+
+        // RAG: 현재 일기를 벡터 DB에 저장 (장기 기억 형성)
+        try {
+            memoryService.saveMemory(userId, currentDiaryText);
+        } catch (Exception e) {
+            System.err.println("Failed to save memory to Pinecone: " + e.getMessage());
+            // 메모리 저장 실패해도 일기 작성은 계속 진행
+        }
 
         Diary newDiary = Diary.builder()
                 .userId(request.getUserId())
