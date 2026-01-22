@@ -1,54 +1,52 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { FaArrowLeft, FaPaperPlane, FaCog } from 'react-icons/fa';
+import React, { useRef, useEffect, useMemo } from 'react';
+import { FaArrowLeft } from 'react-icons/fa';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
-// MindRecord: 채팅 형식으로 과거 기록을 보고 대화하는 컴포넌트
+// MindRecord: 채팅 형식으로 과거 기록을 보는 컴포넌트 (읽기 전용)
 const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
-    // 디버깅: diaries props 확인
-    console.log('[MindRecord] isOpen:', isOpen);
-    console.log('[MindRecord] diaries props:', diaries);
-    console.log('[MindRecord] diaries 타입:', Array.isArray(diaries) ? '배열' : typeof diaries);
-    console.log('[MindRecord] diaries 개수:', Array.isArray(diaries) ? diaries.length : 'N/A');
+    const messagesEndRef = useRef(null);
 
-    // diaries를 메시지 형식으로 변환
-    const initialMessages = useMemo(() => {
-        console.log('[MindRecord] useMemo 실행 - diaries:', diaries);
+    // diaries를 메시지 형식으로 변환 (실시간 반영)
+    const messages = useMemo(() => {
+        console.log('[MindRecord] diaries 변환 시작, 개수:', diaries?.length || 0);
+
         if (!diaries || diaries.length === 0) {
-            console.warn('[MindRecord] diaries가 비어있거나 없음. 기본 메시지 표시');
+            console.log('[MindRecord] 일기 기록이 없습니다.');
             return [
-                { id: 1, type: 'ai', text: '안녕하세요! 대화를 시작해 보세요! 😊\n오늘 하루는 어떠셨나요?', time: format(new Date(), 'a h:mm', { locale: ko }) }
+                {
+                    id: 1,
+                    type: 'ai',
+                    text: '아직 기록이 없어요.\n오늘 하루를 기록해 보는 건 어떨까요? 😊',
+                    time: format(new Date(), 'a h:mm', { locale: ko })
+                }
             ];
         }
 
-        console.log('[MindRecord] 메시지 변환 시작, diaries 개수:', diaries.length);
-
-        const messages = [];
+        const messageList = [];
         let lastDate = null;
         let messageId = 1;
 
         // 날짜순으로 정렬 (오래된 것부터)
         const sortedDiaries = [...diaries].sort((a, b) => new Date(a.date) - new Date(b.date));
-        console.log('[MindRecord] 정렬된 diaries:', sortedDiaries);
 
         sortedDiaries.forEach((diary, index) => {
-            console.log(`[MindRecord] diary[${index}]:`, diary);
-            console.log(`[MindRecord] diary[${index}] fields - date: ${diary.date}, createdAt: ${diary.createdAt}, content: ${diary.content?.substring(0, 50)}`);
-
             // createdAt이 있으면 사용, 없으면 date 사용 (하위 호환성)
             const timestamp = diary.createdAt || diary.date;
             const diaryDateTime = parseISO(timestamp);
             const dateStr = format(diaryDateTime, 'yyyy년 M월 d일 EEEE', { locale: ko });
             const timeStr = format(diaryDateTime, 'a h:mm', { locale: ko });
 
+            console.log(`[MindRecord] diary[${index}] - time: ${timeStr}, content: ${diary.content?.substring(0, 30)}...`);
+
             // 날짜가 바뀌면 날짜 구분선 추가
             if (lastDate !== dateStr) {
-                messages.push({ id: messageId++, type: 'date', text: dateStr });
+                messageList.push({ id: messageId++, type: 'date', text: dateStr });
                 lastDate = dateStr;
             }
 
             // 사용자 메시지 (일기 내용)
-            messages.push({
+            messageList.push({
                 id: messageId++,
                 type: 'user',
                 text: diary.content,
@@ -57,7 +55,7 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
 
             // AI 응답
             if (diary.aiResponse) {
-                messages.push({
+                messageList.push({
                     id: messageId++,
                     type: 'ai',
                     text: diary.aiResponse,
@@ -66,57 +64,26 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
             }
         });
 
-        return messages;
+        console.log(`[MindRecord] 총 ${messageList.length}개 메시지 생성됨`);
+        return messageList;
     }, [diaries]);
-
-    const [messages, setMessages] = useState(initialMessages);
-    const [inputValue, setInputValue] = useState('');
-    const messagesEndRef = useRef(null);
 
     // 스크롤 하단 고정 (instant로 즉시 이동)
     const scrollToBottom = (instant = false) => {
         messagesEndRef.current?.scrollIntoView({ behavior: instant ? "instant" : "smooth" });
     };
 
-    // messages 변경 시 스크롤
+    // messages 또는 diaries 변경 시 스크롤 (카카오톡 스타일)
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    // isOpen 상태 변경 시 즉시 맨 아래로 스크롤 (카카오톡 스타일)
-    useEffect(() => {
-        if (isOpen) {
+        if (isOpen && messages.length > 0) {
             // 약간의 딜레이를 주어 렌더링 완료 후 스크롤
-            setTimeout(() => scrollToBottom(true), 100);
+            const timer = setTimeout(() => scrollToBottom(true), 100);
+            return () => clearTimeout(timer);
         }
-    }, [isOpen]);
+    }, [isOpen, messages]);
 
     // 닫힘 상태일 때 렌더링 최적화 (hooks 호출 후 체크)
     if (!isOpen) return null;
-
-    const handleSend = () => {
-        if (!inputValue.trim()) return;
-        
-        // 사용자 메시지 추가
-        const newMsg = {
-            id: Date.now(),
-            type: 'user',
-            text: inputValue,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, newMsg]);
-        setInputValue('');
-
-        // (임시) AI 응답 시뮬레이션
-        setTimeout(() => {
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                type: 'ai',
-                text: '그랬구나. 내가 듣고 있어.',
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }]);
-        }, 1000);
-    };
 
     return (
         <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col animate-fade-in-up" data-gtm="mind-record-container">
@@ -124,21 +91,18 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
             <div className="absolute inset-0 bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3] opacity-50 pointer-events-none"></div>
 
             {/* 헤더 */}
-            <div className="relative z-10 flex justify-between items-center p-4 px-6 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm" data-gtm="mind-record-header">
-                <button onClick={onClose} className="text-2xl text-slate-600 hover:scale-110 transition-transform p-2" data-gtm="mind-record-back-button">
+            <div className="relative z-10 flex items-center p-4 px-6 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm" data-gtm="mind-record-header">
+                <button onClick={onClose} className="text-2xl text-slate-600 hover:scale-110 transition-transform p-2 mr-4" data-gtm="mind-record-back-button">
                     <FaArrowLeft />
                 </button>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col">
                     <span className="text-lg font-bold text-slate-800">마음 기록</span>
-                    <span className="text-xs text-slate-500 tracking-wider">WITH AI</span>
+                    <span className="text-xs text-slate-500 tracking-wider">과거 대화 기록</span>
                 </div>
-                <button className="text-xl text-slate-600 p-2" data-gtm="mind-record-settings-button">
-                    <FaCog />
-                </button>
             </div>
 
-            {/* 채팅 영역 */}
-            <div className="relative z-10 flex-1 overflow-y-auto p-4 flex flex-col gap-4 no-scrollbar" data-gtm="mind-record-chat-area">
+            {/* 채팅 영역 (읽기 전용) */}
+            <div className="relative z-10 flex-1 overflow-y-auto p-4 pb-8 flex flex-col gap-4 no-scrollbar" data-gtm="mind-record-chat-area">
                 {messages.map((msg) => {
                     if (msg.type === 'date') {
                         return (
@@ -176,28 +140,6 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
                     );
                 })}
                 <div ref={messagesEndRef} />
-            </div>
-
-            {/* 입력창 영역 */}
-            <div className="relative z-10 p-4 pb-6 bg-gradient-to-t from-white/90 via-white/80 to-transparent" data-gtm="mind-record-input-area">
-                <div className="flex items-center bg-white/80 backdrop-blur-xl rounded-3xl border border-white/60 shadow-lg px-2">
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder="대화를 입력하세요..."
-                        className="flex-1 bg-transparent border-none outline-none text-slate-700 placeholder:text-slate-400 text-base h-14 px-4"
-                        data-gtm="mind-record-input-field"
-                    />
-                    <button
-                        onClick={handleSend}
-                        className="m-1.5 w-11 h-11 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-rose-400 to-orange-300 text-white shadow-lg active:scale-95 transition-all"
-                        data-gtm="mind-record-send-button"
-                    >
-                        <FaPaperPlane className="text-sm ml-0.5" />
-                    </button>
-                </div>
             </div>
         </div>
     );
