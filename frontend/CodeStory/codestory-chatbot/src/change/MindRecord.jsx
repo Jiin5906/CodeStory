@@ -5,13 +5,23 @@ import { ko } from 'date-fns/locale';
 
 // MindRecord: 채팅 형식으로 과거 기록을 보고 대화하는 컴포넌트
 const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
+    // 디버깅: diaries props 확인
+    console.log('[MindRecord] isOpen:', isOpen);
+    console.log('[MindRecord] diaries props:', diaries);
+    console.log('[MindRecord] diaries 타입:', Array.isArray(diaries) ? '배열' : typeof diaries);
+    console.log('[MindRecord] diaries 개수:', Array.isArray(diaries) ? diaries.length : 'N/A');
+
     // diaries를 메시지 형식으로 변환
     const initialMessages = useMemo(() => {
+        console.log('[MindRecord] useMemo 실행 - diaries:', diaries);
         if (!diaries || diaries.length === 0) {
+            console.warn('[MindRecord] diaries가 비어있거나 없음. 기본 메시지 표시');
             return [
                 { id: 1, type: 'ai', text: '안녕하세요! 대화를 시작해 보세요! 😊\n오늘 하루는 어떠셨나요?', time: format(new Date(), 'a h:mm', { locale: ko }) }
             ];
         }
+
+        console.log('[MindRecord] 메시지 변환 시작, diaries 개수:', diaries.length);
 
         const messages = [];
         let lastDate = null;
@@ -19,8 +29,12 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
 
         // 날짜순으로 정렬 (오래된 것부터)
         const sortedDiaries = [...diaries].sort((a, b) => new Date(a.date) - new Date(b.date));
+        console.log('[MindRecord] 정렬된 diaries:', sortedDiaries);
 
-        sortedDiaries.forEach((diary) => {
+        sortedDiaries.forEach((diary, index) => {
+            console.log(`[MindRecord] diary[${index}]:`, diary);
+            console.log(`[MindRecord] diary[${index}] fields - date: ${diary.date}, content: ${diary.content?.substring(0, 50)}, aiResponse: ${diary.aiResponse?.substring(0, 50)}`);
+
             const diaryDate = parseISO(diary.date);
             const dateStr = format(diaryDate, 'yyyy년 M월 d일 EEEE', { locale: ko });
 

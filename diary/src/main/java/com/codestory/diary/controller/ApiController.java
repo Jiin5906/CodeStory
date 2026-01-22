@@ -1,5 +1,21 @@
 package com.codestory.diary.controller;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.codestory.diary.dto.AuthRequest;
 import com.codestory.diary.dto.CommentDto;
 import com.codestory.diary.dto.DiaryDto;
@@ -12,16 +28,9 @@ import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.DiaryService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -36,7 +45,6 @@ public class ApiController {
     private final CommentRepository commentRepository;
 
     // --- 인증 API ---
-
     @PostMapping("/auth/signup")
     public ResponseEntity<?> signup(@RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.signup(request));
@@ -48,7 +56,6 @@ public class ApiController {
     }
 
     // --- 일기 및 AI API ---
-
     // [핵심] 주소가 프론트엔드와 동일하게 "/diaries/write"여야 합니다!
     @PostMapping(value = "/diaries/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveDiary(
@@ -138,6 +145,48 @@ public class ApiController {
         String userIp = getClientIp(request);
         boolean liked = diaryService.toggleLike(id, userIp);
         return ResponseEntity.ok(Map.of("liked", liked));
+    }
+
+    // 공유된 피드 조회 (공개된 일기만)
+    @GetMapping("/feed")
+    public ResponseEntity<?> getFeed() {
+        List<Diary> publicDiaries = diaryRepository.findByIsPublicTrueOrderByCreatedAtDesc();
+
+        List<DiaryDto> dtos = publicDiaries.stream().map(d -> {
+            // Get author nickname
+            String authorNickname = "익명"; // Default to anonymous
+            if (!d.isAnonymous()) {
+                authorNickname = memberRepository.findById(d.getUserId())
+                        .map(Member::getNickname)
+                        .orElse("익명");
+            }
+
+            // Get like and comment counts
+            int likeCount = likesRepository.countByDiaryId(d.getId());
+            int commentCount = commentRepository.countByDiaryId(d.getId());
+
+            return DiaryDto.builder()
+                    .id(d.getId())
+                    .userId(d.getUserId())
+                    .content(d.getContent())
+                    .date(d.getDate())
+                    .title(d.getTitle())
+                    .emoji(d.getEmoji())
+                    .mood(d.getMood())
+                    .tension(d.getTension())
+                    .fun(d.getFun())
+                    .tags(d.getTags())
+                    .aiResponse(d.getAiResponse())
+                    .imageUrl(d.getImageUrl())
+                    .shared(d.isPublic())
+                    .anonymous(d.isAnonymous())
+                    .nickname(authorNickname)
+                    .likeCount(likeCount)
+                    .commentCount(commentCount)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     // Helper: 클라이언트 IP 추출

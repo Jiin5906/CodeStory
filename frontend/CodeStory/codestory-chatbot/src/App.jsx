@@ -89,11 +89,19 @@ function AppContent() {
     }, []);
 
     const fetchDiaries = async (userId) => {
-        if (!userId) return;
+        if (!userId) {
+            console.warn('[fetchDiaries] userId가 없습니다:', userId);
+            return;
+        }
+        console.log('[fetchDiaries] 일기 데이터 조회 시작, userId:', userId);
         try {
             const data = await diaryApi.getDiaries(userId);
+            console.log('[fetchDiaries] API 응답 데이터:', data);
+            console.log('[fetchDiaries] 데이터 타입:', Array.isArray(data) ? '배열' : typeof data);
+            console.log('[fetchDiaries] 데이터 개수:', Array.isArray(data) ? data.length : 'N/A');
             setDiaries(Array.isArray(data) ? data : []);
-        } catch {
+        } catch (error) {
+            console.error('[fetchDiaries] API 호출 실패:', error);
             setDiaries([]);
         }
     };
