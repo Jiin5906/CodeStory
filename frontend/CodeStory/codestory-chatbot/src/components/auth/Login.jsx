@@ -1,11 +1,44 @@
-import { useState } from 'react';
-import { FaPenNib, FaSignInAlt, FaUserPlus } from "react-icons/fa";
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FaPenNib, FaSignInAlt, FaUserPlus, FaGoogle } from "react-icons/fa";
 
 const Login = ({ onLogin, onSignup, onGuestLogin }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [isSignup, setIsSignup] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [nickname, setNickname] = useState('');
+
+    // OAuth2 리디렉션 후 토큰 처리
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        const refreshToken = params.get('refreshToken');
+        const userId = params.get('userId');
+        const userEmail = params.get('email');
+        const userNickname = params.get('nickname');
+
+        if (token && userId) {
+            // JWT 토큰과 사용자 정보 저장
+            localStorage.setItem('accessToken', token);
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
+
+            const userInfo = {
+                id: parseInt(userId),
+                email: userEmail,
+                nickname: userNickname
+            };
+            localStorage.setItem('diaryUser', JSON.stringify(userInfo));
+
+            console.log('[OAuth2] Google 로그인 성공 - UserId:', userId);
+
+            // 대시보드로 이동
+            navigate('/dashboard');
+        }
+    }, [location, navigate]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -15,6 +48,15 @@ const Login = ({ onLogin, onSignup, onGuestLogin }) => {
         } else {
             onLogin(email, password);
         }
+    };
+
+    // Google OAuth2 로그인
+    const handleGoogleLogin = () => {
+        // 백엔드 OAuth2 인증 엔드포인트로 리디렉션
+        const backendUrl = import.meta.env.PROD
+            ? 'https://logam.click'
+            : 'http://localhost:8080';
+        window.location.href = `${backendUrl}/oauth2/authorization/google`;
     };
 
     return (
@@ -93,11 +135,32 @@ const Login = ({ onLogin, onSignup, onGuestLogin }) => {
                             <button
                                 type="submit"
                                 className="w-full bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-[#0f1729] font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] transition-all active:scale-[0.98] mt-6"
+                                data-gtm="auth-email-submit"
                             >
                                 {isSignup ? <FaUserPlus /> : <FaSignInAlt />}
                                 <span>{isSignup ? '다이어리 만들기' : '일기장 펼치기'}</span>
                             </button>
                         </form>
+
+                        {/* OAuth Divider */}
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-[#1e3a5f]"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-[#0f1729]/90 text-[#64748b] font-mono">또는</span>
+                            </div>
+                        </div>
+
+                        {/* Google Login Button */}
+                        <button
+                            onClick={handleGoogleLogin}
+                            className="w-full bg-white text-[#0f1729] font-bold py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-[#f8f9fa] transition-all active:scale-[0.98] shadow-lg"
+                            data-gtm="auth-google-login"
+                        >
+                            <FaGoogle className="text-xl text-[#4285F4]" />
+                            <span>Google로 시작하기</span>
+                        </button>
 
                         {/* Footer Actions */}
                         <div className="mt-8 flex flex-col items-center gap-4 border-t border-[#1e3a5f] pt-6">

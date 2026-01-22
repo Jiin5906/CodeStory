@@ -1,0 +1,33 @@
+# Environment Variables (민감한 정보 포함)
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Build outputs
+diary/build/
+diary/out/
+frontend/**/dist/
+frontend/**/build/
+frontend/**/node_modules/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (사용자 업로드 파일)
+uploads/
+
+# Certificates
+certbot/
+
+# Database
+mysql_data/

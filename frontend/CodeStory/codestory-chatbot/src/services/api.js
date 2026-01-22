@@ -7,6 +7,59 @@ const api = axios.create({
     baseURL: API_BASE_URL,
 });
 
+// JWT 토큰을 요청 헤더에 자동으로 추가하는 인터셉터
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// 401 에러 발생 시 Refresh Token으로 재시도하는 인터셉터 (선택적)
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // 401 에러이고, 재시도하지 않은 요청인 경우
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                try {
+                    // Refresh Token으로 새 Access Token 요청 (백엔드에 구현 필요)
+                    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+                        refreshToken
+                    });
+
+                    const { accessToken } = response.data;
+                    localStorage.setItem('accessToken', accessToken);
+
+                    // 원래 요청 재시도
+                    originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+                    return api(originalRequest);
+                } catch (refreshError) {
+                    // Refresh Token도 만료된 경우 로그아웃 처리
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('diaryUser');
+                    window.location.href = '/login';
+                    return Promise.reject(refreshError);
+                }
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export const authApi = {
     login: async (email, password) => {
         const response = await api.post('/auth/login', { email, password });

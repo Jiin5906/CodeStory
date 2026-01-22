@@ -6,7 +6,8 @@
       "Bash(npm run lint:*)",
       "Bash(npm run dev:*)",
       "Bash(./gradlew clean:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(./gradlew dependencies:*)"
     ]
   }
 }
