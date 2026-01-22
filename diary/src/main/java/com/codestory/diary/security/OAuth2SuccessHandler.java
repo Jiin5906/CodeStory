@@ -49,8 +49,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.info("[OAuth2SuccessHandler] JWT 토큰 생성 완료 - UserId: {}", userId);
 
-        // 프론트엔드 리디렉션 URL 결정 (로컬 vs 운영)
-        String redirectUrl = determineRedirectUrl();
+        // 프론트엔드 리디렉션 URL 결정 (요청 Host 기반 동적 결정)
+        String redirectUrl = determineRedirectUrl(request);
 
         // 토큰을 쿼리 파라미터로 전달하여 프론트엔드로 리디렉션
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
@@ -68,14 +68,29 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     /**
-     * 환경에 따라 프론트엔드 리디렉션 URL 결정
+     * 요청이 들어온 Host를 기반으로 프론트엔드 리디렉션 URL 동적 결정
+     *
+     * @param request HTTP 요청 객체
+     * @return 프론트엔드 로그인 페이지 URL
      */
-    private String determineRedirectUrl() {
-        // 로컬 개발 환경
-        if ("local".equals(activeProfile) || "default".equals(activeProfile)) {
-            return "http://localhost:5173/login";
+    private String determineRedirectUrl(HttpServletRequest request) {
+        // X-Forwarded-Host 헤더 확인 (Nginx 프록시를 통한 요청인 경우)
+        String host = request.getHeader("X-Forwarded-Host");
+
+        // X-Forwarded-Host가 없으면 일반 Host 헤더 사용
+        if (host == null || host.isEmpty()) {
+            host = request.getHeader("Host");
         }
-        // 운영 환경
-        return "https://logam.click/login";
+
+        log.info("[OAuth2SuccessHandler] 요청 Host: {}", host);
+
+        // Host 기반으로 환경 결정
+        if (host != null && (host.contains("localhost") || host.contains("127.0.0.1"))) {
+            // 로컬 개발 환경
+            return "http://localhost:5173/login";
+        } else {
+            // 운영 환경 (logam.click 또는 기타 프로덕션 도메인)
+            return "https://logam.click/login";
+        }
     }
 }
