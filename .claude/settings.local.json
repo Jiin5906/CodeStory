@@ -7,7 +7,9 @@
       "Bash(npm run dev:*)",
       "Bash(./gradlew clean:*)",
       "Bash(npm run build:*)",
-      "Bash(./gradlew dependencies:*)"
+      "Bash(./gradlew dependencies:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker compose logs:*)"
     ]
   }
 }
