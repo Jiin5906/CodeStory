@@ -103,8 +103,12 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
             <div className="absolute top-[-10%] left-[-20%] w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-[100px] animate-blob mix-blend-multiply pointer-events-none" data-gtm="blob-decoration-1"></div>
             <div className="absolute bottom-[-10%] right-[-20%] w-[500px] h-[500px] bg-rose-200/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-multiply pointer-events-none" data-gtm="blob-decoration-2"></div>
 
-            {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-6 pt-12" data-gtm="mobile-dashboard-header">
+            {/* Header (Safe Area 적용) */}
+            <div
+                className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center px-6 pb-6"
+                style={{ paddingTop: 'max(3rem, calc(1.5rem + env(safe-area-inset-top)))' }}
+                data-gtm="mobile-dashboard-header"
+            >
                 <div className="flex flex-col animate-fade-in-up">
                     <span className="text-4xl font-bold text-slate-800 tracking-tight font-nunito">
                         {format(new Date(), 'd')}

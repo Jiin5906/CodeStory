@@ -11,7 +11,7 @@ body, button, input, textarea, select {
 /* 2. 앱 최상위 컨테이너 */
 .app-root {
     width: 100vw;
-    min-height: 100vh; /* height를 min-height로 변경하여 내용에 따라 늘어날 수 있게 */
+    min-height: 100dvh; /* Dynamic Viewport Height (모바일 주소창 대응) */
     overflow: hidden; /* 데스크톱에서는 화면 전체 스크롤 방지 */
 
     /* 배경색 변수 적용 */

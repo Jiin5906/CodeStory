@@ -6,7 +6,7 @@
     margin: 0 auto;
     padding-bottom: 80px;
     background: var(--bg-color); /* [수정] 테마 배경 적용 */
-    min-height: 100vh;
+    min-height: 100dvh;
     color: var(--text-color); /* [수정] 테마 텍스트 적용 */
     transition: background 0.3s, color 0.3s;
 }

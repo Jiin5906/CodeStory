@@ -84,8 +84,11 @@ const BottomSheet = ({ onWrite, diaries, streakDays, onCalendarClick, onMindReco
                 </div>
             </div>
 
-            {/* 내부 콘텐츠 (리스트) */}
-            <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-10">
+            {/* 내부 콘텐츠 (리스트, Safe Area 적용) */}
+            <div
+                className="flex-1 overflow-y-auto no-scrollbar px-6"
+                style={{ paddingBottom: 'max(2.5rem, calc(1rem + env(safe-area-inset-bottom)))' }}
+            >
 
                 {/* 퀵 메뉴 */}
                 <div className="grid grid-cols-4 gap-4 mb-8 mt-2" data-gtm="bottomsheet-quick-menu">

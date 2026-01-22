@@ -86,12 +86,20 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col animate-fade-in-up" data-gtm="mind-record-container">
+        <div
+            className="fixed inset-0 z-50 bg-slate-50 flex flex-col animate-fade-in-up"
+            style={{ height: '100dvh' }}
+            data-gtm="mind-record-container"
+        >
             {/* 배경 그라디언트 (MainDashboard와 통일감) */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3] opacity-50 pointer-events-none"></div>
 
-            {/* 헤더 */}
-            <div className="relative z-10 flex items-center p-4 px-6 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm" data-gtm="mind-record-header">
+            {/* 헤더 (Safe Area 적용) */}
+            <div
+                className="relative z-10 flex items-center px-6 py-4 bg-white/30 backdrop-blur-md border-b border-white/20 shadow-sm flex-none"
+                style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+                data-gtm="mind-record-header"
+            >
                 <button onClick={onClose} className="text-2xl text-slate-600 hover:scale-110 transition-transform p-2 mr-4" data-gtm="mind-record-back-button">
                     <FaArrowLeft />
                 </button>
@@ -101,8 +109,12 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
                 </div>
             </div>
 
-            {/* 채팅 영역 (읽기 전용) */}
-            <div className="relative z-10 flex-1 overflow-y-auto p-4 pb-8 flex flex-col gap-4 no-scrollbar" data-gtm="mind-record-chat-area">
+            {/* 채팅 영역 (읽기 전용, Flex 1로 중간 영역만 스크롤) */}
+            <div
+                className="relative z-10 flex-1 overflow-y-auto p-4 flex flex-col gap-4 no-scrollbar"
+                style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+                data-gtm="mind-record-chat-area"
+            >
                 {messages.map((msg) => {
                     if (msg.type === 'date') {
                         return (

@@ -65,7 +65,7 @@ const DiaryDetail = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '100vh',
+                height: '100dvh',
                 color: 'var(--text-color)'
             }} data-gtm="diary-detail-loading">
                 로딩 중...
@@ -79,7 +79,7 @@ const DiaryDetail = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '100vh',
+                height: '100dvh',
                 color: 'var(--text-color)'
             }} data-gtm="diary-detail-not-found">
                 일기를 찾을 수 없습니다.
