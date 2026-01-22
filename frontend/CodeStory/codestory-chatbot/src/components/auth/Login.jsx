@@ -35,8 +35,8 @@ const Login = ({ onLogin, onSignup, onGuestLogin }) => {
 
             console.log('[OAuth2] Google 로그인 성공 - UserId:', userId);
 
-            // 대시보드로 이동
-            navigate('/dashboard');
+            // 대시보드로 이동 (replace: true로 뒤로가기 시 토큰 노출 방지)
+            navigate('/dashboard', { replace: true });
         }
     }, [location, navigate]);
 
