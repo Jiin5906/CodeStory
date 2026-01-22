@@ -33,10 +33,13 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
 
         sortedDiaries.forEach((diary, index) => {
             console.log(`[MindRecord] diary[${index}]:`, diary);
-            console.log(`[MindRecord] diary[${index}] fields - date: ${diary.date}, content: ${diary.content?.substring(0, 50)}, aiResponse: ${diary.aiResponse?.substring(0, 50)}`);
+            console.log(`[MindRecord] diary[${index}] fields - date: ${diary.date}, createdAt: ${diary.createdAt}, content: ${diary.content?.substring(0, 50)}`);
 
-            const diaryDate = parseISO(diary.date);
-            const dateStr = format(diaryDate, 'yyyy년 M월 d일 EEEE', { locale: ko });
+            // createdAt이 있으면 사용, 없으면 date 사용 (하위 호환성)
+            const timestamp = diary.createdAt || diary.date;
+            const diaryDateTime = parseISO(timestamp);
+            const dateStr = format(diaryDateTime, 'yyyy년 M월 d일 EEEE', { locale: ko });
+            const timeStr = format(diaryDateTime, 'a h:mm', { locale: ko });
 
             // 날짜가 바뀌면 날짜 구분선 추가
             if (lastDate !== dateStr) {
@@ -49,7 +52,7 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
                 id: messageId++,
                 type: 'user',
                 text: diary.content,
-                time: format(diaryDate, 'a h:mm', { locale: ko })
+                time: timeStr
             });
 
             // AI 응답
@@ -58,7 +61,7 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
                     id: messageId++,
                     type: 'ai',
                     text: diary.aiResponse,
-                    time: format(diaryDate, 'a h:mm', { locale: ko })
+                    time: timeStr
                 });
             }
         });
@@ -70,14 +73,23 @@ const MindRecord = ({ isOpen, onClose, diaries = [] }) => {
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef(null);
 
-    // 스크롤 하단 고정
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // 스크롤 하단 고정 (instant로 즉시 이동)
+    const scrollToBottom = (instant = false) => {
+        messagesEndRef.current?.scrollIntoView({ behavior: instant ? "instant" : "smooth" });
     };
 
+    // messages 변경 시 스크롤
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    // isOpen 상태 변경 시 즉시 맨 아래로 스크롤 (카카오톡 스타일)
+    useEffect(() => {
+        if (isOpen) {
+            // 약간의 딜레이를 주어 렌더링 완료 후 스크롤
+            setTimeout(() => scrollToBottom(true), 100);
+        }
+    }, [isOpen]);
 
     // 닫힘 상태일 때 렌더링 최적화 (hooks 호출 후 체크)
     if (!isOpen) return null;

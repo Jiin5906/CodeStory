@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,6 +16,7 @@ public class DiaryDto {
     private Long id;
     private Long userId;
     private LocalDate date;
+    private LocalDateTime createdAt; // 생성 시간 (시, 분 포함)
     private String title;
     private String content;
     private String emoji;

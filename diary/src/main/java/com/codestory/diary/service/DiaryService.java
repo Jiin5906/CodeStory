@@ -215,6 +215,7 @@ public class DiaryService {
                 .id(diary.getId())
                 .userId(diary.getUserId())
                 .date(diary.getDate())
+                .createdAt(diary.getCreatedAt())
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .emoji(diary.getEmoji())

@@ -90,6 +90,7 @@ public class ApiController {
                     .userId(d.getUserId())
                     .content(d.getContent())
                     .date(d.getDate())
+                    .createdAt(d.getCreatedAt())
                     .title(d.getTitle())
                     .emoji(d.getEmoji())
                     .mood(d.getMood())
