@@ -147,48 +147,6 @@ public class ApiController {
         return ResponseEntity.ok(Map.of("liked", liked));
     }
 
-    // 공유된 피드 조회 (공개된 일기만)
-    @GetMapping("/feed")
-    public ResponseEntity<?> getFeed() {
-        List<Diary> publicDiaries = diaryRepository.findByIsPublicTrueOrderByCreatedAtDesc();
-
-        List<DiaryDto> dtos = publicDiaries.stream().map(d -> {
-            // Get author nickname
-            String authorNickname = "익명"; // Default to anonymous
-            if (!d.isAnonymous()) {
-                authorNickname = memberRepository.findById(d.getUserId())
-                        .map(Member::getNickname)
-                        .orElse("익명");
-            }
-
-            // Get like and comment counts
-            int likeCount = likesRepository.countByDiaryId(d.getId());
-            int commentCount = commentRepository.countByDiaryId(d.getId());
-
-            return DiaryDto.builder()
-                    .id(d.getId())
-                    .userId(d.getUserId())
-                    .content(d.getContent())
-                    .date(d.getDate())
-                    .title(d.getTitle())
-                    .emoji(d.getEmoji())
-                    .mood(d.getMood())
-                    .tension(d.getTension())
-                    .fun(d.getFun())
-                    .tags(d.getTags())
-                    .aiResponse(d.getAiResponse())
-                    .imageUrl(d.getImageUrl())
-                    .shared(d.isPublic())
-                    .anonymous(d.isAnonymous())
-                    .nickname(authorNickname)
-                    .likeCount(likeCount)
-                    .commentCount(commentCount)
-                    .build();
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
-    }
-
     // Helper: 클라이언트 IP 추출
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
