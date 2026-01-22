@@ -18,6 +18,7 @@ import CalendarModal from './components/calendar/CalendarModal';
 import MonthlyReport from './components/stats/MonthlyReport';
 import Settings from './components/layout/Settings';
 import SharedFeed from './components/feed/SharedFeed';
+import ShopPage from './components/shop/ShopPage';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 function AppContent() {
@@ -192,6 +193,7 @@ function AppContent() {
                                     <Route path="calendar" element={<CalendarView user={user} diaries={diaries} />} />
                                     <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
                                     <Route path="shared" element={<SharedFeed />} />
+                                    <Route path="shop" element={<ShopPage />} />
                                     <Route path="diary/:id" element={<DiaryDetail />} />
                                     <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} onLogout={handleLogout} />} />
                                     <Route path="/" element={<Navigate to="/dashboard" replace />} />

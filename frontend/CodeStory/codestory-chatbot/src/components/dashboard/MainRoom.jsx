@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import mongleAnimation from '../../assets/mongleIDLE.json';
 
 const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
+    const navigate = useNavigate();
     const [floatingTexts, setFloatingTexts] = useState([]);
     const [showAiThought, setShowAiThought] = useState(false);
 
@@ -68,7 +70,11 @@ const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
                     </div>
 
                     {/* (2) 몽글이 캐릭터 */}
-                    <div className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-transform duration-500 hover:scale-105 cursor-pointer group" data-gtm="mainroom-character">
+                    <div
+                        className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-transform duration-500 hover:scale-105 cursor-pointer group"
+                        onClick={() => navigate('/shop')}
+                        data-gtm="mainroom-character"
+                    >
                         <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                         <Lottie
                             animationData={mongleAnimation}

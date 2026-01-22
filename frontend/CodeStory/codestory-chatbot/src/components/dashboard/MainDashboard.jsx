@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { format, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaTrash, FaGlobe, FaLock, FaChevronLeft, FaChevronRight, FaQuoteLeft } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import { diaryApi } from '../../services/api';
 import mongleAnimation from '../../assets/mongleIDLE.json';
 
 const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh }) => {
+    const navigate = useNavigate();
     const [localDiaries, setLocalDiaries] = useState(diaries);
 
     useEffect(() => {
@@ -87,7 +89,11 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                     </h1>
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center" data-gtm="dashboard-mongle-animation">
+                <div
+                    className="relative z-10 flex flex-col items-center cursor-pointer transition-transform duration-300 hover:scale-110"
+                    onClick={() => navigate('/shop')}
+                    data-gtm="dashboard-mongle-animation"
+                >
                     <div className="w-40 h-40 bg-purple-50 rounded-full flex items-center justify-center">
                         <Lottie animationData={mongleAnimation} loop={true} autoplay={true} style={{ width: 140, height: 140 }} />
                     </div>
