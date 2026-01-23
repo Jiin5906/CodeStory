@@ -12,7 +12,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
     
-    // --- [수정 1] 인터랙션 상태 추가 (초기값 설정) ---
+    // --- 인터랙션 상태 관리 ---
     const [isDrawerOpen, setIsDrawerOpen] = useState(false); // 서랍: 닫힘(false) 시작
     const [isLampOn, setIsLampOn] = useState(true);      // 무드등: 켜짐(true) 시작
     const [isWindowOpen, setIsWindowOpen] = useState(false); // 창문: 닫힘(false) 시작
@@ -65,13 +65,13 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
         }
     };
 
-    // --- [수정 2] 클릭 핸들러 (애니메이션만 작동하도록 수정) ---
+    // 클릭 핸들러 (애니메이션 토글)
     const handleDrawerClick = () => {
-        setIsDrawerOpen(!isDrawerOpen); // 클릭 시 열림/닫힘 상태 토글
+        setIsDrawerOpen(!isDrawerOpen);
     };
 
     const handleLampClick = () => {
-        setIsLampOn(!isLampOn); // 클릭 시 켜짐/꺼짐 상태 토글
+        setIsLampOn(!isLampOn);
     };
 
     return (
@@ -81,7 +81,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                 
                 {/* 메인 화면 영역 */}
                 <div className="relative w-full flex-1 overflow-hidden">
-                    {/* 하늘 배경 그라디언트 (창문 열리면 밝아짐) */}
+                    {/* 하늘 배경 그라디언트 */}
                     <div className={`absolute inset-0 bg-gradient-to-b transition-colors duration-700 ${isWindowOpen ? 'from-[#E3F2FD] via-[#E1F5FE] to-[#F3E5F5]' : 'from-[#FFF0F5] via-[#FFF5F6] to-[#FFE4E1]'}`}></div>
 
                     {/* --- 창문 (Top 8%) --- */}
@@ -91,29 +91,34 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                     >
                         <div className={`relative z-10 h-full w-full overflow-hidden rounded-t-full rounded-b-xl border-[6px] border-white bg-[#B3E5FC] shadow-inner transition-all duration-500 ${isWindowOpen ? 'bg-[#E1F5FE]' : ''}`}>
                             <div className="absolute top-4 right-2 h-4 w-8 rounded-full bg-white/40 blur-[2px]"></div>
-                            {/* 창살 애니메이션 */}
                             <div className={`absolute left-1/2 h-full w-[6px] -translate-x-1/2 bg-white transition-transform duration-700 origin-top ${isWindowOpen ? 'scale-y-0 opacity-0' : 'scale-y-100 opacity-100'}`}></div>
                             <div className={`absolute top-1/2 h-[6px] w-full -translate-y-1/2 bg-white transition-transform duration-700 origin-left ${isWindowOpen ? 'scale-x-0 opacity-0' : 'scale-x-100 opacity-100'}`}></div>
                         </div>
                         <div className="absolute -bottom-2 left-1/2 w-32 h-3 bg-white -translate-x-1/2 rounded-full shadow-sm"></div>
                     </div>
 
-                    {/* --- [수정 3] 서랍 (Top 20%) --- */}
+                    {/* --- [수정된 부분] 서랍 (Top 20%) --- */}
                     <div 
                         className="group perspective-1000 absolute top-[20%] left-6 z-20 cursor-pointer transform scale-90"
-                        onClick={handleDrawerClick} // 페이지 이동 대신 상태 토글 함수 연결
+                        onClick={handleDrawerClick}
                     >
+                        {/* 서랍 전체 컨테이너 */}
                         <div className="relative h-28 w-20 rounded-[1rem] border-2 border-rose-50 bg-white shadow-[0_8px_20px_rgba(255,182,193,0.2)] transition-transform duration-300 hover:-rotate-2">
+                            {/* 서랍 상판 (고정) */}
                             <div className="absolute -top-6 left-1/2 h-6 w-8 -translate-x-1/2 rounded-b-lg bg-[#D7CCC8]">
                                 <div className="absolute -top-4 left-1/2 h-6 w-10 -translate-x-1/2 rounded-full bg-[#A5D6A7]"></div>
                             </div>
                             
-                            {/* 움직이는 서랍 통: isDrawerOpen 상태에 따라 translate 적용 */}
+                            {/* 움직이는 서랍 통 (핵심 수정)
+                                - isDrawerOpen이 true면 translate-x-6 (앞으로 나옴)
+                                - isDrawerOpen이 false면 translate-x-0 (제자리) 
+                                - hover 효과 제거하여 깔끔하게 만듦 */}
                             <div className={`absolute top-2 left-1/2 h-10 w-16 -translate-x-1/2 rounded-lg border border-rose-100 bg-rose-50 transition-all duration-500 ease-out 
-                                ${isDrawerOpen ? 'translate-x-6' : 'translate-x-0 group-hover:translate-x-2'}`}>
+                                ${isDrawerOpen ? 'translate-x-6' : 'translate-x-0'}`}>
                                 <div className="absolute top-1/2 left-2 h-2 w-2 -translate-y-1/2 rounded-full bg-rose-200 shadow-sm"></div>
                             </div>
                             
+                            {/* 서랍 하판 (고정) */}
                             <div className="absolute bottom-2 left-1/2 h-10 w-16 -translate-x-1/2 rounded-lg border border-stone-100 bg-white flex items-center justify-center">
                                 <div className="w-8 h-1 bg-stone-100 rounded-full"></div>
                             </div>
@@ -123,10 +128,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                     {/* --- 무드등 (Top 22%) --- */}
                     <div 
                         className="group absolute top-[22%] right-6 z-20 flex cursor-pointer flex-col items-center transform scale-90" 
-                        onClick={handleLampClick} // 페이지 이동 대신 상태 토글 함수 연결
+                        onClick={handleLampClick}
                     >
                         <div className="relative z-10">
-                            {/* 전구 빛 Glow 효과 */}
                             <div className={`absolute top-1/2 left-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-200/40 blur-xl transition-all duration-500 
                                 ${isLampOn ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}></div>
                             <div className="relative h-16 w-20 overflow-hidden rounded-t-full rounded-b-xl border-2 border-white bg-[#FFD1DC] shadow-lg transition-transform duration-300 hover:-translate-y-1">
@@ -145,11 +149,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                         </div>
                     </div>
 
-                    {/* 캐릭터 바닥 그림자 (Top 48%로 위치 조정) */}
+                    {/* 캐릭터 바닥 그림자 (Top 48%) */}
                     <div className="absolute top-[48%] left-1/2 h-24 w-64 -translate-x-1/2 rounded-[50%] bg-[#FFB7C5]/20 blur-[1px]"></div>
 
-                    {/* --- [수정 4] MainRoom 캐릭터 위치 고정 (Top 42%) --- 
-                        Bottom 기준이 아닌 Top 기준으로 잡아 바텀시트 뒤로 숨지 않게 함 */}
+                    {/* MainRoom 캐릭터 (Top 42% 고정) */}
                     <div className="absolute inset-x-0 top-[42%] z-30 flex items-start justify-center pointer-events-none">
                         <div className="pointer-events-auto">
                             <MainRoom
@@ -187,7 +190,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                             </span>
                         </div>
                     </div>
-                    {/* 스트릭 배지 (이건 클릭 시 캘린더 이동 유지) */}
                     <div 
                         className="rounded-full bg-white/80 px-4 py-1.5 shadow-[0_4px_12px_rgba(255,182,193,0.2)] backdrop-blur-sm pointer-events-auto cursor-pointer hover:scale-105 transition-transform"
                         onClick={onCalendarClick}
