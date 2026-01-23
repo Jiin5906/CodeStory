@@ -20,6 +20,7 @@ import com.codestory.diary.entity.Comment;
 import com.codestory.diary.entity.Diary;
 import com.codestory.diary.entity.Likes;
 import com.codestory.diary.entity.Member;
+import com.codestory.diary.neo4j.GraphService;
 import com.codestory.diary.repository.CommentRepository;
 import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.repository.LikesRepository;
@@ -37,6 +38,7 @@ public class DiaryService {
     private final LikesRepository likesRepository;
     private final AiService aiService;
     private final MemoryService memoryService;
+    private final GraphService graphService;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
     @Transactional
@@ -130,6 +132,17 @@ public class DiaryService {
                 .build();
 
         Diary saved = diaryRepository.save(newDiary);
+
+        // Neo4j 그래프 데이터베이스에 일기 저장 (감정 관계 그래프 생성)
+        try {
+            graphService.saveDiaryToGraph(request.getContent());
+            System.out.println("✅ Neo4j에 일기 저장 완료: " + saved.getId());
+        } catch (Exception e) {
+            System.err.println("❌ Neo4j 저장 실패 (일기 작성은 정상 완료): " + e.getMessage());
+            e.printStackTrace();
+            // Neo4j 저장 실패해도 일기 작성은 계속 진행
+        }
+
         return convertToDto(saved);
     }
 
