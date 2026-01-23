@@ -1,6 +1,7 @@
 package com.codestory.diary.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -68,16 +69,20 @@ public class DiaryController {
     @Autowired
     private CounselingService counselingService;
 
-    // 1. 일기 저장 (기억하기)
+    // 1. 일기 저장 (기억하기) - 유저별로 분리된 그래프 생성
     @PostMapping("/save")
-    public String saveDiary(@RequestBody String content) {
-        graphService.saveDiaryToGraph(content);
+    public String saveDiary(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        String content = request.get("content").toString();
+        graphService.saveDiaryToGraph(userId, content);
         return "일기가 마음의 지도에 저장되었습니다.";
     }
 
-    // 2. 상담 요청 (대화하기)
+    // 2. 상담 요청 (대화하기) - 유저별로 분리된 상담
     @PostMapping("/talk")
-    public String talkToAI(@RequestBody String message) {
-        return counselingService.generateCounselingResponse(message);
+    public String talkToAI(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        String message = request.get("message").toString();
+        return counselingService.generateCounselingResponse(userId, message);
     }
 }

@@ -133,10 +133,10 @@ public class DiaryService {
 
         Diary saved = diaryRepository.save(newDiary);
 
-        // Neo4j 그래프 데이터베이스에 일기 저장 (감정 관계 그래프 생성)
+        // Neo4j 그래프 데이터베이스에 일기 저장 (감정 관계 그래프 생성 - 유저별로 분리)
         try {
-            graphService.saveDiaryToGraph(request.getContent());
-            System.out.println("✅ Neo4j에 일기 저장 완료: " + saved.getId());
+            graphService.saveDiaryToGraph(request.getUserId(), request.getContent());
+            System.out.println("✅ Neo4j에 일기 저장 완료 (User ID: " + request.getUserId() + ", Diary ID: " + saved.getId() + ")");
         } catch (Exception e) {
             System.err.println("❌ Neo4j 저장 실패 (일기 작성은 정상 완료): " + e.getMessage());
             e.printStackTrace();

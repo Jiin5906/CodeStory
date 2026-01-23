@@ -17,8 +17,8 @@ public class GraphService {
     private AiService aiService;
 
     // [기능 1] 일기를 뇌(Graph)에 저장하기
-    public void saveDiaryToGraph(String diaryContent) {
-        // 1. 프롬프트 생성
+    public void saveDiaryToGraph(Long userId, String diaryContent) {
+        // 1. 프롬프트 생성 (유저별로 분리된 그래프 생성)
         String prompt = "[System Prompt]\n"
                 + "당신은 심리 상담 전문가이자 데이터 엔지니어입니다.\n"
                 + "사용자의 일기를 분석해서 Neo4j 그래프 데이터베이스에 넣을 수 있는 'Cypher Query' 문장만 딱 만들어주세요.\n"
@@ -26,13 +26,15 @@ public class GraphService {
                 + "\n"
                 + "[규칙]\n"
                 + "1. 노드(점) 종류: (:Person), (:Event), (:Emotion), (:Action)\n"
-                + "2. 관계(선) 종류: -[:DID]->, -[:FELT]->, -[:CAUSED]->\n"
-                + "3. 사용자는 항상 'User'라는 이름의 Person으로 고정하세요.\n"
+                + "2. 관계(선) 종류: -[:DID]->, -[:FELT]->, -[:CAUSED]->, -[:INVOLVED]->\n"
+                + "3. **중요**: 사용자 노드는 반드시 'MERGE (u:Person {userId: $userId})'로 시작하세요.\n"
+                + "   - $userId는 파라미터로 전달되며, 각 유저를 고유하게 식별합니다.\n"
+                + "   - name 속성이 아닌 userId 속성으로 구분해야 합니다.\n"
                 + "\n"
                 + "[예시]\n"
                 + "사용자 입력: \"오늘 팀장님한테 깨져서 너무 우울해. 그래서 매운 떡볶이 먹었어.\"\n"
                 + "출력:\n"
-                + "MERGE (u:Person {name: 'User'})\n"
+                + "MERGE (u:Person {userId: $userId})\n"
                 + "MERGE (p:Person {name: '팀장님'})\n"
                 + "MERGE (e:Event {name: '혼남'})\n"
                 + "MERGE (em:Emotion {name: '우울함', intensity: 8})\n"
@@ -45,17 +47,23 @@ public class GraphService {
         // 2. AiService의 getMultimodalResponse 메서드 호출
         String cypherQuery = aiService.getMultimodalResponse(prompt, diaryContent, null);
 
-        // 3. 코드 정제 및 실행
+        // 3. 코드 정제 및 실행 (userId 파라미터 바인딩)
         if (cypherQuery != null) {
             cypherQuery = cypherQuery.replace("```cypher", "").replace("```", "").trim();
-            neo4jClient.query(cypherQuery).run();
-            System.out.println("✅ 그래프 저장 완료: " + cypherQuery);
+
+            // userId 파라미터 바인딩하여 쿼리 실행
+            neo4jClient.query(cypherQuery)
+                    .bind(userId).to("userId")
+                    .run();
+
+            System.out.println("✅ 그래프 저장 완료 (User ID: " + userId + "): " + cypherQuery);
         }
     }
 
-    // [기능 2] 관련된 기억 꺼내오기
-    public String getRelatedMemories(String userMessage) {
-        String query = "MATCH (e:Emotion)<-[:CAUSED]-(ev:Event) "
+    // [기능 2] 관련된 기억 꺼내오기 (유저별로 분리)
+    public String getRelatedMemories(Long userId, String userMessage) {
+        // 특정 유저의 그래프에서만 기억을 검색
+        String query = "MATCH (u:Person {userId: $userId})-[:INVOLVED]->(ev:Event)-[:CAUSED]->(e:Emotion) "
                 + "WHERE e.name CONTAINS $keyword OR ev.name CONTAINS $keyword "
                 + "RETURN ev.name AS event, e.name AS emotion "
                 + "LIMIT 3";
@@ -64,6 +72,7 @@ public class GraphService {
         String keyword = "우울";
 
         Collection<Map<String, Object>> results = neo4jClient.query(query)
+                .bind(userId).to("userId")
                 .bind(keyword).to("keyword")
                 .fetch().all();
 
