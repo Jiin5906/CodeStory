@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { startOfDay, parseISO, format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
 import { diaryApi } from '../../services/api';
 
-const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedClick, onStatsClick, onSettingsClick }) => {
+const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
@@ -16,21 +17,17 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
     const streakDays = useMemo(() => {
         if (!diaries || diaries.length === 0) return 0;
 
-        // 일기 날짜를 Date 객체로 변환하고 정렬
         const sortedDates = diaries
             .map(d => startOfDay(parseISO(d.date)))
-            .sort((a, b) => b - a); // 최신순 정렬
+            .sort((a, b) => b - a);
 
         if (sortedDates.length === 0) return 0;
 
-        // 오늘 또는 어제부터 시작하는지 확인
         const latestDate = sortedDates[0];
         const daysDiff = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
 
-        // 오늘이나 어제가 아니면 스트릭 끊김
         if (daysDiff > 1) return 0;
 
-        // 연속 일수 계산
         let streak = 1;
         let currentDate = latestDate;
 
@@ -42,14 +39,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                 streak++;
                 currentDate = prevDate;
             } else if (diff === 0) {
-                // 같은 날 여러 일기 - 스킵
                 continue;
             } else {
-                // 연속 끊김
                 break;
             }
         }
-
         return streak;
     }, [diaries, today]);
 
@@ -60,7 +54,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
         setAiResponse(null);
 
         try {
-            // 기본 감정 데이터 설정
             const diaryData = {
                 userId: user.id,
                 content: content,
@@ -75,14 +68,12 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
                 tags: []
             };
 
-            // AI 응답 받기 및 일기 저장
             const response = await diaryApi.saveDiary(diaryData, null);
 
             if (response && response.aiResponse) {
                 setAiResponse(response.aiResponse);
             }
 
-            // 부모 컴포넌트에 알림 (diaries 목록 갱신용)
             if (onWriteClick) {
                 onWriteClick();
             }
@@ -95,58 +86,133 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onFeedC
     };
 
     return (
-        <div
-            className="relative w-full h-[100dvh] overflow-hidden bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3] text-slate-700 font-gowun selection:bg-rose-200"
-            data-gtm="view-mobile-dashboard-new"
-        >
-            {/* Background Blob Decorations */}
-            <div className="absolute top-[-10%] left-[-20%] w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-[100px] animate-blob mix-blend-multiply pointer-events-none" data-gtm="blob-decoration-1"></div>
-            <div className="absolute bottom-[-10%] right-[-20%] w-[500px] h-[500px] bg-rose-200/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-multiply pointer-events-none" data-gtm="blob-decoration-2"></div>
+        <div className="flex min-h-screen items-center justify-center bg-[#FFF5F6] p-4 font-sans selection:bg-rose-200" data-gtm="view-mobile-dashboard-new">
 
-            {/* Header (Safe Area 적용) */}
-            <div
-                className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center px-6 pb-6"
-                style={{ paddingTop: 'max(3rem, calc(1.5rem + env(safe-area-inset-top)))' }}
-                data-gtm="mobile-dashboard-header"
-            >
-                <div className="flex flex-col animate-fade-in-up">
-                    <span className="text-4xl font-bold text-slate-800 tracking-tight font-nunito">
-                        {format(new Date(), 'd')}
-                    </span>
-                    <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest font-nunito">
-                        {format(new Date(), 'EEEE', { locale: { localize: { day: (n) => ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][n] } } })}
-                    </span>
+            {/* 폰 프레임 컨테이너 */}
+            <div className="relative flex h-[800px] w-full max-w-[375px] flex-col overflow-hidden rounded-[3rem] border-[10px] border-white bg-[#FFFCF8] shadow-[0_20px_60px_-10px_rgba(255,182,193,0.5)] ring-1 ring-rose-100">
+
+                {/* 메인 화면 영역 (배경 + MainRoom) */}
+                <div className="relative w-full flex-1 overflow-hidden">
+                    {/* 하늘 배경 그라디언트 */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#FFF0F5] via-[#FFF5F6] to-[#FFE4E1]"></div>
+
+                    {/* 창문 그래픽 */}
+                    <div className="absolute top-12 left-1/2 h-32 w-32 -translate-x-1/2 opacity-80 pointer-events-none">
+                        <div className="relative z-10 h-full w-full overflow-hidden rounded-t-full rounded-b-xl border-[6px] border-white bg-[#B3E5FC] shadow-inner">
+                            <div className="absolute left-1/2 h-full w-[6px] -translate-x-1/2 bg-white"></div>
+                            <div className="absolute top-1/2 h-[6px] w-full -translate-y-1/2 bg-white"></div>
+                            <div className="absolute top-4 right-2 h-4 w-8 animate-pulse rounded-full bg-white/80 blur-[2px]"></div>
+                        </div>
+                    </div>
+
+                    {/* 달력/액자 데코 (좌측) - 클릭 시 캘린더 이동 */}
+                    <div
+                        className="group perspective-1000 absolute top-48 left-6 z-20 cursor-pointer"
+                        onClick={onCalendarClick}
+                        data-gtm="calendar-decoration-click"
+                    >
+                        <div className="relative h-28 w-20 rounded-[1rem] border-2 border-rose-50 bg-white shadow-[0_8px_20px_rgba(255,182,193,0.2)] transition-transform duration-300 group-hover:-rotate-2">
+                            <div className="absolute -top-6 left-1/2 h-6 w-8 -translate-x-1/2 rounded-b-lg bg-[#D7CCC8]">
+                                <div className="absolute -top-4 left-1/2 h-6 w-10 -translate-x-1/2 rounded-full bg-[#A5D6A7]"></div>
+                            </div>
+                            <div className="absolute top-2 left-1/2 h-10 w-16 -translate-x-1/2 rounded-lg border border-rose-100 bg-rose-50 transition-all duration-500 ease-out group-hover:translate-x-4 group-active:translate-x-8">
+                                <div className="absolute top-1/2 left-2 h-2 w-2 -translate-y-1/2 rounded-full bg-rose-200 shadow-sm"></div>
+                            </div>
+                            <div className="absolute bottom-2 left-1/2 h-10 w-16 -translate-x-1/2 rounded-lg border border-stone-100 bg-white flex items-center justify-center">
+                                <div className="w-8 h-1 bg-stone-100 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 전등 스위치 데코 (우측) - 설정 이동 */}
+                    <label
+                        className="group absolute top-56 right-8 z-20 flex cursor-pointer flex-col items-center"
+                        onClick={onSettingsClick}
+                        data-gtm="settings-decoration-click"
+                    >
+                        <div className="relative z-10">
+                            <div className="absolute top-1/2 left-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-200/20 blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+                            <div className="relative h-16 w-20 overflow-hidden rounded-t-full rounded-b-xl border-2 border-white bg-[#FFD1DC] shadow-lg transition-transform duration-300 group-hover:-translate-y-1">
+                                <div className="absolute bottom-0 h-2 w-full bg-white/30"></div>
+                                <div className="absolute bottom-4 h-1 w-full bg-white/20"></div>
+                            </div>
+                        </div>
+                        <div className="relative h-24 w-1.5 bg-white shadow-sm">
+                            <div className="absolute top-0 right-[-8px] h-8 w-[1px] origin-top bg-stone-300 transition-all duration-300 group-hover:rotate-12 group-active:scale-y-125">
+                                <div className="absolute bottom-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-rose-300"></div>
+                            </div>
+                        </div>
+                    </label>
+
+                    {/* 중앙 하단 그림자 (MainRoom 캐릭터가 올라갈 곳) */}
+                    <div className="absolute bottom-[28%] left-1/2 h-24 w-64 -translate-x-1/2 rounded-[50%] bg-[#FFB7C5]/20 blur-[1px]"></div>
+
+                    {/* MainRoom 컴포넌트 배치 */}
+                    <div className="absolute inset-0 z-30 flex items-end justify-center pb-32 pointer-events-none">
+                        <div className="w-full h-full pointer-events-auto">
+                            <MainRoom
+                                latestLog={latestLog}
+                                aiResponse={aiResponse}
+                                isAiThinking={isAiThinking}
+                            />
+                        </div>
+                    </div>
+
+                    {/* 식물 데코 (좌측 하단) */}
+                    <div className="absolute bottom-[18%] left-4 z-20 opacity-80 pointer-events-none">
+                        <div className="relative h-20 w-16">
+                            <div className="absolute bottom-0 left-1/2 h-10 w-10 -translate-x-1/2 rounded-2xl bg-[#D7CCC8]"></div>
+                            <div className="absolute bottom-8 left-1/2 h-12 w-4 -translate-x-1/2 rounded-full bg-[#A5D6A7]"></div>
+                            <div className="absolute bottom-10 left-0 h-10 w-8 rotate-[-45deg] rounded-full bg-[#81C784]"></div>
+                            <div className="absolute right-0 bottom-12 h-10 w-8 rotate-[45deg] rounded-full bg-[#A5D6A7]"></div>
+                        </div>
+                    </div>
                 </div>
-                <div className="group flex items-center gap-2 px-4 py-2 bg-white/30 backdrop-blur-md rounded-full border border-white/40 shadow-sm hover:bg-white/50 transition-all cursor-pointer animate-fade-in-up" data-gtm="mobile-dashboard-streak-indicator">
-                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
-                    <span className="text-lg">🔥</span>
-                    <span className="text-sm font-bold text-slate-700 font-nunito">{streakDays}일</span>
+
+                {/* 헤더 영역 (날짜 & 스트릭) - 절대 위치로 상단 고정 */}
+                <div className="absolute top-0 z-40 flex w-full items-end justify-between px-8 pt-14 pointer-events-none" data-gtm="mobile-dashboard-header">
+                    <div className="pointer-events-auto">
+                        <div className="flex items-baseline gap-1">
+                            <h1 className="text-4xl font-extrabold tracking-tight text-stone-700">
+                                {format(today, 'd')}
+                            </h1>
+                            <span className="text-sm font-bold text-stone-400">
+                                {format(today, 'EEE', { locale: enUS })}
+                            </span>
+                        </div>
+                    </div>
+                    {/* 스트릭 배지 */}
+                    <div
+                        className="rounded-full bg-white/80 px-4 py-1.5 shadow-[0_4px_12px_rgba(255,182,193,0.2)] backdrop-blur-sm pointer-events-auto cursor-pointer hover:scale-105 transition-transform"
+                        onClick={onCalendarClick}
+                        data-gtm="mobile-dashboard-streak-indicator"
+                    >
+                        <span className="text-xs font-bold text-rose-400">
+                            🌸 {streakDays}일차
+                        </span>
+                    </div>
                 </div>
+
+                {/* BottomSheet 컴포넌트 */}
+                <BottomSheet
+                    onWrite={handleWrite}
+                    diaries={diaries}
+                    streakDays={streakDays}
+                    onCalendarClick={onCalendarClick}
+                    onMindRecordClick={() => setIsMindRecordOpen(true)}
+                    onStatsClick={onStatsClick}
+                    onSettingsClick={onSettingsClick}
+                />
+
+                {/* 마음 기록 오버레이 */}
+                <MindRecord
+                    isOpen={isMindRecordOpen}
+                    onClose={() => setIsMindRecordOpen(false)}
+                    userName={user?.nickname}
+                    diaries={diaries}
+                    data-gtm="mind-record-screen"
+                />
             </div>
-
-            <MainRoom
-                latestLog={latestLog}
-                aiResponse={aiResponse}
-                isAiThinking={isAiThinking}
-            />
-            <BottomSheet
-                onWrite={handleWrite}
-                diaries={diaries}
-                streakDays={streakDays}
-                onCalendarClick={onCalendarClick}
-                onMindRecordClick={() => setIsMindRecordOpen(true)}
-                onStatsClick={onStatsClick}
-                onSettingsClick={onSettingsClick}
-            />
-
-            {/* 마음 기록 화면 (전체 화면 오버레이) */}
-            <MindRecord
-                isOpen={isMindRecordOpen}
-                onClose={() => setIsMindRecordOpen(false)}
-                userName={user?.nickname}
-                diaries={diaries}
-                data-gtm="mind-record-screen"
-            />
         </div>
     );
 };
