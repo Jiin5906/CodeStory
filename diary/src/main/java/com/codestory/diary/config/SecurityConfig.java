@@ -39,11 +39,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                // 명시적으로 정적 리소스 및 Actuator 경로 허용
-                .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico", "/*.svg").permitAll()
+                // 정적 리소스 경로 허용 (React 빌드 파일, 이미지 등)
+                .requestMatchers("/", "/index.html", "/assets/**", "/static/**", "/favicon.ico", "/error").permitAll()
+                .requestMatchers("/*.svg", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.ico").permitAll()
+                .requestMatchers("/*.js", "/*.css", "/*.html", "/*.json", "/*.txt").permitAll()
+                // API 엔드포인트 허용
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll() // OAuth2 경로 허용
+                .requestMatchers("/images/**").permitAll() // 업로드된 이미지 경로
+                // OAuth2 경로 허용
+                .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
                 .anyRequest().permitAll()
                 )
                 // OAuth2 로그인 설정
