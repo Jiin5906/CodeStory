@@ -86,10 +86,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-[#FFF5F6] p-4 font-sans selection:bg-rose-200" data-gtm="view-mobile-dashboard-new">
+        <div className="bg-[#FFFCF8] md:bg-[#FFF5F6] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-sans selection:bg-rose-200" data-gtm="view-mobile-dashboard-new">
 
             {/* 폰 프레임 컨테이너 */}
-            <div className="relative flex h-[800px] w-full max-w-[375px] flex-col overflow-hidden rounded-[3rem] border-[10px] border-white bg-[#FFFCF8] shadow-[0_20px_60px_-10px_rgba(255,182,193,0.5)] ring-1 ring-rose-100">
+            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-[#FFFCF8] md:shadow-[0_20px_60px_-10px_rgba(255,182,193,0.5)] md:ring-1 md:ring-rose-100">
 
                 {/* 메인 화면 영역 (배경 + MainRoom) */}
                 <div className="relative w-full flex-1 overflow-hidden">
@@ -170,7 +170,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 </div>
 
                 {/* 헤더 영역 (날짜 & 스트릭) - 절대 위치로 상단 고정 */}
-                <div className="absolute top-0 z-40 flex w-full items-end justify-between px-8 pt-14 pointer-events-none" data-gtm="mobile-dashboard-header">
+                <div
+                    className="absolute top-0 z-40 flex w-full items-end justify-between px-6 md:px-8 pointer-events-none"
+                    style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
+                    data-gtm="mobile-dashboard-header"
+                >
                     <div className="pointer-events-auto">
                         <div className="flex items-baseline gap-1">
                             <h1 className="text-4xl font-extrabold tracking-tight text-stone-700">
