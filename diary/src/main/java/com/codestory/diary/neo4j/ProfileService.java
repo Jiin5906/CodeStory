@@ -1,9 +1,10 @@
 package com.codestory.diary.neo4j;
 
-import com.codestory.diary.service.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
+
+import com.codestory.diary.service.AiService;
 
 @Service
 public class ProfileService {
@@ -39,8 +40,9 @@ public class ProfileService {
 
         // 3. 변경 사항이 있으면 DB(Neo4j)에 업데이트 (유저별로 분리)
         if (newInsight != null && !newInsight.contains("변경 없음")) {
-            String updateQuery = "MERGE (u:Person {userId: $userId}) " +
-                                 "SET u.profile = coalesce(u.profile, '') + ' ' + $insight";
+            String updateQuery = "MERGE (u:User {userId: $userId}) "
+                    + "SET u.profile = coalesce(u.profile, '') + ' ' + $insight"
+                    + "RETURN u.profile";
 
             neo4jClient.query(updateQuery)
                     .bind(userId).to("userId")
@@ -53,7 +55,7 @@ public class ProfileService {
 
     // 사용자 프로필 읽어오기 (유저별로 분리)
     public String getUserProfile(Long userId) {
-        String query = "MATCH (u:Person {userId: $userId}) RETURN u.profile AS profile";
+        String query = "MATCH (u:User {userId: $userId}) RETURN u.profile AS profile";
 
         return neo4jClient.query(query)
                 .bind(userId).to("userId")

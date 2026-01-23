@@ -1,20 +1,21 @@
 package com.codestory.diary.neo4j;
 
-import com.codestory.diary.service.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.codestory.diary.service.AiService;
 
 @Service
 public class CounselingService {
 
     @Autowired
-    private GraphService graphService; 
-    
+    private GraphService graphService;
+
     @Autowired
     private ProfileService profileService; // [NEW] 프로필 관리자 추가
 
     @Autowired
-    private AiService aiService; 
+    private AiService aiService;
 
     public String generateCounselingResponse(Long userId, String userMessage) {
 
@@ -26,7 +27,7 @@ public class CounselingService {
 
         // 3. [생각하기] 기억 + 성향을 모두 고려한 프롬프트
         String systemPrompt = """
-            당신은 AI 상담사 '포포'입니다.
+            당신은 AI 상담사입니다.
 
             [사용자 성향(Profile)]
             """ + userProfile + """
