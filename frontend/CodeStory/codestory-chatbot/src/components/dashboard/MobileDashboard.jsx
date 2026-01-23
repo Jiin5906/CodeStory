@@ -199,7 +199,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
                     {/* MainRoom 컴포넌트 배치 */}
                     <div className="absolute inset-0 z-30 flex items-end justify-center pb-40 pointer-events-none">
-                        <div className="w-full h-full pointer-events-auto">
+                        <div className="w-40 h-40 rounded-full pointer-events-auto flex items-center justify-center">
                             <MainRoom
                                 latestLog={latestLog}
                                 aiResponse={aiResponse}
