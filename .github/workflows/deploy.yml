@@ -82,6 +82,7 @@ jobs:
             echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> .env
             echo "PINECONE_ENVIRONMENT=${{ secrets.PINECONE_ENVIRONMENT }}" >> .env
             echo "PINECONE_INDEX_NAME=${{ secrets.PINECONE_INDEX_NAME }}" >> .env
+            echo "NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}" >> .env
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
             
             docker-compose pull backend

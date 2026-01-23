@@ -10,7 +10,8 @@
       "Bash(./gradlew dependencies:*)",
       "Bash(docker-compose logs:*)",
       "Bash(docker compose logs:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(./gradlew compileJava:*)"
     ]
   }
 }

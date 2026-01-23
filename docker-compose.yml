@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  neo4j:
+    image: neo4j:latest
+    container_name: empathy_diary_graph
+    ports:
+      - "7474:7474" # 웹 관리자 페이지용
+      - "7687:7687" # 스프링부트 연결용
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+    volumes:
+      - ./neo4j/data:/data
+    networks:
+      - codestory_net
   mariadb:
     image: mariadb:10.5
     container_name: mariadb-container
