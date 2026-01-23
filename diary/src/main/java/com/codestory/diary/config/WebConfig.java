@@ -1,6 +1,8 @@
 package com.codestory.diary.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -36,5 +38,23 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/*.ico", "/*.png", "/*.svg", "/*.txt", "/*.json")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(86400);
+    }
+
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        // MIME 타입 명시적 설정
+        configurer
+                .favorPathExtension(false)
+                .favorParameter(false)
+                .ignoreAcceptHeader(false)
+                .defaultContentType(MediaType.APPLICATION_JSON)
+                .mediaType("css", MediaType.parseMediaType("text/css"))
+                .mediaType("js", MediaType.parseMediaType("application/javascript"))
+                .mediaType("json", MediaType.APPLICATION_JSON)
+                .mediaType("html", MediaType.TEXT_HTML)
+                .mediaType("png", MediaType.IMAGE_PNG)
+                .mediaType("jpg", MediaType.IMAGE_JPEG)
+                .mediaType("jpeg", MediaType.IMAGE_JPEG)
+                .mediaType("svg", MediaType.parseMediaType("image/svg+xml"));
     }
 }
