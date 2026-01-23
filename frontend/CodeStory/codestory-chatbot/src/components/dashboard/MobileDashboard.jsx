@@ -133,15 +133,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 달력/액자 데코 (좌측) - 클릭 시 서랍 열림 + 캘린더 이동 */}
+                    {/* 달력/액자 데코 (좌측) - 클릭 시 서랍 애니메이션만 */}
                     <div
                         className="group perspective-1000 absolute top-[20%] left-6 z-20 cursor-pointer scale-90"
-                        onClick={() => {
-                            setIsDrawerOpen(!isDrawerOpen);
-                            setTimeout(() => {
-                                if (onCalendarClick) onCalendarClick();
-                            }, 300);
-                        }}
+                        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
                         data-gtm="calendar-decoration-click"
                     >
                         <div className="relative h-28 w-20 rounded-[1rem] border-2 border-rose-50 bg-white shadow-[0_8px_20px_rgba(255,182,193,0.2)] transition-transform duration-300 group-hover:-rotate-2">
@@ -160,15 +155,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 전등 스위치 데코 (우측) - 무드등 토글 + 설정 이동 */}
+                    {/* 전등 스위치 데코 (우측) - 무드등 토글만 */}
                     <label
                         className="group absolute top-[22%] right-8 z-20 flex cursor-pointer flex-col items-center scale-90"
-                        onClick={() => {
-                            setIsLampOn(!isLampOn);
-                            setTimeout(() => {
-                                if (onSettingsClick) onSettingsClick();
-                            }, 300);
-                        }}
+                        onClick={() => setIsLampOn(!isLampOn)}
                         data-gtm="settings-decoration-click"
                     >
                         <div className="relative z-10">
@@ -195,10 +185,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </label>
 
                     {/* 중앙 하단 그림자 (MainRoom 캐릭터가 올라갈 곳) */}
-                    <div className="absolute bottom-[35%] left-1/2 h-24 w-64 -translate-x-1/2 rounded-[50%] bg-[#FFB7C5]/20 blur-[1px]"></div>
+                    <div className="absolute top-[48%] left-1/2 h-24 w-64 -translate-x-1/2 rounded-[50%] bg-[#FFB7C5]/20 blur-[1px]"></div>
 
-                    {/* MainRoom 컴포넌트 배치 */}
-                    <div className="absolute inset-0 z-30 flex items-end justify-center pb-40 pointer-events-none">
+                    {/* MainRoom 컴포넌트 배치 - 화면 중앙에 고정 */}
+                    <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
                         <div className="w-40 h-40 rounded-full pointer-events-auto flex items-center justify-center">
                             <MainRoom
                                 latestLog={latestLog}
