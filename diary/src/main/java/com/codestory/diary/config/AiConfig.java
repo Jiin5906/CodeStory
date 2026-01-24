@@ -1,7 +1,9 @@
 package com.codestory.diary.config;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 // [중요] 기존 theokanning 라이브러리가 아닌, dev.langchain4j를 임포트해야 합니다.
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -14,6 +16,7 @@ public class AiConfig {
     private String openAiApiKey;
 
     @Bean
+    @Primary
     public ChatLanguageModel chatLanguageModel() {
         return OpenAiChatModel.builder()
                 .apiKey(openAiApiKey)
