@@ -5,8 +5,8 @@ services:
     image: neo4j:latest
     container_name: empathy_diary_graph
     ports:
-      - "7474:7474" # 웹 관리자 페이지용
-      - "7687:7687" # 스프링부트 연결용
+      - "7474:7474"
+      - "7687:7687"
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
     volumes:
@@ -14,7 +14,13 @@ services:
     restart: always
     networks:
       - codestory_net
-    logging: *default-logging
+    # 👇 [수정됨] 정의(&)를 여기서 먼저 해야 밑에서 갖다 쓸 수 있습니다!
+    logging: &default-logging
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   mariadb:
     image: mariadb:10.5
     container_name: mariadb-container
@@ -30,11 +36,8 @@ services:
     restart: always
     networks:
       - codestory_net
-    logging: &default-logging # 반복 설정을 위한 앵커
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    # 👇 [수정됨] 위에서 정의했으니 이제 갖다 쓸(*) 수 있습니다.
+    logging: *default-logging
 
   backend:
     image: ${DOCKER_USERNAME}/diary-backend:latest
@@ -45,35 +48,31 @@ services:
       - mariadb
       - neo4j
     env_file:
-      - .env  # .env 파일을 명시적으로 로드
+      - .env
     environment:
-    # [수정 2] JWT 설정 강제 주입 (서버 다운 해결의 열쇠)
+      # JWT 설정 강제 주입 (잘 작성하셨습니다!)
       - JAVA_TOOL_OPTIONS=-Djwt.expiration=86400000 -Djwt.refresh-expiration=604800000
       
-      # [수정 3] DB 연결 정보 명확화 (DB_HOST 대신 전체 URL 사용 권장)
+      # DB 연결 설정
       - SPRING_DATASOURCE_URL=jdbc:mysql://mariadb:3306/codestory_db?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       
-      # [수정 4] Neo4j 연결 정보 보강 (URI, Username 추가)
+      # Neo4j 연결 설정
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_AUTHENTICATION_USERNAME=neo4j
       - NEO4J_AUTHENTICATION_PASSWORD=${NEO4J_PASSWORD}
-      - DB_HOST=mariadb
-      - DB_PORT=3306
-      - DB_NAME=codestory_db
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      
+      # 나머지 변수들
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - JWT_SECRET=${JWT_SECRET}
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
       - MANAGEMENT_HEALTH_DISKSPACE_ENABLED=false
     restart: always
     networks:
       - codestory_net
-    logging: *default-logging # 위 설정을 그대로 재사용
+    logging: *default-logging
 
   nginx:
     image: nginx:latest
