@@ -51,7 +51,7 @@ services:
       - .env
     environment:
       # JWT 설정 강제 주입 (잘 작성하셨습니다!)
-      - JAVA_TOOL_OPTIONS=-Djwt.expiration=86400000 -Djwt.refresh-expiration=604800000
+      - JAVA_TOOL_OPTIONS=-Djwt.expiration=86400000 -Djwt.refresh-expiration=604800000 -Dspring.neo4j.uri=bolt://neo4j:7687
       
       # DB 연결 설정
       - SPRING_DATASOURCE_URL=jdbc:mysql://mariadb:3306/codestory_db?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
