@@ -39,6 +39,7 @@ public class DiaryService {
     private final AiService aiService;
     private final MemoryService memoryService;
     private final GraphService graphService;
+    private final PiiMaskingService piiMaskingService; // ✨ Phase 3: PII 마스킹
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
     @Transactional
@@ -97,9 +98,14 @@ public class DiaryService {
             - 나쁜 예: "오늘 정말 많이 힘드셨을 것 같아요. 그런 날도 있는 거니까 너무 자책하지 마시고 충분히 쉬면서 마음을 추스르는 시간을 가져보세요."
             """;
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ✨ Phase 3: PII 마스킹 (LLM에 전송하기 전)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        String maskedContent = piiMaskingService.maskContent(request.getContent());
+
         String userMessage = String.format(
                 "오늘의 일기:\n- 내용: %s\n- 기분: %d점\n- 태그: %s%s",
-                request.getContent(),
+                maskedContent,  // 원본 대신 마스킹된 내용 사용
                 request.getMood(),
                 request.getTags(),
                 memoryContext.toString()
@@ -133,9 +139,12 @@ public class DiaryService {
 
         Diary saved = diaryRepository.save(newDiary);
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // Neo4j 그래프 데이터베이스에 일기 저장 (감정 관계 그래프 생성 - 유저별로 분리)
+        // ✨ Phase 3: Neo4j에는 마스킹된 내용 저장 (검색용, 개인정보 불필요)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         try {
-            graphService.saveDiaryToGraph(request.getUserId(), request.getContent());
+            graphService.saveDiaryToGraph(request.getUserId(), maskedContent); // 마스킹된 내용 사용
             System.out.println("✅ Neo4j에 일기 저장 완료 (User ID: " + request.getUserId() + ", Diary ID: " + saved.getId() + ")");
         } catch (Exception e) {
             System.err.println("❌ Neo4j 저장 실패 (일기 작성은 정상 완료): " + e.getMessage());

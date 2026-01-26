@@ -19,7 +19,8 @@ public class GraphRagService {
 
     private final Neo4jClient neo4jClient;
     private final ChatLanguageModel chatLanguageModel;
-    private final EmbeddingModel embeddingModel; // ✨ Phase 2: 임베딩 모델 추가 
+    private final EmbeddingModel embeddingModel; // ✨ Phase 2: 임베딩 모델 추가
+    private final PiiMaskingService piiMaskingService; // ✨ Phase 3: PII 마스킹 
 
     /**
      * 🧠 Phase 2: Hybrid Search (Vector + Graph) + Phase 3: Redis Caching
@@ -41,7 +42,13 @@ public class GraphRagService {
             log.info("🔍 [Phase 2 Hybrid Search] 질문: {}", question);
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // Step 1: 질문을 벡터로 변환 (Embedding)
+            // ✨ Phase 3: PII 마스킹 (LLM에 전달하기 전)
+            // 주의: 벡터 검색은 원본 사용 (검색 정확도 유지), 프롬프트에만 마스킹 사용
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            String maskedQuestion = piiMaskingService.maskContent(question);
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // Step 1: 질문을 벡터로 변환 (Embedding) - 원본 사용
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             Embedding questionEmbedding = embeddingModel.embed(question).content();
             List<Float> questionVector = questionEmbedding.vectorAsList();
@@ -253,7 +260,7 @@ public class GraphRagService {
                 # 나쁜 예시 (절대 하지 마세요!)
                 {"emotion": "worry", "message": "그럴 땐 충분히 쉬면서 스트레스를 관리해보는 게 좋을 것 같아요."}
                 {"emotion": "calm", "message": "데이터 분석 결과 야근과 불면증이 주요 원인입니다."}
-                """.formatted(graphContext, question);
+                """.formatted(graphContext, maskedQuestion); // ✨ Phase 3: 마스킹된 질문 사용
 
             String response = chatLanguageModel.generate(promptToAnswer);
 
@@ -282,6 +289,9 @@ public class GraphRagService {
     private String fallbackGraphSearch(Long userId, String question) {
         try {
             log.info("  🔄 Fallback: 기존 그래프 검색 실행");
+
+            // ✨ Phase 3: PII 마스킹
+            String maskedQuestion = piiMaskingService.maskContent(question);
 
             String cypherQuery = """
                 MATCH (u:User {userId: $userId})
@@ -342,7 +352,7 @@ public class GraphRagService {
                 {"emotion": "감정키워드", "message": "답변내용"}
                 - emotion: [happy, sad, angry, worry, calm, excited] 중 하나
                 - message: 1~2문장, 50자 이내로 공감만 작성
-                """.formatted(graphContext, question);
+                """.formatted(graphContext, maskedQuestion); // ✨ Phase 3: 마스킹된 질문 사용
 
             String response = chatLanguageModel.generate(promptToAnswer);
             return response.replace("```json", "").replace("```", "").trim();
