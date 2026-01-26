@@ -28,29 +28,28 @@ public class GraphService {
 
     // [기능 1] 일기를 뇌(Graph)에 저장하기 + 임베딩 자동 생성 (Phase 2)
     public void saveDiaryToGraph(Long userId, String diaryContent) {
-        // 1. 프롬프트 생성 (유저별로 분리된 그래프 생성)
+        // 1. 프롬프트 생성 (유저별로 분리된 그래프 생성 + timestamp 추가)
         String prompt = "[System Prompt]\n"
                 + "당신은 심리 상담 전문가이자 데이터 엔지니어입니다.\n"
                 + "사용자의 일기를 분석해서 Neo4j 그래프 데이터베이스에 넣을 수 있는 'Cypher Query' 문장만 딱 만들어주세요.\n"
                 + "다른 말(설명)은 절대 하지 말고, 오직 코드만 출력하세요.\n"
                 + "\n"
                 + "[규칙]\n"
-                // [수정 1] Person -> User로 변경 (ProfileService와 통일)
                 + "1. 노드(점) 종류: (:User), (:Event), (:Emotion), (:Action)\n"
                 + "2. 관계(선) 종류: -[:DID]->, -[:FELT]->, -[:CAUSED]->, -[:INVOLVED]->\n"
-                // [수정 2] Prompt에서도 Person -> User, 그리고 userId 속성 명시
                 + "3. **중요**: 사용자 노드는 반드시 'MERGE (u:User {userId: $userId})'로 시작하세요.\n"
                 + "   - $userId는 파라미터로 전달되며, 각 유저를 고유하게 식별합니다.\n"
+                + "4. **[Phase 2.1 추가]** 모든 Event, Emotion, Action 노드에는 반드시 'timestamp: datetime()' 속성을 추가하세요.\n"
+                + "   - 이 속성은 시간 가중치 검색에 사용됩니다.\n"
                 + "\n"
                 + "[예시]\n"
                 + "사용자 입력: \"오늘 팀장님한테 깨져서 너무 우울해. 그래서 매운 떡볶이 먹었어.\"\n"
                 + "출력:\n"
-                // [수정 3] 예시 코드도 User 라벨로 변경
                 + "MERGE (u:User {userId: $userId})\n"
                 + "MERGE (p:Person {name: '팀장님'})\n"
-                + "MERGE (e:Event {name: '혼남'})\n"
-                + "MERGE (em:Emotion {name: '우울함', intensity: 8})\n"
-                + "MERGE (f:Action {name: '매운 떡볶이 먹기'})\n"
+                + "MERGE (e:Event {name: '혼남', timestamp: datetime()})\n"
+                + "MERGE (em:Emotion {name: '우울함', intensity: 8, timestamp: datetime()})\n"
+                + "MERGE (f:Action {name: '매운 떡볶이 먹기', timestamp: datetime()})\n"
                 + "MERGE (u)-[:INVOLVED]->(e)\n"
                 + "MERGE (p)-[:CAUSED]->(e)\n"
                 + "MERGE (e)-[:CAUSED]->(em)\n"

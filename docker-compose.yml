@@ -39,6 +39,19 @@ services:
     # 👇 [수정됨] 위에서 정의했으니 이제 갖다 쓸(*) 수 있습니다.
     logging: *default-logging
 
+  redis:
+    image: redis:alpine
+    container_name: redis-cache
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+    restart: always
+    networks:
+      - codestory_net
+    logging: *default-logging
+
   backend:
     image: ${DOCKER_USERNAME}/diary-backend:latest
     container_name: spring-backend
@@ -47,6 +60,7 @@ services:
     depends_on:
       - mariadb
       - neo4j
+      - redis
     env_file:
       - .env
     environment:
@@ -62,7 +76,12 @@ services:
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_AUTHENTICATION_USERNAME=neo4j
       - NEO4J_AUTHENTICATION_PASSWORD=${NEO4J_PASSWORD}
-      
+
+      # Redis 연결 설정 (Phase 3: 캐싱)
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD}
+
       # 나머지 변수들
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
