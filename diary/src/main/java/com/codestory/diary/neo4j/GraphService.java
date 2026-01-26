@@ -26,31 +26,47 @@ public class GraphService {
     // [기능 1] 일기를 뇌(Graph)에 저장하기 + 임베딩 자동 생성 (Phase 2)
     public void saveDiaryToGraph(Long userId, String diaryContent) {
         // 1. 프롬프트 생성 (유저별로 분리된 그래프 생성 + timestamp 추가)
-        String prompt = "[System Prompt]\n"
-                + "당신은 심리 상담 전문가이자 데이터 엔지니어입니다.\n"
-                + "사용자의 일기를 분석해서 Neo4j 그래프 데이터베이스에 넣을 수 있는 'Cypher Query' 문장만 딱 만들어주세요.\n"
-                + "다른 말(설명)은 절대 하지 말고, 오직 코드만 출력하세요.\n"
-                + "\n"
-                + "[규칙]\n"
-                + "1. 노드(점) 종류: (:User), (:Event), (:Emotion), (:Action)\n"
-                + "2. 관계(선) 종류: -[:DID]->, -[:FELT]->, -[:CAUSED]->, -[:INVOLVED]->\n"
-                + "3. **중요**: 사용자 노드는 반드시 'MERGE (u:User {userId: $userId})'로 시작하세요.\n"
-                + "   - $userId는 파라미터로 전달되며, 각 유저를 고유하게 식별합니다.\n"
-                + "4. **[Phase 2.1 추가]** 모든 Event, Emotion, Action 노드에는 반드시 'timestamp: datetime()' 속성을 추가하세요.\n"
-                + "   - 이 속성은 시간 가중치 검색에 사용됩니다.\n"
-                + "\n"
-                + "[예시]\n"
-                + "사용자 입력: \"오늘 팀장님한테 깨져서 너무 우울해. 그래서 매운 떡볶이 먹었어.\"\n"
-                + "출력:\n"
-                + "MERGE (u:User {userId: $userId})\n"
-                + "MERGE (p:Person {name: '팀장님'})\n"
-                + "MERGE (e:Event {name: '혼남', timestamp: datetime()})\n"
-                + "MERGE (em:Emotion {name: '우울함', intensity: 8, timestamp: datetime()})\n"
-                + "MERGE (f:Action {name: '매운 떡볶이 먹기', timestamp: datetime()})\n"
-                + "MERGE (u)-[:INVOLVED]->(e)\n"
-                + "MERGE (p)-[:CAUSED]->(e)\n"
-                + "MERGE (e)-[:CAUSED]->(em)\n"
-                + "MERGE (em)-[:CAUSED]->(f);";
+        String prompt = """
+            # Role
+            당신은 Neo4j 그래프 데이터베이스 전문가이자 숙련된 데이터 엔지니어입니다.
+            사용자의 자연어 일기를 분석하여, 지식 그래프(Knowledge Graph)를 구축하기 위한 정확한 'Cypher Query'만을 생성해야 합니다.
+
+            # Graph Schema
+            1. **Nodes**: (:User), (:Event), (:Emotion), (:Action), (:Person), (:Place)
+            2. **Relationships**:
+               - (:User)-[:DID]->(:Action)
+               - (:User)-[:FELT]->(:Emotion)
+               - (:Event)-[:CAUSED]->(:Emotion)
+               - (:Person)-[:INVOLVED]->(:Event)
+               - (:Event)-[:HAPPENED_AT]->(:Place)
+
+            # Constraints & Rules (Strict)
+            1. **User Identity**: 모든 쿼리는 반드시 `MERGE (u:User {userId: $userId})`로 시작해야 합니다. ($userId 파라미터 사용 필수)
+            2. **Timestamp**: Event, Emotion, Action 노드 생성 시 반드시 `timestamp: datetime()` 속성을 포함하세요.
+            3. **Merge vs Create**:
+               - **MERGE**: 고유한 개체인 User, Person(사람 이름), Place(장소)에 사용하세요. (중복 생성 방지)
+               - **CREATE**: 매 순간 새롭게 발생하는 Event(사건), Emotion(감정), Action(행동)에 사용하세요.
+               - *주의*: 감정은 매번 다를 수 있으므로 노드를 재사용하지 말고, 그 순간의 감정 인스턴스를 생성해야 합니다.
+            4. **Output**: 주석이나 설명 없이 오직 실행 가능한 Cypher Query 코드만 출력하세요.
+
+            # Few-Shot Examples
+            Input: "오늘 팀장님한테 깨져서 너무 우울해. 그래서 매운 떡볶이 먹었어."
+            Output:
+            MERGE (u:User {userId: $userId})
+            MERGE (p:Person {name: '팀장님'})
+            CREATE (e:Event {name: '혼남', timestamp: datetime()})
+            CREATE (em:Emotion {name: '우울함', intensity: 8, timestamp: datetime()})
+            CREATE (a:Action {name: '매운 떡볶이 먹기', timestamp: datetime()})
+            MERGE (p)-[:INVOLVED]->(e)
+            CREATE (e)-[:CAUSED]->(em)
+            CREATE (em)-[:CAUSED]->(a)
+            MERGE (u)-[:INVOLVED]->(e);
+
+            # User Input
+            "%s" (userId: %s)
+
+            # Generated Query
+            """.formatted(diaryContent, userId);
 
         // 2. AiService 호출
         String cypherQuery = aiService.getMultimodalResponse(prompt, diaryContent, null);
