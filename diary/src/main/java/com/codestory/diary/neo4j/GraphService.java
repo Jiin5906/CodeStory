@@ -1,7 +1,6 @@
 package com.codestory.diary.neo4j;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +8,6 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 
 import com.codestory.diary.service.AiService;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.data.embedding.Embedding;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,7 +21,7 @@ public class GraphService {
     private AiService aiService;
 
     @Autowired
-    private EmbeddingModel embeddingModel; // ✨ Phase 2: 임베딩 모델 추가
+    private com.codestory.diary.service.EmbeddingService embeddingService; // ✨ Phase 3: 비동기 임베딩 서비스
 
     // [기능 1] 일기를 뇌(Graph)에 저장하기 + 임베딩 자동 생성 (Phase 2)
     public void saveDiaryToGraph(Long userId, String diaryContent) {
@@ -69,14 +66,11 @@ public class GraphService {
             log.info("✅ 그래프 저장 완료 (User ID: {})", userId);
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // ✨ Phase 2: 생성된 노드들에 임베딩 자동 추가
+            // ✨ Phase 3: 생성된 노드들에 임베딩 자동 추가 (비동기)
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            try {
-                generateEmbeddingsForNewNodes(userId);
-                log.info("✅ 임베딩 생성 완료 (User ID: {})", userId);
-            } catch (Exception e) {
-                log.warn("⚠️ 임베딩 생성 실패 (그래프 저장은 완료됨): {}", e.getMessage());
-            }
+            // 비동기로 실행되므로 즉시 반환 (사용자 대기 시간 최소화)
+            embeddingService.generateEmbeddingsForNewNodesAsync(userId);
+            log.debug("🚀 임베딩 생성 작업 비동기 시작 (User ID: {})", userId);
         }
     }
 
@@ -99,86 +93,6 @@ public class GraphService {
     }
 
     /**
-     * ✨ [Phase 2] 임베딩이 없는 노드들에 자동으로 임베딩 생성 및 저장
-     *
-     * [작동 방식]
-     * 1. 유저와 연결된 모든 노드 중 embedding 속성이 없는 노드 찾기
-     * 2. 각 노드의 name 속성을 벡터로 변환 (OpenAI text-embedding-3-small)
-     * 3. 해당 노드에 embedding 속성 추가
-     *
-     * [주의사항]
-     * - 이 메서드는 일기 저장 후 자동으로 호출됩니다
-     * - Neo4j 5.11+ 버전에서만 벡터 인덱스가 지원됩니다
-     * - 임베딩 생성 실패 시에도 일기 저장은 정상적으로 완료됩니다
-     */
-    private void generateEmbeddingsForNewNodes(Long userId) {
-        try {
-            // Step 1: embedding 속성이 없는 노드들 찾기 (Event, Emotion, Action 타입)
-            String findNodesQuery = """
-                MATCH (u:User {userId: $userId})-[r]->(n)
-                WHERE (n:Event OR n:Emotion OR n:Action)
-                  AND n.name IS NOT NULL
-                  AND n.embedding IS NULL
-                RETURN id(n) AS nodeId, labels(n) AS labels, n.name AS name
-                LIMIT 50
-            """;
-
-            Collection<Map<String, Object>> nodes = neo4jClient.query(findNodesQuery)
-                    .bind(userId).to("userId")
-                    .fetch()
-                    .all();
-
-            if (nodes.isEmpty()) {
-                log.debug("  ℹ️ 임베딩이 필요한 노드가 없습니다");
-                return;
-            }
-
-            log.info("  🔍 임베딩 생성 대상: {} 개 노드", nodes.size());
-
-            // Step 2: 각 노드에 대해 임베딩 생성 및 저장
-            int successCount = 0;
-            for (Map<String, Object> node : nodes) {
-                Long nodeId = (Long) node.get("nodeId");
-                String name = (String) node.get("name");
-
-                if (name == null || name.trim().isEmpty()) {
-                    continue;
-                }
-
-                try {
-                    // Step 2-1: 텍스트를 벡터로 변환
-                    Embedding embedding = embeddingModel.embed(name).content();
-                    List<Float> vector = embedding.vectorAsList();
-
-                    // Step 2-2: Neo4j에 벡터 저장
-                    String updateQuery = """
-                        MATCH (n)
-                        WHERE id(n) = $nodeId
-                        SET n.embedding = $vector
-                    """;
-
-                    neo4jClient.query(updateQuery)
-                            .bind(nodeId).to("nodeId")
-                            .bind(vector).to("vector")
-                            .run();
-
-                    successCount++;
-                    log.debug("    ✓ 임베딩 추가: {} (ID: {})", name, nodeId);
-
-                } catch (Exception e) {
-                    log.warn("    ⚠️ 임베딩 생성 실패: {} - {}", name, e.getMessage());
-                }
-            }
-
-            log.info("  ✅ 임베딩 생성 완료: {}/{} 성공", successCount, nodes.size());
-
-        } catch (Exception e) {
-            log.error("❌ 임베딩 생성 프로세스 실패", e);
-            throw new RuntimeException("임베딩 생성 실패", e);
-        }
-    }
-
-    /**
      * 🔧 [관리자 도구] 기존 노드들의 임베딩 일괄 생성
      *
      * [사용 시나리오]
@@ -187,19 +101,11 @@ public class GraphService {
      *
      * [실행 방법]
      * curl -X POST http://localhost:8080/api/admin/migrate-embeddings?userId=1
+     *
+     * @param userId 사용자 ID
      */
     public void migrateExistingDataToVectors(Long userId) {
-        log.info("🔄 [마이그레이션] 기존 데이터 벡터화 시작 (User ID: {})", userId);
-
-        try {
-            // 모든 노드(embedding 없는 것들)에 대해 임베딩 생성
-            generateEmbeddingsForNewNodes(userId);
-
-            log.info("✅ [마이그레이션] 완료!");
-
-        } catch (Exception e) {
-            log.error("❌ [마이그레이션] 실패", e);
-            throw new RuntimeException("마이그레이션 실패", e);
-        }
+        // EmbeddingService로 위임
+        embeddingService.migrateExistingDataToVectors(userId);
     }
 }
