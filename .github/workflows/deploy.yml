@@ -85,8 +85,9 @@ jobs:
             echo "NEO4J_URI=${{ secrets.NEO4J_URI }}" >> .env
             echo "NEO4J_USERNAME=${{ secrets.NEO4J_USERNAME }}" >> .env
             echo "NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}" >> .env
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
-            
+
             docker-compose pull backend
             docker-compose up -d backend
             docker image prune -f
