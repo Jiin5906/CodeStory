@@ -56,6 +56,10 @@ dependencies {
 	// LangChain4j with Neo4j support
 	implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter:0.35.0'
 	implementation 'dev.langchain4j:langchain4j-neo4j:0.35.0'
+
+	// LangChain4j Embedding Models (OpenAI text-embedding-3-small)
+	implementation 'dev.langchain4j:langchain4j-embeddings:0.35.0'
+	implementation 'dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:0.35.0'
 }
 
 tasks.named('test') {
