@@ -4,7 +4,7 @@ import { enUS } from 'date-fns/locale';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
-import { diaryApi } from '../../services/api';
+import { diaryApi, graphRagApi } from '../../services/api';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
@@ -53,38 +53,68 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         return streak;
     }, [diaries, today]);
 
-    // 일기 작성 및 AI 응답 핸들러
+    // 일기 작성 및 AI 응답 핸들러 (옵션 C: 하이브리드 방식)
     const handleWrite = async (content) => {
         setLatestLog(content);
         setIsAiThinking(true);
         setAiResponse(null);
 
         try {
-            const diaryData = {
-                userId: user.id,
-                content: content,
-                date: new Date().toISOString().split('T')[0],
-                title: '',
-                mood: 5,
-                tension: 5,
-                fun: 5,
-                emoji: '✨',
-                isPublic: false,
-                isAnonymous: false,
-                tags: []
-            };
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 🧠 Step 1: 질문인지 일기인지 자동 감지
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            const questionKeywords = /[뭐뭘언제어디왜어떻게몇누가했어갔어먹었어]/;
+            const hasQuestionMark = /[\?？]/.test(content);
+            const isQuestion = questionKeywords.test(content) || hasQuestionMark;
 
-            const response = await diaryApi.saveDiary(diaryData, null);
+            if (isQuestion) {
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                // 🔍 질문 모드: GraphRagService (Dual-Path + Kingpin + Temporal)
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                console.log('🔍 질문 감지 → GraphRagService 호출');
+                const response = await graphRagApi.analyzeQuestion(user.id, content);
 
-            if (response && response.aiResponse) {
-                setAiResponse(response.aiResponse);
-            }
+                // JSON 파싱 (GraphRagService는 JSON 문자열 반환)
+                let parsedResponse;
+                try {
+                    parsedResponse = JSON.parse(response);
+                } catch (e) {
+                    // JSON 파싱 실패 시 원본 사용
+                    parsedResponse = { message: response };
+                }
 
-            if (onWriteClick) {
-                onWriteClick();
+                setAiResponse(parsedResponse.message || response);
+            } else {
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                // ✍️ 일기 모드: DiaryService (저장 + Pinecone Memory + 공감)
+                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                console.log('✍️ 일기 감지 → DiaryService 호출');
+                const diaryData = {
+                    userId: user.id,
+                    content: content,
+                    date: new Date().toISOString().split('T')[0],
+                    title: '',
+                    mood: 5,
+                    tension: 5,
+                    fun: 5,
+                    emoji: '✨',
+                    isPublic: false,
+                    isAnonymous: false,
+                    tags: []
+                };
+
+                const response = await diaryApi.saveDiary(diaryData, null);
+
+                if (response && response.aiResponse) {
+                    setAiResponse(response.aiResponse);
+                }
+
+                if (onWriteClick) {
+                    onWriteClick();
+                }
             }
         } catch (error) {
-            console.error('일기 작성 실패:', error);
+            console.error('처리 실패:', error);
             setAiResponse('죄송해요, 지금은 답변을 드릴 수 없어요. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsAiThinking(false);

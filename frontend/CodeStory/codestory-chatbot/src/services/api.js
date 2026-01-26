@@ -146,4 +146,15 @@ export const diaryApi = {
     }
 };
 
+// GraphRAG API (질문 분석용)
+export const graphRagApi = {
+    // 질문 분석 (Dual-Path Architecture + Kingpin + Temporal Grounding)
+    analyzeQuestion: async (userId, question) => {
+        const response = await api.get('/test/analysis', {
+            params: { userId, q: question }
+        });
+        return response.data;
+    }
+};
+
 export default api;
