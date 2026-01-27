@@ -1,11 +1,10 @@
 import React from 'react';
-import { FaHome, FaCalendarAlt, FaChartPie, FaCog, FaGlobe, FaPenFancy, FaComments } from 'react-icons/fa';
+import { FaHome, FaCalendarAlt, FaChartPie, FaCog, FaGlobe, FaPenFancy } from 'react-icons/fa';
 
 const Sidebar = ({ onWriteClick, currentView, onChangeView }) => {
     const navItems = [
         { id: 'dashboard', icon: <FaHome />, label: '홈 피드' },
         { id: 'calendar', icon: <FaCalendarAlt />, label: '캘린더' },
-        { id: 'chat', icon: <FaComments />, label: 'AI 채팅' },
         { id: 'stats', icon: <FaChartPie />, label: '감정 통계' },
         { id: 'shared', icon: <FaGlobe />, label: '감정 공유' },
         { id: 'settings', icon: <FaCog />, label: '설정' },

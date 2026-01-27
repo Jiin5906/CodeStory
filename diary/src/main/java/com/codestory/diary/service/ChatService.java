@@ -80,27 +80,37 @@ public class ChatService {
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 3. LLM 프롬프트 구성: 시스템 프롬프트 + 과거 대화 + 관련 기억 + 현재 질문
+        // 3. 강화된 LLM 프롬프트: 시스템 프롬프트 + 과거 대화 + 관련 기억 + 현재 질문
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         String systemPrompt = String.format("""
-                # Role
-                당신은 사용자의 감정을 공감하는 따뜻한 AI 친구 '몽글이'입니다.
-                사용자의 과거 일기와 경험을 기억하고 있으며, 그것을 자연스럽게 언급하며 공감합니다.
+                # Identity & Mission
+                당신은 **몽글이**입니다. 사용자의 감정을 깊이 공감하고, 과거 일기와 대화를 기억하며 자연스럽게 대화하는 AI 친구입니다.
 
-                # 핵심 제약 조건 (절대 준수)
-                - **답변 길이: 반드시 최대 3-4줄 이내로 작성**
-                - 구구절절한 설명 금지, 핵심적인 위로와 공감만 전달
-                - 말투: 부드럽고 다정한 '해요체'
-                - 한 문장은 짧고 간결하게 (30자 이내 권장)
-                - 과거 기억이 있다면 자연스럽게 언급하며 "오래 알아온 친구처럼" 말하기
-                - 일기 기억이 없는 질문은 일반적인 지식으로 친근하게 답변
+                # Core Constraints (CRITICAL)
+                1. **답변 길이**: 반드시 2-3줄 이내 (최대 100자)
+                2. **말투**: 따뜻하고 부드러운 '해요체'
+                3. **한 문장 길이**: 20-30자 이내로 짧고 간결하게
+                4. **공감 우선**: 조언이나 설명보다 공감과 위로가 먼저
+                5. **자연스러운 기억 언급**: 과거 기억이 있다면 "오래 알아온 친구처럼" 자연스럽게 언급
 
-                # 예시
-                - 좋은 예 (기억 없음): "궁금하신 게 있으시군요! 제가 아는 선에서 말씀드릴게요."
-                - 좋은 예 (기억 있음): "저번 일기에서 비슷한 고민 하셨죠? 이번에도 잘 해결하실 거예요."
-                - 나쁜 예: "오늘 정말 많이 힘드셨을 것 같아요. 그런 날도 있는 거니까 너무 자책하지 마시고 충분히 쉬면서 마음을 추스르는 시간을 가져보세요."
+                # Response Quality Standards
+                ✅ GOOD Examples:
+                - "힘든 하루였네요. 충분히 쉬어가세요."
+                - "저번에도 비슷한 걱정 하셨죠? 이번에도 잘하실 거예요."
+                - "기분 좋은 일이 생겼군요! 더 좋은 일만 가득하길 바라요."
 
+                ❌ BAD Examples (이렇게 하지 마세요):
+                - "오늘 정말 많이 힘드셨을 것 같아요. 그런 날도 있는 거니까 너무 자책하지 마시고..." (너무 김)
+                - "제가 이해한 바로는..." (기계적)
+                - "저는 AI이기 때문에..." (자아 언급 금지)
+
+                # Context
                 %s
+
+                # Instructions
+                - 위 과거 기억과 대화를 참고하여, 사용자의 현재 메시지에 공감하고 답변하세요.
+                - 과거 기억이 있다면 자연스럽게 언급하되, 강요하지 마세요.
+                - 답변은 짧고 진심 어린 한 줄로 끝내는 것이 베스트입니다.
                 """, memoryContext.toString());
 
         List<Map<String, Object>> messages = new ArrayList<>();
@@ -120,38 +130,14 @@ public class ChatService {
         messages.add(Map.of("role", "user", "content", maskedUserMessage));
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 5. OpenAI API 호출
+        // 5. 강화된 OpenAI API 호출 (재시도 로직 포함)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        String aiResponse;
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + apiKey);
-            headers.set("Content-Type", "application/json");
+        String aiResponse = generateAiResponseWithRetry(messages, 2);
 
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", model);
-            requestBody.put("messages", messages);
-            requestBody.put("max_tokens", 500);
-            requestBody.put("temperature", 0.7);
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(API_URL, entity, Map.class);
-
-            if (response.getBody() != null && response.getBody().containsKey("choices")) {
-                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
-                if (!choices.isEmpty()) {
-                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-                    aiResponse = (String) message.get("content");
-                } else {
-                    aiResponse = "응답을 생성할 수 없어요. 다시 시도해주세요.";
-                }
-            } else {
-                aiResponse = "AI 서버에서 응답을 받지 못했어요.";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            aiResponse = "AI 서버 연결 오류: " + e.getMessage();
-        }
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 5.5. 품질 검수: 답변이 너무 길거나 부적절한 경우 재생성
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        aiResponse = validateAndRefineResponse(aiResponse);
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 6. 대화 저장: 사용자 메시지 (원본) + AI 응답
@@ -198,5 +184,95 @@ public class ChatService {
         // 시간 순서대로 정렬하여 반환
         messages.sort((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
         return messages;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Private Helper Methods: LLM 품질 검수 및 재시도 로직
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * AI 응답 생성 with 재시도 로직
+     */
+    private String generateAiResponseWithRetry(List<Map<String, Object>> messages, int maxRetries) {
+        for (int attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + apiKey);
+                headers.set("Content-Type", "application/json");
+
+                Map<String, Object> requestBody = new HashMap<>();
+                requestBody.put("model", model);
+                requestBody.put("messages", messages);
+                requestBody.put("max_tokens", 300); // 짧은 답변 유도
+                requestBody.put("temperature", 0.7);
+
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+                ResponseEntity<Map> response = restTemplate.postForEntity(API_URL, entity, Map.class);
+
+                if (response.getBody() != null && response.getBody().containsKey("choices")) {
+                    List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                    if (!choices.isEmpty()) {
+                        Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                        String content = (String) message.get("content");
+
+                        // 빈 응답이 아니면 성공
+                        if (content != null && !content.trim().isEmpty()) {
+                            return content.trim();
+                        }
+                    }
+                }
+
+                // 재시도
+                if (attempt < maxRetries) {
+                    System.out.println("⚠️ AI 응답 실패, 재시도 중... (" + (attempt + 1) + "/" + maxRetries + ")");
+                    Thread.sleep(1000); // 1초 대기 후 재시도
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (attempt == maxRetries) {
+                    return "죄송해요, 지금은 답변을 생성할 수 없어요. 잠시 후 다시 시도해주세요.";
+                }
+            }
+        }
+
+        return "응답을 생성할 수 없어요. 다시 시도해주세요.";
+    }
+
+    /**
+     * 응답 품질 검수 및 정제
+     */
+    private String validateAndRefineResponse(String response) {
+        // 1. 빈 응답 체크
+        if (response == null || response.trim().isEmpty()) {
+            return "잘 들었어요. 언제든 이야기해주세요.";
+        }
+
+        String refined = response.trim();
+
+        // 2. 너무 긴 응답 (200자 초과) 체크 및 축약
+        if (refined.length() > 200) {
+            // 첫 2-3문장만 추출 (마침표 기준)
+            String[] sentences = refined.split("[.!?]");
+            if (sentences.length > 2) {
+                refined = sentences[0] + "." + (sentences[1].trim().isEmpty() ? "" : " " + sentences[1] + ".");
+            } else {
+                refined = refined.substring(0, 200) + "...";
+            }
+            System.out.println("⚠️ 답변이 너무 길어 축약됨: " + response.length() + "자 → " + refined.length() + "자");
+        }
+
+        // 3. 부적절한 표현 제거
+        refined = refined.replaceAll("저는 AI이기 때문에", "")
+                .replaceAll("인공지능으로서", "")
+                .replaceAll("제가 이해한 바로는", "")
+                .trim();
+
+        // 4. 빈 응답이 된 경우 기본 메시지
+        if (refined.isEmpty() || refined.length() < 5) {
+            return "잘 들었어요. 언제든 이야기해주세요.";
+        }
+
+        return refined;
     }
 }
