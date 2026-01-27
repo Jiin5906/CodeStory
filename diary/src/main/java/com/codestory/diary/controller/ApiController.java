@@ -148,6 +148,65 @@ public class ApiController {
         return ResponseEntity.ok(Map.of("liked", liked));
     }
 
+    // 공유 피드 조회 (모든 public 일기)
+    @GetMapping("/feed")
+    public ResponseEntity<?> getFeed() {
+        List<Diary> publicDiaries = diaryRepository.findByIsPublicTrueOrderByCreatedAtDesc();
+
+        List<DiaryDto> dtos = publicDiaries.stream().map(d -> {
+            // Get author nickname
+            String authorNickname = "익명"; // Default to anonymous
+            if (!d.isAnonymous()) {
+                // Only fetch nickname if not anonymous
+                authorNickname = memberRepository.findById(d.getUserId())
+                        .map(Member::getNickname)
+                        .orElse("익명");
+            }
+
+            // Get like and comment counts
+            int likeCount = likesRepository.countByDiaryId(d.getId());
+            int commentCount = commentRepository.countByDiaryId(d.getId());
+
+            return DiaryDto.builder()
+                    .id(d.getId())
+                    .userId(d.getUserId())
+                    .content(d.getContent())
+                    .date(d.getDate())
+                    .createdAt(d.getCreatedAt())
+                    .title(d.getTitle())
+                    .emoji(d.getEmoji())
+                    .mood(d.getMood())
+                    .tension(d.getTension())
+                    .fun(d.getFun())
+                    .tags(d.getTags())
+                    .aiResponse(d.getAiResponse())
+                    .imageUrl(d.getImageUrl())
+                    .shared(d.isPublic())
+                    .anonymous(d.isAnonymous())
+                    .nickname(authorNickname)
+                    .likeCount(likeCount)
+                    .commentCount(commentCount)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    // 공유 상태 토글 (public/private 전환)
+    @PostMapping("/diary/{id}/status")
+    public ResponseEntity<?> toggleShare(@PathVariable Long id) {
+        Diary diary = diaryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("일기를 찾을 수 없습니다."));
+
+        diary.togglePublic();
+        diaryRepository.save(diary);
+
+        return ResponseEntity.ok(Map.of(
+                "id", diary.getId(),
+                "isPublic", diary.isPublic()
+        ));
+    }
+
     // Helper: 클라이언트 IP 추출
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");

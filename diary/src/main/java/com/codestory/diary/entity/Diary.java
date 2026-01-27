@@ -108,4 +108,9 @@ public class Diary {
             this.imageUrl = imageUrl;
         }
     }
+
+    // 공유 상태 토글 (비즈니스 로직)
+    public void togglePublic() {
+        this.isPublic = !this.isPublic;
+    }
 }
