@@ -74,16 +74,32 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 console.log('🔍 질문 감지 → GraphRagService 호출');
                 const response = await graphRagApi.analyzeQuestion(user.id, content);
 
-                // JSON 파싱 (GraphRagService는 JSON 문자열 반환)
+                // 응답 처리: 이미 객체인지, 문자열인지 확인
                 let parsedResponse;
-                try {
-                    parsedResponse = JSON.parse(response);
-                } catch (e) {
-                    // JSON 파싱 실패 시 원본 사용
-                    parsedResponse = { message: response };
+                if (typeof response === 'string') {
+                    // 문자열인 경우 JSON 파싱 시도
+                    try {
+                        parsedResponse = JSON.parse(response);
+                    } catch (e) {
+                        console.warn('JSON 파싱 실패, 원본 문자열 사용:', e);
+                        parsedResponse = { message: response };
+                    }
+                } else if (typeof response === 'object' && response !== null) {
+                    // 이미 객체인 경우 그대로 사용
+                    parsedResponse = response;
+                } else {
+                    // 예상치 못한 타입
+                    console.error('예상치 못한 응답 타입:', typeof response, response);
+                    parsedResponse = { message: '응답을 처리할 수 없습니다.' };
                 }
 
-                setAiResponse(parsedResponse.message || response);
+                // message 필드 추출 (없으면 전체 응답을 문자열로 변환)
+                const messageText = parsedResponse.message
+                    || parsedResponse.content
+                    || (typeof parsedResponse === 'string' ? parsedResponse : JSON.stringify(parsedResponse));
+
+                console.log('최종 AI 응답:', messageText);
+                setAiResponse(messageText);
             } else {
                 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                 // ✍️ 일기 모드: DiaryService (저장 + Pinecone Memory + 공감)
