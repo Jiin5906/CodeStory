@@ -35,7 +35,7 @@ public class ChatService {
     private String model;
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final int MAX_HISTORY = 10; // 최근 대화 히스토리 개수 제한
+    private static final int MAX_HISTORY = 5; // 최근 대화 히스토리 개수 제한 (속도 최적화)
 
     /**
      * 사용자 메시지를 받아 AI 응답을 생성하고, 대화를 저장 및 학습
@@ -63,78 +63,34 @@ public class ChatService {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         List<String> relatedMemories = memoryService.findRelatedMemories(userIdString, userMessage);
 
-        // 관련 기억 컨텍스트 생성 (대화 중심으로 개편)
+        // 관련 기억 컨텍스트 생성 (속도 최적화 버전)
         StringBuilder memoryContext = new StringBuilder();
         if (!relatedMemories.isEmpty()) {
-            memoryContext.append("\n\n## 🧠 사용자에 대해 학습한 기억:\n");
-            for (int i = 0; i < relatedMemories.size(); i++) {
+            memoryContext.append("\n🧠 학습된 기억:\n");
+            for (int i = 0; i < Math.min(3, relatedMemories.size()); i++) { // 최대 3개만 사용
                 String memory = relatedMemories.get(i);
-                memoryContext.append(String.format("%d. %s\n",
-                        i + 1,
-                        memory.length() > 120 ? memory.substring(0, 120) + "..." : memory));
+                memoryContext.append(String.format("- %s\n",
+                        memory.length() > 80 ? memory.substring(0, 80) + "..." : memory));
             }
-            memoryContext.append(
-                    "\n✅ 위 기억을 바탕으로, 사용자의 성향/선호/패턴을 이해하고 개인화된 답변을 해주세요.\n");
-            memoryContext.append(
-                    "✅ 과거 대화를 자연스럽게 언급하되, 강요하지 마세요. (예: \"저번에 말씀하셨던 것처럼...\")\n");
+            memoryContext.append("→ 자연스럽게 활용하세요.\n");
         } else {
-            memoryContext.append(
-                    "\n\n## 💡 아직 학습된 기억이 없습니다\n");
-            memoryContext.append(
-                    "✅ 일반적인 대화형 AI처럼 자연스럽게 답변하세요.\n");
-            memoryContext.append(
-                    "✅ 이번 대화를 통해 사용자를 학습하고, 다음번엔 더 개인화된 답변을 제공할 수 있습니다.\n");
+            memoryContext.append("\n💡 첫 대화입니다. 자연스럽게 답변하세요.\n");
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 3. 사용자 학습형 대화 LLM 프롬프트 (완전 개편)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         String systemPrompt = String.format("""
-                # 🎯 Identity & Mission
-                당신은 **몽글이**입니다. 사용자와의 모든 대화를 학습하여, 점점 더 개인화된 공감과 위로를 제공하는 AI 친구입니다.
+                당신은 **몽글이**, 사용자를 학습하는 AI 친구입니다.
 
-                당신의 차별점은 **사용자를 깊이 이해하고 학습한다**는 것입니다:
-                - 사용자의 성향, 선호, 고민, 습관을 기억합니다
-                - 대화할수록 더 정확하고 개인화된 답변을 제공합니다
-                - 처음 대화할 때는 일반적인 AI처럼 답변하지만, 시간이 지날수록 "오래 알아온 친구"가 됩니다
+                **핵심 규칙**:
+                - 2-3줄 이내, 최대 100자
+                - 따뜻한 '해요체'
+                - 공감 우선, 자연스럽게
+                - 과거 대화를 기억하면 자연스럽게 언급
+                - "일기", "데이터", "정보 없음" 같은 시스템 표현 절대 금지
 
-                # 📏 Core Response Rules (절대 준수)
-                1. **답변 길이**: 2-3줄 이내 (최대 100자)
-                2. **말투**: 따뜻하고 편안한 '해요체'
-                3. **공감 우선**: 설명이나 조언보다 공감이 먼저
-                4. **자연스러움**: 기계적이거나 형식적이지 않게
-                5. **기억 활용**: 과거 대화가 있다면 자연스럽게 언급 (강요 금지)
-
-                # 💬 Response Patterns by Context
-
-                ## A. 학습된 기억이 있을 때:
-                ✅ GOOD:
-                - "저번에 말씀하셨던 그 프로젝트, 어떻게 되셨어요?"
-                - "항상 이 시간에 피곤해하시던데, 오늘도 그러신가요?"
-                - "좋아하시는 음식이죠! 맛있게 드셨길 바라요."
-
-                ❌ BAD:
-                - "일기에서 관련 내용을 찾지 못했어요" (절대 금지!)
-                - "과거 기록에 의하면..." (기계적)
-
-                ## B. 학습된 기억이 없을 때:
-                ✅ GOOD (일반 대화형 AI처럼 자연스럽게):
-                - "배고프시군요! 뭐 드시고 싶으세요?"
-                - "오늘 뭐 할까 고민이시군요. 기분 전환이 필요하신가요?"
-                - "힘든 하루셨네요. 편하게 쉬어가세요."
-
-                ❌ BAD:
-                - "관련된 정보가 없어요" (사용자가 실망함)
-                - "이전 대화 내역이 없습니다" (노출 금지)
-
-                # 🧠 Context
                 %s
-
-                # 🎯 Final Instructions
-                1. **항상 자연스럽게**: 데이터가 있든 없든, 친구처럼 자연스럽게 대화하세요
-                2. **개인화 우선**: 학습된 정보가 있다면 적극 활용하세요
-                3. **짧고 진심 있게**: 한두 문장으로 핵심만 전달하세요
-                4. **절대 금지**: "일기", "데이터", "정보 없음" 같은 시스템적 표현 사용 금지
                 """, memoryContext.toString());
 
         List<Map<String, Object>> messages = new ArrayList<>();
@@ -228,8 +184,8 @@ public class ChatService {
                 Map<String, Object> requestBody = new HashMap<>();
                 requestBody.put("model", model);
                 requestBody.put("messages", messages);
-                requestBody.put("max_tokens", 300); // 짧은 답변 유도
-                requestBody.put("temperature", 0.7);
+                requestBody.put("max_tokens", 150); // 짧은 답변 유도 (속도 최적화)
+                requestBody.put("temperature", 0.5); // 낮은 temperature로 빠른 생성
 
                 HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
                 ResponseEntity<Map> response = restTemplate.postForEntity(API_URL, entity, Map.class);
@@ -275,14 +231,14 @@ public class ChatService {
 
         String refined = response.trim();
 
-        // 2. 너무 긴 응답 (200자 초과) 체크 및 축약
-        if (refined.length() > 200) {
-            // 첫 2-3문장만 추출 (마침표 기준)
+        // 2. 너무 긴 응답 (120자 초과) 체크 및 축약 (속도 최적화)
+        if (refined.length() > 120) {
+            // 첫 2문장만 추출 (마침표 기준)
             String[] sentences = refined.split("[.!?]");
-            if (sentences.length > 2) {
+            if (sentences.length > 1) {
                 refined = sentences[0] + "." + (sentences[1].trim().isEmpty() ? "" : " " + sentences[1] + ".");
             } else {
-                refined = refined.substring(0, 200) + "...";
+                refined = refined.substring(0, 120) + "...";
             }
             System.out.println("⚠️ 답변이 너무 길어 축약됨: " + response.length() + "자 → " + refined.length() + "자");
         }
