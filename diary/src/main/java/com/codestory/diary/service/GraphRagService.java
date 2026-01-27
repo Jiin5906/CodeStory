@@ -154,23 +154,25 @@ public class GraphRagService {
             log.info("  ✓ Kingpin 분석 완료 (핵심 원인 수: {})", kingpinResults.size());
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // Step 3: 검색 결과를 자연어 컨텍스트로 변환 (시간 가중치 + Kingpin 포함)
+            // Step 3: 검색 결과를 자연어 컨텍스트로 변환 (자연스러운 시간 표현)
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             StringBuilder contextBuilder = new StringBuilder();
-            contextBuilder.append("🔍 [시간 가중치 적용 검색 결과]\n\n");
+            contextBuilder.append("🔍 [과거 기억 데이터 (자연어 시간 표현)]\n\n");
 
             for (Map<String, Object> row : vectorResults) {
                 String keyword = (String) row.get("keyword");
                 String types = row.get("types").toString();
                 Double finalScore = (Double) row.get("similarity");
-                Double vectorSimilarity = (Double) row.get("vectorSimilarity");
                 Long daysAgo = (Long) row.get("daysAgo");
                 String relationship = (String) row.get("relationship");
 
-                // 최종 점수와 함께 벡터 유사도, 경과 일수 표시
+                // ✨ 자연스러운 한국어 시간 표현 변환
+                String naturalTime = convertToNaturalTime(daysAgo);
+
+                // 자연어 시간 + 관계 정보 표시
                 contextBuilder.append(String.format(
-                    "- [최종점수: %.2f, 벡터: %.2f, %d일 전] (나) --[%s]--> [%s: %s]\n",
-                    finalScore * 100, vectorSimilarity * 100, daysAgo, relationship, types, keyword
+                    "- [%s] (나) --[%s]--> [%s: %s] (점수: %.0f)\n",
+                    naturalTime, relationship, types, keyword, finalScore * 100
                 ));
 
                 // 연결된 노드들도 추가
@@ -231,9 +233,16 @@ public class GraphRagService {
 
                 # Retrieval Context (User Diary Data)
                 %s
+                [중요] 위 데이터의 시간 표현 ("어제", "그저께", "지난주" 등)은 이미 자연어로 변환되어 있습니다.
+                답변 시 이 자연어 표현을 그대로 사용하세요. ISO 날짜 형식(YYYY-MM-DD)으로 재변환하지 마세요.
 
                 # User Question
                 "%s"
+
+                # Question Analysis for Time Format
+                사용자 질문에 다음 키워드가 포함되어 있는지 확인하세요:
+                - "정확히", "정확한 날짜", "몇 월 몇 일", "날짜", "년월일" -> 이 경우에만 YYYY-MM-DD 형식 사용
+                - 그 외 모든 경우 -> 자연어 시간 표현 사용 ("어제", "그저께", "지난주" 등)
 
                 # Cognitive Process (Internal Monologue Instructions)
                 답변을 생성하기 전에, 반드시 다음 단계의 논리적 추론을 거치세요. (이 과정은 내부적으로만 수행하고 출력하지 마세요.)
@@ -250,26 +259,33 @@ public class GraphRagService {
 
                 3. **Persona Selection (페르소나 적용)**:
 
-                   **[Mode A: 분석가] - 정확한 Fact 전달 우선**
-                   - 감정적 수식어 없이, 건조하고 명확하게 사실만 전달하세요.
-                   - 날짜는 반드시 YYYY-MM-DD 형식으로 명시하세요 (예: 2025-10-05).
-                   - "저번에도", "기억이 나요", "~하셨네요" 같은 감정적 표현은 절대 사용하지 마세요.
+                   **[Mode A: 정보 전달자] - 사람처럼 말하되 팩트에 집중**
+                   - 팩트를 전달하되, 사람처럼 자연스러운 시간 표현을 사용하세요.
+                   - 기본은 상대적 시간: "어제", "그저께", "지난주 화요일", "3일 전", "이번 달 초"
+                   - 시간대 표현: "아침에", "점심때", "저녁 무렵", "밤늦게"
+                   - 사용자가 "정확한 날짜", "몇 월 몇 일", "정확히 언제"를 물어볼 때만 YYYY-MM-DD 형식 사용
+                   - "저번에도", "기억이 나요" 같은 앵무새 패턴은 금지하되, 자연스러운 "-셨지요", "-셨어요"는 허용
 
-                   좋은 예시:
-                   - "2025-10-05에 야근을 하셨습니다."
-                   - "최근 2주간 총 3회 야근을 기록하셨어요."
-                   - "2025-09-20, 2025-09-25, 2025-10-01에 친구를 만나셨습니다."
+                   좋은 예시 (자연스러운 시간 표현):
+                   - "어제 저녁에 피자로 식사를 하셨지요."
+                   - "그저께 밤늦게까지 야근을 하셨어요."
+                   - "지난주 화요일 점심에 친구와 만나셨습니다."
+                   - "최근 2주간 총 3번 야근을 하셨네요."
+
+                   정확한 날짜를 요구할 때만 (질문에 "정확히", "몇 월 몇 일", "날짜" 키워드 포함 시):
+                   - "2025-10-05 저녁 7시에 야근을 시작하셨습니다."
+                   - "정확히는 2025-09-20, 2025-09-25, 2025-10-01에 친구를 만나셨어요."
 
                    나쁜 예시 (절대 금지):
-                   - "저번에도 야근을 하셨죠?" ❌ (날짜 없음, 의문형)
-                   - "기억이 나요! 지난번에도 힘들어하셨잖아요!" ❌ (감정 과다, 앵무새 느낌)
-                   - "또 야근이시네요 ㅠㅠ" ❌ (감정 표현 금지)
+                   - "저번에도 야근을 하셨죠?" ❌ (구체적 시간 없음, 의문형)
+                   - "기억이 나요! 지난번에도 힘들어하셨잖아요!" ❌ (앵무새 패턴)
+                   - "2025-10-05 19:00에 야근했습니다." ❌ (사용자가 정확한 날짜를 요구하지 않았는데 ISO 형식 사용)
 
-                   **[Mode B: 친구] - 자연스러운 공감 우선**
+                   **[Mode B: 감정 지지자] - 공감 우선, 팩트는 맥락에만**
                    - 공감과 위로에 집중하되, 억지로 기억을 언급하려 들지 마세요.
-                   - 날짜를 직접 말하지 말고, "예전에", "전에도", "그때" 같은 자연스러운 표현을 사용하세요.
-                   - "기억이 나요!", "저번에도~", "~하셨네요!" 같은 기계적 패턴은 절대 사용하지 마세요.
-                   - 따뜻한 해요체를 사용하되, 과도한 감탄사(!!!, ㅠㅠㅠ)는 1-2개로 제한하세요.
+                   - 시간을 언급할 때는 "예전에", "전에도", "그때", "요즘" 같은 모호한 표현 사용
+                   - "기억이 나요!", "저번에도~", "~하셨네요!" 같은 기계적 패턴은 절대 금지
+                   - 따뜻한 해요체를 사용하되, 과도한 감탄사(!!!, ㅠㅠㅠ)는 1-2개로 제한
 
                    좋은 예시:
                    - "또 야근이었구나... 많이 피곤하시겠어요."
@@ -277,9 +293,9 @@ public class GraphRagService {
                    - "밤늦게까지 일하시느라 힘드셨겠어요."
 
                    나쁜 예시 (절대 금지):
-                   - "저번에도 10월 5일에 야근하셨죠? 기억나요!" ❌ (날짜 직접 언급, 앵무새 느낌)
+                   - "어제 저녁에도 야근하셨죠? 기억나요!" ❌ (구체적 시간 언급, 앵무새 느낌)
                    - "와!!! 진짜 힘드시겠어요!!! ㅠㅠㅠ" ❌ (과도한 감탄사)
-                   - "2025-10-05에도 늦게까지 일하셔서..." ❌ (Mode B에서 정확한 날짜 금지)
+                   - "그저께 밤늦게까지 일하셔서..." ❌ (Mode B에서 구체적 시간 금지)
 
                 # JSON Output Format (Strict Enforcement)
                 반드시 아래의 JSON 포맷으로만 출력하세요. 마크다운 태그(```json)나 사설을 붙이지 마세요.
@@ -394,6 +410,46 @@ public class GraphRagService {
                     "message": "기억을 분석하는 도중 문제가 발생했습니다. 잠시 후 다시 시도해주세요."
                 }
                 """;
+        }
+    }
+
+    /**
+     * 🕐 일(days) 단위를 자연스러운 한국어 시간 표현으로 변환
+     *
+     * @param daysAgo 경과 일수 (0 = 오늘)
+     * @return 자연스러운 한국어 시간 표현 (예: "어제", "지난주", "2개월 전")
+     */
+    private String convertToNaturalTime(Long daysAgo) {
+        if (daysAgo == null || daysAgo < 0) {
+            return "최근";
+        }
+
+        if (daysAgo == 0) {
+            return "오늘";
+        } else if (daysAgo == 1) {
+            return "어제";
+        } else if (daysAgo == 2) {
+            return "그저께";
+        } else if (daysAgo <= 6) {
+            return daysAgo + "일 전";
+        } else if (daysAgo <= 13) {
+            return "지난주";
+        } else if (daysAgo <= 20) {
+            return "2주 전";
+        } else if (daysAgo <= 30) {
+            return "3주 전";
+        } else if (daysAgo <= 60) {
+            return "지난달";
+        } else if (daysAgo <= 90) {
+            return "2개월 전";
+        } else if (daysAgo <= 180) {
+            int months = (int) (daysAgo / 30);
+            return months + "개월 전";
+        } else if (daysAgo <= 365) {
+            return "반년 전";
+        } else {
+            int years = (int) (daysAgo / 365);
+            return years + "년 전";
         }
     }
 }
