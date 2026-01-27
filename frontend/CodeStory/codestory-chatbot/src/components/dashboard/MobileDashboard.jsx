@@ -69,29 +69,28 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
             // - LLM 검수 강화
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('💬 입력 감지 → 통합 DiaryService 호출 (질문/일기 자동 처리)');
-                const diaryData = {
-                    userId: user.id,
-                    content: content,
-                    date: new Date().toISOString().split('T')[0],
-                    title: '',
-                    mood: 5,
-                    tension: 5,
-                    fun: 5,
-                    emoji: '✨',
-                    isPublic: false,
-                    isAnonymous: false,
-                    tags: []
-                };
+            const diaryData = {
+                userId: user.id,
+                content: content,
+                date: new Date().toISOString().split('T')[0],
+                title: '',
+                mood: 5,
+                tension: 5,
+                fun: 5,
+                emoji: '✨',
+                isPublic: false,
+                isAnonymous: false,
+                tags: []
+            };
 
-                const response = await diaryApi.saveDiary(diaryData, null);
+            const response = await diaryApi.saveDiary(diaryData, null);
 
-                if (response && response.aiResponse) {
-                    setAiResponse(response.aiResponse);
-                }
+            if (response && response.aiResponse) {
+                setAiResponse(response.aiResponse);
+            }
 
-                if (onWriteClick) {
-                    onWriteClick();
-                }
+            if (onWriteClick) {
+                onWriteClick();
             }
         } catch (error) {
             console.error('처리 실패:', error);
