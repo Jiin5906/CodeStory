@@ -4,7 +4,7 @@ import { enUS } from 'date-fns/locale';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
-import { diaryApi, graphRagApi } from '../../services/api';
+import { diaryApi } from '../../services/api';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
@@ -63,44 +63,12 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             // 🧠 Step 1: 질문인지 일기인지 자동 감지
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            const questionKeywords = /[뭐뭘언제어디왜어떻게몇누가했어갔어먹었어]/;
-            const hasQuestionMark = /[\?？]/.test(content);
-            const isQuestion = questionKeywords.test(content) || hasQuestionMark;
-
-            if (isQuestion) {
-                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                // 🔍 질문 모드: GraphRagService (RAG + LLM 통합)
-                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                console.log('🔍 질문 감지 → GraphRagService 호출');
-                const response = await graphRagApi.analyzeQuestion(user.id, content);
-                console.log('📥 API 응답 받음:', typeof response, response);
-
-                // 응답 파싱 (간소화)
-                let messageText = '';
-
-                if (typeof response === 'string') {
-                    // 문자열인 경우 JSON 파싱
-                    try {
-                        const parsed = JSON.parse(response);
-                        messageText = parsed.message || response;
-                    } catch (e) {
-                        // JSON 파싱 실패 시 원본 사용
-                        messageText = response;
-                    }
-                } else if (response && typeof response === 'object') {
-                    // 이미 객체인 경우 message 추출
-                    messageText = response.message || JSON.stringify(response);
-                } else {
-                    messageText = '응답을 받지 못했어요. 다시 시도해주세요.';
-                }
-
-                console.log('✅ 최종 AI 응답:', messageText);
-                setAiResponse(messageText);
-            } else {
-                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                // ✍️ 일기 모드: DiaryService (저장 + Pinecone Memory + 공감)
-                // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                console.log('✍️ 일기 감지 → DiaryService 호출');
+            // ✨ 통합 모드: 질문/일기 구분 없이 ChatService가 모두 처리
+            // - 대화 히스토리 참고
+            // - RAG 기반 과거 기억 검색
+            // - LLM 검수 강화
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('💬 입력 감지 → 통합 DiaryService 호출 (질문/일기 자동 처리)');
                 const diaryData = {
                     userId: user.id,
                     content: content,
