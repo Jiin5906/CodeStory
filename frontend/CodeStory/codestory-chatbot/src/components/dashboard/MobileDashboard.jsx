@@ -9,6 +9,7 @@ import { diaryApi } from '../../services/api';
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
+    const [emotion, setEmotion] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
 
@@ -58,6 +59,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         setLatestLog(content);
         setIsAiThinking(true);
         setAiResponse(null);
+        setEmotion(null);
 
         try {
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -87,6 +89,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
             if (response && response.aiResponse) {
                 setAiResponse(response.aiResponse);
+                // emotion 필드가 있으면 설정
+                if (response.emotion) {
+                    setEmotion(response.emotion);
+                }
             }
 
             if (onWriteClick) {
@@ -202,6 +208,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             <MainRoom
                                 latestLog={latestLog}
                                 aiResponse={aiResponse}
+                                emotion={emotion}
                                 isAiThinking={isAiThinking}
                             />
                         </div>

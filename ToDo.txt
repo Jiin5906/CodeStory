@@ -1,2 +1,178 @@
-오케이 ai가 답변 하는건 이제 거의 완성.
-대신 느림. 이걸 좀 빠르게 해야함.
+🎯 목표
+  1. 로딩 시: 마스코트가 고민하는 애니메이션
+  2. 답변 시: 사용자 감정(슬픔, 화, 분노, 즐거움 등)에 맞춤 애니메이션
+
+  ---
+  📦 Phase 1: 준비물 확보 (필수 선행 작업)
+
+  1.1 Lottie 애니메이션 파일 준비
+
+  - 현재 있는 파일: src/assets/mongleIDLE.json (대기 상태)
+  - 필요한 파일 (총 6개):
+  src/assets/
+  ├── mongleIDLE.json           ✅ (기존 - 대기 상태)
+  ├── mongleThinking.json       🆕 (로딩 시 - 고민하는 모습)
+  ├── mongleHappy.json          🆕 (즐거움 감정)
+  ├── mongleSad.json            🆕 (슬픔 감정)
+  ├── mongleAngry.json          🆕 (화/분노 감정)
+  └── mongleNeutral.json        🆕 (중립 감정)
+
+  애니메이션 파일 구하는 방법:
+  - https://lottiefiles.com/ 무료 다운로드
+  - 디자이너에게 의뢰
+  - 기존 mongleIDLE.json 복사 후 속도/색상 변경 (임시용)
+
+  ---
+  🔧 Phase 2: 백엔드 API 확장 (감정 분석)
+
+  2.1 AI 응답에 감정 태그 추가
+
+  수정 파일: diary/src/main/java/com/codestory/diary/service/ChatService.java
+
+  // 현재 응답: { "response": "잘 들었어요..." }
+  // 변경 후: { "response": "잘 들었어요...", "emotion": "happy" }
+
+  변경 사항:
+  1. OpenAI API 호출 시 시스템 프롬프트에 추가:
+  "답변 마지막에 감정 태그를 추가하세요: [EMOTION:happy/sad/angry/neutral]"
+  2. 응답 파싱 후 emotion 필드 추출
+  3. ChatResponseDto에 emotion 필드 추가
+
+  예상 소요 시간: 30분
+
+  ---
+  🎨 Phase 3: 프론트엔드 구현
+
+  3.1 Lottie 애니메이션 매핑 로직 추가
+
+  수정 파일: frontend/.../components/dashboard/MainRoom.jsx
+
+  현재 구조:
+  const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
+    // ...
+    <Lottie animationData={mongleAnimation} loop={true} autoplay={true} />
+  }
+
+  변경 후 구조:
+  import mongleIDLE from '../../assets/mongleIDLE.json';
+  import mongleThinking from '../../assets/mongleThinking.json';
+  import mongleHappy from '../../assets/mongleHappy.json';
+  import mongleSad from '../../assets/mongleSad.json';
+  import mongleAngry from '../../assets/mongleAngry.json';
+  import mongleNeutral from '../../assets/mongleNeutral.json';
+
+  const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking }) => {
+    const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
+
+    useEffect(() => {
+      // 1. 로딩 중: mongleThinking
+      if (isAiThinking) {
+        setCurrentAnimation(mongleThinking);
+      }
+      // 2. 답변 도착: 감정에 맞는 애니메이션
+      else if (emotion) {
+        const emotionMap = {
+          happy: mongleHappy,
+          sad: mongleSad,
+          angry: mongleAngry,
+          neutral: mongleNeutral,
+        };
+        setCurrentAnimation(emotionMap[emotion] || mongleNeutral);
+
+        // 3초 후 대기 상태로 복귀
+        setTimeout(() => setCurrentAnimation(mongleIDLE), 3000);
+      }
+      // 3. 기본 상태: mongleIDLE
+      else {
+        setCurrentAnimation(mongleIDLE);
+      }
+    }, [isAiThinking, emotion]);
+
+    return (
+      <Lottie animationData={currentAnimation} loop={true} autoplay={true} />
+    );
+  }
+
+  예상 소요 시간: 1시간
+
+  ---
+  3.2 API 연동 수정
+
+  수정 파일: frontend/.../components/dashboard/MobileDashboard.jsx (또는 채팅 호출 부분)
+
+  현재:
+  const response = await chatApi.sendMessage(userId, message);
+  setAiResponse(response.response);
+
+  변경 후:
+  const response = await chatApi.sendMessage(userId, message);
+  setAiResponse(response.response);
+  setEmotion(response.emotion); // 🆕 추가
+
+  예상 소요 시간: 15분
+
+  ---
+  ✅ Phase 4: 테스트 및 최적화
+
+  4.1 기능 테스트 체크리스트
+
+  - 채팅 입력 → mongleThinking 애니메이션 재생
+  - 즐거운 메시지 → mongleHappy 애니메이션 3초 표시 → mongleIDLE 복귀
+  - 슬픈 메시지 → mongleSad 애니메이션 3초 표시 → mongleIDLE 복귀
+  - 화난 메시지 → mongleAngry 애니메이션 3초 표시 → mongleIDLE 복귀
+  - 중립 메시지 → mongleNeutral 애니메이션 3초 표시 → mongleIDLE 복귀
+
+  4.2 성능 최적화
+
+  - Lottie JSON 파일 크기 확인 (각 파일 100KB 이하 권장)
+  - preload 또는 lazy loading 적용 검토
+  - 애니메이션 전환 시 깜빡임 방지 (key prop 활용)
+
+  예상 소요 시간: 30분
+
+  ---
+  📊 전체 작업 요약
+  ┌───────────┬────────────────────────┬───────────┬──────────────────────┐
+  │   Phase   │       작업 내용        │ 예상 시간 │        난이도        │
+  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
+  │ Phase 1   │ Lottie 파일 준비       │ 2-4시간   │ ⭐⭐⭐ (디자인 의존) │
+  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
+  │ Phase 2   │ 백엔드 감정 분석 추가  │ 30분      │ ⭐⭐                 │
+  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
+  │ Phase 3.1 │ 프론트 애니메이션 로직 │ 1시간     │ ⭐⭐                 │
+  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
+  │ Phase 3.2 │ API 연동 수정          │ 15분      │ ⭐                   │
+  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
+  │ Phase 4   │ 테스트 및 최적화       │ 30분      │ ⭐                   │
+  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
+  │ 합계      │                        │ 4-6시간   │                      │
+  └───────────┴────────────────────────┴───────────┴──────────────────────┘
+  ---
+  🎬 빠른 프로토타입 (Phase 1 대체안)
+
+  애니메이션 파일 없이 즉시 테스트하려면:
+  1. 기존 mongleIDLE.json 파일을 5번 복사
+  2. 각각 mongleThinking.json, mongleHappy.json, mongleSad.json, mongleAngry.json, mongleNeutral.json으로 이름 변경   
+  3. Phase 2-4 진행 (나중에 실제 애니메이션으로 교체)
+
+  ---
+  💡 추가 고려 사항
+
+  1. 감정 분석 정확도 개선
+
+  - GPT-4o-mini 대신 GPT-4o 사용 (더 정확한 감정 분석)
+  - 또는 전용 감정 분석 모델
+  (https://huggingface.co/models?pipeline_tag=text-classification&sort=downloads&search=emotion)
+
+  2. 애니메이션 성능 최적화
+
+  - 첫 로딩 시 모든 Lottie 파일 프리로드
+  - React.memo()로 불필요한 리렌더링 방지
+
+  3. 접근성 (Accessibility)
+
+  - 애니메이션 중 aria-label 추가 (예: "몽글이가 고민 중입니다")
+  - prefers-reduced-motion CSS 쿼리 지원
+
+  ---
+  이 로드맵대로 진행하시면 됩니다! 추가 질문이나 특정 Phase에 대한 상세 구현이 필요하시면 말씀해주세요. 🚀

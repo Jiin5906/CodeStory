@@ -68,7 +68,8 @@ public class DiaryService {
 
         // ChatService를 통해 대화 히스토리를 참고한 AI 응답 생성
         // (내부적으로 RAG, PII 마스킹, 대화 저장 모두 처리됨)
-        String aiReply = chatService.chat(request.getUserId(), currentDiaryText);
+        com.codestory.diary.dto.ChatResponseDto aiReplyDto = chatService.chat(request.getUserId(), currentDiaryText);
+        String aiReply = aiReplyDto.getContent();
 
         // ✨ 벡터 DB 저장은 ChatService 내부에서 이미 처리되므로 중복 저장 불필요
 

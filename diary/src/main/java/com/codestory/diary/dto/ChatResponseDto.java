@@ -15,4 +15,5 @@ public class ChatResponseDto {
     private String role; // "user" or "assistant"
     private String content;
     private LocalDateTime timestamp;
+    private String emotion; // "happy", "sad", "angry", "neutral"
 }

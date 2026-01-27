@@ -42,10 +42,10 @@ public class ChatService {
      *
      * @param userId 사용자 ID
      * @param userMessage 사용자 메시지
-     * @return AI 응답
+     * @return AI 응답 (감정 태그 포함)
      */
     @Transactional
-    public String chat(Long userId, String userMessage) {
+    public com.codestory.diary.dto.ChatResponseDto chat(Long userId, String userMessage) {
         System.out.println("🎯 [ChatService] 호출됨 - User: " + userId + ", Message: " + userMessage);
         String userIdString = String.valueOf(userId);
 
@@ -89,6 +89,8 @@ public class ChatService {
                 - 공감 우선, 자연스럽게
                 - 과거 대화를 기억하면 자연스럽게 언급
                 - "일기", "데이터", "정보 없음" 같은 시스템 표현 절대 금지
+                - **답변 마지막에 반드시 감정 태그를 추가하세요**: [EMOTION:happy|sad|angry|neutral]
+                  (happy=즐거움/긍정, sad=슬픔/우울, angry=화남/분노, neutral=중립)
 
                 %s
                 """, memoryContext.toString());
@@ -150,7 +152,33 @@ public class ChatService {
         }
 
         System.out.println("✅ [ChatService] 응답 생성 완료: " + aiResponse);
-        return aiResponse;
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 8. 감정 태그 파싱 [EMOTION:xxx]
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        String emotion = "neutral"; // 기본값
+        String cleanedResponse = aiResponse;
+
+        if (aiResponse.contains("[EMOTION:")) {
+            int startIdx = aiResponse.indexOf("[EMOTION:");
+            int endIdx = aiResponse.indexOf("]", startIdx);
+            if (endIdx > startIdx) {
+                String emotionTag = aiResponse.substring(startIdx + 9, endIdx).trim().toLowerCase();
+                if (emotionTag.equals("happy") || emotionTag.equals("sad") ||
+                    emotionTag.equals("angry") || emotionTag.equals("neutral")) {
+                    emotion = emotionTag;
+                }
+                // 사용자에게 보여줄 메시지에서 태그 제거
+                cleanedResponse = aiResponse.substring(0, startIdx).trim();
+            }
+        }
+
+        return com.codestory.diary.dto.ChatResponseDto.builder()
+                .role("assistant")
+                .content(cleanedResponse)
+                .emotion(emotion)
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
     }
 
     /**

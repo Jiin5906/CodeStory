@@ -1,12 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
-import mongleAnimation from '../../assets/mongleIDLE.json';
+import mongleIDLE from '../../assets/mongleIDLE.json';
+import mongleThinking from '../../assets/mongleThinking.json';
+import mongleHappy from '../../assets/mongleHappy.json';
+import mongleSad from '../../assets/mongleSad.json';
+import mongleAngry from '../../assets/mongleAngry.json';
+import mongleNeutral from '../../assets/mongleNeutral.json';
 
-const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
+const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking }) => {
     const navigate = useNavigate();
     const [floatingTexts, setFloatingTexts] = useState([]);
     const [showAiThought, setShowAiThought] = useState(false);
+    const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
+
+    // 0. 애니메이션 전환 로직 (감정 기반)
+    useEffect(() => {
+        // 1. 로딩 중: mongleThinking
+        if (isAiThinking) {
+            const timer = setTimeout(() => setCurrentAnimation(mongleThinking), 0);
+            return () => clearTimeout(timer);
+        }
+        // 2. 답변 도착: 감정에 맞는 애니메이션
+        else if (emotion) {
+            const emotionMap = {
+                happy: mongleHappy,
+                sad: mongleSad,
+                angry: mongleAngry,
+                neutral: mongleNeutral,
+            };
+            const showTimer = setTimeout(() => setCurrentAnimation(emotionMap[emotion] || mongleNeutral), 0);
+            // 3초 후 대기 상태로 복귀
+            const hideTimer = setTimeout(() => setCurrentAnimation(mongleIDLE), 3000);
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(hideTimer);
+            };
+        }
+        // 3. 기본 상태: mongleIDLE
+        else {
+            const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 0);
+            return () => clearTimeout(timer);
+        }
+    }, [isAiThinking, emotion]);
 
     // 1. 사용자가 글을 쓰면 -> 공기 중으로 흩어지는 애니메이션 (Visual Effect)
     useEffect(() => {
@@ -77,7 +113,7 @@ const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
                     >
                         <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                         <Lottie
-                            animationData={mongleAnimation}
+                            animationData={currentAnimation}
                             loop={true}
                             autoplay={true}
                             className="w-full h-full drop-shadow-2xl"

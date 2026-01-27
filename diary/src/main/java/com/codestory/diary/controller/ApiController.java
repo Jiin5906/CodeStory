@@ -164,8 +164,11 @@ public class ApiController {
             return ResponseEntity.badRequest().body("userId와 message는 필수입니다.");
         }
 
-        String aiResponse = chatService.chat(request.getUserId(), request.getMessage());
-        return ResponseEntity.ok(Map.of("response", aiResponse));
+        ChatResponseDto aiResponse = chatService.chat(request.getUserId(), request.getMessage());
+        return ResponseEntity.ok(Map.of(
+            "response", aiResponse.getContent(),
+            "emotion", aiResponse.getEmotion()
+        ));
     }
 
     /**
