@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.codestory.diary.dto.AuthRequest;
+import com.codestory.diary.dto.ChatRequestDto;
+import com.codestory.diary.dto.ChatResponseDto;
 import com.codestory.diary.dto.CommentDto;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
+import com.codestory.diary.entity.ChatMessage;
 import com.codestory.diary.entity.Diary;
 import com.codestory.diary.entity.Member;
 import com.codestory.diary.repository.CommentRepository;
@@ -27,6 +30,7 @@ import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.service.AuthService;
+import com.codestory.diary.service.ChatService;
 import com.codestory.diary.service.DiaryService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +43,7 @@ public class ApiController {
 
     private final AuthService authService;
     private final DiaryService diaryService;
+    private final ChatService chatService;
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
     private final LikesRepository likesRepository;
@@ -146,6 +151,40 @@ public class ApiController {
         String userIp = getClientIp(request);
         boolean liked = diaryService.toggleLike(id, userIp);
         return ResponseEntity.ok(Map.of("liked", liked));
+    }
+
+    // --- 채팅 API ---
+    /**
+     * 사용자 메시지를 받아 AI 응답을 생성하고 대화 히스토리를 저장
+     * POST /api/chat
+     */
+    @PostMapping("/chat")
+    public ResponseEntity<?> chat(@RequestBody ChatRequestDto request) {
+        if (request.getUserId() == null || request.getMessage() == null || request.getMessage().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("userId와 message는 필수입니다.");
+        }
+
+        String aiResponse = chatService.chat(request.getUserId(), request.getMessage());
+        return ResponseEntity.ok(Map.of("response", aiResponse));
+    }
+
+    /**
+     * 특정 사용자의 전체 채팅 히스토리 조회
+     * GET /api/chat/history?userId={id}
+     */
+    @GetMapping("/chat/history")
+    public ResponseEntity<?> getChatHistory(@RequestParam Long userId) {
+        List<ChatMessage> messages = chatService.getChatHistory(userId);
+
+        List<ChatResponseDto> dtos = messages.stream()
+                .map(msg -> ChatResponseDto.builder()
+                        .role(msg.getRole())
+                        .content(msg.getContent())
+                        .timestamp(msg.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     // Helper: 클라이언트 IP 추출

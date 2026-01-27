@@ -157,4 +157,19 @@ export const graphRagApi = {
     }
 };
 
+// Chat API (AI 채팅)
+export const chatApi = {
+    // 채팅 메시지 전송 및 AI 응답 받기
+    sendMessage: async (userId, message) => {
+        const response = await api.post('/chat', { userId, message });
+        return response.data; // { response: "AI 응답" }
+    },
+
+    // 채팅 히스토리 가져오기
+    getChatHistory: async (userId) => {
+        const response = await api.get(`/chat/history?userId=${userId}`);
+        return response.data; // [{ role, content, timestamp }, ...]
+    }
+};
+
 export default api;
