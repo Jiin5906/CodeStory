@@ -69,36 +69,32 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
             if (isQuestion) {
                 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                // 🔍 질문 모드: GraphRagService (Dual-Path + Kingpin + Temporal)
+                // 🔍 질문 모드: GraphRagService (RAG + LLM 통합)
                 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                 console.log('🔍 질문 감지 → GraphRagService 호출');
                 const response = await graphRagApi.analyzeQuestion(user.id, content);
+                console.log('📥 API 응답 받음:', typeof response, response);
 
-                // 응답 처리: 이미 객체인지, 문자열인지 확인
-                let parsedResponse;
+                // 응답 파싱 (간소화)
+                let messageText = '';
+
                 if (typeof response === 'string') {
-                    // 문자열인 경우 JSON 파싱 시도
+                    // 문자열인 경우 JSON 파싱
                     try {
-                        parsedResponse = JSON.parse(response);
+                        const parsed = JSON.parse(response);
+                        messageText = parsed.message || response;
                     } catch (e) {
-                        console.warn('JSON 파싱 실패, 원본 문자열 사용:', e);
-                        parsedResponse = { message: response };
+                        // JSON 파싱 실패 시 원본 사용
+                        messageText = response;
                     }
-                } else if (typeof response === 'object' && response !== null) {
-                    // 이미 객체인 경우 그대로 사용
-                    parsedResponse = response;
+                } else if (response && typeof response === 'object') {
+                    // 이미 객체인 경우 message 추출
+                    messageText = response.message || JSON.stringify(response);
                 } else {
-                    // 예상치 못한 타입
-                    console.error('예상치 못한 응답 타입:', typeof response, response);
-                    parsedResponse = { message: '응답을 처리할 수 없습니다.' };
+                    messageText = '응답을 받지 못했어요. 다시 시도해주세요.';
                 }
 
-                // message 필드 추출 (없으면 전체 응답을 문자열로 변환)
-                const messageText = parsedResponse.message
-                    || parsedResponse.content
-                    || (typeof parsedResponse === 'string' ? parsedResponse : JSON.stringify(parsedResponse));
-
-                console.log('최종 AI 응답:', messageText);
+                console.log('✅ 최종 AI 응답:', messageText);
                 setAiResponse(messageText);
             } else {
                 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
