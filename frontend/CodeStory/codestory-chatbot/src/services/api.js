@@ -172,4 +172,24 @@ export const chatApi = {
     }
 };
 
+// Pet (다마고치) API
+export const petApi = {
+    getStatus: async (userId) => {
+        const response = await api.get(`/pet/status?userId=${userId}`);
+        return response.data;
+    },
+    ventilate: async (userId) => {
+        const response = await api.post('/pet/ventilate', { userId, action: 'ventilate' });
+        return response.data;
+    },
+    affectionComplete: async (userId) => {
+        const response = await api.post('/pet/affection-complete', { userId, action: 'affection-complete' });
+        return response.data;
+    },
+    collectShard: async (userId) => {
+        const response = await api.post('/pet/collect-shard', { userId, action: 'collect-shard' });
+        return response.data;
+    }
+};
+
 export default api;

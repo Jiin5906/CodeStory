@@ -1,0 +1,110 @@
+package com.codestory.diary.service;
+
+import com.codestory.diary.dto.PetStatusDto;
+import com.codestory.diary.entity.PetStatus;
+import com.codestory.diary.repository.PetStatusRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Random;
+
+@Service
+@RequiredArgsConstructor
+public class PetService {
+
+    private final PetStatusRepository petStatusRepository;
+    private static final Random random = new Random();
+
+    // 신규 사용자이면 자동 생성, 기존이면 조회
+    @Transactional
+    public PetStatus getOrCreatePetStatus(Long userId) {
+        return petStatusRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    PetStatus newPet = PetStatus.builder()
+                            .userId(userId)
+                            .build();
+                    return petStatusRepository.save(newPet);
+                });
+    }
+
+    // DTO 변환 반환
+    @Transactional(readOnly = true)
+    public PetStatusDto getPetStatusDto(Long userId) {
+        PetStatus pet = getOrCreatePetStatus(userId);
+        boolean ventilationAvailable = pet.getLastVentilationDate() == null
+                || !pet.getLastVentilationDate().isEqual(LocalDate.now());
+
+        return PetStatusDto.builder()
+                .userId(userId)
+                .level(pet.getLevel())
+                .currentExp(pet.getExp())
+                .requiredExp(pet.getRequiredExp())
+                .sunlight(pet.getSunlight())
+                .affection(pet.getAffection())
+                .evolutionStage(pet.getEvolutionStage())
+                .ventilationAvailable(ventilationAvailable)
+                .build();
+    }
+
+    // 환기: 하루 1회 제한
+    @Transactional
+    public PetStatusDto ventilate(Long userId) {
+        PetStatus pet = getOrCreatePetStatus(userId);
+
+        if (pet.getLastVentilationDate() != null && pet.getLastVentilationDate().isEqual(LocalDate.now())) {
+            System.out.println("🌬️ [PetService] 환기 제한: 오늘 이미 환기했음 - User: " + userId);
+            return getPetStatusDto(userId);
+        }
+
+        long expReward = 5L * pet.getLevel();
+        long sunlightReward = 3L * pet.getLevel();
+
+        pet.addExp(expReward);
+        pet.addSunlight(sunlightReward);
+        pet.setLastVentilationDate(LocalDate.now());
+
+        System.out.println("🌬️ [PetService] 환기 완료 - EXP+" + expReward + ", Sunlight+" + sunlightReward + " - User: " + userId);
+
+        return getPetStatusDto(userId);
+    }
+
+    // 쓰다듭기 완료: EXP 30~50 랜덤, affection 리셋
+    @Transactional
+    public PetStatusDto affectionComplete(Long userId) {
+        PetStatus pet = getOrCreatePetStatus(userId);
+
+        long expReward = 30 + random.nextInt(21); // 30~50
+        pet.addExp(expReward);
+        pet.resetAffection();
+
+        System.out.println("🐾 [PetService] 쓰다듭기 완료 - EXP+" + expReward + " - User: " + userId);
+
+        return getPetStatusDto(userId);
+    }
+
+    // 감정 조각 수집: EXP+10, Sunlight+5
+    @Transactional
+    public PetStatusDto collectEmotionShard(Long userId) {
+        PetStatus pet = getOrCreatePetStatus(userId);
+
+        pet.addExp(10);
+        pet.addSunlight(5);
+
+        System.out.println("💎 [PetService] 감정 조각 수집 - EXP+10, Sunlight+5 - User: " + userId);
+
+        return getPetStatusDto(userId);
+    }
+
+    // 채팅 시 30% 확률로 EXP 부여
+    @Transactional
+    public void onChatInteraction(Long userId) {
+        if (random.nextInt(100) < 30) {
+            PetStatus pet = getOrCreatePetStatus(userId);
+            pet.addExp(10);
+
+            System.out.println("🎲 [PetService] 채팅 확률 EXP+10 - User: " + userId);
+        }
+    }
+}

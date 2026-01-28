@@ -17,7 +17,9 @@
       "Bash(git push:*)",
       "Bash(./gradlew test:*)",
       "Bash(xcopy /E /I /Y \"frontend\\\\CodeStory\\\\codestory-chatbot\\\\dist\\\\*\" \"diary\\\\src\\\\main\\\\resources\\\\static\"\")",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(npm install:*)",
+      "Bash(cat:*)"
     ]
   }
 }

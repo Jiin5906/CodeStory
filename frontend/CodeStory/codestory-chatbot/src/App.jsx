@@ -20,9 +20,11 @@ import Settings from './components/layout/Settings';
 import SharedFeed from './components/feed/SharedFeed';
 import ShopPage from './components/shop/ShopPage';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { PetProvider, usePet } from './context/PetContext';
 
 function AppContent() {
     const { currentTheme } = useTheme();
+    const { fetchPetStatus } = usePet();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -78,6 +80,7 @@ function AppContent() {
                 const parsed = JSON.parse(storedUser);
                 setUser(parsed);
                 fetchDiaries(parsed.id);
+                fetchPetStatus(parsed.id);
                 if (location.pathname === '/' || location.pathname === '/login') {
                     navigate('/dashboard');
                 }
@@ -111,6 +114,7 @@ function AppContent() {
         setUser(userInfo);
         localStorage.setItem('diaryUser', JSON.stringify(userInfo));
         fetchDiaries(userInfo.id);
+        fetchPetStatus(userInfo.id);
         navigate('/dashboard');
     };
 
@@ -243,9 +247,11 @@ function AppContent() {
 function App() {
     return (
         <ThemeProvider>
-            <Router>
-                <AppContent />
-            </Router>
+            <PetProvider>
+                <Router>
+                    <AppContent />
+                </Router>
+            </PetProvider>
         </ThemeProvider>
     );
 }

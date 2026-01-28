@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO, format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
+import ExpBar from './ExpBar';
 import { diaryApi } from '../../services/api';
+import { usePet } from '../../context/PetContext';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
@@ -17,6 +19,15 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const [isLampOn, setIsLampOn] = useState(true);
     const [isWindowOpen, setIsWindowOpen] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+    // 창문 관련 확장 상태
+    const [windowColdAnimation, setWindowColdAnimation] = useState(false);
+    const [windowClosedAnimation, setWindowClosedAnimation] = useState(false);
+
+    const ventilateTimerRef = useRef(null);
+    const coldTimerRef = useRef(null);
+
+    const { handleVentilateComplete, petStatus } = usePet();
 
     const today = startOfDay(new Date());
 
@@ -54,7 +65,60 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         return streak;
     }, [diaries, today]);
 
-    // 일기 작성 및 AI 응답 핸들러 (옵션 C: 하이브리드 방식)
+    // 창문 열기/닫기 핸들러
+    const handleWindowClick = () => {
+        if (!isWindowOpen) {
+            // 열기
+            setIsWindowOpen(true);
+            setWindowColdAnimation(false);
+
+            // 환기 가능 시 10초 카운트
+            const ventilationAvailable = petStatus?.ventilationAvailable !== false;
+            if (ventilationAvailable) {
+                ventilateTimerRef.current = setTimeout(() => {
+                    handleVentilateComplete(user?.id);
+                    setAiResponse('환기가 완료 된 것 같아요! 😊');
+                    setEmotion(null);
+                    ventilateTimerRef.current = null;
+                }, 10000);
+            }
+
+            // 30초 미폐쇄 감지
+            coldTimerRef.current = setTimeout(() => {
+                setWindowColdAnimation(true);
+            }, 30000);
+        } else {
+            // 닫기
+            setIsWindowOpen(false);
+            setWindowClosedAnimation(true);
+
+            // 타이머 정리
+            if (ventilateTimerRef.current) {
+                clearTimeout(ventilateTimerRef.current);
+                ventilateTimerRef.current = null;
+            }
+            if (coldTimerRef.current) {
+                clearTimeout(coldTimerRef.current);
+                coldTimerRef.current = null;
+            }
+            setWindowColdAnimation(false);
+
+            // 3초 후 windowClosedAnimation 리셋
+            setTimeout(() => {
+                setWindowClosedAnimation(false);
+            }, 3000);
+        }
+    };
+
+    // 컴포넌트 정리 시 타이머 방지 누수
+    useEffect(() => {
+        return () => {
+            if (ventilateTimerRef.current) clearTimeout(ventilateTimerRef.current);
+            if (coldTimerRef.current) clearTimeout(coldTimerRef.current);
+        };
+    }, []);
+
+    // 일기 작성 및 AI 응답 핸들러
     const handleWrite = async (content) => {
         setLatestLog(content);
         setIsAiThinking(true);
@@ -62,14 +126,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         setEmotion(null);
 
         try {
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 🧠 Step 1: 질문인지 일기인지 자동 감지
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // ✨ 통합 모드: 질문/일기 구분 없이 ChatService가 모두 처리
-            // - 대화 히스토리 참고
-            // - RAG 기반 과거 기억 검색
-            // - LLM 검수 강화
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('💬 입력 감지 → 통합 DiaryService 호출 (질문/일기 자동 처리)');
             const diaryData = {
                 userId: user.id,
@@ -89,7 +145,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
             if (response && response.aiResponse) {
                 setAiResponse(response.aiResponse);
-                // emotion 필드가 있으면 설정
                 if (response.emotion) {
                     setEmotion(response.emotion);
                 }
@@ -127,7 +182,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     {/* 창문 그래픽 */}
                     <div
                         className="absolute top-[8%] left-1/2 h-32 w-32 -translate-x-1/2 opacity-80 cursor-pointer z-20 scale-90"
-                        onClick={() => setIsWindowOpen(!isWindowOpen)}
+                        onClick={handleWindowClick}
                         data-gtm="window-decoration-click"
                     >
                         <div className={`relative z-10 h-full w-full overflow-hidden rounded-t-full rounded-b-xl border-[6px] border-white shadow-inner transition-all duration-500 ${
@@ -158,7 +213,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             <div className="absolute -top-6 left-1/2 h-6 w-8 -translate-x-1/2 rounded-b-lg bg-[#D7CCC8]">
                                 <div className="absolute -top-4 left-1/2 h-6 w-10 -translate-x-1/2 rounded-full bg-[#A5D6A7]"></div>
                             </div>
-                            {/* 서랍 (애니메이션 적용) */}
+                            {/* 서랍 */}
                             <div className={`absolute top-2 left-1/2 h-10 w-16 -translate-x-1/2 rounded-lg border border-rose-100 bg-rose-50 transition-all duration-500 ease-out ${
                                 isDrawerOpen ? 'translate-x-8' : 'translate-x-0'
                             } group-hover:translate-x-4`}>
@@ -170,18 +225,16 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 전등 스위치 데코 (우측) - 무드등 토글만 */}
+                    {/* 전등 스위치 데코 (우측) */}
                     <label
                         className="group absolute top-[22%] right-8 z-20 flex cursor-pointer flex-col items-center scale-90"
                         onClick={() => setIsLampOn(!isLampOn)}
                         data-gtm="settings-decoration-click"
                     >
                         <div className="relative z-10">
-                            {/* Glow 효과 - 전등이 켜져 있을 때만 표시 */}
                             <div className={`absolute top-1/2 left-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-200/30 blur-xl transition-all duration-500 ${
                                 isLampOn ? 'opacity-100' : 'opacity-0'
                             } group-hover:opacity-100`}></div>
-                            {/* 전구 */}
                             <div className={`relative h-16 w-20 overflow-hidden rounded-t-full rounded-b-xl border-2 border-white shadow-lg transition-all duration-300 group-hover:-translate-y-1 ${
                                 isLampOn ? 'bg-[#FFEB99]' : 'bg-[#FFD1DC]'
                             }`}>
@@ -189,7 +242,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                 <div className="absolute bottom-4 h-1 w-full bg-white/20"></div>
                             </div>
                         </div>
-                        {/* 스위치 줄 */}
                         <div className="relative h-24 w-1.5 bg-white shadow-sm">
                             <div className={`absolute top-0 right-[-8px] h-8 w-[1px] origin-top bg-stone-300 transition-all duration-300 ${
                                 isLampOn ? 'rotate-0' : 'rotate-12'
@@ -199,10 +251,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </label>
 
-                    {/* 중앙 하단 그림자 (MainRoom 캐릭터가 올라갈 곳) */}
+                    {/* 중앙 하단 그림자 */}
                     <div className="absolute top-[48%] left-1/2 h-24 w-64 -translate-x-1/2 rounded-[50%] bg-[#FFB7C5]/20 blur-[1px]"></div>
 
-                    {/* MainRoom 컴포넌트 배치 - 화면 중앙에 고정 */}
+                    {/* MainRoom 컴포넌트 배치 */}
                     <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
                         <div className="w-40 h-40 rounded-full pointer-events-auto flex items-center justify-center">
                             <MainRoom
@@ -210,6 +262,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                 aiResponse={aiResponse}
                                 emotion={emotion}
                                 isAiThinking={isAiThinking}
+                                user={user}
+                                windowColdAnimation={windowColdAnimation}
+                                windowClosedAnimation={windowClosedAnimation}
                             />
                         </div>
                     </div>
@@ -225,7 +280,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </div>
                 </div>
 
-                {/* 헤더 영역 (날짜 & 스트릭) - 절대 위치로 상단 고정 */}
+                {/* 헤더 영역 (날짜 & 스트릭) */}
                 <div
                     className="absolute top-0 z-40 flex w-full items-end justify-between px-6 md:px-8 pointer-events-none"
                     style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
@@ -251,6 +306,13 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             🌸 {streakDays}일차
                         </span>
                     </div>
+                </div>
+
+                {/* ExpBar 배치 - 헤더 아래 (z-50) */}
+                <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
+                    style={{ marginTop: 'max(0px, env(safe-area-inset-top))' }}
+                >
+                    <ExpBar />
                 </div>
 
                 {/* BottomSheet 컴포넌트 */}

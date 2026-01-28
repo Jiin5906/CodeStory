@@ -26,6 +26,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final MemoryService memoryService;
     private final PiiMaskingService piiMaskingService;
+    private final PetService petService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${openai.api.key}")
@@ -168,6 +169,11 @@ public class ChatService {
                 cleanedResponse = aiResponse.substring(0, startIdx).trim();
             }
         }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 9. Pet 상호작용: 30% 확률로 EXP 부여
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        petService.onChatInteraction(userId);
 
         return com.codestory.diary.dto.ChatResponseDto.builder()
                 .role("assistant")

@@ -1,178 +1,79 @@
-🎯 목표
-  1. 로딩 시: 마스코트가 고민하는 애니메이션
-  2. 답변 시: 사용자 감정(슬픔, 화, 분노, 즐거움 등)에 맞춤 애니메이션
+요구사항
+ 지금 시스템에는 일기가 아닌 단순 대화입니다. 저는 이걸 원했고요. 여기서 사용자를 더 잡아 두기 위해 몽글이를 직접 키우는 느낌으로 변화시키고 싶습니다. 지금 현재 몽글이는 대화만 할 수 있는 상태입니다. 몽글이와 상호작용 할 수 있게 바꾸고 싶어요. 저는 다마고치에서 영감을 받아 이걸 전면적으로 수정하고 싶습니다. 
 
-  ---
-  📦 Phase 1: 준비물 확보 (필수 선행 작업)
+1. 전체 경험치 추가 : 전체 경험치를 통해서 포켓몬스터나 다마고치처럼 레벨이 오를 수록 매인 캐릭터의 외형이 변화
+1-1. 레벨 디자인 : 1레벨 -> 2레벨 = 100의 경험치 필요, 2레벨 -> 3레벨 150경험치 필요 이런 식으로 레벨이 올라갈 때마다 레벨을 올리기 어렵게 만들며 각각 5레벨, 10레벨마다 캐릭터의 외형이 더욱 성장 혹은 귀여워지게 바꾸고 싶습니다.
 
-  1.1 Lottie 애니메이션 파일 준비
+2. 다마고치처럼 만지면 Lottie애니메이션이 나오고 애정 게이지 증가. 애정 게이지가 100이 되면 전체 경험치를 30~50 정도 적당한 수치로 증가. 또한 다마고치는 단순히 캐릭터를 만지면 애정게이지가 엄청나게 빨리 오릅니다. 문질문질하고 있으면 약 5~7초정도면 100퍼센트까지 차지요. 이걸 그냥 그대로 넣고 싶습니다. 뿐만 아니라 문질문질할 때 메인캐릭터가 좋아하는 듯한 Lottie 애니메이션도 추가해야 합니다.
 
-  - 현재 있는 파일: src/assets/mongleIDLE.json (대기 상태)
-  - 필요한 파일 (총 6개):
-  src/assets/
-  ├── mongleIDLE.json           ✅ (기존 - 대기 상태)
-  ├── mongleThinking.json       🆕 (로딩 시 - 고민하는 모습)
-  ├── mongleHappy.json          🆕 (즐거움 감정)
-  ├── mongleSad.json            🆕 (슬픔 감정)
-  ├── mongleAngry.json          🆕 (화/분노 감정)
-  └── mongleNeutral.json        🆕 (중립 감정)
+3.  다마고치는 씻는 것, 먹이는 것까지 해서 실제로 양육을 하고 있습니다. 하지만 저는 이 정도로 사용자에게 빡세게 양육을 하는 것은 좋지 않다고 봅니다. 따라서 환기 시스템을 넣고 싶습니다. 방 위에 있는 창문을 클릭하면 창문이 열림 -> 대략 10초 정도 지나면 환기가 완료가 되면 전체 경험치가 적당량 증가가 되며 '햇살'이라는 재화를 얻음. 이 햇살은 추후 추가할 상점에서 쓸 재화로 쓸 수 있음. 환기는 하루에 한 번 밖에 할 수 없지만 전체 레벨이 오르면 오를 수록 주는 전체 경험치 양과 주는 재화의 양이 증가함. 또한 창문을 깜박하고 안 닫으면 30초 뒤 몽글이가 추워하는 Lottie애니메이션 추가하고 창문을 닫으면 따듯해 하는 표정을 짓는 Lottie 애니메이션을 추가하고 정상으로 돌아옴.
 
-  애니메이션 파일 구하는 방법:
-  - https://lottiefiles.com/ 무료 다운로드
-  - 디자이너에게 의뢰
-  - 기존 mongleIDLE.json 복사 후 속도/색상 변경 (임시용)
 
-  ---
-  🔧 Phase 2: 백엔드 API 확장 (감정 분석)
+5. 몽글이와 대화를 하면 감정 조각이 떨어지며 사용자가 이걸 주울 시 소량의 전체 경험치와 소량의 햇살을 획득.
 
-  2.1 AI 응답에 감정 태그 추가
+# Role
+당신은 **Gamification UX 전문가**이자 **Full-Stack 수석 개발자**입니다.
+현재 단순한 '1:1 채팅' 서비스인 프로젝트를, **'다마고치 스타일의 육성 시뮬레이션'**이 결합된 서비스로 전면 개편해야 합니다.
 
-  수정 파일: diary/src/main/java/com/codestory/diary/service/ChatService.java
+# Goal
+사용자가 AI 캐릭터 '몽글이'와 상호작용(터치, 대화, 환경조성)하며 애착을 느끼고, 캐릭터를 성장시키는 **Gamification Layer**를 구축하세요.
 
-  // 현재 응답: { "response": "잘 들었어요..." }
-  // 변경 후: { "response": "잘 들었어요...", "emotion": "happy" }
+# 🏗️ Database & Backend Specs (Spring Boot)
 
-  변경 사항:
-  1. OpenAI API 호출 시 시스템 프롬프트에 추가:
-  "답변 마지막에 감정 태그를 추가하세요: [EMOTION:happy/sad/angry/neutral]"
-  2. 응답 파싱 후 emotion 필드 추출
-  3. ChatResponseDto에 emotion 필드 추가
+### 1. `pet_status` 테이블 생성 및 엔티티 구현
+사용자의 몽글이 상태를 관리하는 테이블이 필요합니다.
+- **Fields:**
+  - `user_id` (PK, FK)
+  - `level` (INT, Default 1): 현재 레벨
+  - `exp` (BIGINT, Default 0): 현재 누적 경험치
+  - `sunlight` (BIGINT, Default 0): 재화(햇살)
+  - `affection` (INT, Default 0): 애정 게이지 (0~100)
+  - `last_ventilation_date` (DATE): 마지막으로 환기한 날짜 (하루 1회 제한용)
+  - `evolution_stage` (ENUM): BABY(1~4Lv), KID(5~9Lv), ADULT(10Lv~)
 
-  예상 소요 시간: 30분
+### 2. `PetService` 로직 구현
+- **Level Up Logic:**
+  - 필요 경험치 공식: `Base(100) * (Level ^ 1.5)` (레벨이 오를수록 어렵게)
+  - 레벨업 시 `evolution_stage` 체크 및 업데이트.
+- **Ventilation Logic (Daily):**
+  - 하루 1회 수행 가능. 성공 시 `Sunlight`와 `Exp` 지급.
+  - 보상 수량: `BaseReward * Level` (성장할수록 보상 증가)
+- **Chat Reward:**
+  - `ChatService`에서 대화 발생 시 30% 확률로 `addExp(10)` 호출.
 
-  ---
-  🎨 Phase 3: 프론트엔드 구현
+---
 
-  3.1 Lottie 애니메이션 매핑 로직 추가
+# 🎨 Frontend Specs (React + Framer Motion + Lottie)
 
-  수정 파일: frontend/.../components/dashboard/MainRoom.jsx
+### 1. 인터랙션 레이어 (`InteractionLayer.jsx`)
+채팅창 뒤 혹은 위에 캐릭터와 방이 존재하는 레이어를 만드세요.
 
-  현재 구조:
-  const MainRoom = ({ latestLog, aiResponse, isAiThinking }) => {
-    // ...
-    <Lottie animationData={mongleAnimation} loop={true} autoplay={true} />
-  }
+#### A. 쓰다듬기 (Rubbing System)
+- **제스처:** 캐릭터 영역 위에서 마우스 무브/터치 무브가 발생하면 감지.
+- **로직:**
+  - 문질문질 지속 시 `Affection` 게이지가 빠르게 상승 (0->100까지 약 5~7초 소요).
+  - 게이지 100 달성 시: `PetService.addExp(30~50)` 호출 및 게이지 리셋.
+- **Animation:** 문지르는 동안 몽글이가 좋아하는 모션(Lottie) 재생.
 
-  변경 후 구조:
-  import mongleIDLE from '../../assets/mongleIDLE.json';
-  import mongleThinking from '../../assets/mongleThinking.json';
-  import mongleHappy from '../../assets/mongleHappy.json';
-  import mongleSad from '../../assets/mongleSad.json';
-  import mongleAngry from '../../assets/mongleAngry.json';
-  import mongleNeutral from '../../assets/mongleNeutral.json';
+#### B. 환기 시스템 (Ventilation System)
+- **Trigger:** 배경의 '창문' 영역 클릭.
+- **Flow:**
+  1. 창문 열림 (이미지 변경).
+  2. **Timer 10s:** 10초 카운트다운 후 '환기 완료' → 보상(햇살+EXP) 획득 팝업. 10초 카운트 다운은 화면에 보이지 않고 몽글이가 사용자에게 "환기가 완료 된 것 같아요!" 등과 같은 메시지를 보내서 알려주도록 해야함.
+  3. **Warning 30s:** 만약 30초 동안 창문을 안 닫으면 몽글이가 '추워하는' 모션(Lottie)으로 변경.
+  4. 창문 닫기 클릭 시: 몽글이가 '따뜻해하는' 모션(Lottie) 후 기본 상태 복귀.
 
-  const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking }) => {
-    const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
+#### C. 레벨 및 외형 변화 (Evolution)
+- 현재 `level`에 따라 캐릭터 이미지/Lottie 소스를 다르게 렌더링.
 
-    useEffect(() => {
-      // 1. 로딩 중: mongleThinking
-      if (isAiThinking) {
-        setCurrentAnimation(mongleThinking);
-      }
-      // 2. 답변 도착: 감정에 맞는 애니메이션
-      else if (emotion) {
-        const emotionMap = {
-          happy: mongleHappy,
-          sad: mongleSad,
-          angry: mongleAngry,
-          neutral: mongleNeutral,
-        };
-        setCurrentAnimation(emotionMap[emotion] || mongleNeutral);
+#### D. 감정 조각 (Emotion Shard - Additional Feature)
+- 채팅 중 감정 분석 결과(`EMOTION: happy/sad`)가 들어오면, 캐릭터 주변에 반짝이는 '감정 구슬' 아이콘 생성.
+- 클릭 시 소량의 `Sunlight`, 와 소량의 EXP 획득.
 
-        // 3초 후 대기 상태로 복귀
-        setTimeout(() => setCurrentAnimation(mongleIDLE), 3000);
-      }
-      // 3. 기본 상태: mongleIDLE
-      else {
-        setCurrentAnimation(mongleIDLE);
-      }
-    }, [isAiThinking, emotion]);
+# 📦 Additional Requirements
+1. **Lottie Files:** 현재는 마땅한 로티 파일이 없으므로 @frontend/CodeStory/codestory-chatbot/src/assets/mongleIDLE.json를 복사하여 이름만 바꿔서 넣어주세요.
+2. **State Sync:** 프론트엔드는 백엔드의 `pet_status`를 실시간(혹은 액션 발생 시) 동기화하여 경험치 바와 레벨을 표시해야 합니다.
+3. **UI Overlay:** 채팅창은 화면 하단에 위치하고, 상단 70% 영역은 몽글이와의 상호작용 공간으로 확보하세요. 이전의 화면처럼 구성해주면 됩니다.
 
-    return (
-      <Lottie animationData={currentAnimation} loop={true} autoplay={true} />
-    );
-  }
-
-  예상 소요 시간: 1시간
-
-  ---
-  3.2 API 연동 수정
-
-  수정 파일: frontend/.../components/dashboard/MobileDashboard.jsx (또는 채팅 호출 부분)
-
-  현재:
-  const response = await chatApi.sendMessage(userId, message);
-  setAiResponse(response.response);
-
-  변경 후:
-  const response = await chatApi.sendMessage(userId, message);
-  setAiResponse(response.response);
-  setEmotion(response.emotion); // 🆕 추가
-
-  예상 소요 시간: 15분
-
-  ---
-  ✅ Phase 4: 테스트 및 최적화
-
-  4.1 기능 테스트 체크리스트
-
-  - 채팅 입력 → mongleThinking 애니메이션 재생
-  - 즐거운 메시지 → mongleHappy 애니메이션 3초 표시 → mongleIDLE 복귀
-  - 슬픈 메시지 → mongleSad 애니메이션 3초 표시 → mongleIDLE 복귀
-  - 화난 메시지 → mongleAngry 애니메이션 3초 표시 → mongleIDLE 복귀
-  - 중립 메시지 → mongleNeutral 애니메이션 3초 표시 → mongleIDLE 복귀
-
-  4.2 성능 최적화
-
-  - Lottie JSON 파일 크기 확인 (각 파일 100KB 이하 권장)
-  - preload 또는 lazy loading 적용 검토
-  - 애니메이션 전환 시 깜빡임 방지 (key prop 활용)
-
-  예상 소요 시간: 30분
-
-  ---
-  📊 전체 작업 요약
-  ┌───────────┬────────────────────────┬───────────┬──────────────────────┐
-  │   Phase   │       작업 내용        │ 예상 시간 │        난이도        │
-  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
-  │ Phase 1   │ Lottie 파일 준비       │ 2-4시간   │ ⭐⭐⭐ (디자인 의존) │
-  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
-  │ Phase 2   │ 백엔드 감정 분석 추가  │ 30분      │ ⭐⭐                 │
-  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
-  │ Phase 3.1 │ 프론트 애니메이션 로직 │ 1시간     │ ⭐⭐                 │
-  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
-  │ Phase 3.2 │ API 연동 수정          │ 15분      │ ⭐                   │
-  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
-  │ Phase 4   │ 테스트 및 최적화       │ 30분      │ ⭐                   │
-  ├───────────┼────────────────────────┼───────────┼──────────────────────┤
-  │ 합계      │                        │ 4-6시간   │                      │
-  └───────────┴────────────────────────┴───────────┴──────────────────────┘
-  ---
-  🎬 빠른 프로토타입 (Phase 1 대체안)
-
-  애니메이션 파일 없이 즉시 테스트하려면:
-  1. 기존 mongleIDLE.json 파일을 5번 복사
-  2. 각각 mongleThinking.json, mongleHappy.json, mongleSad.json, mongleAngry.json, mongleNeutral.json으로 이름 변경   
-  3. Phase 2-4 진행 (나중에 실제 애니메이션으로 교체)
-
-  ---
-  💡 추가 고려 사항
-
-  1. 감정 분석 정확도 개선
-
-  - GPT-4o-mini 대신 GPT-4o 사용 (더 정확한 감정 분석)
-  - 또는 전용 감정 분석 모델
-  (https://huggingface.co/models?pipeline_tag=text-classification&sort=downloads&search=emotion)
-
-  2. 애니메이션 성능 최적화
-
-  - 첫 로딩 시 모든 Lottie 파일 프리로드
-  - React.memo()로 불필요한 리렌더링 방지
-
-  3. 접근성 (Accessibility)
-
-  - 애니메이션 중 aria-label 추가 (예: "몽글이가 고민 중입니다")
-  - prefers-reduced-motion CSS 쿼리 지원
-
-  ---
-  이 로드맵대로 진행하시면 됩니다! 추가 질문이나 특정 Phase에 대한 상세 구현이 필요하시면 말씀해주세요. 🚀
+# Execution
+위 기획을 바탕으로 **Backend(Entity, Controller, Service)**와 **Frontend(Components, Context)** 코드를 모두 작성/수정해주세요.

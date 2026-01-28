@@ -29,9 +29,11 @@ import com.codestory.diary.repository.CommentRepository;
 import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
+import com.codestory.diary.dto.PetActionRequestDto;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.ChatService;
 import com.codestory.diary.service.DiaryService;
+import com.codestory.diary.service.PetService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,7 @@ public class ApiController {
     private final AuthService authService;
     private final DiaryService diaryService;
     private final ChatService chatService;
+    private final PetService petService;
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
     private final LikesRepository likesRepository;
@@ -188,6 +191,27 @@ public class ApiController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
+    }
+
+    // --- Pet (다마고치) API ---
+    @GetMapping("/pet/status")
+    public ResponseEntity<?> getPetStatus(@RequestParam Long userId) {
+        return ResponseEntity.ok(petService.getPetStatusDto(userId));
+    }
+
+    @PostMapping("/pet/ventilate")
+    public ResponseEntity<?> ventilate(@RequestBody PetActionRequestDto request) {
+        return ResponseEntity.ok(petService.ventilate(request.getUserId()));
+    }
+
+    @PostMapping("/pet/affection-complete")
+    public ResponseEntity<?> affectionComplete(@RequestBody PetActionRequestDto request) {
+        return ResponseEntity.ok(petService.affectionComplete(request.getUserId()));
+    }
+
+    @PostMapping("/pet/collect-shard")
+    public ResponseEntity<?> collectEmotionShard(@RequestBody PetActionRequestDto request) {
+        return ResponseEntity.ok(petService.collectEmotionShard(request.getUserId()));
     }
 
     // Helper: 클라이언트 IP 추출
