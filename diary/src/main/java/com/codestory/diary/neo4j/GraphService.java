@@ -8,6 +8,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 
 import com.codestory.diary.service.AiService;
+import org.springframework.scheduling.annotation.Async;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -22,6 +23,20 @@ public class GraphService {
 
     @Autowired
     private com.codestory.diary.service.EmbeddingService embeddingService; // ✨ Phase 3: 비동기 임베딩 서비스
+
+    /**
+     * ✨ [비동기] 그래프 저장 - Fire-and-Forget
+     * DiaryService/DiaryController에서 호출 시 즉시 반환,
+     * OpenAI 프롬프트 생성 + Neo4j 저장은 백그라운드로 처리
+     */
+    @Async("chatAsyncExecutor")
+    public void saveDiaryToGraphAsync(Long userId, String diaryContent) {
+        try {
+            saveDiaryToGraph(userId, diaryContent);
+        } catch (Exception e) {
+            log.error("⚠️ [Async] 그래프 저장 실패 (User ID: {}): {}", userId, e.getMessage());
+        }
+    }
 
     // [기능 1] 일기를 뇌(Graph)에 저장하기 + 임베딩 자동 생성 (Phase 2)
     public void saveDiaryToGraph(Long userId, String diaryContent) {

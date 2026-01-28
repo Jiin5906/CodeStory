@@ -96,9 +96,10 @@ public class DiaryService {
         // ✨ ChatService에서 이미 PII 마스킹 처리됨
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         try {
+            // ✨ Fire-and-Forget 비동기 호출: 그래프 저장이 끝날 때까지 사용자 기다리지 않음
             String maskedContent = piiMaskingService.maskContent(currentDiaryText);
-            graphService.saveDiaryToGraph(request.getUserId(), maskedContent);
-            System.out.println("✅ Neo4j에 일기 저장 완료 (User ID: " + request.getUserId() + ", Diary ID: " + saved.getId() + ")");
+            graphService.saveDiaryToGraphAsync(request.getUserId(), maskedContent);
+            System.out.println("🚀 Neo4j 그래프 저장 비동기 시작 (User ID: " + request.getUserId() + ", Diary ID: " + saved.getId() + ")");
         } catch (Exception e) {
             System.err.println("❌ Neo4j 저장 실패 (일기 작성은 정상 완료): " + e.getMessage());
             e.printStackTrace();

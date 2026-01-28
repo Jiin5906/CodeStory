@@ -74,7 +74,7 @@ public class DiaryController {
     public String saveDiary(@RequestBody Map<String, Object> request) {
         Long userId = Long.valueOf(request.get("userId").toString());
         String content = request.get("content").toString();
-        graphService.saveDiaryToGraph(userId, content);
+        graphService.saveDiaryToGraphAsync(userId, content);
         return "일기가 마음의 지도에 저장되었습니다.";
     }
 

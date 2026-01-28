@@ -6,6 +6,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.scheduling.annotation.Async;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -121,6 +123,19 @@ public class MemoryService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to save memory: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✨ [비동기] Fire-and-Forget 벡터 저장
+     * ChatService에서 호출하여 사용자 응답 시간에 영향 없이 백그라운드로 학습
+     */
+    @Async("chatAsyncExecutor")
+    public void saveMemoryAsync(String userId, String text) {
+        try {
+            saveMemory(userId, text);
+        } catch (Exception e) {
+            System.err.println("⚠️ [Async] Pinecone 저장 실패 (userId: " + userId + "): " + e.getMessage());
         }
     }
 

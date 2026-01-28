@@ -26,7 +26,7 @@ public class GraphRagController {
     @PostMapping(value = "/test/save", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveTestData(@RequestParam Long userId, @RequestParam String content) {
         try {
-            graphService.saveDiaryToGraph(userId, content);
+            graphService.saveDiaryToGraphAsync(userId, content);
             String jsonResponse = """
                 {
                     "status": "success",

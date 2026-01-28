@@ -141,17 +141,11 @@ public class ChatService {
         chatMessageRepository.save(assistantMsg);
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 7. 벡터 DB에 저장 (학습): 사용자 메시지 + AI 응답 모두 저장
+        // 7. 벡터 DB에 저장 (학습): Fire-and-Forget 비동기 호출
+        //    사용자 응답 반환에 영향 없이 백그라운드로 학습
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        try {
-            // 사용자 메시지 학습
-            memoryService.saveMemory(userIdString, userMessage);
-            // AI 응답도 학습 (미래에 참고 가능하도록)
-            memoryService.saveMemory(userIdString, "AI 응답: " + aiResponse);
-        } catch (Exception e) {
-            System.err.println("Failed to save chat memory to vector DB: " + e.getMessage());
-            // 벡터 DB 저장 실패해도 대화는 계속 진행
-        }
+        memoryService.saveMemoryAsync(userIdString, userMessage);
+        memoryService.saveMemoryAsync(userIdString, "AI 응답: " + aiResponse);
 
         System.out.println("✅ [ChatService] 응답 생성 완료: " + aiResponse);
 
