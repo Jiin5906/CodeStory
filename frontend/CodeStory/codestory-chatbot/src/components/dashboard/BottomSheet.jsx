@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { FaPen, FaCalendarAlt, FaHeart, FaChartPie, FaCog, FaFire, FaChevronRight } from 'react-icons/fa';
+import { FaCalendarAlt, FaHeart, FaChartPie, FaCog, FaChevronRight } from 'react-icons/fa';
+import StatusDashboard from './StatusDashboard';
 
 // 날짜 포맷팅 함수 (date-fns 없이 간단 구현)
 const formatDate = (dateString) => {
@@ -45,18 +46,9 @@ const BottomSheet = ({ onWrite, diaries, streakDays, onCalendarClick, onMindReco
             >
                 <div className="w-12 h-1.5 bg-slate-300/50 rounded-full mx-auto mb-2"></div>
 
-                {/* 퀵 태그 */}
-                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1" onTouchStart={(e) => e.stopPropagation()} data-gtm="bottomsheet-quick-tags">
-                    {['☁️ 텅 빈 것 같아', '🫠 너무 지쳤어'].map((tag) => (
-                        <button
-                            key={tag}
-                            onClick={(e) => { e.stopPropagation(); handleSubmit(tag.split(' ').slice(1).join(' ')); }}
-                            className="flex-shrink-0 px-4 py-2 bg-white/60 hover:bg-white backdrop-blur-sm rounded-2xl text-sm font-medium text-slate-600 shadow-sm border border-white/50 transition-all hover:-translate-y-1 active:scale-95"
-                            data-gtm={`bottomsheet-tag-${tag.split(' ')[0]}`}
-                        >
-                            {tag}
-                        </button>
-                    ))}
+                {/* 상태 대시보드 (퀵 태그 대체) */}
+                <div onTouchStart={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+                    <StatusDashboard />
                 </div>
 
                 {/* 입력창 (Glassmorphism) */}

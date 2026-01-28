@@ -1,13 +1,62 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect, useRef } from 'react';
 import { petApi } from '../services/api';
 
 const PetContext = createContext();
+
+// Lock/Unlock 임계값 상수
+const LOCK_THRESHOLD = 100;   // 100%에 도달하면 Lock
+const UNLOCK_THRESHOLD = 30;  // 30% 이하이면 Unlock
+const DECAY_INTERVAL_MS = 10000; // 10초
+const DECAY_AMOUNT = 5;       // 5%씩 감소
 
 export const PetProvider = ({ children }) => {
     const [petStatus, setPetStatus] = useState(null);
     const [emotionShards, setEmotionShards] = useState([]);
     const [isRubbing, setIsRubbing] = useState(false);
-    const [affectionGauge, setAffectionGauge] = useState(0);
+    const [affectionGauge, setAffectionGauge] = useState(50);
+
+    // 상태 게이지 (0~100)
+    const [airGauge, setAirGauge] = useState(50);
+    const [energyGauge, setEnergyGauge] = useState(50);
+
+    // Lock 상태 (100% 도달 시 Lock → 30% 이하 시 Unlock)
+    const [isAffectionLocked, setIsAffectionLocked] = useState(false);
+    const [isAirLocked, setIsAirLocked] = useState(false);
+    const [isEnergyLocked, setIsEnergyLocked] = useState(false);
+
+    const decayTimerRef = useRef(null);
+
+    // ─── Lock/Unlock 로직 ───
+    const checkLock = useCallback((value, currentLocked) => {
+        if (value >= LOCK_THRESHOLD) return true;
+        if (value <= UNLOCK_THRESHOLD) return false;
+        return currentLocked; // 임계값 사이면 기존 상태 유지
+    }, []);
+
+    // ─── Decay (자연 감소) 시뮬레이션 ───
+    useEffect(() => {
+        decayTimerRef.current = setInterval(() => {
+            setAffectionGauge(prev => {
+                const next = Math.max(0, prev - DECAY_AMOUNT);
+                setIsAffectionLocked(locked => checkLock(next, locked));
+                return next;
+            });
+            setAirGauge(prev => {
+                const next = Math.max(0, prev - DECAY_AMOUNT);
+                setIsAirLocked(locked => checkLock(next, locked));
+                return next;
+            });
+            setEnergyGauge(prev => {
+                const next = Math.max(0, prev - DECAY_AMOUNT);
+                setIsEnergyLocked(locked => checkLock(next, locked));
+                return next;
+            });
+        }, DECAY_INTERVAL_MS);
+
+        return () => {
+            if (decayTimerRef.current) clearInterval(decayTimerRef.current);
+        };
+    }, [checkLock]);
 
     const fetchPetStatus = useCallback(async (userId) => {
         if (!userId) return;
@@ -32,7 +81,7 @@ export const PetProvider = ({ children }) => {
         try {
             const data = await petApi.affectionComplete(userId);
             setPetStatus(data);
-            setAffectionGauge(0);
+            // Lock 후 reset하지 않음 — decay가 자연 감소 후 30% 이하에서 unlock
         } catch (e) {
             console.error('[PetContext] affectionComplete 실패:', e);
         }
@@ -62,6 +111,17 @@ export const PetProvider = ({ children }) => {
         }, 10000);
     }, []);
 
+    // ─── Air Gauge 증가 (환기 버튼 클릭 시) ───
+    const increaseAirGauge = useCallback((amount = 10) => {
+        if (isAirLocked) return false; // Lock 중이면 증가 불가
+        setAirGauge(prev => {
+            const next = Math.min(LOCK_THRESHOLD, prev + amount);
+            setIsAirLocked(checkLock(next, false));
+            return next;
+        });
+        return true;
+    }, [isAirLocked, checkLock]);
+
     return (
         <PetContext.Provider value={{
             petStatus,
@@ -70,6 +130,16 @@ export const PetProvider = ({ children }) => {
             setIsRubbing,
             affectionGauge,
             setAffectionGauge,
+            airGauge,
+            setAirGauge,
+            energyGauge,
+            setEnergyGauge,
+            isAffectionLocked,
+            setIsAffectionLocked,
+            isAirLocked,
+            isEnergyLocked,
+            increaseAirGauge,
+            checkLock,
             fetchPetStatus,
             handleVentilateComplete,
             handleAffectionComplete,

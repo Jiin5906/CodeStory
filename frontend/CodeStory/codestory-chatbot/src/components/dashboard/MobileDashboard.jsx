@@ -4,7 +4,7 @@ import { enUS } from 'date-fns/locale';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
-import ExpBar from './ExpBar';
+import CircularProgress from './CircularProgress';
 import { diaryApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
@@ -280,22 +280,12 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </div>
                 </div>
 
-                {/* 헤더 영역 (날짜 & 스트릭) */}
+                {/* 헤더 영역 (스트릭 배지만 — 날짜는 CircularProgress로 이동) */}
                 <div
-                    className="absolute top-0 z-40 flex w-full items-end justify-between px-6 md:px-8 pointer-events-none"
+                    className="absolute top-0 z-40 flex w-full items-end justify-end px-6 md:px-8 pointer-events-none"
                     style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
                     data-gtm="mobile-dashboard-header"
                 >
-                    <div className="pointer-events-auto">
-                        <div className="flex items-baseline gap-1">
-                            <h1 className="text-4xl font-extrabold tracking-tight text-stone-700">
-                                {format(today, 'd')}
-                            </h1>
-                            <span className="text-sm font-bold text-stone-400">
-                                {format(today, 'EEE', { locale: enUS })}
-                            </span>
-                        </div>
-                    </div>
                     {/* 스트릭 배지 */}
                     <div
                         className="rounded-full bg-white/80 px-4 py-1.5 shadow-[0_4px_12px_rgba(255,182,193,0.2)] backdrop-blur-sm pointer-events-auto cursor-pointer hover:scale-105 transition-transform"
@@ -308,11 +298,15 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </div>
                 </div>
 
-                {/* ExpBar 배치 - 헤더 아래 (z-50) */}
-                <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
-                    style={{ marginTop: 'max(0px, env(safe-area-inset-top))' }}
+                {/* CircularProgress — 좌측 상단 레벨 HUD (safe-area 적용) */}
+                <div
+                    className="pointer-events-auto"
+                    style={{ position: 'absolute', top: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-top)))', left: '1.5rem', zIndex: 50 }}
                 >
-                    <ExpBar />
+                    <CircularProgress
+                        level={petStatus?.level ?? 1}
+                        percent={petStatus ? (petStatus.currentExp / petStatus.requiredExp) * 100 : 0}
+                    />
                 </div>
 
                 {/* BottomSheet 컴포넌트 */}
