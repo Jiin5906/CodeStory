@@ -34,6 +34,21 @@ public class ChatService {
     @Value("${openai.model}")
     private String model;
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Phase 1.1: Few-shot 프롬프트 Feature Flags
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @Value("${ai.prompt.enable-few-shot:false}")
+    private boolean enableFewShot;
+
+    @Value("${ai.prompt.enable-chain-of-thought:false}")
+    private boolean enableChainOfThought;
+
+    @Value("${ai.response.max-tokens:150}")
+    private int maxTokens;
+
+    @Value("${ai.response.temperature:0.5}")
+    private double temperature;
+
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
     private static final int MAX_HISTORY = 5; // 최근 대화 히스토리 개수 제한 (속도 최적화)
 
@@ -80,20 +95,7 @@ public class ChatService {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 3. 사용자 학습형 대화 LLM 프롬프트 (완전 개편)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        String systemPrompt = String.format("""
-                당신은 **몽글이**, 사용자를 학습하는 AI 친구입니다.
-
-                **핵심 규칙**:
-                - 2-3줄 이내, 최대 100자
-                - 따뜻한 '해요체'
-                - 공감 우선, 자연스럽게
-                - 과거 대화를 기억하면 자연스럽게 언급
-                - "일기", "데이터", "정보 없음" 같은 시스템 표현 절대 금지
-                - **답변 마지막에 반드시 감정 태그를 추가하세요**: [EMOTION:happy|sad|angry|neutral]
-                  (happy=즐거움/긍정, sad=슬픔/우울, angry=화남/분노, neutral=중립)
-
-                %s
-                """, memoryContext.toString());
+        String systemPrompt = buildSystemPrompt(memoryContext.toString());
 
         List<Map<String, Object>> messages = new ArrayList<>();
         messages.add(Map.of("role", "system", "content", systemPrompt));
@@ -212,8 +214,8 @@ public class ChatService {
                 Map<String, Object> requestBody = new HashMap<>();
                 requestBody.put("model", model);
                 requestBody.put("messages", messages);
-                requestBody.put("max_tokens", 150); // 짧은 답변 유도 (속도 최적화)
-                requestBody.put("temperature", 0.5); // 낮은 temperature로 빠른 생성
+                requestBody.put("max_tokens", maxTokens); // Feature Flag로 제어
+                requestBody.put("temperature", temperature); // Feature Flag로 제어
 
                 HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
                 ResponseEntity<Map> response = restTemplate.postForEntity(API_URL, entity, Map.class);
@@ -283,5 +285,90 @@ public class ChatService {
         }
 
         return refined;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ✨ Phase 1.1: 동적 프롬프트 생성 (Feature Flag 제어)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /**
+     * Feature Flag에 따라 기본 프롬프트 또는 Few-shot 프롬프트 반환
+     */
+    private String buildSystemPrompt(String memoryContext) {
+        if (enableFewShot) {
+            return buildFewShotPrompt(memoryContext);
+        } else {
+            return buildBasicPrompt(memoryContext);
+        }
+    }
+
+    /**
+     * 기존 프롬프트 (기본값, 안전)
+     */
+    private String buildBasicPrompt(String memoryContext) {
+        return String.format("""
+                당신은 **몽글이**, 사용자를 학습하는 AI 친구입니다.
+
+                **핵심 규칙**:
+                - 2-3줄 이내, 최대 100자
+                - 따뜻한 '해요체'
+                - 공감 우선, 자연스럽게
+                - 과거 대화를 기억하면 자연스럽게 언급
+                - "일기", "데이터", "정보 없음" 같은 시스템 표현 절대 금지
+                - **답변 마지막에 반드시 감정 태그를 추가하세요**: [EMOTION:happy|sad|angry|neutral]
+                  (happy=즐거움/긍정, sad=슬픔/우울, angry=화남/분노, neutral=중립)
+
+                %s
+                """, memoryContext);
+    }
+
+    /**
+     * ✨ Phase 1.1: Few-shot 프롬프트 (답변 품질 개선)
+     */
+    private String buildFewShotPrompt(String memoryContext) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("당신은 **몽글이**, 사용자를 학습하는 AI 친구입니다.\n\n");
+
+        // Chain-of-Thought 추가 (선택적)
+        if (enableChainOfThought) {
+            prompt.append("""
+                    **사고 과정**:
+                    1. 사용자의 감정 파악 → 2. 관련 기억 참조 → 3. 공감 표현 → 4. 자연스러운 조언
+
+                    """);
+        }
+
+        prompt.append("""
+                **핵심 규칙**:
+                - 2-3줄 이내, 최대 100자
+                - 따뜻한 '해요체'
+                - 공감 우선, 자연스럽게
+                - 과거 대화를 기억하면 자연스럽게 언급
+                - "일기", "데이터", "정보 없음" 같은 시스템 표현 절대 금지
+                - **답변 마지막에 반드시 감정 태그를 추가하세요**: [EMOTION:happy|sad|angry|neutral]
+
+                """);
+
+        // Few-shot 예시 추가
+        prompt.append("""
+                **좋은 답변 예시**:
+                사용자: "오늘 시험 망했어"
+                몽글이: "많이 속상했겠다. 시험 준비하느라 고생했는데 아쉽겠어요. [EMOTION:sad]"
+
+                사용자: "친구랑 싸웠어"
+                몽글이: "많이 힘들었겠어요. 친구랑의 관계는 소중하니까 더 마음 아플 거예요. [EMOTION:sad]"
+
+                사용자: "오늘 진짜 재밌었어!"
+                몽글이: "와, 기분 좋은 하루였나 봐요! 무슨 일 있었는지 궁금해요. [EMOTION:happy]"
+
+                **나쁜 답변 예시 (절대 하지 마세요)**:
+                ❌ "일기에 기록이 없어서 답변드리기 어렵습니다."
+                ❌ "저는 AI이기 때문에 감정을 이해하기 어렵습니다."
+                ❌ "데이터에 따르면..."
+
+                """);
+
+        prompt.append(memoryContext);
+
+        return prompt.toString();
     }
 }

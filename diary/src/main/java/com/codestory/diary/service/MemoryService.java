@@ -23,6 +23,15 @@ public class MemoryService {
     @org.springframework.beans.factory.annotation.Value("${pinecone.host}")
     private String pineconeHost;
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Phase 2.1: RAG 필터링 Feature Flags
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @org.springframework.beans.factory.annotation.Value("${ai.rag.enable-similarity-filter:false}")
+    private boolean enableSimilarityFilter;
+
+    @org.springframework.beans.factory.annotation.Value("${ai.rag.similarity-threshold:0.7}")
+    private double similarityThreshold;
+
     private static final String EMBEDDING_API_URL = "https://api.openai.com/v1/embeddings";
     private static final String EMBEDDING_MODEL = "text-embedding-3-small";
     private static final int TOP_K = 5; // 검색할 유사 메모리 개수
@@ -155,6 +164,17 @@ public class MemoryService {
             if (response.getBody() != null && response.getBody().containsKey("matches")) {
                 List<Map<String, Object>> matches = (List<Map<String, Object>>) response.getBody().get("matches");
                 for (Map<String, Object> match : matches) {
+                    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    // ✨ Phase 2.1: 유사도 필터링 (Feature Flag로 제어)
+                    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    if (enableSimilarityFilter && match.containsKey("score")) {
+                        Double score = ((Number) match.get("score")).doubleValue();
+                        if (score < similarityThreshold) {
+                            System.out.println("⚠️ [RAG Filter] 낮은 유사도로 제외: score=" + score);
+                            continue; // 임계값 이하 제외
+                        }
+                    }
+
                     if (match.containsKey("metadata")) {
                         Map<String, Object> metadata = (Map<String, Object>) match.get("metadata");
                         if (metadata.containsKey("originalText")) {
@@ -165,7 +185,8 @@ public class MemoryService {
                 }
             }
 
-            System.out.println("Found " + relatedMemories.size() + " related memories for user: " + userId);
+            System.out.println("Found " + relatedMemories.size() + " related memories for user: " + userId
+                + (enableSimilarityFilter ? " (filtered by similarity >= " + similarityThreshold + ")" : ""));
             return relatedMemories;
 
         } catch (Exception e) {
