@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO } from 'date-fns';
 import MainRoom from './MainRoom';
-import BottomSheetNew from './BottomSheetNew';
+import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
 import CircularProgressNew from './CircularProgressNew';
 import { diaryApi } from '../../services/api';
@@ -161,17 +161,20 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     };
 
     return (
-        <div className="bg-gray-50 md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body" data-gtm="view-mobile-dashboard-new">
+        <div className="bg-gradient-to-br from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body" data-gtm="view-mobile-dashboard-new">
 
             {/* 폰 프레임 컨테이너 */}
-            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[8px] md:border-white bg-white md:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] md:ring-1 md:ring-gray-100">
+            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]">
 
                 {/* 메인 화면 영역 (배경 + MainRoom) */}
                 <div className="relative w-full flex-1 overflow-hidden">
-                    {/* 세련된 심플 배경 */}
-                    <div className={`absolute inset-0 bg-gradient-to-b from-white via-pink-50/30 to-white transition-all duration-1000 ${
+                    {/* 따뜻한 감성 배경 */}
+                    <div className={`absolute inset-0 bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] transition-all duration-1000 ${
                         isLampOn ? 'opacity-100' : 'opacity-90'
                     }`}></div>
+
+                    {/* 부드러운 블롭 애니메이션 (하나만) */}
+                    <div className="absolute top-1/4 -right-32 w-96 h-96 bg-[#FFB5C2]/10 rounded-full blur-3xl animate-pulse pointer-events-none" style={{ animationDuration: '4s' }}></div>
 
                     {/* 창문 그래픽 - 미니멀 */}
                     <div
@@ -259,14 +262,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
                     data-gtm="mobile-dashboard-header"
                 >
-                    {/* 스트릭 배지 - 미니멀 스타일 */}
+                    {/* 스트릭 배지 - 따뜻한 스타일 */}
                     <div
-                        className="rounded-full bg-white px-3 py-1.5 shadow-sm border border-gray-100 pointer-events-auto cursor-pointer hover:border-[#FF8FA3] transition-smooth"
+                        className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 border-[#FFD4DC]/40 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
                         onClick={onCalendarClick}
                         data-gtm="mobile-dashboard-streak-indicator"
                     >
-                        <span className="text-xs font-semibold text-[#FF8FA3]">
-                            {streakDays}일 연속
+                        <span className="text-xs font-bold text-[#FFB5C2]">
+                            🌸 {streakDays}일차
                         </span>
                     </div>
                 </div>
@@ -282,12 +285,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     />
                 </div>
 
-                {/* 세련된 미니멀 BottomSheet */}
-                <BottomSheetNew
+                {/* 따뜻한 공감일기 BottomSheet */}
+                <BottomSheet
                     onWrite={handleWrite}
                     onCalendarClick={onCalendarClick}
+                    onVentilateClick={handleWindowClick}
                     diaries={diaries}
                     streakDays={streakDays}
+                    onMindRecordClick={() => setIsMindRecordOpen(true)}
                     onStatsClick={onStatsClick}
                     onSettingsClick={onSettingsClick}
                 />

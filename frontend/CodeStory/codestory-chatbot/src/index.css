@@ -10,23 +10,26 @@
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
 
-  /* 🎨 세련된 단일 컬러 시스템 (2030 여성 타겟) */
-  --color-primary: #FF8FA3;        /* 세련된 로즈 핑크 - 메인 브랜드 컬러 */
-  --color-primary-light: #FFB5C2;  /* 연한 핑크 - 배경, 호버 */
-  --color-primary-dark: #E67890;   /* 진한 핑크 - 강조 */
+  /* 🎨 따뜻한 공감일기 색상 시스템 */
+  --color-peach: #FFB5C2;          /* 따뜻한 피치 - 메인 브랜드 */
+  --color-peach-light: #FFD4DC;    /* 연한 피치 - 배경 */
+  --color-peach-dark: #FF9AAB;     /* 진한 피치 - 강조 */
 
-  --color-bg: #FAFAFA;             /* 밝은 회색 배경 */
-  --color-surface: #FFFFFF;        /* 카드, 바텀시트 */
-  --color-border: #F0F0F0;         /* 경계선 */
+  --color-coral: #FF8FB1;          /* 코랄 - 액센트 */
+  --color-lavender: #D4A5F5;       /* 라벤더 - 보조 */
 
-  --color-text-primary: #2D2D2D;   /* 주 텍스트 */
-  --color-text-secondary: #8B8B8B; /* 보조 텍스트 */
-  --color-text-tertiary: #C4C4C4;  /* 비활성 텍스트 */
+  --color-cream: #FFF8F3;          /* 따뜻한 크림 배경 */
+  --color-beige: #F8F6F4;          /* 베이지 */
+  --color-warm-white: #FFFBF7;     /* 따뜻한 흰색 */
+
+  --color-text-primary: #4A4A4A;   /* 차콜 텍스트 */
+  --color-text-secondary: #8B8B8B; /* 회색 텍스트 */
+  --color-text-light: #B8B8B8;     /* 연한 회색 */
 }
 
 body{
   margin: 0;
-  background: var(--color-bg);
+  background: var(--color-cream);
   color: var(--color-text-primary);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   /* 모바일 스크롤 허용 */
