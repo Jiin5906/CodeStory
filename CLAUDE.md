@@ -342,7 +342,72 @@ Configure Prometheus to scrape Spring Boot Actuator metrics if needed.
 
 ### 4. Safety Constraints (안전장치)
 - **삭제 금지:** `rm -rf`, `DROP TABLE`, `docker system prune` 등 파괴적인 명령어는 병렬 모드에서도 **반드시 사용자 승인**을 받으세요.
-- **커밋 제한:** `git commit`이나 `git push`는 사용자가 명시적으로 요청했을 때만 수행하세요.
+
+### 5. Auto Commit & Push Strategy (자동 커밋/푸시 전략)
+이 프로젝트는 개발 속도 향상을 위해 **자동 커밋/푸시 워크플로우**를 사용합니다.
+
+#### 커밋 시점
+다음 작업이 완료되었을 때 **자동으로 커밋/푸시를 제안**하세요:
+1. UI/UX 개선 완료 (디자인 변경, 컴포넌트 추가/수정)
+2. 새 기능 구현 완료 (API, 서비스 로직 추가)
+3. 버그 수정 완료
+4. 리팩토링 완료
+5. 설정 파일 변경 완료
+
+#### 커밋 메시지 규칙
+**형식**: `[이모지] [타입]: [간결한 설명]`
+
+**타입별 이모지**:
+- `✨ feat`: 새 기능 추가
+- `🎨 design`: UI/UX 디자인 개선
+- `🐛 fix`: 버그 수정
+- `♻️ refactor`: 코드 리팩토링
+- `📝 docs`: 문서 수정
+- `⚡ perf`: 성능 개선
+- `🔧 config`: 설정 파일 수정
+- `🚀 deploy`: 배포 관련
+
+**예시**:
+```bash
+✨ feat: 3단계 스냅포인트 BottomSheet 구현
+🎨 design: 다마고치 스타일 배경 가구 추가
+🐛 fix: 바텀시트 드래그 시 새로고침 문제 해결
+♻️ refactor: 색상 시스템 통일 및 불필요한 코드 제거
+```
+
+#### 커밋 워크플로우
+1. **작업 완료 확인**:
+   - Frontend 수정 시: `npm run lint` 성공 확인
+   - Backend 수정 시: `./gradlew clean bootJar -x test` 성공 확인
+
+2. **변경사항 분석**:
+   ```bash
+   git status
+   git diff
+   ```
+
+3. **커밋 메시지 생성**:
+   - 변경된 파일과 내용을 분석하여 적절한 타입과 이모지 선택
+   - 한글로 간결하게 작성 (50자 이내)
+
+4. **커밋 실행**:
+   ```bash
+   git add [변경된 파일들]
+   git commit -m "[이모지] [타입]: [설명]
+
+   Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+   ```
+
+5. **푸시**:
+   ```bash
+   git push origin main
+   ```
+
+#### 중요 사항
+- **민감 정보 체크**: `.env`, `credentials.json` 등은 절대 커밋하지 않음
+- **빌드 성공 확인**: 커밋 전 반드시 린트/빌드 테스트 통과 확인
+- **원자적 커밋**: 한 번에 하나의 논리적 변경만 포함
+- **사용자 확인**: 커밋/푸시 전 변경사항을 사용자에게 요약 보고
 ## 🔌 Enabled Plugins Strategy
 이 프로젝트는 다음 플러그인을 적극 활용합니다. 작업 성격에 맞춰 우선적으로 호출하세요:
 1. **UI/UX Design:** 디자인 변경 요청 시 수동 코딩 대신 **`frontend-design`** 플러그인을 최우선으로 사용할 것.
