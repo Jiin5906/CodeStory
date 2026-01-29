@@ -7,7 +7,7 @@ import CircularProgress from './CircularProgress';
 import { diaryApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
-const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick }) => {
+const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [emotion, setEmotion] = useState(null);
@@ -329,11 +329,16 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                     </div>
                 </div>
 
-                {/* BottomSheet 컴포넌트 (want.html 디자인) */}
+                {/* BottomSheet 컴포넌트 (want.html 디자인 + 펼침 기능) */}
                 <BottomSheet
                     onWrite={handleWrite}
                     onCalendarClick={onCalendarClick}
                     onVentilateClick={handleWindowClick}
+                    diaries={diaries}
+                    streakDays={streakDays}
+                    onMindRecordClick={() => setIsMindRecordOpen(true)}
+                    onStatsClick={onStatsClick}
+                    onSettingsClick={onSettingsClick}
                 />
 
                 {/* 마음 기록 오버레이 */}
