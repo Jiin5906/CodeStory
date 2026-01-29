@@ -243,17 +243,85 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 식물 데코 (좌측 하단) - 미니멀 */}
-                    <div className="absolute bottom-[30%] left-6 z-20 pointer-events-none">
-                        <div className="relative h-16 w-12">
-                            {/* 화분 */}
-                            <div className="absolute bottom-0 left-1/2 h-8 w-8 -translate-x-1/2 rounded-lg bg-gray-200"></div>
-                            {/* 식물 */}
-                            <div className="absolute bottom-6 left-1/2 h-8 w-2 -translate-x-1/2 rounded-full bg-green-200"></div>
-                            <div className="absolute bottom-8 left-1 h-6 w-6 rotate-[-30deg] rounded-full bg-green-100"></div>
-                            <div className="absolute bottom-8 right-1 h-6 w-6 rotate-[30deg] rounded-full bg-green-100"></div>
+                    {/* 🌿 좌측 선반 + 책들 (다마고치 스타일) */}
+                    <div className="absolute top-[35%] left-4 z-20 pointer-events-none">
+                        {/* 선반 */}
+                        <div className="relative w-24 h-3 bg-[#D7CCC8] rounded-lg shadow-md mb-1"></div>
+                        <div className="absolute top-3 left-2 flex gap-1">
+                            {/* 책 3권 */}
+                            <div className="w-3 h-12 bg-[#FF8FA3] rounded-sm shadow-sm"></div>
+                            <div className="w-3 h-10 bg-[#FFB5C2] rounded-sm shadow-sm mt-2"></div>
+                            <div className="w-3 h-14 bg-[#D4A5F5] rounded-sm shadow-sm -mt-1"></div>
                         </div>
                     </div>
+
+                    {/* 🖼️ 우측 선반 + 소품 */}
+                    <div className="absolute top-[38%] right-4 z-20 pointer-events-none">
+                        {/* 선반 */}
+                        <div className="relative w-20 h-3 bg-[#D7CCC8] rounded-lg shadow-md mb-1"></div>
+                        <div className="absolute top-3 left-1 flex gap-2 items-end">
+                            {/* 작은 화분 */}
+                            <div className="relative w-6 h-8">
+                                <div className="absolute bottom-0 w-6 h-4 bg-[#FF9AAB] rounded-lg"></div>
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-5 bg-[#A5D6A7] rounded-full"></div>
+                            </div>
+                            {/* 작은 액자 */}
+                            <div className="w-5 h-6 bg-white border-2 border-[#FFB5C2] rounded-sm shadow-sm flex items-center justify-center">
+                                <div className="text-[8px]">💕</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 🌱 좌측 작은 식물 */}
+                    <div className="absolute bottom-[30%] left-6 z-20 pointer-events-none">
+                        <div className="relative h-16 w-12">
+                            <div className="absolute bottom-0 left-1/2 h-8 w-8 -translate-x-1/2 rounded-lg bg-[#D7CCC8] shadow-sm"></div>
+                            <div className="absolute bottom-6 left-1/2 h-8 w-2 -translate-x-1/2 rounded-full bg-[#81C784]"></div>
+                            <div className="absolute bottom-8 left-1 h-6 w-6 rotate-[-30deg] rounded-full bg-[#A5D6A7]"></div>
+                            <div className="absolute bottom-8 right-1 h-6 w-6 rotate-[30deg] rounded-full bg-[#A5D6A7]"></div>
+                        </div>
+                    </div>
+
+                    {/* 🪴 우측 큰 식물 (다마고치 스타일) */}
+                    <div className="absolute bottom-[28%] right-5 z-20 pointer-events-none">
+                        <div className="relative h-24 w-16">
+                            {/* 화분 */}
+                            <div className="absolute bottom-0 left-1/2 h-10 w-12 -translate-x-1/2 bg-gradient-to-b from-[#FF9AAB] to-[#FFB5C2] rounded-t-sm rounded-b-lg shadow-lg"></div>
+                            {/* 큰 잎들 */}
+                            <div className="absolute bottom-8 left-1/2 h-12 w-3 -translate-x-1/2 bg-[#66BB6A] rounded-full"></div>
+                            <div className="absolute bottom-10 left-0 h-10 w-8 rotate-[-40deg] rounded-full bg-[#81C784]"></div>
+                            <div className="absolute bottom-10 right-0 h-10 w-8 rotate-[40deg] rounded-full bg-[#81C784]"></div>
+                            <div className="absolute bottom-14 left-1 h-8 w-7 rotate-[-20deg] rounded-full bg-[#A5D6A7]"></div>
+                            <div className="absolute bottom-14 right-1 h-8 w-7 rotate-[20deg] rounded-full bg-[#A5D6A7]"></div>
+                        </div>
+                    </div>
+
+                    {/* 🛋️ 바닥 쿠션 (좌측 하단) */}
+                    <div className="absolute bottom-[20%] left-8 z-10 pointer-events-none">
+                        <div className="w-14 h-8 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-[40%] shadow-lg opacity-90"></div>
+                    </div>
+
+                    {/* 🎀 작은 장식품 (우측 하단) */}
+                    <div className="absolute bottom-[22%] right-16 z-10 pointer-events-none">
+                        <div className="relative w-8 h-8">
+                            <div className="absolute inset-0 bg-[#FFD4DC] rounded-full shadow-md"></div>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">🎀</div>
+                        </div>
+                    </div>
+
+                    {/* ⏰ 벽 시계 (상단 중앙) */}
+                    <div className="absolute top-[5%] left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+                        <div className="relative w-10 h-10 bg-white rounded-full border-3 border-[#FFB5C2] shadow-lg">
+                            <div className="absolute top-1/2 left-1/2 w-0.5 h-3 bg-[#FFB5C2] -translate-x-1/2 -translate-y-full origin-bottom rotate-0"></div>
+                            <div className="absolute top-1/2 left-1/2 w-0.5 h-4 bg-[#FFB5C2] -translate-x-1/2 -translate-y-full origin-bottom rotate-90"></div>
+                            <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-[#FFB5C2] rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                        </div>
+                    </div>
+
+                    {/* ⭐ 별 장식 (랜덤 배치) */}
+                    <div className="absolute top-[15%] left-[20%] z-5 pointer-events-none text-yellow-200 text-2xl opacity-60">✨</div>
+                    <div className="absolute top-[25%] right-[15%] z-5 pointer-events-none text-yellow-200 text-xl opacity-50">✨</div>
+                    <div className="absolute top-[50%] left-[10%] z-5 pointer-events-none text-pink-200 text-xl opacity-40">💫</div>
                 </div>
 
                 {/* 헤더 영역 (스트릭 배지만) */}

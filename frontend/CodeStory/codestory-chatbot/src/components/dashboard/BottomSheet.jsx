@@ -19,8 +19,8 @@ const formatDate = (dateString) => {
 
 // 스냅포인트 높이
 const SNAP_POINTS = {
-    COLLAPSED: 140,  // 버튼만
-    HALF: 260,       // 버튼 + 채팅
+    COLLAPSED: 170,  // 버튼만 (높이 조정)
+    HALF: 270,       // 버튼 + 채팅
     EXPANDED: 85     // 전체 (%)
 };
 
@@ -180,6 +180,8 @@ const BottomSheet = ({
     };
 
     const handleTouchMove = (e) => {
+        // 브라우저 기본 스크롤/새로고침 방지
+        e.preventDefault();
         handleDragMove(e.touches[0].clientY);
     };
 
@@ -259,21 +261,22 @@ const BottomSheet = ({
         >
             {/* 핸들바 영역 (드래그 가능) */}
             <div
-                className="pt-5 pb-4 px-6 cursor-grab active:cursor-grabbing"
+                className="pt-4 pb-3 px-6 cursor-grab active:cursor-grabbing"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
                 onMouseDown={handleMouseDown}
+                style={{ touchAction: 'none' }}
             >
                 {/* 핸들바 */}
                 <div
-                    className="w-12 h-1.5 bg-[#FFB5C2]/40 rounded-full mx-auto mb-6 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
+                    className="w-12 h-1.5 bg-[#FFB5C2]/40 rounded-full mx-auto mb-4 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
                     onClick={handleHandleClick}
                 ></div>
             </div>
 
             {/* 액션 버튼 그룹 - 항상 표시 */}
-            <div className="px-6 pb-6">
+            <div className="px-6 pb-5">
                 <div className="flex justify-between items-end gap-2 px-1" data-gtm="action-buttons">
                     <ActionButton
                         icon="🤚"
