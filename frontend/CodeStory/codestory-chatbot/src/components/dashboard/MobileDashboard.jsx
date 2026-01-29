@@ -192,9 +192,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         backgroundPosition: '0 0, 0 0'
                     }}></div>
 
-                    {/* 🪟 대형 창문 (우측) - 다마고치 스타일, 일부 잘림 */}
+                    {/* 🪟 대형 창문 (우측) - 다마고치 스타일, 벽면에만 위치 */}
                     <div
-                        className="absolute top-[8%] right-[-2%] z-20 w-[40%] h-[55%]"
+                        className="absolute top-[5%] right-[-2%] z-20 w-[40%] h-[48%]"
                         data-gtm="window-decoration-click"
                         style={{
                             filter: 'drop-shadow(-4px 8px 16px rgba(0,0,0,0.25))'
