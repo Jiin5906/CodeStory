@@ -192,38 +192,96 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         backgroundPosition: '0 0, 0 0'
                     }}></div>
 
-                    {/* 🪟 창문 (우측 상단) - 아치형, 파란 하늘 배경 */}
+                    {/* 🪟 대형 창문 (우측) - 아치형, 마을 풍경 */}
                     <div
-                        className="absolute top-[8%] right-[10%] cursor-pointer z-20"
+                        className="absolute top-[8%] right-0 cursor-pointer z-20 w-[38%] h-[55%]"
                         onClick={handleWindowClick}
                         data-gtm="window-decoration-click"
-                        style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}
+                        style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))' }}
                     >
-                        <div className="relative w-24 h-28">
-                            {/* 창문 틀 (아치형) */}
-                            <div className={`absolute inset-0 bg-white rounded-t-[50%] rounded-b-lg border-4 border-white transition-all duration-300 overflow-hidden ${
+                        <div className="relative w-full h-full">
+                            {/* 창문 틀 (큰 아치형) */}
+                            <div className={`absolute inset-0 bg-white rounded-tl-[45%] rounded-tr-[45%] rounded-b-2xl border-[6px] border-white transition-all duration-300 overflow-hidden ${
                                 isWindowOpen ? 'border-[#87CEEB]' : ''
                             }`}>
                                 {/* 하늘 배경 */}
                                 <div className={`absolute inset-0 transition-all duration-500 ${
-                                    isWindowOpen ? 'bg-gradient-to-b from-[#87CEEB] to-[#B0E0E6]' : 'bg-[#E8E8E8]'
+                                    isWindowOpen ? 'bg-gradient-to-b from-[#87CEEB] via-[#B0E0E6] to-[#C8E9F5]' : 'bg-[#E8E8E8]'
                                 }`}></div>
 
+                                {/* 마을 풍경 (창문 열렸을 때만 표시) */}
+                                {isWindowOpen && (
+                                    <div className="absolute inset-0 overflow-hidden">
+                                        {/* 🏠 집 (좌측) */}
+                                        <div className="absolute bottom-[25%] left-[15%]">
+                                            {/* 집 본체 */}
+                                            <div className="w-12 h-10 bg-gradient-to-b from-[#FFD4A3] to-[#FFB88C] rounded-md" style={{
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                                            }}></div>
+                                            {/* 지붕 */}
+                                            <div className="absolute -top-6 -left-1 w-14 h-8 bg-gradient-to-b from-[#E85D75] to-[#D4476B] rounded-t-lg" style={{
+                                                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                                            }}></div>
+                                            {/* 문 */}
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-5 bg-[#8B6F47] rounded-t-md"></div>
+                                            {/* 창문 */}
+                                            <div className="absolute top-2 left-2 w-3 h-3 bg-[#FFE8CC] rounded-sm"></div>
+                                        </div>
+
+                                        {/* 🏠 집 (우측) */}
+                                        <div className="absolute bottom-[20%] right-[10%]">
+                                            {/* 집 본체 */}
+                                            <div className="w-10 h-8 bg-gradient-to-b from-[#FFE8B3] to-[#FFDAA0] rounded-md" style={{
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                                            }}></div>
+                                            {/* 지붕 */}
+                                            <div className="absolute -top-5 -left-1 w-12 h-7 bg-gradient-to-b from-[#7CB5E8] to-[#5A9FD4] rounded-t-lg" style={{
+                                                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                                            }}></div>
+                                            {/* 창문 */}
+                                            <div className="absolute top-1 right-2 w-2.5 h-2.5 bg-[#FFE8CC] rounded-sm"></div>
+                                        </div>
+
+                                        {/* 🌳 나무 (좌측) */}
+                                        <div className="absolute bottom-[15%] left-[8%]">
+                                            {/* 나무 기둥 */}
+                                            <div className="w-2 h-10 bg-gradient-to-b from-[#8B6F47] to-[#6B5537] rounded-full"></div>
+                                            {/* 나무잎 */}
+                                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gradient-to-br from-[#9CCC65] to-[#7CB342] rounded-full"></div>
+                                        </div>
+
+                                        {/* 🌳 나무 (중앙) */}
+                                        <div className="absolute bottom-[18%] left-[45%]">
+                                            <div className="w-2.5 h-12 bg-gradient-to-b from-[#8B6F47] to-[#6B5537] rounded-full"></div>
+                                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-9 h-9 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full"></div>
+                                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-7 h-7 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full"></div>
+                                        </div>
+
+                                        {/* 🌳 나무 (우측) */}
+                                        <div className="absolute bottom-[12%] right-[5%]">
+                                            <div className="w-2 h-8 bg-gradient-to-b from-[#8B6F47] to-[#6B5537] rounded-full"></div>
+                                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-7 h-7 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-gradient-to-br from-[#9CCC65] to-[#7CB342] rounded-full"></div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* 창살 (세로) */}
-                                <div className={`absolute left-1/2 top-0 bottom-0 w-1 -translate-x-1/2 bg-white transition-opacity duration-300 ${
-                                    isWindowOpen ? 'opacity-50' : 'opacity-100'
+                                <div className={`absolute left-1/2 top-0 bottom-0 w-1.5 -translate-x-1/2 bg-white transition-opacity duration-300 ${
+                                    isWindowOpen ? 'opacity-40' : 'opacity-100'
                                 }`}></div>
 
                                 {/* 창살 (가로) */}
-                                <div className={`absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 bg-white transition-opacity duration-300 ${
-                                    isWindowOpen ? 'opacity-50' : 'opacity-100'
+                                <div className={`absolute top-1/2 left-0 right-0 h-1.5 -translate-y-1/2 bg-white transition-opacity duration-300 ${
+                                    isWindowOpen ? 'opacity-40' : 'opacity-100'
                                 }`}></div>
                             </div>
                         </div>
                     </div>
 
                     {/* 📚 좌측 선반 2단 (다마고치 스타일) */}
-                    <div className="absolute top-[15%] left-[8%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
+                    <div className="absolute top-[28%] left-[8%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
                         {/* 상단 선반 */}
                         <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md mb-8" style={{
                             boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
@@ -302,7 +360,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </div>
 
                     {/* 🎁 좌측 하단 선물 상자 */}
-                    <div className="absolute bottom-[18%] left-[10%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}>
+                    <div className="absolute bottom-[28%] left-[10%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}>
                         <div className="relative w-12 h-14">
                             {/* 상자 본체 */}
                             <div className="absolute bottom-0 w-12 h-10 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-lg" style={{
@@ -327,33 +385,41 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 🪴 우측 하단 대형 화분 */}
-                    <div className="absolute bottom-[16%] right-[8%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.2))' }}>
-                        <div className="relative w-16 h-28">
+                    {/* 🪴 우측 하단 대형 화분 (크기 증가) */}
+                    <div className="absolute bottom-[26%] right-[6%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
+                        <div className="relative w-24 h-44">
                             {/* 화분 */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-12 bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-2xl" style={{
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-3xl" style={{
                                 clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
-                                boxShadow: '0 4px 8px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.3)'
+                                boxShadow: '0 6px 12px rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.3)'
                             }}></div>
 
                             {/* 중앙 큰 잎 */}
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-4 h-16 bg-gradient-to-t from-[#66BB6A] to-[#81C784] rounded-full"></div>
+                            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 bg-gradient-to-t from-[#66BB6A] to-[#81C784] rounded-full"></div>
 
-                            {/* 좌측 잎들 */}
-                            <div className="absolute bottom-12 left-1 w-7 h-12 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full rotate-[-35deg]" style={{
-                                boxShadow: 'inset -2px 2px 4px rgba(0,0,0,0.1)'
+                            {/* 좌측 잎들 (크기 2배) */}
+                            <div className="absolute bottom-16 left-0 w-11 h-18 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full rotate-[-35deg]" style={{
+                                boxShadow: 'inset -3px 3px 6px rgba(0,0,0,0.12)'
                             }}></div>
-                            <div className="absolute bottom-16 left-0 w-6 h-10 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-25deg]"></div>
+                            <div className="absolute bottom-22 left-[-2px] w-9 h-15 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-25deg]"></div>
 
-                            {/* 우측 잎들 */}
-                            <div className="absolute bottom-12 right-1 w-7 h-12 bg-gradient-to-bl from-[#81C784] to-[#66BB6A] rounded-full rotate-[35deg]" style={{
-                                boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.1)'
+                            {/* 우측 잎들 (크기 2배) */}
+                            <div className="absolute bottom-16 right-0 w-11 h-18 bg-gradient-to-bl from-[#81C784] to-[#66BB6A] rounded-full rotate-[35deg]" style={{
+                                boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.12)'
                             }}></div>
-                            <div className="absolute bottom-16 right-0 w-6 h-10 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[25deg]"></div>
+                            <div className="absolute bottom-22 right-[-2px] w-9 h-15 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[25deg]"></div>
 
-                            {/* 상단 작은 잎들 */}
-                            <div className="absolute bottom-20 left-2 w-5 h-8 bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[-15deg]"></div>
-                            <div className="absolute bottom-20 right-2 w-5 h-8 bg-gradient-to-bl from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[15deg]"></div>
+                            {/* 상단 작은 잎들 (크기 2배) */}
+                            <div className="absolute bottom-28 left-3 w-8 h-12 bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[-15deg]"></div>
+                            <div className="absolute bottom-28 right-3 w-8 h-12 bg-gradient-to-bl from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[15deg]"></div>
+
+                            {/* 추가 잎들로 더 풍성하게 */}
+                            <div className="absolute bottom-20 left-1 w-7 h-10 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-40deg]" style={{
+                                opacity: 0.9
+                            }}></div>
+                            <div className="absolute bottom-20 right-1 w-7 h-10 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[40deg]" style={{
+                                opacity: 0.9
+                            }}></div>
                         </div>
                     </div>
 
