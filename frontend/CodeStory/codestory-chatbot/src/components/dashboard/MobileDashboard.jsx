@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { startOfDay, parseISO, format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { startOfDay, parseISO } from 'date-fns';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
+import BottomControlBar from './BottomControlBar';
 import MindRecord from '../../change/MindRecord';
 import CircularProgress from './CircularProgress';
 import { diaryApi } from '../../services/api';
@@ -319,6 +319,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     onStatsClick={onStatsClick}
                     onSettingsClick={onSettingsClick}
                 />
+
+                {/* 다마고치 스타일 하단 컨트롤 바 */}
+                <BottomControlBar onVentilateClick={handleWindowClick} />
 
                 {/* 마음 기록 오버레이 */}
                 <MindRecord

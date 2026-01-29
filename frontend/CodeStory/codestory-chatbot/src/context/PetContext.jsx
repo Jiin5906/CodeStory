@@ -6,8 +6,14 @@ const PetContext = createContext();
 // Lock/Unlock 임계값 상수
 const LOCK_THRESHOLD = 100;   // 100%에 도달하면 Lock
 const UNLOCK_THRESHOLD = 30;  // 30% 이하이면 Unlock
-const DECAY_INTERVAL_MS = 10000; // 10초
-const DECAY_AMOUNT = 5;       // 5%씩 감소
+
+// ─── 게이지 감소 속도 설정 ───
+// 프로덕션: 100% → 0% = 2시간 (7200초)
+// 개발 모드: 100% → 0% = 5분 (300초) - 테스트용
+const IS_DEV_MODE = true; // 배포 시 false로 변경
+const TOTAL_DECAY_TIME_MS = IS_DEV_MODE ? 300000 : 7200000; // 5분 or 2시간
+const DECAY_INTERVAL_MS = 10000; // 10초마다 체크
+const DECAY_AMOUNT = (100 / (TOTAL_DECAY_TIME_MS / DECAY_INTERVAL_MS)); // 동적 계산
 
 export const PetProvider = ({ children }) => {
     const [petStatus, setPetStatus] = useState(null);
