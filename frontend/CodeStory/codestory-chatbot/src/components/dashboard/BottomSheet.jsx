@@ -1,19 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaCalendarAlt, FaHeart, FaChartPie, FaCog, FaChevronRight } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 
 /**
- * BottomSheet — 따뜻한 공감일기 디자인 (개선판)
+ * BottomSheet — 3단계 스냅포인트 시스템
  *
- * 구성:
- * 1. 고정 영역 (항상 표시):
- *    - 핸들바
- *    - 4개 액션 버튼 (쓰다듬기, 환기, 잠자기, 홈) - 다마고치 리텐션 시스템
- *    - 채팅 입력창
- * 2. 펼침 영역:
- *    - 퀵 메뉴 (달력, 마음 기록, 통계, 설정)
- *    - 스트릭 카드
- *    - 일기 리스트 (카톡처럼 대화 내역)
+ * 스냅포인트:
+ * 1. COLLAPSED (최소): 액션 버튼만
+ * 2. HALF (중간): 액션 버튼 + 채팅창
+ * 3. EXPANDED (최대): 전체 내용
  */
 
 // 날짜 포맷팅
@@ -22,7 +17,14 @@ const formatDate = (dateString) => {
     return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
 
-// 액션 버튼 컴포넌트 (개선된 디자인)
+// 스냅포인트 높이
+const SNAP_POINTS = {
+    COLLAPSED: 140,  // 버튼만
+    HALF: 260,       // 버튼 + 채팅
+    EXPANDED: 85     // 전체 (%)
+};
+
+// 액션 버튼 컴포넌트
 const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
     const [showPercent, setShowPercent] = useState(false);
     const [labelText, setLabelText] = useState(label);
@@ -64,7 +66,7 @@ const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
                         : 'bg-white hover:shadow-xl'
                 } border-2 border-white`}
             >
-                {/* 게이지 배경 (따뜻한 그라데이션) */}
+                {/* 게이지 배경 */}
                 {!isHome && (
                     <div
                         className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#FFB5C2] to-[#FFD4DC] transition-all duration-500 ease-out rounded-b-[14px]"
@@ -109,18 +111,118 @@ const BottomSheet = ({
     onStatsClick,
     onSettingsClick
 }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const [snapPoint, setSnapPoint] = useState('COLLAPSED'); // COLLAPSED, HALF, EXPANDED
+    const [dragStartY, setDragStartY] = useState(0);
+    const [currentY, setCurrentY] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
     const [input, setInput] = useState('');
-    const [touchStart, setTouchStart] = useState(0);
+
+    const sheetRef = useRef(null);
     const { affectionGauge, airGauge, energyGauge } = usePet();
 
-    // 드래그 제스처
-    const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientY);
-    const handleTouchEnd = (e) => {
-        const touchEnd = e.changedTouches[0].clientY;
-        const diff = touchStart - touchEnd;
-        if (diff > 50) setIsOpen(true);
-        else if (diff < -50) setIsOpen(false);
+    // 스냅포인트 높이 계산
+    const getHeight = () => {
+        if (snapPoint === 'EXPANDED') {
+            return '85%';
+        } else if (snapPoint === 'HALF') {
+            return `${SNAP_POINTS.HALF}px`;
+        } else {
+            return `${SNAP_POINTS.COLLAPSED}px`;
+        }
+    };
+
+    // 드래그 시작
+    const handleDragStart = (clientY) => {
+        setIsDragging(true);
+        setDragStartY(clientY);
+        setCurrentY(0);
+    };
+
+    // 드래그 중
+    const handleDragMove = (clientY) => {
+        if (!isDragging) return;
+
+        const deltaY = clientY - dragStartY;
+        setCurrentY(deltaY);
+    };
+
+    // 드래그 끝
+    const handleDragEnd = () => {
+        if (!isDragging) return;
+
+        setIsDragging(false);
+
+        // velocity와 위치 기반으로 다음 스냅포인트 결정
+        const threshold = 50; // 최소 이동 거리
+
+        if (snapPoint === 'COLLAPSED') {
+            if (currentY < -threshold) {
+                setSnapPoint('HALF');
+            }
+        } else if (snapPoint === 'HALF') {
+            if (currentY < -threshold) {
+                setSnapPoint('EXPANDED');
+            } else if (currentY > threshold) {
+                setSnapPoint('COLLAPSED');
+            }
+        } else if (snapPoint === 'EXPANDED') {
+            if (currentY > threshold) {
+                setSnapPoint('HALF');
+            }
+        }
+
+        setCurrentY(0);
+    };
+
+    // 터치 이벤트
+    const handleTouchStart = (e) => {
+        handleDragStart(e.touches[0].clientY);
+    };
+
+    const handleTouchMove = (e) => {
+        handleDragMove(e.touches[0].clientY);
+    };
+
+    const handleTouchEnd = () => {
+        handleDragEnd();
+    };
+
+    // 마우스 이벤트 (데스크톱용)
+    const handleMouseDown = (e) => {
+        handleDragStart(e.clientY);
+    };
+
+    const handleMouseMove = (e) => {
+        if (isDragging) {
+            handleDragMove(e.clientY);
+        }
+    };
+
+    const handleMouseUp = () => {
+        handleDragEnd();
+    };
+
+    // 마우스 이벤트 리스너
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('mouseup', handleMouseUp);
+            };
+        }
+    }, [isDragging, dragStartY]);
+
+    // 핸들바 클릭으로 순차 이동
+    const handleHandleClick = () => {
+        if (snapPoint === 'COLLAPSED') {
+            setSnapPoint('HALF');
+        } else if (snapPoint === 'HALF') {
+            setSnapPoint('EXPANDED');
+        } else {
+            setSnapPoint('COLLAPSED');
+        }
     };
 
     const handleSubmit = () => {
@@ -129,26 +231,50 @@ const BottomSheet = ({
         setInput('');
     };
 
+    // 드래그 중 transform 계산
+    const getTransform = () => {
+        if (isDragging && currentY !== 0) {
+            // 드래그 방향에 따라 저항 적용 (경계 넘어갈 때)
+            const resistance = 0.5;
+            if (snapPoint === 'COLLAPSED' && currentY > 0) {
+                return `translateY(${currentY * resistance}px)`;
+            } else if (snapPoint === 'EXPANDED' && currentY < 0) {
+                return `translateY(${currentY * resistance}px)`;
+            }
+            return `translateY(${currentY}px)`;
+        }
+        return 'translateY(0)';
+    };
+
     return (
         <div
-            className={`absolute bottom-0 w-full z-50 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t-2 border-[#FFD4DC]/30 rounded-t-[32px] shadow-[0_-8px_32px_rgba(255,181,194,0.15)] transition-all duration-500 flex flex-col ${
-                isOpen ? 'h-[85%]' : 'h-auto'
-            }`}
+            ref={sheetRef}
+            className="absolute bottom-0 w-full z-50 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t-2 border-[#FFD4DC]/30 rounded-t-[32px] shadow-[0_-8px_32px_rgba(255,181,194,0.15)] flex flex-col"
+            style={{
+                height: getHeight(),
+                transform: getTransform(),
+                transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
             data-gtm="bottomsheet-container"
         >
-            {/* 고정 영역 */}
+            {/* 핸들바 영역 (드래그 가능) */}
             <div
-                className="pt-5 pb-8 px-6 flex flex-col"
-                style={{ paddingBottom: isOpen ? '1rem' : 'max(2rem, calc(1rem + env(safe-area-inset-bottom)))' }}
+                className="pt-5 pb-4 px-6 cursor-grab active:cursor-grabbing"
                 onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                onClick={() => setIsOpen(!isOpen)}
+                onMouseDown={handleMouseDown}
             >
                 {/* 핸들바 */}
-                <div className="w-12 h-1.5 bg-[#FFB5C2]/40 rounded-full mx-auto mb-6 cursor-pointer"></div>
+                <div
+                    className="w-12 h-1.5 bg-[#FFB5C2]/40 rounded-full mx-auto mb-6 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
+                    onClick={handleHandleClick}
+                ></div>
+            </div>
 
-                {/* 액션 버튼 그룹 - 다마고치 리텐션 시스템 */}
-                <div className="flex justify-between items-end gap-2 mb-6 px-1" data-gtm="action-buttons">
+            {/* 액션 버튼 그룹 - 항상 표시 */}
+            <div className="px-6 pb-6">
+                <div className="flex justify-between items-end gap-2 px-1" data-gtm="action-buttons">
                     <ActionButton
                         icon="🤚"
                         label="쓰다듬기"
@@ -175,37 +301,43 @@ const BottomSheet = ({
                         isHome={true}
                     />
                 </div>
-
-                {/* 채팅 입력창 (따뜻한 디자인) */}
-                <div
-                    className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-[22px] border-2 border-[#FFD4DC]/40 shadow-lg group focus-within:border-[#FFB5C2] focus-within:shadow-xl transition-all duration-300"
-                    onClick={(e) => e.stopPropagation()}
-                    data-gtm="chat-input-area"
-                >
-                    <div className="pl-5 pr-2 text-xl opacity-70">✏️</div>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                        placeholder="오늘의 마음을 들려주세요..."
-                        className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-14 text-[15px] leading-relaxed"
-                        data-gtm="chat-input-field"
-                    />
-                    <button
-                        onClick={handleSubmit}
-                        className="m-2 w-11 h-11 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-lg active:scale-95 hover:shadow-xl transition-all duration-200 flex items-center justify-center font-bold text-lg"
-                        data-gtm="chat-submit-button"
-                    >
-                        ↑
-                    </button>
-                </div>
             </div>
 
-            {/* 펼침 영역 */}
-            {isOpen && (
+            {/* 채팅 입력창 - HALF 이상에서 표시 */}
+            {(snapPoint === 'HALF' || snapPoint === 'EXPANDED') && (
                 <div
-                    className="flex-1 overflow-y-auto no-scrollbar px-6 pb-8"
+                    className="px-6 pb-6 animate-fade-in-up"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div
+                        className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-[22px] border-2 border-[#FFD4DC]/40 shadow-lg group focus-within:border-[#FFB5C2] focus-within:shadow-xl transition-all duration-300"
+                        data-gtm="chat-input-area"
+                    >
+                        <div className="pl-5 pr-2 text-xl opacity-70">✏️</div>
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                            placeholder="오늘의 마음을 들려주세요..."
+                            className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-14 text-[15px] leading-relaxed"
+                            data-gtm="chat-input-field"
+                        />
+                        <button
+                            onClick={handleSubmit}
+                            className="m-2 w-11 h-11 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-lg active:scale-95 hover:shadow-xl transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                            data-gtm="chat-submit-button"
+                        >
+                            ↑
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* 펼침 영역 - EXPANDED에서만 표시 */}
+            {snapPoint === 'EXPANDED' && (
+                <div
+                    className="flex-1 overflow-y-auto hide-scrollbar px-6 pb-8 animate-fade-in-up"
                     style={{ paddingBottom: 'max(2.5rem, calc(1rem + env(safe-area-inset-bottom)))' }}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -253,7 +385,7 @@ const BottomSheet = ({
                         </button>
                     </div>
 
-                    {/* 스트릭 카드 (따뜻한 디자인) */}
+                    {/* 스트릭 카드 */}
                     <div
                         onClick={onCalendarClick}
                         className="bg-gradient-to-r from-white/90 to-[#FFF8F3]/90 backdrop-blur-md p-5 rounded-[24px] shadow-lg border-2 border-[#FFD4DC]/40 mb-6 flex items-center justify-between cursor-pointer hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
@@ -271,7 +403,7 @@ const BottomSheet = ({
                         <FaChevronRight className="text-[#FFB5C2]" />
                     </div>
 
-                    {/* 일기 리스트 (카톡처럼 대화 내역) */}
+                    {/* 일기 리스트 */}
                     <div className="space-y-3" data-gtm="bottomsheet-diary-list">
                         <h3 className="text-sm font-bold text-gray-400 mb-3">최근 대화</h3>
                         {diaries && diaries.length > 0 ? (
