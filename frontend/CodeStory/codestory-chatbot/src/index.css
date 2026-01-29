@@ -78,20 +78,6 @@ button{
   scrollbar-width: none;
 }
 
-/* 미니멀 애니메이션 - 필수만 유지 */
-@keyframes subtle-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.animate-subtle-float {
-  animation: subtle-float 6s ease-in-out infinite;
-}
-
 /* 🖋️ 타이포그래피 시스템 */
 .text-title {
   font-size: 24px;
@@ -120,16 +106,7 @@ button{
   color: var(--color-text-tertiary);
 }
 
-/* No scrollbar 유틸리티 */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* 부드러운 트랜지션만 유지 */
+/* 부드러운 트랜지션 */
 .transition-smooth {
   transition: all 0.2s ease;
 }
