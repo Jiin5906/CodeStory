@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO } from 'date-fns';
 import MainRoom from './MainRoom';
-import BottomSheet from './BottomSheet';
+import BottomSheetNew from './BottomSheetNew';
 import MindRecord from '../../change/MindRecord';
-import CircularProgress from './CircularProgress';
+import CircularProgressNew from './CircularProgressNew';
 import { diaryApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
@@ -161,20 +161,17 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     };
 
     return (
-        <div className="bg-gradient-to-br from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body selection:bg-[#FFD4DC]" data-gtm="view-mobile-dashboard-new">
+        <div className="bg-gray-50 md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body" data-gtm="view-mobile-dashboard-new">
 
             {/* 폰 프레임 컨테이너 */}
-            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]">
+            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[8px] md:border-white bg-white md:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] md:ring-1 md:ring-gray-100">
 
                 {/* 메인 화면 영역 (배경 + MainRoom) */}
                 <div className="relative w-full flex-1 overflow-hidden">
-                    {/* 🌸 깔끔한 단색 배경 */}
-                    <div className={`absolute inset-0 bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] transition-all duration-1000 ${
+                    {/* 세련된 심플 배경 */}
+                    <div className={`absolute inset-0 bg-gradient-to-b from-white via-pink-50/30 to-white transition-all duration-1000 ${
                         isLampOn ? 'opacity-100' : 'opacity-90'
                     }`}></div>
-
-                    {/* 🫧 미니멀한 블롭 (피치 하나만) */}
-                    <div className="absolute top-1/4 -right-32 w-96 h-96 bg-[#FFB5C2]/15 rounded-full blur-3xl animate-blob-organic pointer-events-none"></div>
 
                     {/* 창문 그래픽 */}
                     <div
@@ -277,40 +274,39 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </div>
                 </div>
 
-                {/* 헤더 영역 (스트릭 배지만 — 날짜는 CircularProgress로 이동) */}
+                {/* 헤더 영역 (스트릭 배지만) */}
                 <div
                     className="absolute top-0 z-40 flex w-full items-end justify-end px-6 md:px-8 pointer-events-none"
                     style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
                     data-gtm="mobile-dashboard-header"
                 >
-                    {/* 스트릭 배지 */}
+                    {/* 스트릭 배지 - 미니멀 스타일 */}
                     <div
-                        className="rounded-full bg-white/80 px-4 py-1.5 shadow-[0_4px_12px_rgba(255,182,193,0.2)] backdrop-blur-sm pointer-events-auto cursor-pointer hover:scale-105 transition-transform"
+                        className="rounded-full bg-white px-3 py-1.5 shadow-sm border border-gray-100 pointer-events-auto cursor-pointer hover:border-[#FF8FA3] transition-smooth"
                         onClick={onCalendarClick}
                         data-gtm="mobile-dashboard-streak-indicator"
                     >
-                        <span className="text-xs font-bold text-rose-400">
-                            🌸 {streakDays}일차
+                        <span className="text-xs font-semibold text-[#FF8FA3]">
+                            {streakDays}일 연속
                         </span>
                     </div>
                 </div>
 
-                {/* CircularProgress — 좌측 상단 레벨 HUD (safe-area 적용) */}
+                {/* CircularProgressNew — 좌측 상단 레벨 HUD (safe-area 적용) */}
                 <div
                     className="pointer-events-auto"
                     style={{ position: 'absolute', top: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-top)))', left: '1.5rem', zIndex: 50 }}
                 >
-                    <CircularProgress
+                    <CircularProgressNew
                         level={petStatus?.level ?? 1}
                         percent={petStatus ? (petStatus.currentExp / petStatus.requiredExp) * 100 : 0}
                     />
                 </div>
 
-                {/* BottomSheet 컴포넌트 (want.html 디자인 + 펼침 기능) */}
-                <BottomSheet
+                {/* 세련된 미니멀 BottomSheet */}
+                <BottomSheetNew
                     onWrite={handleWrite}
                     onCalendarClick={onCalendarClick}
-                    onVentilateClick={handleWindowClick}
                     diaries={diaries}
                     streakDays={streakDays}
                     onMindRecordClick={() => setIsMindRecordOpen(true)}
