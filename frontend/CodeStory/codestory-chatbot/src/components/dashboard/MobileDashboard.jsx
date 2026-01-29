@@ -2,13 +2,12 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO } from 'date-fns';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
-import BottomControlBar from './BottomControlBar';
 import MindRecord from '../../change/MindRecord';
 import CircularProgress from './CircularProgress';
 import { diaryApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
-const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
+const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick }) => {
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [emotion, setEmotion] = useState(null);
@@ -27,7 +26,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const ventilateTimerRef = useRef(null);
     const coldTimerRef = useRef(null);
 
-    const { handleVentilateComplete, petStatus } = usePet();
+    const { handleVentilateComplete, petStatus, emotionShards } = usePet();
 
     const today = startOfDay(new Date());
 
@@ -309,19 +308,33 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     />
                 </div>
 
-                {/* BottomSheet 컴포넌트 */}
+                {/* 상단 리소스 표시 (보석/골드) — want.html 디자인 */}
+                <div
+                    className="absolute left-1/2 -translate-x-1/2 z-40 bg-white/90 rounded-full px-4 py-1.5 flex items-center gap-4 shadow-md border-2 border-white pointer-events-auto"
+                    style={{ top: 'max(2rem, calc(1rem + env(safe-area-inset-top)))' }}
+                    data-gtm="resource-display"
+                >
+                    {/* 보석 (감정 조각) */}
+                    <div className="flex items-center gap-1">
+                        <span className="text-pink-500 text-sm">💎</span>
+                        <span className="text-sm font-bold text-gray-600">{emotionShards.length}</span>
+                    </div>
+                    <div className="w-[1px] h-4 bg-gray-300"></div>
+                    {/* 골드 (햇빛) */}
+                    <div className="flex items-center gap-1">
+                        <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] text-white font-bold border border-yellow-500">
+                            G
+                        </div>
+                        <span className="text-sm font-bold text-gray-600">{petStatus?.sunlight ?? 0}</span>
+                    </div>
+                </div>
+
+                {/* BottomSheet 컴포넌트 (want.html 디자인) */}
                 <BottomSheet
                     onWrite={handleWrite}
-                    diaries={diaries}
-                    streakDays={streakDays}
                     onCalendarClick={onCalendarClick}
-                    onMindRecordClick={() => setIsMindRecordOpen(true)}
-                    onStatsClick={onStatsClick}
-                    onSettingsClick={onSettingsClick}
+                    onVentilateClick={handleWindowClick}
                 />
-
-                {/* 다마고치 스타일 하단 컨트롤 바 */}
-                <BottomControlBar onVentilateClick={handleWindowClick} />
 
                 {/* 마음 기록 오버레이 */}
                 <MindRecord

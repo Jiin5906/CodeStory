@@ -1,5 +1,39 @@
-문제점 일단 쓰다듬기 게이지가 너무 빨리 줄어듦 조금 천천히 줄어들면 좋겠음, 대략 2시간 정도면 충분함.
+# Role
+당신은 **React & Tailwind CSS 프론트엔드 전문가**입니다.
+ @frontend/CodeStory/codestory-chatbot/src/change/want.html파일을 참고하여 변경 사항을 적용해주세요.
+현재 프로젝트의 **하단 인터페이스(Bottom Sheet & Control Bar)**를 첨부한 HTML 디자인(`new_ui.html`)과 동일하게 전면 개편하려고 합니다.
 
-치명적인 버그. 쓰다듬기를 한 뒤 무슨 일이진 모르겠는데, 계속해서 레벨이 올라감. 쓰다듬기를 하면서 틱으로 레벨이 오르는 것이 아니라 100%가 되었을 때 EXP를 지급해야함. 환기, 잠자기도 마찬가지임.
+# Context
+현재 `MobileDashboard.jsx`에는 상단 배경/가구(`MainRoom`)와 하단 컨트롤 바(`BottomControlBar`), 그리고 바텀시트(`BottomSheet`)가 분리되어 있습니다.
+이것을 **"통합된 바텀시트 UI"** 형태로 변경해야 합니다.
 
-UI문제점으론 게이지가 너무 커서 화면을 가림 내가 원하는 건 게이지 크기를 좀 줄이고, 채팅도 바로바로 할 수 있게 만드는 것.
+# 🎯 Goal
+기존의 **배경, 가구 배치, MainRoom 컴포넌트는 건드리지 말고**, **화면 하단의 UI 구성과 좌측 상단에 존재하는 레벨 표시 변경을 도와주세요.**
+
+# 🛠️ Task Requirements
+
+### 1. 컴포넌트 구조 변경 (`MobileDashboard.jsx`)
+- 기존의 독립된 `BottomControlBar` 컴포넌트를 제거하세요.
+- `BottomSheet` 컴포넌트가 화면 하단에 고정(`absolute bottom-0`)되도록 배치하고, 이 안에 **액션 버튼 4개**와 **채팅 입력창**을 모두 포함시키세요.
+
+### 2. 바텀시트 UI 구현 (`BottomSheet.jsx`)
+첨부된 HTML 코드를 참고하여 아래 구조로 재작성하세요:
+- **Container:** `bg-white/90 backdrop-blur-xl` 스타일을 적용하여 채팅창과 버튼을 감싸는 단일 패널로 만드세요.
+- **Section A (버튼 그룹):**
+  - 채팅 입력창 바로 위에 '쓰다듬기', '환기', '잠자기', '홈' 버튼 4개를 배치하세요.
+  - **Gauge Visual:** 버튼의 배경색(`bg-slate-100`) 위에 `div`의 `height%`를 조절하여 게이지가 차오르는 효과를 구현하세요.
+  - **Color Logic:** 상태값(0~100)에 따라 빨강(Red)/파랑(Blue)/초록(Green)으로 색상이 변하는 로직을 적용하세요. (HTML의 스크립트 로직 참고)
+  - **Interaction:** 버튼 클릭 시 라벨 텍스트("쓰다듬기")가 잠시 퍼센트("45%")로 바뀌는 인터랙션을 `useState`와 `setTimeout`으로 구현하세요.
+- **Section B (채팅 입력창):**
+  - 버튼 그룹 바로 아래에 위치하며, 기존 `onWrite` 함수와 연결하여 채팅 기능이 정상 작동해야 합니다.
+
+### 3. 상태 연결 (Logic Integration)
+- 새로 만든 버튼들이 기존 `usePet` 훅 또는 `MobileDashboard`의 핸들러(`handleRubbing`, `handleVentilate` 등)와 올바르게 연결되어 실제 데이터가 변경되도록 하세요.
+
+# ⚠️ Constraints (중요)
+1. **배경 유지:** `MainRoom` 컴포넌트와 그 뒤에 있는 배경(벽지, 바닥) 코드는 수정하지 마세요.
+2. **Tailwind Config:** 첨부된 HTML에 정의된 커스텀 컬러(`theme-ui`, `theme-floor` 등)가 `tailwind.config.js`에 없다면 `jit` 모드(`w-[...]`, `bg-[#...]`)를 사용하거나 설정에 추가하라고 알려주세요.
+3. **기능 보존:** 디자인을 바꾸더라도 '채팅 전송'과 '경험치 획득' 로직은 기존대로 작동해야 합니다.
+
+# Reference
+- UI 디자인 및 인터랙션 로직은 첨부한  @frontend/CodeStory/codestory-chatbot/src/change/want.html 파일을 따르세요.
