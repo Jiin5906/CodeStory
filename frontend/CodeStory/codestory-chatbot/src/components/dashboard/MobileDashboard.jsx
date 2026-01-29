@@ -161,20 +161,29 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     };
 
     return (
-        <div className="bg-[#FFFCF8] md:bg-[#FFF5F6] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-sans selection:bg-rose-200" data-gtm="view-mobile-dashboard-new">
+        <div className="bg-gradient-to-br from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body selection:bg-[#FFD4DC]" data-gtm="view-mobile-dashboard-new">
 
             {/* 폰 프레임 컨테이너 */}
-            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-[#FFFCF8] md:shadow-[0_20px_60px_-10px_rgba(255,182,193,0.5)] md:ring-1 md:ring-rose-100">
+            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]">
 
                 {/* 메인 화면 영역 (배경 + MainRoom) */}
                 <div className="relative w-full flex-1 overflow-hidden">
-                    {/* 하늘 배경 그라디언트 */}
-                    <div className={`absolute inset-0 bg-gradient-to-b from-[#FFF0F5] via-[#FFF5F6] to-[#FFE4E1] transition-all duration-700 ${
-                        isLampOn ? 'brightness-110' : 'brightness-90'
+                    {/* 🌸 따뜻한 감성 배경 그라디언트 */}
+                    <div className={`absolute inset-0 bg-gradient-to-b from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] transition-all duration-1000 ${
+                        isLampOn ? 'opacity-100' : 'opacity-80'
                     }`}></div>
 
-                    {/* 무드등 조명 효과 오버레이 */}
-                    <div className={`absolute inset-0 bg-gradient-to-br from-yellow-100/20 via-transparent to-transparent transition-opacity duration-700 pointer-events-none ${
+                    {/* 🫧 유기적 블롭 1 (피치) */}
+                    <div className="absolute -top-20 -left-20 w-80 h-80 bg-gradient-to-br from-[#FFB5C2]/30 to-[#FFD4DC]/20 rounded-full blur-3xl animate-blob-organic pointer-events-none"></div>
+
+                    {/* 🫧 유기적 블롭 2 (라벤더) */}
+                    <div className="absolute top-1/3 -right-20 w-72 h-72 bg-gradient-to-br from-[#D4A5F5]/25 to-[#E8D4FF]/15 rounded-full blur-3xl animate-blob-organic pointer-events-none" style={{ animationDelay: '3s' }}></div>
+
+                    {/* 🫧 유기적 블롭 3 (민트) */}
+                    <div className="absolute -bottom-20 left-1/4 w-64 h-64 bg-gradient-to-br from-[#A8E6CF]/20 to-[#C8F5E0]/10 rounded-full blur-3xl animate-blob-organic pointer-events-none" style={{ animationDelay: '6s' }}></div>
+
+                    {/* 무드등 조명 효과 오버레이 (더 부드럽게) */}
+                    <div className={`absolute inset-0 bg-gradient-to-br from-[#FFE8A3]/15 via-transparent to-transparent transition-opacity duration-1000 pointer-events-none ${
                         isLampOn ? 'opacity-100' : 'opacity-0'
                     }`}></div>
 
@@ -308,24 +317,42 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     />
                 </div>
 
-                {/* 상단 리소스 표시 (보석/골드) — want.html 디자인 */}
+                {/* 상단 리소스 표시 (감성 디자인) */}
                 <div
-                    className="absolute left-1/2 -translate-x-1/2 z-40 bg-white/90 rounded-full px-4 py-1.5 flex items-center gap-4 shadow-md border-2 border-white pointer-events-auto"
-                    style={{ top: 'max(2rem, calc(1rem + env(safe-area-inset-top)))' }}
+                    className="absolute left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md px-5 py-2 flex items-center gap-4 shadow-[0_6px_20px_rgba(212,165,245,0.2)] border-2 border-[#FFD4DC]/40 pointer-events-auto hover-wiggle"
+                    style={{
+                        top: 'max(2rem, calc(1rem + env(safe-area-inset-top)))',
+                        borderRadius: '20px 16px 18px 17px' // 손그림 느낌
+                    }}
                     data-gtm="resource-display"
                 >
                     {/* 보석 (감정 조각) */}
-                    <div className="flex items-center gap-1">
-                        <span className="text-pink-500 text-sm">💎</span>
-                        <span className="text-sm font-bold text-gray-600">{emotionShards.length}</span>
+                    <div className="flex items-center gap-1.5 group cursor-pointer">
+                        <div className="relative">
+                            <span className="text-base animate-sparkle">💎</span>
+                            {emotionShards.length > 0 && (
+                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-br from-[#FFB5C2] to-[#D4A5F5] rounded-full animate-pulse"></div>
+                            )}
+                        </div>
+                        <span className="text-sm font-handwriting bg-gradient-to-r from-[#FFB5C2] to-[#D4A5F5] bg-clip-text text-transparent">
+                            {emotionShards.length}
+                        </span>
                     </div>
-                    <div className="w-[1px] h-4 bg-gray-300"></div>
+
+                    {/* 구분선 */}
+                    <div className="w-[2px] h-4 bg-gradient-to-b from-[#FFB5C2]/30 to-[#D4A5F5]/30 rounded-full"></div>
+
                     {/* 골드 (햇빛) */}
-                    <div className="flex items-center gap-1">
-                        <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] text-white font-bold border border-yellow-500">
+                    <div className="flex items-center gap-1.5 group cursor-pointer">
+                        <div
+                            className="w-5 h-5 bg-gradient-to-br from-[#FFE8A3] to-[#FFD966] flex items-center justify-center text-[10px] text-white font-handwriting shadow-[0_2px_6px_rgba(255,232,163,0.4)] border border-white"
+                            style={{ borderRadius: '50% 45% 50% 48%' }}
+                        >
                             G
                         </div>
-                        <span className="text-sm font-bold text-gray-600">{petStatus?.sunlight ?? 0}</span>
+                        <span className="text-sm font-handwriting bg-gradient-to-r from-[#FFE8A3] to-[#FFD966] bg-clip-text text-transparent">
+                            {petStatus?.sunlight ?? 0}
+                        </span>
                     </div>
                 </div>
 

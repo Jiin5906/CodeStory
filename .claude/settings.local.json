@@ -20,7 +20,8 @@
       "Bash(git log:*)",
       "Bash(npm install:*)",
       "Bash(cat:*)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "WebSearch"
     ]
   }
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nunito:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root{
@@ -9,16 +9,41 @@
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
+
+  /* 🎨 2030 여성 타겟 감성 색상 팔레트 */
+  --color-peach: #FFB5C2;
+  --color-peach-light: #FFD4DC;
+  --color-peach-dark: #FF9AAB;
+
+  --color-lavender: #D4A5F5;
+  --color-lavender-light: #E8D4FF;
+  --color-lavender-dark: #B87FE0;
+
+  --color-mint: #A8E6CF;
+  --color-mint-light: #C8F5E0;
+  --color-mint-dark: #7FD9B8;
+
+  --color-cream: #FFF8F3;
+  --color-beige: #F8F6F4;
+  --color-charcoal: #4A4A4A;
+
+  /* 손글씨 느낌 강조색 */
+  --color-coral: #FF8FB1;
+  --color-sky: #B8D8FF;
+  --color-butter: #FFE8A3;
 }
 
 body{
   margin: 0;
-  background: #f8fafc;
-  color: #334155;
-  font-family: 'Gowun Dodum', system-ui, -apple-system, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+  font-family: 'Pretendard', 'Gowun Batang', system-ui, -apple-system, sans-serif;
   /* 모바일 스크롤 허용 */
   overflow-x: hidden;
   overflow-y: auto;
+  /* 부드러운 렌더링 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root{
@@ -115,13 +140,19 @@ button{
   animation-delay: 2s;
 }
 
-/* Nunito 폰트 유틸리티 */
-.font-nunito {
-  font-family: 'Nunito', sans-serif;
+/* 🖋️ 폰트 유틸리티 (손글씨 느낌) */
+.font-handwriting {
+  font-family: 'Gowun Batang', serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.font-body {
+  font-family: 'Pretendard', sans-serif;
 }
 
 .font-gowun {
-  font-family: 'Gowun Dodum', sans-serif;
+  font-family: 'Gowun Batang', serif;
 }
 
 /* No scrollbar 유틸리티 */
@@ -148,4 +179,77 @@ button{
 
 .animate-shake {
   animation: shake 0.5s ease-in-out infinite;
+}
+
+/* 🌊 부드러운 블롭 애니메이션 (유기적 느낌) */
+@keyframes blob-organic {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: rotate(5deg) scale(1.05);
+  }
+  50% {
+    border-radius: 50% 60% 30% 60% / 30% 50% 70% 50%;
+    transform: rotate(-5deg) scale(1);
+  }
+  75% {
+    border-radius: 60% 40% 60% 40% / 60% 50% 40% 50%;
+    transform: rotate(3deg) scale(1.02);
+  }
+}
+
+.animate-blob-organic {
+  animation: blob-organic 20s ease-in-out infinite;
+}
+
+/* 💫 반짝임 애니메이션 (손글씨 느낌) */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+/* 🌸 부드러운 페이드 인 (자연스러운 등장) */
+@keyframes soft-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-soft-fade-in {
+  animation: soft-fade-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ✨ 버튼 호버 효과 (손그림 느낌) */
+@keyframes button-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+.hover-wiggle:hover {
+  animation: button-wiggle 0.3s ease-in-out;
 }
