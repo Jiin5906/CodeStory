@@ -149,6 +149,17 @@ export const PetProvider = ({ children }) => {
         };
     }, [checkLock]);
 
+    // ─── fetchPetStatus 정의 (다른 함수들보다 먼저!) ───
+    const fetchPetStatus = useCallback(async (userId) => {
+        if (!userId) return;
+        try {
+            const data = await petApi.getStatus(userId);
+            setPetStatus(data);
+        } catch (e) {
+            console.error('[PetContext] fetchPetStatus 실패:', e);
+        }
+    }, []);
+
     // ─── 서버에 상태 저장 (디바운스 5초) ───
     useEffect(() => {
         // 5초 디바운스: 마지막 변경 후 5초 뒤에 저장
@@ -211,16 +222,6 @@ export const PetProvider = ({ children }) => {
             }
         };
     }, [affectionGauge, airGauge, energyGauge, fetchPetStatus, isApiLoading]);
-
-    const fetchPetStatus = useCallback(async (userId) => {
-        if (!userId) return;
-        try {
-            const data = await petApi.getStatus(userId);
-            setPetStatus(data);
-        } catch (e) {
-            console.error('[PetContext] fetchPetStatus 실패:', e);
-        }
-    }, []);
 
     const handleVentilateComplete = useCallback(async (userId, retryCount = 0) => {
         if (isApiLoading) return; // 이미 API 호출 중이면 무시
