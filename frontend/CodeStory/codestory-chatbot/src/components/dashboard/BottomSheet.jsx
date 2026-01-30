@@ -5,9 +5,9 @@ import { usePet } from '../../context/PetContext';
 /**
  * BottomSheet — 3단계 스냅포인트 시스템
  *
- * 스냅포인트:
- * 1. COLLAPSED (최소): 액션 버튼만
- * 2. HALF (중간): 액션 버튼 + 채팅창
+ * 스냅포인트 (ToDo.txt 기준):
+ * 1. COLLAPSED (최소): 채팅 입력창만 (버튼 숨김)
+ * 2. HALF (중간): 채팅 입력창 + 액션 버튼
  * 3. EXPANDED (최대): 전체 내용
  */
 
@@ -19,8 +19,8 @@ const formatDate = (dateString) => {
 
 // 스냅포인트 높이
 const SNAP_POINTS = {
-    COLLAPSED: 170,  // 버튼만 (높이 조정)
-    HALF: 270,       // 버튼 + 채팅
+    COLLAPSED: 110,  // 채팅만 (버튼 숨김)
+    HALF: 220,       // 채팅 + 버튼
     EXPANDED: 85     // 전체 (%)
 };
 
@@ -180,9 +180,12 @@ const BottomSheet = ({
     };
 
     const handleTouchMove = (e) => {
-        // 브라우저 기본 스크롤/새로고침 방지
-        e.preventDefault();
-        handleDragMove(e.touches[0].clientY);
+        // 바텀시트 영역에서만 기본 동작 방지
+        if (isDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleDragMove(e.touches[0].clientY);
+        }
     };
 
     const handleTouchEnd = () => {
@@ -233,17 +236,22 @@ const BottomSheet = ({
         setInput('');
     };
 
-    // 드래그 중 transform 계산
+    // 드래그 중 transform 계산 (개선된 경계 처리)
     const getTransform = () => {
         if (isDragging && currentY !== 0) {
-            // 드래그 방향에 따라 저항 적용 (경계 넘어갈 때)
-            const resistance = 0.5;
+            // 경계 저항 강화 (0.3으로 낮춤)
+            const resistance = 0.3;
+
+            // COLLAPSED 상태에서 아래로 드래그 시 저항
             if (snapPoint === 'COLLAPSED' && currentY > 0) {
-                return `translateY(${currentY * resistance}px)`;
-            } else if (snapPoint === 'EXPANDED' && currentY < 0) {
-                return `translateY(${currentY * resistance}px)`;
+                return `translateY(${Math.min(currentY * resistance, 30)}px)`;
             }
-            return `translateY(${currentY}px)`;
+            // EXPANDED 상태에서 위로 드래그 시 저항
+            else if (snapPoint === 'EXPANDED' && currentY < 0) {
+                return `translateY(${Math.max(currentY * resistance, -30)}px)`;
+            }
+            // 정상 범위 내 드래그
+            return `translateY(${Math.max(-200, Math.min(200, currentY))}px)`;
         }
         return 'translateY(0)';
     };
@@ -275,39 +283,67 @@ const BottomSheet = ({
                 ></div>
             </div>
 
-            {/* 액션 버튼 그룹 - 항상 표시 */}
-            <div className="px-6 pb-5">
-                <div className="flex justify-between items-end gap-2 px-1" data-gtm="action-buttons">
-                    <ActionButton
-                        icon="🤚"
-                        label="쓰다듬기"
-                        value={affectionGauge}
-                        onClick={() => {}}
+            {/* 채팅 입력창 - 항상 표시 */}
+            <div className="px-6 pb-5" onClick={(e) => e.stopPropagation()}>
+                <div
+                    className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-[22px] border-2 border-[#FFD4DC]/40 shadow-lg group focus-within:border-[#FFB5C2] focus-within:shadow-xl transition-all duration-300"
+                    data-gtm="chat-input-area"
+                >
+                    <div className="pl-5 pr-2 text-xl opacity-70">✏️</div>
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                        placeholder="오늘의 마음을 들려주세요..."
+                        className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-14 text-[15px] leading-relaxed"
+                        data-gtm="chat-input-field"
                     />
-                    <ActionButton
-                        icon="💨"
-                        label="환기"
-                        value={airGauge}
-                        onClick={onVentilateClick}
-                    />
-                    <ActionButton
-                        icon="🌙"
-                        label="잠자기"
-                        value={energyGauge}
-                        onClick={() => console.log('🌙 잠자기 기능')}
-                    />
-                    <ActionButton
-                        icon="🏠"
-                        label="홈"
-                        value={100}
-                        onClick={onCalendarClick}
-                        isHome={true}
-                    />
+                    <button
+                        onClick={handleSubmit}
+                        className="m-2 w-11 h-11 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-lg active:scale-95 hover:shadow-xl transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        data-gtm="chat-submit-button"
+                    >
+                        ↑
+                    </button>
                 </div>
             </div>
 
-            {/* 채팅 입력창 - HALF 이상에서 표시 */}
+            {/* 액션 버튼 그룹 - HALF 이상에서 표시 */}
             {(snapPoint === 'HALF' || snapPoint === 'EXPANDED') && (
+                <div className="px-6 pb-5 animate-fade-in-up">
+                    <div className="flex justify-between items-end gap-2 px-1" data-gtm="action-buttons">
+                        <ActionButton
+                            icon="🤚"
+                            label="쓰다듬기"
+                            value={affectionGauge}
+                            onClick={() => {}}
+                        />
+                        <ActionButton
+                            icon="💨"
+                            label="환기"
+                            value={airGauge}
+                            onClick={onVentilateClick}
+                        />
+                        <ActionButton
+                            icon="🌙"
+                            label="잠자기"
+                            value={energyGauge}
+                            onClick={() => console.log('🌙 잠자기 기능')}
+                        />
+                        <ActionButton
+                            icon="🏠"
+                            label="홈"
+                            value={100}
+                            onClick={onCalendarClick}
+                            isHome={true}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* 기존 채팅 입력창 섹션 제거 (위로 이동했으므로) */}
+            {false && (snapPoint === 'HALF' || snapPoint === 'EXPANDED') && (
                 <div
                     className="px-6 pb-6 animate-fade-in-up"
                     onClick={(e) => e.stopPropagation()}

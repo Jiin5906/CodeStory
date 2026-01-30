@@ -189,6 +189,20 @@ export const petApi = {
     collectShard: async (userId) => {
         const response = await api.post('/pet/collect-shard', { userId, action: 'collect-shard' });
         return response.data;
+    },
+    // 게이지 상태 저장 (데이터 영속성)
+    saveGauges: async (userId, gauges) => {
+        try {
+            const response = await api.post('/pet/save-gauges', {
+                userId,
+                ...gauges
+            });
+            return response.data;
+        } catch (error) {
+            console.error('[petApi] saveGauges 실패:', error);
+            // 서버 에러 시에도 localStorage는 유지되므로 무시
+            throw error;
+        }
     }
 };
 

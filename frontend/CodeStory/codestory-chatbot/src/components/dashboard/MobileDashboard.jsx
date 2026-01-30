@@ -16,6 +16,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
     // 인터랙티브 효과를 위한 상태
     const [isWindowOpen, setIsWindowOpen] = useState(false);
+    const [isLampOn, setIsLampOn] = useState(true); // 무드등 상태 (기본: ON)
 
     // 창문 관련 확장 상태
     const [windowColdAnimation, setWindowColdAnimation] = useState(false);
@@ -24,11 +25,33 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const ventilateTimerRef = useRef(null);
     const coldTimerRef = useRef(null);
 
-    const { handleVentilateComplete, petStatus } = usePet();
+    const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard } = usePet();
 
     const today = startOfDay(new Date());
 
+    // 실시간 낮/밤 판별 (06:00 ~ 17:59: 낮, 18:00 ~ 05:59: 밤)
+    const currentHour = new Date().getHours();
+    const isNightTime = currentHour >= 18 || currentHour < 6;
+
     // 스트릭(연속 작성일) 계산 로직
+    // 감정별 색상 매핑
+    const getEmotionColor = (emotion) => {
+        const emotionMap = {
+            'anger': 'bg-gradient-to-br from-red-500 to-red-700 shadow-[0_0_15px_rgba(239,68,68,0.6)]',
+            'happiness': 'bg-gradient-to-br from-pink-400 to-pink-600 shadow-[0_0_15px_rgba(236,72,153,0.6)]',
+            'depression': 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-[0_0_15px_rgba(59,130,246,0.6)]',
+            'sadness': 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-[0_0_15px_rgba(96,165,250,0.6)]',
+            'anxiety': 'bg-gradient-to-br from-orange-500 to-orange-700 shadow-[0_0_15px_rgba(249,115,22,0.6)]',
+            'fear': 'bg-gradient-to-br from-purple-600 to-purple-800 shadow-[0_0_15px_rgba(147,51,234,0.6)]',
+            'surprise': 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-[0_0_15px_rgba(250,204,21,0.6)]',
+            'love': 'bg-gradient-to-br from-rose-400 to-rose-600 shadow-[0_0_15px_rgba(251,113,133,0.6)]',
+            'calm': 'bg-gradient-to-br from-teal-400 to-teal-600 shadow-[0_0_15px_rgba(45,212,191,0.6)]',
+            'neutral': 'bg-gradient-to-br from-gray-300 to-gray-500 shadow-[0_0_15px_rgba(156,163,175,0.6)]',
+            'normal': 'bg-gradient-to-br from-white to-gray-200 shadow-[0_0_15px_rgba(229,231,235,0.6)]'
+        };
+        return emotionMap[emotion.toLowerCase()] || emotionMap['normal'];
+    };
+
     const streakDays = useMemo(() => {
         if (!diaries || diaries.length === 0) return 0;
 
@@ -144,6 +167,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 setAiResponse(response.aiResponse);
                 if (response.emotion) {
                     setEmotion(response.emotion);
+                    // 감정 조각 생성
+                    spawnEmotionShard(response.emotion);
                 }
             }
 
@@ -166,6 +191,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
                 {/* 메인 화면 영역 (배경 + MainRoom) */}
                 <div className="relative w-full flex-1 overflow-hidden">
+                    {/* 💡 무드등 OFF 시 어두운 오버레이 */}
+                    {!isLampOn && (
+                        <div
+                            className="absolute inset-0 bg-black/50 z-[100] pointer-events-none transition-opacity duration-700"
+                            style={{ mixBlendMode: 'multiply' }}
+                        />
+                    )}
+
                     {/* 🎨 벽 배경 (상단 60%) - 핑크색 + 다이아몬드 패턴 */}
                     <div className="absolute inset-0 bg-[#FF9EAA]" style={{
                         backgroundImage: `
@@ -206,8 +239,27 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                 boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.15), inset 0 -4px 8px rgba(255,255,255,0.3), 0 0 0 2px rgba(255,255,255,0.4)',
                                 background: 'linear-gradient(135deg, #6EC1E4 0%, #5DADE2 100%)'
                             }}>
-                                {/* 하늘 배경 (항상 표시) */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-[#87CEEB] via-[#A8D8F0] to-[#C8EDF9]"></div>
+                                {/* 하늘 배경 (낮/밤 조건부 렌더링) */}
+                                <div className={`absolute inset-0 transition-colors duration-1000 ${
+                                    isNightTime
+                                        ? 'bg-gradient-to-b from-slate-900 via-indigo-950 to-indigo-900'
+                                        : 'bg-gradient-to-b from-[#87CEEB] via-[#A8D8F0] to-[#C8EDF9]'
+                                }`}>
+                                    {/* 밤하늘 장식 (별과 달) */}
+                                    {isNightTime && (
+                                        <>
+                                            {/* 🌙 달 */}
+                                            <div className="absolute top-[15%] right-[20%] text-4xl animate-pulse" style={{ animationDuration: '3s' }}>
+                                                🌙
+                                            </div>
+                                            {/* ✨ 별들 */}
+                                            <div className="absolute top-[20%] left-[15%] text-xl animate-pulse" style={{ animationDuration: '2s' }}>⭐</div>
+                                            <div className="absolute top-[10%] left-[30%] text-sm animate-pulse" style={{ animationDuration: '2.5s' }}>✨</div>
+                                            <div className="absolute top-[25%] right-[35%] text-base animate-pulse" style={{ animationDuration: '3s' }}>⭐</div>
+                                            <div className="absolute top-[35%] left-[25%] text-xs animate-pulse" style={{ animationDuration: '2.2s' }}>✨</div>
+                                        </>
+                                    )}
+                                </div>
 
                                 {/* 마을 풍경 (항상 표시) - 사실적 레이어링 */}
                                 <div className="absolute inset-0 overflow-hidden">
@@ -401,29 +453,36 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 🎁 좌측 하단 선물 상자 */}
-                    <div className="absolute bottom-[28%] left-[10%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}>
-                        <div className="relative w-12 h-14">
-                            {/* 상자 본체 */}
-                            <div className="absolute bottom-0 w-12 h-10 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-lg" style={{
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.15), inset 0 2px 0 rgba(255,255,255,0.2)'
+                    {/* 💡 좌측 하단 무드등 (클릭 가능) */}
+                    <div
+                        className="absolute bottom-[28%] left-[10%] z-20 cursor-pointer pointer-events-auto active:scale-95 transition-transform duration-200"
+                        style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.2))' }}
+                        onClick={() => setIsLampOn(!isLampOn)}
+                        data-gtm="mood-lamp-toggle"
+                    >
+                        <div className="relative w-14 h-16">
+                            {/* 무드등 받침대 */}
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-3 bg-gradient-to-br from-[#8B6F47] to-[#6B5537] rounded-full" style={{
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
                             }}></div>
-                            {/* 리본 (가로) */}
-                            <div className="absolute bottom-0 left-0 right-0 top-3 flex items-center justify-center">
-                                <div className="w-full h-2 bg-gradient-to-br from-[#FFB5C2] to-[#FF8FA3]"></div>
-                            </div>
-                            {/* 리본 (세로) */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-10 bg-gradient-to-br from-[#FFB5C2] to-[#FF8FA3]"></div>
-                            {/* 리본 매듭 */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-4 bg-gradient-to-br from-[#FFB5C2] to-[#FF8FA3] rounded-full"></div>
-                            {/* 리본 끝 (좌) */}
-                            <div className="absolute -top-1 left-2 w-3 h-3 bg-gradient-to-br from-[#FFB5C2] to-[#FF8FA3] rounded-bl-full" style={{
-                                clipPath: 'polygon(0 0, 100% 0, 0 100%)'
+                            {/* 무드등 기둥 */}
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-2 h-6 bg-gradient-to-b from-[#8B6F47] to-[#6B5537]"></div>
+                            {/* 무드등 갓 (ON일 때 빛남) */}
+                            <div className={`absolute bottom-7 left-1/2 -translate-x-1/2 w-12 h-9 rounded-t-full transition-all duration-500 ${
+                                isLampOn
+                                    ? 'bg-gradient-to-b from-[#FFF9E6] to-[#FFE8A0] shadow-[0_0_25px_rgba(255,230,140,0.9)]'
+                                    : 'bg-gradient-to-b from-[#5A4A3A] to-[#4A3A2A]'
+                            }`} style={{
+                                clipPath: 'polygon(20% 0%, 80% 0%, 95% 100%, 5% 100%)',
+                                boxShadow: isLampOn ? '0 0 30px rgba(255,230,140,0.8), inset 0 2px 8px rgba(255,255,255,0.4)' : 'inset 0 2px 4px rgba(0,0,0,0.3)'
                             }}></div>
-                            {/* 리본 끝 (우) */}
-                            <div className="absolute -top-1 right-2 w-3 h-3 bg-gradient-to-br from-[#FFB5C2] to-[#FF8FA3] rounded-br-full" style={{
-                                clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
-                            }}></div>
+                            {/* 전구 (ON일 때만 표시) */}
+                            {isLampOn && (
+                                <div className="absolute bottom-9 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFACD] rounded-full animate-pulse" style={{
+                                    boxShadow: '0 0 15px rgba(255,250,205,0.9)',
+                                    animationDuration: '2s'
+                                }}></div>
+                            )}
                         </div>
                     </div>
 
@@ -464,6 +523,26 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             }}></div>
                         </div>
                     </div>
+
+                    {/* 🧩 감정 조각 렌더링 (바닥 위에 표시) */}
+                    {emotionShards && emotionShards.map(shard => (
+                        <div
+                            key={shard.id}
+                            className={`absolute z-25 w-8 h-8 rounded-full cursor-pointer pointer-events-auto animate-bounce active:scale-90 transition-transform duration-200 ${getEmotionColor(shard.emotion)}`}
+                            style={{
+                                left: `${shard.x}%`,
+                                bottom: `${shard.y}%`,
+                                animationDuration: '1.5s'
+                            }}
+                            onClick={() => {
+                                handleCollectShard(user?.id, shard.id);
+                            }}
+                            data-gtm="emotion-shard-collect"
+                        >
+                            {/* 내부 빛나는 효과 */}
+                            <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse"></div>
+                        </div>
+                    ))}
 
                     {/* ✨ 반짝이는 별 장식 (다이아몬드 모양) */}
                     <div className="absolute top-[12%] left-[15%] z-5 pointer-events-none">
