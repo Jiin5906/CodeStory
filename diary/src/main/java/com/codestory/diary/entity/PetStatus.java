@@ -35,6 +35,30 @@ public class PetStatus {
     @Column(name = "evolution_stage", length = 10)
     private String evolutionStage = "BABY";
 
+    // ━━━ 게이지 데이터 (프론트엔드 연동) ━━━
+    @Builder.Default
+    @Column(name = "affection_gauge")
+    private double affectionGauge = 50.0;
+
+    @Builder.Default
+    @Column(name = "air_gauge")
+    private double airGauge = 50.0;
+
+    @Builder.Default
+    @Column(name = "energy_gauge")
+    private double energyGauge = 50.0;
+
+    @Column(name = "last_update")
+    private java.time.LocalDateTime lastUpdate;
+
+    // 게이지 업데이트 메소드
+    public void updateGauges(double affection, double air, double energy) {
+        this.affectionGauge = Math.max(0, Math.min(100, affection));
+        this.airGauge = Math.max(0, Math.min(100, air));
+        this.energyGauge = Math.max(0, Math.min(100, energy));
+        this.lastUpdate = java.time.LocalDateTime.now();
+    }
+
     // 다음 레벨까지 필요한 EXP: Base(100) * Level^1.5
     public long getRequiredExp() {
         return (long) (100 * Math.pow(level, 1.5));

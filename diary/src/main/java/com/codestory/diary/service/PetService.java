@@ -45,6 +45,10 @@ public class PetService {
                 .affection(pet.getAffection())
                 .evolutionStage(pet.getEvolutionStage())
                 .ventilationAvailable(ventilationAvailable)
+                .affectionGauge(pet.getAffectionGauge())
+                .airGauge(pet.getAirGauge())
+                .energyGauge(pet.getEnergyGauge())
+                .lastUpdate(pet.getLastUpdate())
                 .build();
     }
 
@@ -106,5 +110,19 @@ public class PetService {
 
             System.out.println("🎲 [PetService] 채팅 확률 EXP+10 - User: " + userId);
         }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 게이지 저장 (데이터 영속성)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    @Transactional
+    public PetStatusDto saveGauges(Long userId, double affectionGauge, double airGauge, double energyGauge) {
+        PetStatus pet = getOrCreatePetStatus(userId);
+        pet.updateGauges(affectionGauge, airGauge, energyGauge);
+
+        System.out.println("💾 [PetService] 게이지 저장 완료 - Affection: " + affectionGauge +
+                ", Air: " + airGauge + ", Energy: " + energyGauge + " - User: " + userId);
+
+        return getPetStatusDto(userId);
     }
 }

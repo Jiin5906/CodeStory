@@ -214,6 +214,16 @@ public class ApiController {
         return ResponseEntity.ok(petService.collectEmotionShard(request.getUserId()));
     }
 
+    @PostMapping("/pet/save-gauges")
+    public ResponseEntity<?> saveGauges(@RequestBody com.codestory.diary.dto.PetGaugeRequestDto request) {
+        return ResponseEntity.ok(petService.saveGauges(
+                request.getUserId(),
+                request.getAffectionGauge(),
+                request.getAirGauge(),
+                request.getEnergyGauge()
+        ));
+    }
+
     // Helper: 클라이언트 IP 추출
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
