@@ -21,7 +21,20 @@
       "Bash(npm install:*)",
       "Bash(cat:*)",
       "Bash(npx vite build)",
-      "WebSearch"
-    ]
+      "WebSearch",
+      "Bash(npx:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:mcp-awesome.com)",
+      "Bash(npm search:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then grep -E \"^DB_|^MYSQL_\" .env)",
+      "Bash(else echo \".env 파일이 없습니다\")",
+      "Bash(fi)",
+      "Bash(echo:*)"
+    ],
+    "env": {
+      "ENABLE_MCP_SERVER_MEMORY": "true"
+    }
   }
 }

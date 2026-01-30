@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -132,9 +133,71 @@ public class DiaryService {
 
     @Transactional(readOnly = true)
     public List<DiaryDto> getPublicFeed() {
-        return diaryRepository.findByIsPublicTrueOrderByCreatedAtDesc().stream()
-                .map(this::convertToDto)
+        List<Diary> diaries = diaryRepository.findByIsPublicTrueOrderByCreatedAtDesc();
+
+        // N+1 문제 해결: 모든 diary의 좋아요/댓글 개수를 한 번에 조회
+        return convertToDtoWithCounts(diaries);
+    }
+
+    // N+1 문제 해결: 일괄 조회 후 매핑
+    private List<DiaryDto> convertToDtoWithCounts(List<Diary> diaries) {
+        if (diaries.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> diaryIds = diaries.stream().map(Diary::getId).collect(Collectors.toList());
+
+        // 좋아요 개수 일괄 조회
+        Map<Long, Long> likeCountMap = likesRepository.countByDiaryIds(diaryIds).stream()
+                .collect(Collectors.toMap(
+                    m -> ((Number) m.get("diaryId")).longValue(),
+                    m -> ((Number) m.get("likeCount")).longValue()
+                ));
+
+        // 댓글 개수 일괄 조회
+        Map<Long, Long> commentCountMap = commentRepository.countByDiaryIds(diaryIds).stream()
+                .collect(Collectors.toMap(
+                    m -> ((Number) m.get("diaryId")).longValue(),
+                    m -> ((Number) m.get("commentCount")).longValue()
+                ));
+
+        // DTO 변환 시 미리 조회한 Map에서 개수를 가져옴
+        return diaries.stream()
+                .map(diary -> convertToDtoWithPreloadedCounts(diary, likeCountMap, commentCountMap))
                 .collect(Collectors.toList());
+    }
+
+    private DiaryDto convertToDtoWithPreloadedCounts(Diary diary, Map<Long, Long> likeCountMap, Map<Long, Long> commentCountMap) {
+        String authorNickname = "익명";
+        if (!diary.isAnonymous()) {
+            authorNickname = memberRepository.findById(diary.getUserId())
+                    .map(Member::getNickname)
+                    .orElse("익명");
+        }
+
+        int likeCount = likeCountMap.getOrDefault(diary.getId(), 0L).intValue();
+        int commentCount = commentCountMap.getOrDefault(diary.getId(), 0L).intValue();
+
+        return DiaryDto.builder()
+                .id(diary.getId())
+                .userId(diary.getUserId())
+                .date(diary.getDate())
+                .createdAt(diary.getCreatedAt())
+                .title(diary.getTitle())
+                .content(diary.getContent())
+                .emoji(diary.getEmoji())
+                .mood(diary.getMood())
+                .tension(diary.getTension())
+                .fun(diary.getFun())
+                .tags(diary.getTags())
+                .aiResponse(diary.getAiResponse())
+                .imageUrl(diary.getImageUrl())
+                .shared(diary.isPublic())
+                .anonymous(diary.isAnonymous())
+                .nickname(authorNickname)
+                .likeCount(likeCount)
+                .commentCount(commentCount)
+                .build();
     }
 
     @Transactional(readOnly = true)

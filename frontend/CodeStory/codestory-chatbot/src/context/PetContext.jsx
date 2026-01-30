@@ -3,6 +3,15 @@ import { petApi } from '../services/api';
 
 const PetContext = createContext();
 
+// Debounce 유틸리티 함수 (버튼 연타 방지)
+const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func(...args), delay);
+    };
+};
+
 // Lock/Unlock 임계값 상수
 const LOCK_THRESHOLD = 100;   // 100%에 도달하면 Lock
 const UNLOCK_THRESHOLD = 30;  // 30% 이하이면 Unlock
@@ -56,6 +65,9 @@ export const PetProvider = ({ children }) => {
     const [isAffectionLocked, setIsAffectionLocked] = useState(false);
     const [isAirLocked, setIsAirLocked] = useState(false);
     const [isEnergyLocked, setIsEnergyLocked] = useState(false);
+
+    // API 호출 중복 방지 플래그
+    const [isApiLoading, setIsApiLoading] = useState(false);
 
     const decayTimerRef = useRef(null);
     const saveToServerTimerRef = useRef(null);
@@ -160,6 +172,14 @@ export const PetProvider = ({ children }) => {
                 console.log('[PetContext] 서버에 게이지 저장 완료');
             } catch (e) {
                 console.error('[PetContext] 서버 저장 실패:', e);
+                // 409 에러 시 서버 데이터로 강제 동기화
+                if (e.response?.status === 409) {
+                    console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+                    const user = JSON.parse(localStorage.getItem('diaryUser'));
+                    if (user?.id) {
+                        await fetchPetStatus(user.id);
+                    }
+                }
             }
         }, 5000);
 
@@ -168,7 +188,7 @@ export const PetProvider = ({ children }) => {
                 clearTimeout(saveToServerTimerRef.current);
             }
         };
-    }, [affectionGauge, airGauge, energyGauge]);
+    }, [affectionGauge, airGauge, energyGauge, fetchPetStatus]);
 
     const fetchPetStatus = useCallback(async (userId) => {
         if (!userId) return;
@@ -181,33 +201,63 @@ export const PetProvider = ({ children }) => {
     }, []);
 
     const handleVentilateComplete = useCallback(async (userId) => {
+        if (isApiLoading) return; // 이미 API 호출 중이면 무시
+
         try {
+            setIsApiLoading(true);
             const data = await petApi.ventilate(userId);
             setPetStatus(data);
         } catch (e) {
             console.error('[PetContext] ventilate 실패:', e);
+            // 409 에러 시 서버 데이터로 강제 동기화
+            if (e.response?.status === 409) {
+                console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+                await fetchPetStatus(userId);
+            }
+        } finally {
+            setIsApiLoading(false);
         }
-    }, []);
+    }, [isApiLoading]);
 
     const handleAffectionComplete = useCallback(async (userId) => {
+        if (isApiLoading) return; // 이미 API 호출 중이면 무시
+
         try {
+            setIsApiLoading(true);
             const data = await petApi.affectionComplete(userId);
             setPetStatus(data);
             // Lock 후 reset하지 않음 — decay가 자연 감소 후 30% 이하에서 unlock
         } catch (e) {
             console.error('[PetContext] affectionComplete 실패:', e);
+            // 409 에러 시 서버 데이터로 강제 동기화
+            if (e.response?.status === 409) {
+                console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+                await fetchPetStatus(userId);
+            }
+        } finally {
+            setIsApiLoading(false);
         }
-    }, []);
+    }, [isApiLoading]);
 
     const handleCollectShard = useCallback(async (userId, shardId) => {
+        if (isApiLoading) return; // 이미 API 호출 중이면 무시
+
         try {
+            setIsApiLoading(true);
             const data = await petApi.collectShard(userId);
             setPetStatus(data);
             setEmotionShards(prev => prev.filter(s => s.id !== shardId));
         } catch (e) {
             console.error('[PetContext] collectShard 실패:', e);
+            // 409 에러 시 서버 데이터로 강제 동기화
+            if (e.response?.status === 409) {
+                console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+                await fetchPetStatus(userId);
+            }
+        } finally {
+            setIsApiLoading(false);
         }
-    }, []);
+    }, [isApiLoading]);
 
     const spawnEmotionShard = useCallback((emotion) => {
         if (!emotion || emotion === 'neutral') return;

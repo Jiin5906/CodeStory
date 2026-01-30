@@ -17,6 +17,10 @@ public class PetStatus {
     @Column(name = "user_id")
     private Long userId;
 
+    @Version
+    @Column(name = "version")
+    private Long version;
+
     @Builder.Default
     private int level = 1;
 
