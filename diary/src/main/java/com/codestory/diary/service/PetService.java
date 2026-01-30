@@ -69,6 +69,9 @@ public class PetService {
         pet.addSunlight(sunlightReward);
         pet.setLastVentilationDate(LocalDate.now());
 
+        // 명시적으로 저장 (409 에러 방지)
+        petStatusRepository.save(pet);
+
         System.out.println("🌬️ [PetService] 환기 완료 - EXP+" + expReward + ", Sunlight+" + sunlightReward + " - User: " + userId);
 
         return getPetStatusDto(userId);
@@ -83,7 +86,10 @@ public class PetService {
         pet.addExp(expReward);
         pet.resetAffection();
 
-        System.out.println("🐾 [PetService] 쓰다듭기 완료 - EXP+" + expReward + " - User: " + userId);
+        // 명시적으로 저장 (409 에러 방지)
+        petStatusRepository.save(pet);
+
+        System.out.println("🐾 [PetService] 쓰다듬기 완료 - EXP+" + expReward + " - User: " + userId);
 
         return getPetStatusDto(userId);
     }
@@ -96,6 +102,9 @@ public class PetService {
         pet.addExp(10);
         pet.addSunlight(5);
 
+        // 명시적으로 저장 (409 에러 방지)
+        petStatusRepository.save(pet);
+
         System.out.println("💎 [PetService] 감정 조각 수집 - EXP+10, Sunlight+5 - User: " + userId);
 
         return getPetStatusDto(userId);
@@ -107,6 +116,9 @@ public class PetService {
         if (random.nextInt(100) < 30) {
             PetStatus pet = getOrCreatePetStatus(userId);
             pet.addExp(10);
+
+            // 명시적으로 저장 (409 에러 방지)
+            petStatusRepository.save(pet);
 
             System.out.println("🎲 [PetService] 채팅 확률 EXP+10 - User: " + userId);
         }

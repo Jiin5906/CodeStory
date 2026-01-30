@@ -4,7 +4,7 @@ import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
 import CircularProgressNew from './CircularProgressNew';
-import { diaryApi } from '../../services/api';
+import { diaryApi, chatApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
@@ -150,7 +150,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         };
     }, []);
 
-    // 일기 작성 및 AI 응답 핸들러
+    // 채팅 및 AI 응답 핸들러
     const handleWrite = async (content) => {
         setLatestLog(content);
         setIsAiThinking(true);
@@ -158,27 +158,18 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         setEmotion(null);
 
         try {
-            console.log('💬 입력 감지 → 통합 DiaryService 호출 (질문/일기 자동 처리)');
-            const diaryData = {
-                userId: user.id,
-                content: content,
-                date: new Date().toISOString().split('T')[0],
-                title: '',
-                mood: 5,
-                tension: 5,
-                fun: 5,
-                emoji: '✨',
-                isPublic: false,
-                isAnonymous: false,
-                tags: []
-            };
+            console.log('💬 채팅 입력 → ChatAPI 호출 (감정 분석 포함)');
 
-            const response = await diaryApi.saveDiary(diaryData, null);
+            // 채팅 API 호출 (감정 태그 포함)
+            const response = await chatApi.sendMessage(user.id, content);
 
-            if (response && response.aiResponse) {
-                setAiResponse(response.aiResponse);
+            if (response) {
+                // response 구조: { response: "AI 응답 내용", emotion: "happiness" }
+                setAiResponse(response.response);
+
                 if (response.emotion) {
                     setEmotion(response.emotion);
+                    console.log('✨ 감정 감지:', response.emotion);
                     // 감정 조각 생성
                     spawnEmotionShard(response.emotion);
                 }
@@ -188,7 +179,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 onWriteClick();
             }
         } catch (error) {
-            console.error('처리 실패:', error);
+            console.error('채팅 처리 실패:', error);
             setAiResponse('죄송해요, 지금은 답변을 드릴 수 없어요. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsAiThinking(false);
