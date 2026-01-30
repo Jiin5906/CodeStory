@@ -403,6 +403,63 @@ Configure Prometheus to scrape Spring Boot Actuator metrics if needed.
    git push origin main
    ```
 
+6. **EC2 배포 확인** (중요!):
+
+   **배포 후 사용자에게 다음 내용을 보고하세요:**
+
+   ```markdown
+   ## 🚀 배포 완료 및 EC2 확인 필요
+
+   ### 📦 배포 상태
+   - ✅ 커밋: [커밋 해시]
+   - ✅ 푸시 완료: origin/main
+   - ⏳ GitHub Actions 자동 배포 진행 중 (5-10분 소요)
+
+   ### 🖥️ EC2 터미널에서 확인할 것
+
+   **① 배포 완료 대기:**
+   GitHub Actions: https://github.com/Jiin5906/CodeStory/actions
+
+   **② SSH 접속:**
+   \`\`\`bash
+   ssh -i <키페어> ec2-user@<EC2_HOST>
+   cd ~/CodeStory
+   \`\`\`
+
+   **③ 컨테이너 상태 확인:**
+   \`\`\`bash
+   docker-compose ps
+   # 모든 컨테이너가 Up 상태인지 확인
+   \`\`\`
+
+   **④ 백엔드 로그 확인 (필수):**
+   \`\`\`bash
+   docker-compose logs backend --tail=100
+
+   # 확인할 것:
+   # ✅ "Started GongGamDiaryApplication"
+   # ✅ "HikariPool-1 - Start completed" (DB 연결 성공)
+   # ❌ 에러 메시지 없는지 확인
+   \`\`\`
+
+   **⑤ 헬스 체크:**
+   \`\`\`bash
+   curl http://localhost:8080/actuator/health
+   curl https://logam.click/api/feed
+   \`\`\`
+
+   **⑥ 문제 발생 시:**
+   \`\`\`bash
+   # 수동 재배포
+   git pull origin main
+   docker-compose pull backend
+   docker-compose up -d backend
+   docker image prune -f
+   \`\`\`
+   ```
+
+   **중요:** 코드 변경이 인프라에 영향을 주는 경우 (Java 버전, 컨테이너 이름 변경 등), 추가 조치 사항을 명시하세요.
+
 #### 중요 사항
 - **민감 정보 체크**: `.env`, `credentials.json` 등은 절대 커밋하지 않음
 - **빌드 성공 확인**: 커밋 전 반드시 린트/빌드 테스트 통과 확인
