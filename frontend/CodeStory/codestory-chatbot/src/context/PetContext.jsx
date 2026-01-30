@@ -157,6 +157,12 @@ export const PetProvider = ({ children }) => {
         }
 
         saveToServerTimerRef.current = setTimeout(async () => {
+            // ✅ 다른 API 호출 중이면 대기
+            if (isApiLoading) {
+                console.log('[PetContext] API 호출 중이므로 게이지 저장 대기...');
+                return;
+            }
+
             try {
                 const user = JSON.parse(localStorage.getItem('diaryUser'));
                 if (!user?.id) return;
@@ -172,13 +178,29 @@ export const PetProvider = ({ children }) => {
                 console.log('[PetContext] 서버에 게이지 저장 완료');
             } catch (e) {
                 console.error('[PetContext] 서버 저장 실패:', e);
-                // 409 에러 시 서버 데이터로 강제 동기화
+                // 409 에러 시 재시도 (1초 후)
                 if (e.response?.status === 409) {
-                    console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
-                    const user = JSON.parse(localStorage.getItem('diaryUser'));
-                    if (user?.id) {
-                        await fetchPetStatus(user.id);
-                    }
+                    console.log('[PetContext] 409 Conflict 발생 - 1초 후 재시도...');
+                    setTimeout(async () => {
+                        try {
+                            const user = JSON.parse(localStorage.getItem('diaryUser'));
+                            if (!user?.id) return;
+
+                            await petApi.saveGauges(user.id, {
+                                affectionGauge,
+                                airGauge,
+                                energyGauge,
+                                lastUpdate: new Date().toISOString()
+                            });
+                            console.log('[PetContext] 재시도 성공');
+                        } catch (retryError) {
+                            console.error('[PetContext] 재시도 실패 - 서버 데이터로 동기화:', retryError);
+                            const user = JSON.parse(localStorage.getItem('diaryUser'));
+                            if (user?.id) {
+                                await fetchPetStatus(user.id);
+                            }
+                        }
+                    }, 1000);
                 }
             }
         }, 5000);
@@ -188,7 +210,7 @@ export const PetProvider = ({ children }) => {
                 clearTimeout(saveToServerTimerRef.current);
             }
         };
-    }, [affectionGauge, airGauge, energyGauge, fetchPetStatus]);
+    }, [affectionGauge, airGauge, energyGauge, fetchPetStatus, isApiLoading]);
 
     const fetchPetStatus = useCallback(async (userId) => {
         if (!userId) return;
@@ -200,7 +222,7 @@ export const PetProvider = ({ children }) => {
         }
     }, []);
 
-    const handleVentilateComplete = useCallback(async (userId) => {
+    const handleVentilateComplete = useCallback(async (userId, retryCount = 0) => {
         if (isApiLoading) return; // 이미 API 호출 중이면 무시
 
         try {
@@ -209,17 +231,26 @@ export const PetProvider = ({ children }) => {
             setPetStatus(data);
         } catch (e) {
             console.error('[PetContext] ventilate 실패:', e);
-            // 409 에러 시 서버 데이터로 강제 동기화
-            if (e.response?.status === 409) {
-                console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+            // 409 에러 시 재시도 (최대 3회)
+            if (e.response?.status === 409 && retryCount < 3) {
+                console.log(`[PetContext] 409 Conflict 발생 - ${retryCount + 1}회 재시도 (1초 후)...`);
+                setIsApiLoading(false);
+                setTimeout(() => {
+                    handleVentilateComplete(userId, retryCount + 1);
+                }, 1000 * (retryCount + 1));
+            } else {
+                console.log('[PetContext] 재시도 실패 - 서버 데이터로 재동기화');
                 await fetchPetStatus(userId);
+                setIsApiLoading(false);
             }
         } finally {
-            setIsApiLoading(false);
+            if (retryCount === 0) {
+                setIsApiLoading(false);
+            }
         }
-    }, [isApiLoading]);
+    }, [isApiLoading, fetchPetStatus]);
 
-    const handleAffectionComplete = useCallback(async (userId) => {
+    const handleAffectionComplete = useCallback(async (userId, retryCount = 0) => {
         if (isApiLoading) return; // 이미 API 호출 중이면 무시
 
         try {
@@ -229,17 +260,27 @@ export const PetProvider = ({ children }) => {
             // Lock 후 reset하지 않음 — decay가 자연 감소 후 30% 이하에서 unlock
         } catch (e) {
             console.error('[PetContext] affectionComplete 실패:', e);
-            // 409 에러 시 서버 데이터로 강제 동기화
-            if (e.response?.status === 409) {
-                console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+            // 409 에러 시 재시도 (최대 3회)
+            if (e.response?.status === 409 && retryCount < 3) {
+                console.log(`[PetContext] 409 Conflict 발생 - ${retryCount + 1}회 재시도 (1초 후)...`);
+                setIsApiLoading(false); // 재시도 전 플래그 해제
+                setTimeout(() => {
+                    handleAffectionComplete(userId, retryCount + 1);
+                }, 1000 * (retryCount + 1)); // 지수 백오프: 1초, 2초, 3초
+            } else {
+                // 재시도 실패 시 서버 데이터로 동기화
+                console.log('[PetContext] 재시도 실패 - 서버 데이터로 재동기화');
                 await fetchPetStatus(userId);
+                setIsApiLoading(false);
             }
         } finally {
-            setIsApiLoading(false);
+            if (retryCount === 0) { // 첫 시도에서만 플래그 해제
+                setIsApiLoading(false);
+            }
         }
-    }, [isApiLoading]);
+    }, [isApiLoading, fetchPetStatus]);
 
-    const handleCollectShard = useCallback(async (userId, shardId) => {
+    const handleCollectShard = useCallback(async (userId, shardId, retryCount = 0) => {
         if (isApiLoading) return; // 이미 API 호출 중이면 무시
 
         try {
@@ -249,15 +290,24 @@ export const PetProvider = ({ children }) => {
             setEmotionShards(prev => prev.filter(s => s.id !== shardId));
         } catch (e) {
             console.error('[PetContext] collectShard 실패:', e);
-            // 409 에러 시 서버 데이터로 강제 동기화
-            if (e.response?.status === 409) {
-                console.log('[PetContext] 409 Conflict 발생 - 서버 데이터로 재동기화');
+            // 409 에러 시 재시도 (최대 3회)
+            if (e.response?.status === 409 && retryCount < 3) {
+                console.log(`[PetContext] 409 Conflict 발생 - ${retryCount + 1}회 재시도 (1초 후)...`);
+                setIsApiLoading(false);
+                setTimeout(() => {
+                    handleCollectShard(userId, shardId, retryCount + 1);
+                }, 1000 * (retryCount + 1));
+            } else {
+                console.log('[PetContext] 재시도 실패 - 서버 데이터로 재동기화');
                 await fetchPetStatus(userId);
+                setIsApiLoading(false);
             }
         } finally {
-            setIsApiLoading(false);
+            if (retryCount === 0) {
+                setIsApiLoading(false);
+            }
         }
-    }, [isApiLoading]);
+    }, [isApiLoading, fetchPetStatus]);
 
     const spawnEmotionShard = useCallback((emotion) => {
         if (!emotion || emotion === 'neutral') return;
