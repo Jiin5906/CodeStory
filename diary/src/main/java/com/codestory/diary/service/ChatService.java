@@ -151,7 +151,7 @@ public class ChatService {
         System.out.println("✅ [ChatService] 응답 생성 완료: " + aiResponse);
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 8. 감정 태그 파싱 [EMOTION:xxx]
+        // 8. 감정 태그 파싱 [EMOTION:xxx] - 11가지 감정 지원 (개선됨)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         String emotion = "neutral"; // 기본값
         String cleanedResponse = aiResponse;
@@ -161,10 +161,35 @@ public class ChatService {
             int endIdx = aiResponse.indexOf("]", startIdx);
             if (endIdx > startIdx) {
                 String emotionTag = aiResponse.substring(startIdx + 9, endIdx).trim().toLowerCase();
-                if (emotionTag.equals("happy") || emotionTag.equals("sad") ||
-                    emotionTag.equals("angry") || emotionTag.equals("neutral")) {
-                    emotion = emotionTag;
-                }
+
+                // ✨ 프론트엔드 호환: 백엔드 감정 → 프론트엔드 형식 변환
+                Map<String, String> emotionMapping = new java.util.HashMap<>();
+                emotionMapping.put("happy", "happiness");
+                emotionMapping.put("sad", "sadness");
+                emotionMapping.put("angry", "anger");
+                emotionMapping.put("anxious", "anxiety");
+                emotionMapping.put("scared", "fear");
+                emotionMapping.put("surprised", "surprise");
+                emotionMapping.put("loving", "love");
+                emotionMapping.put("peaceful", "calm");
+                emotionMapping.put("depressed", "depression");
+                emotionMapping.put("neutral", "neutral");
+                emotionMapping.put("normal", "normal");
+
+                // 이미 프론트엔드 형식인 경우도 지원
+                emotionMapping.put("happiness", "happiness");
+                emotionMapping.put("sadness", "sadness");
+                emotionMapping.put("anger", "anger");
+                emotionMapping.put("anxiety", "anxiety");
+                emotionMapping.put("fear", "fear");
+                emotionMapping.put("surprise", "surprise");
+                emotionMapping.put("love", "love");
+                emotionMapping.put("calm", "calm");
+                emotionMapping.put("depression", "depression");
+
+                // 변환 또는 그대로 사용
+                emotion = emotionMapping.getOrDefault(emotionTag, "neutral");
+
                 // 사용자에게 보여줄 메시지에서 태그 제거
                 cleanedResponse = aiResponse.substring(0, startIdx).trim();
             }
