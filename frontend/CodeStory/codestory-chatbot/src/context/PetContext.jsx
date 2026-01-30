@@ -3,36 +3,27 @@ import { petApi } from '../services/api';
 
 const PetContext = createContext();
 
-// Debounce 유틸리티 함수 (버튼 연타 방지)
-const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-    };
-};
-
-// Lock/Unlock 임계값 상수
+// ─── 상수 정의 ───
 const LOCK_THRESHOLD = 100;   // 100%에 도달하면 Lock
 const UNLOCK_THRESHOLD = 30;  // 30% 이하이면 Unlock
 
-// ─── 게이지 감소 속도 설정 ───
-// 프로덕션: 100% → 0% = 2시간 (7200초)
-// 개발 모드: 100% → 0% = 5분 (300초) - 테스트용
+// 게이지 감소 속도 설정
 const IS_DEV_MODE = true; // 배포 시 false로 변경
 const TOTAL_DECAY_TIME_MS = IS_DEV_MODE ? 300000 : 7200000; // 5분 or 2시간
 const DECAY_INTERVAL_MS = 10000; // 10초마다 체크
-const DECAY_AMOUNT = (100 / (TOTAL_DECAY_TIME_MS / DECAY_INTERVAL_MS)); // 동적 계산
+const DECAY_AMOUNT = (100 / (TOTAL_DECAY_TIME_MS / DECAY_INTERVAL_MS));
 
-// localStorage 키 상수
+// 자동 저장 간격
+const AUTO_SAVE_INTERVAL_MS = 30000; // 30초
+
+// localStorage 키
 const STORAGE_KEYS = {
     AFFECTION: 'pet_affection_gauge',
     AIR: 'pet_air_gauge',
     ENERGY: 'pet_energy_gauge',
-    LAST_UPDATE: 'pet_last_update'
 };
 
-// localStorage에서 게이지 값 불러오기 (없으면 기본값 50)
+// localStorage 유틸리티
 const loadGaugeFromStorage = (key, defaultValue = 50) => {
     try {
         const stored = localStorage.getItem(key);
@@ -42,89 +33,70 @@ const loadGaugeFromStorage = (key, defaultValue = 50) => {
     }
 };
 
-// localStorage에 게이지 값 저장
-const saveGaugeToStorage = (key, value) => {
-    try {
-        localStorage.setItem(key, value.toString());
-    } catch (e) {
-        console.error('[PetContext] localStorage 저장 실패:', e);
-    }
-};
-
 export const PetProvider = ({ children }) => {
     const [petStatus, setPetStatus] = useState(null);
     const [emotionShards, setEmotionShards] = useState([]);
     const [isRubbing, setIsRubbing] = useState(false);
 
-    // localStorage에서 초기값 불러오기
+    // 게이지 상태 (localStorage 초기값)
     const [affectionGauge, setAffectionGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.AFFECTION));
     const [airGauge, setAirGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.AIR));
     const [energyGauge, setEnergyGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.ENERGY));
 
-    // Lock 상태 (100% 도달 시 Lock → 30% 이하 시 Unlock)
+    // Lock 상태
     const [isAffectionLocked, setIsAffectionLocked] = useState(false);
     const [isAirLocked, setIsAirLocked] = useState(false);
     const [isEnergyLocked, setIsEnergyLocked] = useState(false);
 
-    // API 호출 중복 방지 플래그
+    // ✅ 동시성 제어 플래그
     const [isApiLoading, setIsApiLoading] = useState(false);
 
+    // Refs
     const decayTimerRef = useRef(null);
-    const saveToServerTimerRef = useRef(null);
+    const autoSaveTimerRef = useRef(null);
+    const gaugesRef = useRef({ affectionGauge, airGauge, energyGauge });
+
+    // ─── gaugesRef 및 localStorage 동기화 ───
+    useEffect(() => {
+        gaugesRef.current = { affectionGauge, airGauge, energyGauge };
+        localStorage.setItem(STORAGE_KEYS.AFFECTION, affectionGauge);
+        localStorage.setItem(STORAGE_KEYS.AIR, airGauge);
+        localStorage.setItem(STORAGE_KEYS.ENERGY, energyGauge);
+    }, [affectionGauge, airGauge, energyGauge]);
 
     // ─── Lock/Unlock 로직 ───
     const checkLock = useCallback((value, currentLocked) => {
         if (value >= LOCK_THRESHOLD) return true;
         if (value <= UNLOCK_THRESHOLD) return false;
-        return currentLocked; // 임계값 사이면 기존 상태 유지
+        return currentLocked;
     }, []);
 
-    // ─── localStorage 동기화 ───
-    useEffect(() => {
-        saveGaugeToStorage(STORAGE_KEYS.AFFECTION, affectionGauge);
-    }, [affectionGauge]);
-
-    useEffect(() => {
-        saveGaugeToStorage(STORAGE_KEYS.AIR, airGauge);
-    }, [airGauge]);
-
-    useEffect(() => {
-        saveGaugeToStorage(STORAGE_KEYS.ENERGY, energyGauge);
-    }, [energyGauge]);
-
-    // ─── 서버에서 초기 상태 불러오기 (마운트 시 1회) ───
-    useEffect(() => {
-        const loadFromServer = async () => {
-            try {
-                const user = JSON.parse(localStorage.getItem('diaryUser'));
-                if (!user?.id) return;
-
-                const data = await petApi.getStatus(user.id);
-                if (data) {
-                    setPetStatus(data);
-                    // 서버 데이터가 있으면 localStorage 덮어쓰기
-                    if (data.affectionGauge !== undefined) {
-                        setAffectionGauge(data.affectionGauge);
-                        saveGaugeToStorage(STORAGE_KEYS.AFFECTION, data.affectionGauge);
-                    }
-                    if (data.airGauge !== undefined) {
-                        setAirGauge(data.airGauge);
-                        saveGaugeToStorage(STORAGE_KEYS.AIR, data.airGauge);
-                    }
-                    if (data.energyGauge !== undefined) {
-                        setEnergyGauge(data.energyGauge);
-                        saveGaugeToStorage(STORAGE_KEYS.ENERGY, data.energyGauge);
-                    }
-                }
-            } catch (e) {
-                console.error('[PetContext] 서버 초기 로드 실패, localStorage 사용:', e);
+    // ─── 서버에서 PetStatus 조회 및 로컬 state 동기화 ───
+    const fetchPetStatus = useCallback(async (userId) => {
+        if (!userId) return;
+        try {
+            const data = await petApi.getStatus(userId);
+            if (data) {
+                setPetStatus(data);
+                // ✅ 서버 데이터로 로컬 게이지 동기화
+                if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
+                if (data.airGauge !== undefined) setAirGauge(data.airGauge);
+                if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
             }
-        };
+        } catch (e) {
+            console.error('[PetContext] fetchPetStatus 실패:', e);
+        }
+    }, []);
 
-        loadFromServer();
-    }, []); // 마운트 시 1회만 실행
+    // ─── 초기 로드 (마운트 시 1회) ───
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('diaryUser'));
+        if (user?.id) {
+            fetchPetStatus(user.id);
+        }
+    }, [fetchPetStatus]);
 
-    // ─── Decay (자연 감소) 시뮬레이션 ───
+    // ─── 게이지 자연 감소 (Decay) ───
     useEffect(() => {
         decayTimerRef.current = setInterval(() => {
             setAffectionGauge(prev => {
@@ -149,167 +121,92 @@ export const PetProvider = ({ children }) => {
         };
     }, [checkLock]);
 
-    // ─── fetchPetStatus 정의 (다른 함수들보다 먼저!) ───
-    const fetchPetStatus = useCallback(async (userId) => {
-        if (!userId) return;
-        try {
-            const data = await petApi.getStatus(userId);
-            setPetStatus(data);
-        } catch (e) {
-            console.error('[PetContext] fetchPetStatus 실패:', e);
-        }
-    }, []);
-
-    // ─── 서버에 상태 저장 (디바운스 5초) ───
+    // ─── 주기적 자동 저장 (30초마다) ───
     useEffect(() => {
-        // 5초 디바운스: 마지막 변경 후 5초 뒤에 저장
-        if (saveToServerTimerRef.current) {
-            clearTimeout(saveToServerTimerRef.current);
-        }
-
-        saveToServerTimerRef.current = setTimeout(async () => {
-            // ✅ 다른 API 호출 중이면 대기
+        autoSaveTimerRef.current = setInterval(async () => {
+            // ✅ 사용자 액션 중이면 저장 건너뛰기
             if (isApiLoading) {
-                console.log('[PetContext] API 호출 중이므로 게이지 저장 대기...');
+                console.log('💾 [AutoSave] API 호출 중이므로 건너뜀');
                 return;
             }
 
-            try {
-                const user = JSON.parse(localStorage.getItem('diaryUser'));
-                if (!user?.id) return;
+            const user = JSON.parse(localStorage.getItem('diaryUser'));
+            if (!user?.id) return;
 
-                // 서버에 현재 게이지 상태 저장
+            try {
+                // ✅ gaugesRef로 최신 값 읽기
+                const currentGauges = gaugesRef.current;
                 await petApi.saveGauges(user.id, {
-                    affectionGauge,
-                    airGauge,
-                    energyGauge,
+                    affectionGauge: currentGauges.affectionGauge,
+                    airGauge: currentGauges.airGauge,
+                    energyGauge: currentGauges.energyGauge,
                     lastUpdate: new Date().toISOString()
                 });
-
-                console.log('[PetContext] 서버에 게이지 저장 완료');
+                console.log('💾 [AutoSave] 주기적 저장 완료');
             } catch (e) {
-                console.error('[PetContext] 서버 저장 실패:', e);
-                // 409 에러 시 재시도 (1초 후)
-                if (e.response?.status === 409) {
-                    console.log('[PetContext] 409 Conflict 발생 - 1초 후 재시도...');
-                    setTimeout(async () => {
-                        try {
-                            const user = JSON.parse(localStorage.getItem('diaryUser'));
-                            if (!user?.id) return;
-
-                            await petApi.saveGauges(user.id, {
-                                affectionGauge,
-                                airGauge,
-                                energyGauge,
-                                lastUpdate: new Date().toISOString()
-                            });
-                            console.log('[PetContext] 재시도 성공');
-                        } catch (retryError) {
-                            console.error('[PetContext] 재시도 실패 - 서버 데이터로 동기화:', retryError);
-                            const user = JSON.parse(localStorage.getItem('diaryUser'));
-                            if (user?.id) {
-                                await fetchPetStatus(user.id);
-                            }
-                        }
-                    }, 1000);
-                }
+                // ✅ 자동 저장 실패는 무시 (중요하지 않음)
+                console.warn('⚠️ [AutoSave] 저장 실패 (무시됨):', e.message);
             }
-        }, 5000);
+        }, AUTO_SAVE_INTERVAL_MS);
 
         return () => {
-            if (saveToServerTimerRef.current) {
-                clearTimeout(saveToServerTimerRef.current);
-            }
+            if (autoSaveTimerRef.current) clearInterval(autoSaveTimerRef.current);
         };
-    }, [affectionGauge, airGauge, energyGauge, fetchPetStatus, isApiLoading]);
+    }, [isApiLoading]);
 
-    const handleVentilateComplete = useCallback(async (userId, retryCount = 0) => {
-        if (isApiLoading) return; // 이미 API 호출 중이면 무시
+    // ─── 공통 액션 핸들러 (동시성 제어 + 서버 동기화) ───
+    const handleAction = useCallback(async (apiCall) => {
+        // ✅ 중복 호출 방지
+        if (isApiLoading) {
+            console.log('⚠️ [handleAction] 이미 API 호출 중이므로 무시');
+            return;
+        }
 
+        setIsApiLoading(true);
         try {
-            setIsApiLoading(true);
-            const data = await petApi.ventilate(userId);
+            const data = await apiCall();
             setPetStatus(data);
+
+            // ✅ 서버 응답으로 로컬 게이지 동기화
+            if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
+            if (data.airGauge !== undefined) setAirGauge(data.airGauge);
+            if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
         } catch (e) {
-            console.error('[PetContext] ventilate 실패:', e);
-            // 409 에러 시 재시도 (최대 3회)
-            if (e.response?.status === 409 && retryCount < 3) {
-                console.log(`[PetContext] 409 Conflict 발생 - ${retryCount + 1}회 재시도 (1초 후)...`);
-                setIsApiLoading(false);
-                setTimeout(() => {
-                    handleVentilateComplete(userId, retryCount + 1);
-                }, 1000 * (retryCount + 1));
-            } else {
-                console.log('[PetContext] 재시도 실패 - 서버 데이터로 재동기화');
-                await fetchPetStatus(userId);
-                setIsApiLoading(false);
+            console.error('❌ [handleAction] API 호출 실패:', e);
+
+            // ✅ 409 Conflict 발생 시 즉시 서버 데이터로 동기화
+            if (e.response?.status === 409) {
+                console.log('🚨 [handleAction] 409 Conflict 감지! 서버 데이터로 즉시 동기화');
+                const user = JSON.parse(localStorage.getItem('diaryUser'));
+                if (user?.id) {
+                    await fetchPetStatus(user.id);
+                }
             }
         } finally {
-            if (retryCount === 0) {
-                setIsApiLoading(false);
-            }
+            setIsApiLoading(false);
         }
     }, [isApiLoading, fetchPetStatus]);
 
-    const handleAffectionComplete = useCallback(async (userId, retryCount = 0) => {
-        if (isApiLoading) return; // 이미 API 호출 중이면 무시
+    // ─── 환기 완료 ───
+    const handleVentilateComplete = useCallback((userId) => {
+        handleAction(() => petApi.ventilate(userId));
+    }, [handleAction]);
 
-        try {
-            setIsApiLoading(true);
-            const data = await petApi.affectionComplete(userId);
-            setPetStatus(data);
-            // Lock 후 reset하지 않음 — decay가 자연 감소 후 30% 이하에서 unlock
-        } catch (e) {
-            console.error('[PetContext] affectionComplete 실패:', e);
-            // 409 에러 시 재시도 (최대 3회)
-            if (e.response?.status === 409 && retryCount < 3) {
-                console.log(`[PetContext] 409 Conflict 발생 - ${retryCount + 1}회 재시도 (1초 후)...`);
-                setIsApiLoading(false); // 재시도 전 플래그 해제
-                setTimeout(() => {
-                    handleAffectionComplete(userId, retryCount + 1);
-                }, 1000 * (retryCount + 1)); // 지수 백오프: 1초, 2초, 3초
-            } else {
-                // 재시도 실패 시 서버 데이터로 동기화
-                console.log('[PetContext] 재시도 실패 - 서버 데이터로 재동기화');
-                await fetchPetStatus(userId);
-                setIsApiLoading(false);
-            }
-        } finally {
-            if (retryCount === 0) { // 첫 시도에서만 플래그 해제
-                setIsApiLoading(false);
-            }
-        }
-    }, [isApiLoading, fetchPetStatus]);
+    // ─── 쓰다듬기 완료 ───
+    const handleAffectionComplete = useCallback((userId) => {
+        handleAction(() => petApi.affectionComplete(userId));
+    }, [handleAction]);
 
-    const handleCollectShard = useCallback(async (userId, shardId, retryCount = 0) => {
-        if (isApiLoading) return; // 이미 API 호출 중이면 무시
-
-        try {
-            setIsApiLoading(true);
+    // ─── 감정 조각 수집 ───
+    const handleCollectShard = useCallback((userId, shardId) => {
+        handleAction(async () => {
             const data = await petApi.collectShard(userId);
-            setPetStatus(data);
             setEmotionShards(prev => prev.filter(s => s.id !== shardId));
-        } catch (e) {
-            console.error('[PetContext] collectShard 실패:', e);
-            // 409 에러 시 재시도 (최대 3회)
-            if (e.response?.status === 409 && retryCount < 3) {
-                console.log(`[PetContext] 409 Conflict 발생 - ${retryCount + 1}회 재시도 (1초 후)...`);
-                setIsApiLoading(false);
-                setTimeout(() => {
-                    handleCollectShard(userId, shardId, retryCount + 1);
-                }, 1000 * (retryCount + 1));
-            } else {
-                console.log('[PetContext] 재시도 실패 - 서버 데이터로 재동기화');
-                await fetchPetStatus(userId);
-                setIsApiLoading(false);
-            }
-        } finally {
-            if (retryCount === 0) {
-                setIsApiLoading(false);
-            }
-        }
-    }, [isApiLoading, fetchPetStatus]);
+            return data;
+        });
+    }, [handleAction]);
 
+    // ─── 감정 조각 생성 ───
     const spawnEmotionShard = useCallback((emotion) => {
         if (!emotion || emotion === 'neutral') return;
         const id = Date.now() + Math.random();
@@ -324,9 +221,9 @@ export const PetProvider = ({ children }) => {
         }, 10000);
     }, []);
 
-    // ─── Air Gauge 증가 (환기 버튼 클릭 시) ───
+    // ─── Air Gauge 증가 (환기 버튼 클릭) ───
     const increaseAirGauge = useCallback((amount = 10) => {
-        if (isAirLocked) return false; // Lock 중이면 증가 불가
+        if (isAirLocked) return false;
         setAirGauge(prev => {
             const next = Math.min(LOCK_THRESHOLD, prev + amount);
             setIsAirLocked(checkLock(next, false));
