@@ -43,24 +43,30 @@ public class PetStatus {
     // ━━━ 게이지 데이터 (프론트엔드 연동) ━━━
     @Builder.Default
     @Column(name = "affection_gauge")
-    private double affectionGauge = 50.0;
+    private Double affectionGauge = 50.0;
 
     @Builder.Default
     @Column(name = "air_gauge")
-    private double airGauge = 50.0;
+    private Double airGauge = 50.0;
 
     @Builder.Default
     @Column(name = "energy_gauge")
-    private double energyGauge = 50.0;
+    private Double energyGauge = 50.0;
 
     @Column(name = "last_update")
     private java.time.LocalDateTime lastUpdate;
 
     // 게이지 업데이트 메소드
-    public void updateGauges(double affection, double air, double energy) {
-        this.affectionGauge = Math.max(0, Math.min(100, affection));
-        this.airGauge = Math.max(0, Math.min(100, air));
-        this.energyGauge = Math.max(0, Math.min(100, energy));
+    public void updateGauges(Double affection, Double air, Double energy) {
+        if (affection != null) {
+            this.affectionGauge = Math.max(0.0, Math.min(100.0, affection));
+        }
+        if (air != null) {
+            this.airGauge = Math.max(0.0, Math.min(100.0, air));
+        }
+        if (energy != null) {
+            this.energyGauge = Math.max(0.0, Math.min(100.0, energy));
+        }
         this.lastUpdate = java.time.LocalDateTime.now();
     }
 
