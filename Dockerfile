@@ -1,5 +1,5 @@
-# 1. 실행 환경 설정
-FROM eclipse-temurin:17-jre-jammy
+# 1. 실행 환경 설정 (Java 21)
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 # 2. 빌드된 JAR 복사 (폴더 구조 반영)
