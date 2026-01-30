@@ -323,13 +323,13 @@ const BottomSheet = ({
                             icon="💨"
                             label="환기"
                             value={airGauge}
-                            onClick={onVentilateClick}
+                            onClick={() => console.log('💨 환기 기능 (비활성화)')}
                         />
                         <ActionButton
                             icon="🌙"
                             label="잠자기"
                             value={energyGauge}
-                            onClick={() => console.log('🌙 잠자기 기능')}
+                            onClick={() => console.log('🌙 잠자기 기능 (비활성화)')}
                         />
                         <ActionButton
                             icon="🏠"

@@ -120,6 +120,9 @@ public class PetService {
         PetStatus pet = getOrCreatePetStatus(userId);
         pet.updateGauges(affectionGauge, airGauge, energyGauge);
 
+        // 명시적으로 저장 (409 에러 방지)
+        petStatusRepository.save(pet);
+
         System.out.println("💾 [PetService] 게이지 저장 완료 - Affection: " + affectionGauge +
                 ", Air: " + airGauge + ", Energy: " + energyGauge + " - User: " + userId);
 

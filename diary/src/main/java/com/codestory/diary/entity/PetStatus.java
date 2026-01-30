@@ -7,6 +7,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "pet_status")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
