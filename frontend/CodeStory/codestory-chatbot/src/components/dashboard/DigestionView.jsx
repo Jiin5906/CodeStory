@@ -356,17 +356,17 @@ const DigestionView = ({ onClose, userId }) => {
             </main>
 
             {/* 하단 감정 조각 리스트 */}
-            <div className="relative z-50 bg-white/90 backdrop-blur-md border-t-4 border-white/60 rounded-t-[35px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] pb-8">
+            <div className="relative z-50 bg-white/90 backdrop-blur-md border-t-4 border-white/60 rounded-t-[35px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] h-[220px] flex flex-col">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 rounded-full"></div>
 
-                <div className="px-8 pt-6 mb-2 text-center">
+                <div className="px-8 pt-6 pb-2 text-center flex-shrink-0">
                     <span className="text-xs text-gray-500 font-bold bg-gray-100 px-3 py-1 rounded-full">
                         ✨ 감정 조각을 선택하세요
                     </span>
                 </div>
 
                 {/* 감정 조각 스크롤 영역 */}
-                <div className="w-full overflow-x-auto no-scrollbar px-6 py-2">
+                <div className="w-full overflow-x-auto no-scrollbar px-6 py-2 flex-1">
                     {emotionShards.length > 0 ? (
                         <div className="flex gap-4 w-max pb-2">
                             {emotionShards.map(shard => {
