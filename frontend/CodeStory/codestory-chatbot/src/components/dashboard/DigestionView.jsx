@@ -72,6 +72,7 @@ const DigestionView = ({ onClose, userId }) => {
     const [isEating, setIsEating] = useState(false);
     const [currentColor, setCurrentColor] = useState('#FFFFFF');
     const [flyingShards, setFlyingShards] = useState([]);
+    const [floatingHearts, setFloatingHearts] = useState([]);
     const [mongleBubble, setMongleBubble] = useState('배고파요... ( •̀ ω •́ )');
 
     // ✅ 디버깅: emotionShards 확인
@@ -121,6 +122,23 @@ const DigestionView = ({ onClose, userId }) => {
         setIsEating(true);
         setMongleBubble('냠냠... 😋');
 
+        // 하트 떠오르는 효과 (3개)
+        // eslint-disable-next-line react-hooks/purity
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                // eslint-disable-next-line react-hooks/purity
+                const heartId = Date.now() + Math.random();
+                setFloatingHearts(prev => [...prev, {
+                    id: heartId,
+                    delay: i * 200
+                }]);
+
+                setTimeout(() => {
+                    setFloatingHearts(prev => prev.filter(h => h.id !== heartId));
+                }, 2000);
+            }, i * 300);
+        }
+
         // 색상 변화
         setCurrentColor(color);
 
@@ -149,9 +167,27 @@ const DigestionView = ({ onClose, userId }) => {
 
     return (
         <div
-            className="fixed inset-0 z-50 bg-gradient-to-b from-pink-100 via-pink-50 to-yellow-50 flex flex-col"
+            className="fixed inset-0 z-50 flex flex-col"
             data-gtm="digestion-view"
         >
+            {/* 벽 배경 (코랄/주황색 그라데이션) */}
+            <div className="absolute inset-0 bg-gradient-to-b from-orange-300 via-orange-200 to-orange-100"></div>
+
+            {/* 바닥 (노란색 타일 패턴) */}
+            <div
+                className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-b from-yellow-200 to-yellow-300"
+                style={{
+                    backgroundImage: `
+                        linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
+                        linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%),
+                        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%)
+                    `,
+                    backgroundSize: '40px 40px',
+                    backgroundPosition: '0 0, 0 20px, 20px -20px, -20px 0px'
+                }}
+            ></div>
+
             {/* 헤더 */}
             <header className="relative z-50 pt-14 px-6 flex items-center justify-between">
                 <button
@@ -171,9 +207,44 @@ const DigestionView = ({ onClose, userId }) => {
 
             {/* 메인 영역 */}
             <main className="flex-1 flex flex-col items-center justify-center pb-20 relative overflow-hidden">
-                {/* 배경 데코레이션 */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-200/30 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-200/30 rounded-full blur-3xl"></div>
+                {/* 벽 장식 - 왼쪽 위 액자 */}
+                <div className="absolute top-20 left-8 z-5 bg-white/80 p-3 rounded-lg shadow-md border-4 border-amber-700">
+                    <div className="text-3xl">🌸</div>
+                </div>
+
+                {/* 벽 장식 - 오른쪽 위 시계 */}
+                <div className="absolute top-20 right-8 z-5 bg-white/80 p-2 rounded-full shadow-md border-3 border-amber-800">
+                    <div className="text-2xl">🕐</div>
+                </div>
+
+                {/* 배경 가구 - 왼쪽 선반 + 화분 */}
+                <div className="absolute top-32 left-6 z-5">
+                    <div className="bg-amber-700 w-20 h-3 rounded-sm shadow-md mb-1"></div>
+                    <div className="flex justify-center">
+                        <div className="text-3xl">🪴</div>
+                    </div>
+                </div>
+
+                {/* 배경 가구 - 오른쪽 냉장고 */}
+                <div className="absolute top-40 right-8 z-5">
+                    <div className="bg-gradient-to-b from-blue-200 to-blue-300 w-16 h-24 rounded-lg shadow-lg border-2 border-blue-400 flex flex-col items-center justify-center gap-1">
+                        <div className="w-8 h-1 bg-gray-400 rounded"></div>
+                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                    </div>
+                </div>
+
+                {/* 추가 장식 - 벽 스티커들 */}
+                <div className="absolute top-36 left-1/2 -translate-x-1/2 z-5 text-2xl opacity-80">⭐</div>
+                <div className="absolute top-28 left-1/3 z-5 text-xl opacity-70">🌟</div>
+                <div className="absolute top-32 right-1/3 z-5 text-xl opacity-70">✨</div>
+
+                {/* 바닥 러그 */}
+                <div className="absolute bottom-40 z-10 w-48 h-32 bg-gradient-to-b from-pink-200 to-pink-300 rounded-3xl opacity-40 shadow-inner"
+                    style={{
+                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10%)',
+                        backgroundSize: '20px 20px'
+                    }}
+                ></div>
 
                 {/* 몽글이 말풍선 */}
                 <div className="relative mb-6 z-10">
@@ -221,6 +292,47 @@ const DigestionView = ({ onClose, userId }) => {
                         </div>
                     </div>
                 ))}
+
+                {/* 떠오르는 하트들 */}
+                {floatingHearts.map(heart => (
+                    <div
+                        key={heart.id}
+                        className="absolute z-[100] pointer-events-none"
+                        style={{
+                            left: '50%',
+                            top: '50%',
+                            animation: 'float-up-heart 2s ease-out forwards',
+                            animationDelay: `${heart.delay}ms`
+                        }}
+                    >
+                        <div className="text-4xl">💕</div>
+                    </div>
+                ))}
+
+                {/* 전경 - 식탁 */}
+                <div className="absolute bottom-24 z-40 flex flex-col items-center">
+                    {/* 식탁 상판 */}
+                    <div className="bg-gradient-to-b from-amber-600 to-amber-700 w-64 h-4 rounded-full shadow-2xl border-t-2 border-amber-500"></div>
+                    {/* 식탁 다리 */}
+                    <div className="flex gap-40">
+                        <div className="bg-amber-700 w-3 h-8 rounded-b-sm"></div>
+                        <div className="bg-amber-700 w-3 h-8 rounded-b-sm"></div>
+                    </div>
+                </div>
+
+                {/* 식탁 위 접시들 */}
+                <div className="absolute bottom-28 left-1/4 z-41">
+                    <div className="relative">
+                        <div className="w-8 h-8 bg-white rounded-full shadow-md border-2 border-gray-200"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-blue-100 rounded-full"></div>
+                    </div>
+                </div>
+                <div className="absolute bottom-28 right-1/4 z-41">
+                    <div className="relative">
+                        <div className="w-8 h-8 bg-white rounded-full shadow-md border-2 border-gray-200"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-pink-100 rounded-full"></div>
+                    </div>
+                </div>
 
                 {/* 배고픔 게이지 */}
                 <div className="mt-8 bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 shadow-md border-2 border-white">
@@ -309,6 +421,20 @@ const DigestionView = ({ onClose, userId }) => {
                     }
                     100% {
                         transform: translate(-50vw, -30vh) scale(0.5);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes float-up-heart {
+                    0% {
+                        transform: translate(-50%, -50%) translateY(0) scale(0.5);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) translateY(-150px) scale(1.2);
                         opacity: 0;
                     }
                 }
