@@ -119,7 +119,7 @@ const BottomSheet = ({
     const [input, setInput] = useState('');
 
     const sheetRef = useRef(null);
-    const { affectionGauge, sleepGauge } = usePet();
+    const { affectionGauge, hungerGauge, sleepGauge } = usePet();
 
     // 스냅포인트 높이 계산
     const getHeight = () => {
@@ -318,6 +318,12 @@ const BottomSheet = ({
                             icon="🤚"
                             label="쓰다듬기"
                             value={affectionGauge}
+                            onClick={() => {}}
+                        />
+                        <ActionButton
+                            icon="🍽️"
+                            label="식사"
+                            value={hungerGauge}
                             onClick={() => {}}
                         />
                         <ActionButton
