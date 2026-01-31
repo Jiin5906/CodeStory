@@ -351,14 +351,38 @@ export const PetProvider = ({ children }) => {
     }, [handleAction]);
 
     // ─── 쓰다듬기 완료 ───
-    const handleAffectionComplete = useCallback((userId) => {
+    const handleAffectionComplete = useCallback(async (userId) => {
         // Lock 시간 설정
         const lockUntil = Date.now() + AFFECTION_LOCK_DURATION_MS;
         setAffectionLockUntil(lockUntil);
         console.log(`💕 [AffectionLock] Lock 설정됨 (${AFFECTION_LOCK_DURATION_MS / 1000}초 동안)`);
 
-        handleAction(() => petApi.affectionComplete(userId));
-    }, [handleAction]);
+        // 게이지를 100%로 설정
+        setAffectionGauge(100);
+
+        // 서버 API 호출 (동시성 제어)
+        if (isApiLoading) {
+            console.log('⚠️ [AffectionComplete] 이미 API 호출 중이므로 무시');
+            return;
+        }
+
+        setIsApiLoading(true);
+        try {
+            const data = await petApi.affectionComplete(userId);
+            setPetStatus(data);
+
+            // ✅ CRITICAL: affectionGauge는 서버 응답으로 덮어쓰지 않고 100% 유지
+            // 다른 게이지들만 동기화
+            if (data.airGauge !== undefined) setAirGauge(data.airGauge);
+            if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
+
+            console.log('💕 [AffectionComplete] 완료 - 게이지 100% 유지');
+        } catch (e) {
+            console.error('❌ [AffectionComplete] API 호출 실패:', e);
+        } finally {
+            setIsApiLoading(false);
+        }
+    }, [isApiLoading]);
 
     // ─── 감정 조각 수집 ───
     const handleCollectShard = useCallback((userId, shardId) => {
