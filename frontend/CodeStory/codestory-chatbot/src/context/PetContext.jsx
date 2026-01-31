@@ -178,8 +178,18 @@ export const PetProvider = ({ children }) => {
             const data = await petApi.getStatus(userId);
             if (data) {
                 setPetStatus(data);
-                // ✅ 서버 데이터로 로컬 게이지 동기화
-                if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
+
+                // ✅ CRITICAL: Lock이 유효한 경우 affectionGauge는 서버 값으로 덮어쓰지 않음
+                const storedLockUntil = localStorage.getItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL);
+                const isLockActive = storedLockUntil && parseInt(storedLockUntil) > Date.now();
+
+                if (isLockActive) {
+                    console.log('💕 [fetchPetStatus] Lock 활성 상태 - affectionGauge 서버 동기화 건너뜀');
+                } else {
+                    if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
+                }
+
+                // 다른 게이지들은 항상 동기화
                 if (data.airGauge !== undefined) setAirGauge(data.airGauge);
                 if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
             }
