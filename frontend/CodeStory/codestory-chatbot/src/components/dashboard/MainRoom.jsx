@@ -12,6 +12,7 @@ import mongleWarm from '../../assets/mongleWarm.json';
 import mongleSLEEP from '../../assets/mongleSLEEP.json';
 import mongleSLEEPING from '../../assets/mongleSLEEPING.json';
 import mongleTired from '../../assets/mongleTired.json';
+import mongleFull from '../../assets/mongleFull.json';
 import { usePet } from '../../context/PetContext';
 import RubbingOverlay from './RubbingOverlay';
 import EmotionShard from './EmotionShard';
@@ -21,7 +22,14 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
     const [showAiThought, setShowAiThought] = useState(false);
     const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
     const [justWokeUp, setJustWokeUp] = useState(false);
+    const [showFullAnimation, setShowFullAnimation] = useState(false);
     const { isRubbing, emotionShards, spawnEmotionShard, isSleeping, moodLightOn, sleepGauge } = usePet();
+
+    // 포화 애니메이션 트리거 핸들러
+    const handleShowFullAnimation = () => {
+        setShowFullAnimation(true);
+        setTimeout(() => setShowFullAnimation(false), 2000);
+    };
 
     // 기상 시 Tired 애니메이션 관리
     useEffect(() => {
@@ -44,28 +52,34 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
             setCurrentAnimation(mongleTired);
             return;
         }
-        // 3. 쓰다듭기 중: mongleRubbing
+        // 3. 포화 상태 (쓰다듬기 게이지 100%): mongleFull
+        if (showFullAnimation) {
+            setCurrentAnimation(mongleFull);
+            const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 2000);
+            return () => clearTimeout(timer);
+        }
+        // 4. 쓰다듬기 중: mongleRubbing
         if (isRubbing) {
             setCurrentAnimation(mongleRubbing);
             return;
         }
-        // 4. 창문 30초 미폐쇄: mongleCold
+        // 5. 창문 30초 미폐쇄: mongleCold
         if (windowColdAnimation) {
             setCurrentAnimation(mongleCold);
             return;
         }
-        // 5. 창문 닫기: mongleWarm (3초 후 IDLE 복귀)
+        // 6. 창문 닫기: mongleWarm (3초 후 IDLE 복귀)
         if (windowClosedAnimation) {
             setCurrentAnimation(mongleWarm);
             const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 3000);
             return () => clearTimeout(timer);
         }
-        // 6. 로딩 중: mongleThinking
+        // 7. 로딩 중: mongleThinking
         if (isAiThinking) {
             const timer = setTimeout(() => setCurrentAnimation(mongleThinking), 0);
             return () => clearTimeout(timer);
         }
-        // 7. 답변 도착: 감정에 맞는 애니메이션
+        // 8. 답변 도착: 감정에 맞는 애니메이션
         if (emotion) {
             const emotionMap = {
                 happy: mongleHappy,
@@ -80,15 +94,15 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                 clearTimeout(hideTimer);
             };
         }
-        // 8. 수면 게이지 < 15%: Sleepy IDLE (같은 애니메이션이지만 나중에 다른 애니메이션으로 변경 가능)
+        // 9. 수면 게이지 < 15%: Sleepy IDLE (같은 애니메이션이지만 나중에 다른 애니메이션으로 변경 가능)
         if (sleepGauge < 15) {
             const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 0);
             return () => clearTimeout(timer);
         }
-        // 9. 기본 상태: mongleIDLE
+        // 10. 기본 상태: mongleIDLE
         const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 0);
         return () => clearTimeout(timer);
-    }, [isAiThinking, emotion, isRubbing, windowColdAnimation, windowClosedAnimation, isSleeping, justWokeUp, sleepGauge]);
+    }, [isAiThinking, emotion, isRubbing, windowColdAnimation, windowClosedAnimation, isSleeping, justWokeUp, sleepGauge, showFullAnimation]);
 
     // 감정 조각 스폰 (emotion 값이 들어오면)
     useEffect(() => {
@@ -168,8 +182,8 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                             style={{ filter: 'saturate(1.1)' }}
                         />
 
-                        {/* 쓰다듭기 오버레이 */}
-                        <RubbingOverlay userId={user?.id} />
+                        {/* 쓰다듬기 오버레이 */}
+                        <RubbingOverlay userId={user?.id} onShowFullAnimation={handleShowFullAnimation} />
 
                         {/* 감정 조각 (캐릭터 영역 같은 level) */}
                         {emotionShards.map(shard => (

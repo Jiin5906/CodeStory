@@ -3,7 +3,7 @@ import { useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { usePet } from '../../context/PetContext';
 
-export default function RubbingOverlay({ userId }) {
+export default function RubbingOverlay({ userId, onShowFullAnimation }) {
     const {
         isRubbing,
         setIsRubbing,
@@ -20,8 +20,16 @@ export default function RubbingOverlay({ userId }) {
     const GAUGE_INCREMENT = 2; // 드래그 시 2%씩 증가
 
     const handleMove = useCallback(() => {
-        // Lock 중이거나 이미 100% 도달했으면 증가 불가
-        if (isAffectionLocked || hasReachedMaxRef.current) return;
+        // Lock 중이면 포화 애니메이션 트리거
+        if (isAffectionLocked) {
+            if (onShowFullAnimation) {
+                onShowFullAnimation();
+            }
+            return;
+        }
+
+        // 이미 100% 도달했으면 증가 불가
+        if (hasReachedMaxRef.current) return;
 
         const now = Date.now();
         if (now - lastMoveTimeRef.current < THROTTLE_MS) return;
@@ -40,7 +48,7 @@ export default function RubbingOverlay({ userId }) {
 
             return next;
         });
-    }, [userId, isAffectionLocked, setAffectionGauge, setIsAffectionLocked, handleAffectionComplete]);
+    }, [userId, isAffectionLocked, setAffectionGauge, setIsAffectionLocked, handleAffectionComplete, onShowFullAnimation]);
 
     const startRubbing = useCallback(() => {
         setIsRubbing(true);
@@ -63,18 +71,6 @@ export default function RubbingOverlay({ userId }) {
             onTouchEnd={stopRubbing}
             data-gtm="rubbing-overlay"
             style={{ touchAction: 'none' }}
-        >
-            {/* Lock 상태일 때 피드백 표시 */}
-            {isAffectionLocked && isRubbing && (
-                <motion.div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-500 text-sm font-bold bg-white/80 px-3 py-1 rounded-full shadow-sm"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                >
-                    💕 이미 배불어요!
-                </motion.div>
-            )}
-        </motion.div>
+        />
     );
 }

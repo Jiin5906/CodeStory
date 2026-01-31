@@ -29,6 +29,9 @@ const AUTO_SAVE_INTERVAL_MS = 30000; // 30초
 const FORCE_SLEEP_THRESHOLD = 10; // 수면 게이지 10% 이하
 const INACTIVITY_TIME_MS = 300000; // 5분 동안 입력 없으면
 
+// 쓰다듬기 Lock 유지 시간
+const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
+
 // localStorage 키
 const STORAGE_KEYS = {
     AFFECTION: 'pet_affection_gauge',
@@ -40,6 +43,7 @@ const STORAGE_KEYS = {
     MOOD_LIGHT_ON: 'pet_mood_light_on',
     LAST_INTERACTION: 'pet_last_interaction_time',
     EMOTION_SHARDS: 'pet_emotion_shards',
+    AFFECTION_LOCK_UNTIL: 'pet_affection_lock_until',
 };
 
 // localStorage 유틸리티
@@ -87,6 +91,10 @@ export const PetProvider = ({ children }) => {
 
     // Lock 상태
     const [isAffectionLocked, setIsAffectionLocked] = useState(false);
+    const [affectionLockUntil, setAffectionLockUntil] = useState(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL);
+        return stored ? parseInt(stored) : null;
+    });
     const [isAirLocked, setIsAirLocked] = useState(false);
     const [isEnergyLocked, setIsEnergyLocked] = useState(false);
 
@@ -116,6 +124,15 @@ export const PetProvider = ({ children }) => {
         localStorage.setItem(STORAGE_KEYS.LAST_INTERACTION, lastInteractionTime);
     }, [isSleeping, moodLightOn, lastInteractionTime]);
 
+    // ─── affectionLockUntil localStorage 동기화 ───
+    useEffect(() => {
+        if (affectionLockUntil !== null) {
+            localStorage.setItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL, affectionLockUntil);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL);
+        }
+    }, [affectionLockUntil]);
+
     // ─── 감정 조각 localStorage 동기화 ───
     useEffect(() => {
         localStorage.setItem(STORAGE_KEYS.EMOTION_SHARDS, JSON.stringify(emotionShards));
@@ -127,6 +144,32 @@ export const PetProvider = ({ children }) => {
         if (value <= UNLOCK_THRESHOLD) return false;
         return currentLocked;
     }, []);
+
+    // ─── 쓰다듬기 Lock 시간 기반 체크 ───
+    useEffect(() => {
+        if (affectionLockUntil === null) {
+            setIsAffectionLocked(false);
+            return;
+        }
+
+        const checkLockExpiry = () => {
+            const now = Date.now();
+            if (now >= affectionLockUntil) {
+                console.log('💕 [AffectionLock] Lock 해제됨 (시간 경과)');
+                setIsAffectionLocked(false);
+                setAffectionLockUntil(null);
+            } else {
+                setIsAffectionLocked(true);
+            }
+        };
+
+        // 즉시 체크
+        checkLockExpiry();
+
+        // 1초마다 체크
+        const interval = setInterval(checkLockExpiry, 1000);
+        return () => clearInterval(interval);
+    }, [affectionLockUntil]);
 
     // ─── 서버에서 PetStatus 조회 및 로컬 state 동기화 ───
     const fetchPetStatus = useCallback(async (userId) => {
@@ -309,6 +352,11 @@ export const PetProvider = ({ children }) => {
 
     // ─── 쓰다듬기 완료 ───
     const handleAffectionComplete = useCallback((userId) => {
+        // Lock 시간 설정
+        const lockUntil = Date.now() + AFFECTION_LOCK_DURATION_MS;
+        setAffectionLockUntil(lockUntil);
+        console.log(`💕 [AffectionLock] Lock 설정됨 (${AFFECTION_LOCK_DURATION_MS / 1000}초 동안)`);
+
         handleAction(() => petApi.affectionComplete(userId));
     }, [handleAction]);
 
