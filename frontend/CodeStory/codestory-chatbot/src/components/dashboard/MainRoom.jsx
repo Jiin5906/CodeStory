@@ -156,7 +156,7 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                         className={`transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
                         data-gtm="mainroom-mongle-speech-bubble"
                     >
-                        <div className="relative px-6 py-4 text-left max-w-[280px] sm:max-w-[320px]">
+                        <div className="relative px-6 py-4 text-left min-w-[200px] max-w-[85vw] sm:max-w-md md:max-w-lg">
                             {/* 메신저 스타일 버블 배경 */}
                             <div
                                 className="absolute inset-0 rounded-[24px]"
@@ -171,7 +171,9 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                                 className="relative text-[15px] sm:text-base font-normal leading-relaxed break-keep"
                                 style={{
                                     color: '#5D4037',
-                                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif'
+                                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif',
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word'
                                 }}
                             >
                                 {isAiThinking ? "공감하는 중..." : aiResponse}
