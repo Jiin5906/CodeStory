@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard:wght@400;500;600;700&family=Jua&display=swap');
 @import "tailwindcss";
 
 :root{
@@ -70,6 +70,26 @@ button{
 
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* 🌟 Cloud-like Speech Bubble Bounce Animation */
+@keyframes fadeInUpBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.animate-bubble-bounce {
+  animation: fadeInUpBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* 스크롤바 숨기기 */
