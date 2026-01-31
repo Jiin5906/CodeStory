@@ -438,18 +438,18 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </div>
 
                     {/* 💜 고급 방석 (바닥 중앙 - 캐릭터 뒤) */}
-                    <div className="absolute bottom-[35%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
-                        <div className="relative w-36 h-20">
+                    <div className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
+                        <div className="relative w-52 h-28">
                             {/* 방석 본체 (타원형) */}
                             <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
                                 style={{
-                                    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))',
-                                    boxShadow: 'inset 0 -6px 12px rgba(139,92,246,0.3), inset 0 4px 8px rgba(255,255,255,0.4)'
+                                    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+                                    boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
                                 }}
                             ></div>
 
                             {/* 방석 중앙 패턴 (십자형 스티치) */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-12">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16">
                                 {/* 가로 스티치 라인 */}
                                 <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
                                 {/* 세로 스티치 라인 */}
@@ -457,32 +457,34 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             </div>
 
                             {/* 방석 테두리 스티치 (점선) */}
-                            <div className="absolute inset-2 rounded-[50%] border-2 border-dashed border-white/30"></div>
+                            <div className="absolute inset-3 rounded-[50%] border-2 border-dashed border-white/35"></div>
 
                             {/* 방석 모서리 장식 (4개 코너) */}
-                            <div className="absolute top-2 left-3 w-2 h-2 bg-white/50 rounded-full"></div>
-                            <div className="absolute top-2 right-3 w-2 h-2 bg-white/50 rounded-full"></div>
-                            <div className="absolute bottom-2 left-3 w-2 h-2 bg-white/50 rounded-full"></div>
-                            <div className="absolute bottom-2 right-3 w-2 h-2 bg-white/50 rounded-full"></div>
+                            <div className="absolute top-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                            <div className="absolute top-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                            <div className="absolute bottom-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                            <div className="absolute bottom-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
 
                             {/* 방석 푹신한 질감 (세로 주름) */}
                             <div className="absolute inset-0 overflow-hidden rounded-[50%]">
-                                <div className="absolute left-[20%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                                <div className="absolute left-[40%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/15 to-transparent"></div>
+                                <div className="absolute left-[15%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                <div className="absolute left-[30%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                <div className="absolute left-[45%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
                                 <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                                <div className="absolute left-[80%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/15 to-transparent"></div>
+                                <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                <div className="absolute left-[85%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
                             </div>
 
                             {/* 방석 하이라이트 (상단 빛 반사) */}
-                            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/40 rounded-[50%] blur-sm"></div>
+                            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-8 bg-white/45 rounded-[50%] blur-md"></div>
 
                             {/* 방석 그림자 (바닥) */}
-                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-3 bg-black/20 rounded-[50%] blur-md"></div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/25 rounded-[50%] blur-lg"></div>
                         </div>
                     </div>
 
                     {/* MainRoom 컴포넌트 배치 */}
-                    <div className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+                    <div className="absolute top-[53%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
                         <div className="w-40 h-40 rounded-full pointer-events-auto flex items-center justify-center">
                             <MainRoom
                                 latestLog={latestLog}
