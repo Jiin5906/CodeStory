@@ -4,11 +4,10 @@ import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
 import CircularProgressNew from './CircularProgressNew';
-import DigestionView from './DigestionView';
 import MoodLight from './MoodLight';
 import MainMenu from './MainMenu';
 import StoreView from './StoreView';
-import { diaryApi, chatApi } from '../../services/api';
+import { chatApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
@@ -17,7 +16,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const [emotion, setEmotion] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
-    const [isDigestionViewOpen, setIsDigestionViewOpen] = useState(false);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
     const [isStoreViewOpen, setIsStoreViewOpen] = useState(false);
 
@@ -31,7 +29,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const ventilateTimerRef = useRef(null);
     const coldTimerRef = useRef(null);
 
-    const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn, isSleeping } = usePet();
+    const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn } = usePet();
 
     const today = startOfDay(new Date());
 
@@ -207,9 +205,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             style={{ mixBlendMode: 'multiply' }}
                         />
                     )}
-
-                    {/* MoodLight 컴포넌트 (우측 상단) */}
-                    <MoodLight />
 
                     {/* 🎨 벽 배경 (상단 60%) - 핑크색 + 다이아몬드 패턴 */}
                     <div className="absolute inset-0 bg-[#FF9EAA]" style={{
@@ -442,12 +437,48 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 💜 러그 (바닥 중앙 - 캐릭터 뒤) */}
+                    {/* 💜 고급 방석 (바닥 중앙 - 캐릭터 뒤) */}
                     <div className="absolute bottom-[35%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
-                        <div className="w-32 h-16 bg-gradient-to-br from-[#E0B0FF] to-[#D4A5F5] rounded-[50%] opacity-80" style={{
-                            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.2))',
-                            boxShadow: 'inset 0 -4px 8px rgba(255,255,255,0.3)'
-                        }}></div>
+                        <div className="relative w-36 h-20">
+                            {/* 방석 본체 (타원형) */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
+                                style={{
+                                    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))',
+                                    boxShadow: 'inset 0 -6px 12px rgba(139,92,246,0.3), inset 0 4px 8px rgba(255,255,255,0.4)'
+                                }}
+                            ></div>
+
+                            {/* 방석 중앙 패턴 (십자형 스티치) */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-12">
+                                {/* 가로 스티치 라인 */}
+                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
+                                {/* 세로 스티치 라인 */}
+                                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/40 rounded-full -translate-x-1/2"></div>
+                            </div>
+
+                            {/* 방석 테두리 스티치 (점선) */}
+                            <div className="absolute inset-2 rounded-[50%] border-2 border-dashed border-white/30"></div>
+
+                            {/* 방석 모서리 장식 (4개 코너) */}
+                            <div className="absolute top-2 left-3 w-2 h-2 bg-white/50 rounded-full"></div>
+                            <div className="absolute top-2 right-3 w-2 h-2 bg-white/50 rounded-full"></div>
+                            <div className="absolute bottom-2 left-3 w-2 h-2 bg-white/50 rounded-full"></div>
+                            <div className="absolute bottom-2 right-3 w-2 h-2 bg-white/50 rounded-full"></div>
+
+                            {/* 방석 푹신한 질감 (세로 주름) */}
+                            <div className="absolute inset-0 overflow-hidden rounded-[50%]">
+                                <div className="absolute left-[20%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                <div className="absolute left-[40%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/15 to-transparent"></div>
+                                <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                <div className="absolute left-[80%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/15 to-transparent"></div>
+                            </div>
+
+                            {/* 방석 하이라이트 (상단 빛 반사) */}
+                            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/40 rounded-[50%] blur-sm"></div>
+
+                            {/* 방석 그림자 (바닥) */}
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-3 bg-black/20 rounded-[50%] blur-md"></div>
+                        </div>
                     </div>
 
                     {/* MainRoom 컴포넌트 배치 */}
@@ -465,6 +496,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
+
+                    {/* 💡 무드등 (좌측 하단) */}
+                    <MoodLight />
 
                     {/* 🪴 우측 하단 대형 화분 (크기 증가) */}
                     <div className="absolute bottom-[26%] right-[6%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
@@ -582,7 +616,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     onWrite={handleWrite}
                     onCalendarClick={onCalendarClick}
                     onVentilateClick={handleWindowClick}
-                    onFeedClick={() => setIsDigestionViewOpen(true)}
                     onHomeClick={() => setIsMainMenuOpen(true)}
                     diaries={diaries}
                     streakDays={streakDays}
@@ -599,14 +632,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     diaries={diaries}
                     data-gtm="mind-record-screen"
                 />
-
-                {/* 감정 소화 (식사) 오버레이 */}
-                {isDigestionViewOpen && (
-                    <DigestionView
-                        onClose={() => setIsDigestionViewOpen(false)}
-                        userId={user?.id}
-                    />
-                )}
 
                 {/* 메인 메뉴 */}
                 <MainMenu
