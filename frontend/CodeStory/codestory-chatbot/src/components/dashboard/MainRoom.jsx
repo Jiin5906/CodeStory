@@ -156,12 +156,39 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                         className={`transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
                         data-gtm="mainroom-mongle-speech-bubble"
                     >
-                        <div className="relative px-6 py-4 text-center max-w-[280px] sm:max-w-[320px]">
-                            <div className="absolute inset-0 bg-white/60 backdrop-blur-md rounded-3xl shadow-lg border border-white/40"></div>
-                            <p className="relative text-base sm:text-lg font-medium leading-relaxed text-slate-800 break-keep">
-                                {isAiThinking ? "공감하는 중..." : `"${aiResponse}"`}
+                        <div className="relative px-6 py-4 text-left max-w-[280px] sm:max-w-[320px]">
+                            {/* 메신저 스타일 버블 배경 */}
+                            <div
+                                className="absolute inset-0 rounded-[24px]"
+                                style={{
+                                    background: 'linear-gradient(135deg, #FFF9E6 0%, #FFE8CC 50%, #FFD4A3 100%)',
+                                    boxShadow: '0 4px 16px rgba(255, 200, 120, 0.25), 0 2px 8px rgba(0, 0, 0, 0.08)'
+                                }}
+                            ></div>
+
+                            {/* 텍스트 콘텐츠 */}
+                            <p
+                                className="relative text-[15px] sm:text-base font-normal leading-relaxed break-keep"
+                                style={{
+                                    color: '#5D4037',
+                                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif'
+                                }}
+                            >
+                                {isAiThinking ? "공감하는 중..." : aiResponse}
                             </p>
-                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white/60 backdrop-blur-md rotate-45 border-r border-b border-white/40"></div>
+
+                            {/* 메신저 스타일 꼬리 */}
+                            <div
+                                className="absolute -bottom-2 left-8"
+                                style={{
+                                    width: 0,
+                                    height: 0,
+                                    borderLeft: '12px solid transparent',
+                                    borderRight: '12px solid transparent',
+                                    borderTop: '12px solid #FFD4A3',
+                                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06))'
+                                }}
+                            ></div>
                         </div>
                     </div>
 
