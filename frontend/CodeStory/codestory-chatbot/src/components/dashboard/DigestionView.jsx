@@ -208,53 +208,21 @@ const DigestionView = ({ onClose, userId }) => {
 
             {/* 메인 영역 */}
             <main className="flex-1 flex flex-col items-center justify-center pb-20 relative overflow-hidden">
-                {/* 벽 장식 - 왼쪽 위 액자 */}
-                <div className="absolute top-20 left-8 z-5 bg-white/90 p-3 rounded-lg shadow-sm border-3 border-pink-200">
-                    <div className="text-3xl">🌸</div>
+                {/* 미니멀한 장식 - 상단 작은 구름 하나 */}
+                <div className="absolute top-24 right-12 z-5 flex gap-1 opacity-40">
+                    <div className="w-4 h-3 bg-white/60 rounded-full"></div>
+                    <div className="w-5 h-3.5 bg-white/70 rounded-full -ml-2"></div>
+                    <div className="w-3 h-3 bg-white/60 rounded-full -ml-1"></div>
                 </div>
-
-                {/* 벽 장식 - 오른쪽 위 시계 */}
-                <div className="absolute top-20 right-8 z-5 bg-white/90 p-2 rounded-full shadow-sm border-2 border-purple-200">
-                    <div className="text-2xl">🕐</div>
-                </div>
-
-                {/* 배경 가구 - 왼쪽 선반 + 화분 */}
-                <div className="absolute top-32 left-6 z-5">
-                    <div className="bg-[#E8C4A0] w-20 h-3 rounded-sm shadow-sm mb-1"></div>
-                    <div className="flex justify-center">
-                        <div className="text-3xl">🪴</div>
-                    </div>
-                </div>
-
-                {/* 배경 가구 - 오른쪽 냉장고 */}
-                <div className="absolute top-40 right-8 z-5">
-                    <div className="bg-gradient-to-b from-blue-100 to-blue-200 w-16 h-24 rounded-lg shadow-md border-2 border-blue-200 flex flex-col items-center justify-center gap-1">
-                        <div className="w-8 h-1 bg-gray-300 rounded"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    </div>
-                </div>
-
-                {/* 추가 장식 - 벽 스티커들 */}
-                <div className="absolute top-36 left-1/2 -translate-x-1/2 z-5 text-2xl opacity-70">⭐</div>
-                <div className="absolute top-28 left-1/3 z-5 text-xl opacity-60">🌟</div>
-                <div className="absolute top-32 right-1/3 z-5 text-xl opacity-60">✨</div>
-
-                {/* 바닥 러그 */}
-                <div className="absolute bottom-40 z-10 w-48 h-32 bg-gradient-to-b from-pink-100 to-pink-200 rounded-3xl opacity-50 shadow-sm"
-                    style={{
-                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 10%, transparent 10%)',
-                        backgroundSize: '20px 20px'
-                    }}
-                ></div>
 
                 {/* 몽글이 말풍선 */}
                 <div className="relative mb-6 z-10">
                     <div className="relative px-6 py-4 text-center max-w-[280px]">
-                        <div className="absolute inset-0 bg-white/70 backdrop-blur-md rounded-3xl shadow-lg border-2 border-white"></div>
-                        <p className="relative text-base font-bold leading-relaxed text-slate-800">
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-md rounded-3xl shadow-lg border border-white/40"></div>
+                        <p className="relative text-base font-medium leading-relaxed text-slate-800">
                             {mongleBubble}
                         </p>
-                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white/70 backdrop-blur-md rotate-45 border-r-2 border-b-2 border-white"></div>
+                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white/60 backdrop-blur-md rotate-45 border-r border-b border-white/40"></div>
                     </div>
                 </div>
 
@@ -310,45 +278,26 @@ const DigestionView = ({ onClose, userId }) => {
                     </div>
                 ))}
 
-                {/* 전경 - 식탁 */}
-                <div className="absolute bottom-24 z-40 flex flex-col items-center">
-                    {/* 식탁 상판 */}
-                    <div className="bg-gradient-to-b from-[#E8C4A0] to-[#D4B598] w-64 h-4 rounded-full shadow-lg border-t-2 border-[#EDD4BC]"></div>
-                    {/* 식탁 다리 */}
-                    <div className="flex gap-40">
-                        <div className="bg-[#D4B598] w-3 h-8 rounded-b-sm"></div>
-                        <div className="bg-[#D4B598] w-3 h-8 rounded-b-sm"></div>
-                    </div>
-                </div>
-
-                {/* 식탁 위 접시들 */}
-                <div className="absolute bottom-28 left-1/4 z-41">
-                    <div className="relative">
-                        <div className="w-8 h-8 bg-white rounded-full shadow-sm border-2 border-gray-100"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-blue-50 rounded-full"></div>
-                    </div>
-                </div>
-                <div className="absolute bottom-28 right-1/4 z-41">
-                    <div className="relative">
-                        <div className="w-8 h-8 bg-white rounded-full shadow-sm border-2 border-gray-100"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-pink-50 rounded-full"></div>
-                    </div>
+                {/* 전경 - 미니멀한 식탁 */}
+                <div className="absolute bottom-24 z-40">
+                    <div className="text-6xl opacity-30">🍽️</div>
                 </div>
 
                 {/* 배고픔 게이지 */}
-                <div className="mt-8 bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 shadow-md border-2 border-white">
+                <div className="mt-8 bg-white/60 backdrop-blur-md rounded-full px-6 py-3 shadow-lg border border-white/40">
                     <div className="flex items-center gap-3">
                         <span className="text-lg">🍽️</span>
-                        <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-32 h-3 bg-white/40 rounded-full overflow-hidden">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${
-                                    hungerGauge >= 90 ? 'bg-green-400' :
-                                    hungerGauge >= 50 ? 'bg-yellow-400' : 'bg-red-400'
+                                    hungerGauge >= 90 ? 'bg-gradient-to-r from-green-300 to-green-400' :
+                                    hungerGauge >= 50 ? 'bg-gradient-to-r from-yellow-300 to-yellow-400' :
+                                    'bg-gradient-to-r from-red-300 to-red-400'
                                 }`}
                                 style={{ width: `${Math.min(100, hungerGauge)}%` }}
                             />
                         </div>
-                        <span className="text-xs font-bold text-gray-600">
+                        <span className="text-sm font-medium text-slate-700">
                             {Math.round(hungerGauge)}%
                         </span>
                     </div>
@@ -359,8 +308,8 @@ const DigestionView = ({ onClose, userId }) => {
             <div className="relative z-50 bg-white/90 backdrop-blur-md border-t-4 border-white/60 rounded-t-[35px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] h-[220px] flex flex-col">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 rounded-full"></div>
 
-                <div className="px-8 pt-6 pb-2 text-center flex-shrink-0">
-                    <span className="text-xs text-gray-500 font-bold bg-gray-100 px-3 py-1 rounded-full">
+                <div className="px-8 pt-6 pb-3 text-center flex-shrink-0">
+                    <span className="text-xs text-gray-500 font-medium bg-white/60 px-3 py-1.5 rounded-full border border-white/40">
                         ✨ 감정 조각을 선택하세요
                     </span>
                 </div>
@@ -378,22 +327,20 @@ const DigestionView = ({ onClose, userId }) => {
                                     <button
                                         key={shard.id}
                                         onClick={() => handleFeedEmotion(shard)}
-                                        className="group flex flex-col items-center gap-2 active:scale-90 transition-transform"
+                                        className="group flex flex-col items-center gap-2 active:scale-95 transition-all"
                                         data-gtm={`digestion-shard-${shard.emotion}`}
                                     >
                                         <div
-                                            className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg border-3 border-white relative group-hover:scale-110 group-hover:shadow-xl transition-all animate-bounce-soft"
+                                            className="w-14 h-14 rounded-full flex items-center justify-center shadow-md border-2 border-white/50 relative group-hover:scale-105 group-hover:shadow-lg transition-all"
                                             style={{
                                                 backgroundColor: color,
-                                                boxShadow: `0 4px 12px ${color}80, inset 0 -2px 8px rgba(0,0,0,0.1)`
+                                                boxShadow: `0 2px 8px ${color}60`
                                             }}
                                         >
-                                            <div className="text-3xl drop-shadow-md">{emoji}</div>
-                                            {/* 반짝이는 효과 */}
-                                            <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse" style={{ animationDuration: '2s' }}></div>
+                                            <div className="text-2xl">{emoji}</div>
                                         </div>
-                                        <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
-                                            <span className="text-[11px] font-bold text-gray-600">
+                                        <div className="bg-white/70 backdrop-blur-sm px-2.5 py-0.5 rounded-full">
+                                            <span className="text-[10px] font-medium text-gray-600">
                                                 {name}
                                             </span>
                                         </div>
