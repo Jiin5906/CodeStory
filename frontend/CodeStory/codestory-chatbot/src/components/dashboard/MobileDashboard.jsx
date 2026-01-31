@@ -4,6 +4,8 @@ import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import MindRecord from '../../change/MindRecord';
 import CircularProgressNew from './CircularProgressNew';
+import DigestionView from './DigestionView';
+import MoodLight from './MoodLight';
 import { diaryApi, chatApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
@@ -13,10 +15,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const [emotion, setEmotion] = useState(null);
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
+    const [isDigestionViewOpen, setIsDigestionViewOpen] = useState(false);
 
     // 인터랙티브 효과를 위한 상태
     const [isWindowOpen, setIsWindowOpen] = useState(false);
-    const [isLampOn, setIsLampOn] = useState(true); // 무드등 상태 (기본: ON)
 
     // 창문 관련 확장 상태
     const [windowColdAnimation, setWindowColdAnimation] = useState(false);
@@ -25,7 +27,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const ventilateTimerRef = useRef(null);
     const coldTimerRef = useRef(null);
 
-    const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard } = usePet();
+    const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn, isSleeping } = usePet();
 
     const today = startOfDay(new Date());
 
@@ -195,12 +197,15 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 {/* 메인 화면 영역 (배경 + MainRoom) */}
                 <div className="relative w-full flex-1 overflow-hidden">
                     {/* 💡 무드등 OFF 시 어두운 오버레이 */}
-                    {!isLampOn && (
+                    {!moodLightOn && (
                         <div
-                            className="absolute inset-0 bg-black/50 z-[100] pointer-events-none transition-opacity duration-700"
+                            className="absolute inset-0 bg-black/60 z-[100] pointer-events-none transition-opacity duration-700"
                             style={{ mixBlendMode: 'multiply' }}
                         />
                     )}
+
+                    {/* MoodLight 컴포넌트 (우측 상단) */}
+                    <MoodLight />
 
                     {/* 🎨 벽 배경 (상단 60%) - 핑크색 + 다이아몬드 패턴 */}
                     <div className="absolute inset-0 bg-[#FF9EAA]" style={{
@@ -456,38 +461,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         </div>
                     </div>
 
-                    {/* 💡 좌측 하단 무드등 (클릭 가능) */}
-                    <div
-                        className="absolute bottom-[28%] left-[10%] z-20 cursor-pointer pointer-events-auto active:scale-95 transition-transform duration-200"
-                        style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.2))' }}
-                        onClick={() => setIsLampOn(!isLampOn)}
-                        data-gtm="mood-lamp-toggle"
-                    >
-                        <div className="relative w-14 h-16">
-                            {/* 무드등 받침대 */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-3 bg-gradient-to-br from-[#8B6F47] to-[#6B5537] rounded-full" style={{
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                            }}></div>
-                            {/* 무드등 기둥 */}
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-2 h-6 bg-gradient-to-b from-[#8B6F47] to-[#6B5537]"></div>
-                            {/* 무드등 갓 (ON일 때 빛남) */}
-                            <div className={`absolute bottom-7 left-1/2 -translate-x-1/2 w-12 h-9 rounded-t-full transition-all duration-500 ${
-                                isLampOn
-                                    ? 'bg-gradient-to-b from-[#FFF9E6] to-[#FFE8A0] shadow-[0_0_25px_rgba(255,230,140,0.9)]'
-                                    : 'bg-gradient-to-b from-[#5A4A3A] to-[#4A3A2A]'
-                            }`} style={{
-                                clipPath: 'polygon(20% 0%, 80% 0%, 95% 100%, 5% 100%)',
-                                boxShadow: isLampOn ? '0 0 30px rgba(255,230,140,0.8), inset 0 2px 8px rgba(255,255,255,0.4)' : 'inset 0 2px 4px rgba(0,0,0,0.3)'
-                            }}></div>
-                            {/* 전구 (ON일 때만 표시) */}
-                            {isLampOn && (
-                                <div className="absolute bottom-9 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFFACD] rounded-full animate-pulse" style={{
-                                    boxShadow: '0 0 15px rgba(255,250,205,0.9)',
-                                    animationDuration: '2s'
-                                }}></div>
-                            )}
-                        </div>
-                    </div>
 
                     {/* 🪴 우측 하단 대형 화분 (크기 증가) */}
                     <div className="absolute bottom-[26%] right-[6%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
@@ -605,6 +578,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     onWrite={handleWrite}
                     onCalendarClick={onCalendarClick}
                     onVentilateClick={handleWindowClick}
+                    onFeedClick={() => setIsDigestionViewOpen(true)}
                     diaries={diaries}
                     streakDays={streakDays}
                     onMindRecordClick={() => setIsMindRecordOpen(true)}
@@ -620,6 +594,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     diaries={diaries}
                     data-gtm="mind-record-screen"
                 />
+
+                {/* 감정 소화 (식사) 오버레이 */}
+                {isDigestionViewOpen && (
+                    <DigestionView
+                        onClose={() => setIsDigestionViewOpen(false)}
+                        userId={user?.id}
+                    />
+                )}
             </div>
         </div>
     );

@@ -13,14 +13,32 @@ const TOTAL_DECAY_TIME_MS = IS_DEV_MODE ? 300000 : 7200000; // 5분 or 2시간
 const DECAY_INTERVAL_MS = 10000; // 10초마다 체크
 const DECAY_AMOUNT = (100 / (TOTAL_DECAY_TIME_MS / DECAY_INTERVAL_MS));
 
+// 수면 게이지 설정
+const AWAKE_TIME_MS = IS_DEV_MODE ? 600000 : 61200000; // 10분 or 17시간 (깨어있을 때)
+const SLEEP_TIME_MS = IS_DEV_MODE ? 300000 : 25200000; // 5분 or 7시간 (잘 때)
+const SLEEP_DECAY_AMOUNT = (100 / (AWAKE_TIME_MS / DECAY_INTERVAL_MS));
+const SLEEP_RECOVERY_AMOUNT = (100 / (SLEEP_TIME_MS / DECAY_INTERVAL_MS));
+
+// 배고픔 게이지 설정
+const HUNGER_DECAY_AMOUNT = (100 / (TOTAL_DECAY_TIME_MS / DECAY_INTERVAL_MS));
+
 // 자동 저장 간격
 const AUTO_SAVE_INTERVAL_MS = 30000; // 30초
+
+// 강제 수면 조건
+const FORCE_SLEEP_THRESHOLD = 10; // 수면 게이지 10% 이하
+const INACTIVITY_TIME_MS = 300000; // 5분 동안 입력 없으면
 
 // localStorage 키
 const STORAGE_KEYS = {
     AFFECTION: 'pet_affection_gauge',
     AIR: 'pet_air_gauge',
     ENERGY: 'pet_energy_gauge',
+    SLEEP: 'pet_sleep_gauge',
+    HUNGER: 'pet_hunger_gauge',
+    IS_SLEEPING: 'pet_is_sleeping',
+    MOOD_LIGHT_ON: 'pet_mood_light_on',
+    LAST_INTERACTION: 'pet_last_interaction_time',
 };
 
 // localStorage 유틸리티
@@ -42,6 +60,22 @@ export const PetProvider = ({ children }) => {
     const [affectionGauge, setAffectionGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.AFFECTION));
     const [airGauge, setAirGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.AIR));
     const [energyGauge, setEnergyGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.ENERGY));
+    const [sleepGauge, setSleepGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.SLEEP, 100));
+    const [hungerGauge, setHungerGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.HUNGER, 50));
+
+    // 수면 시스템 상태
+    const [isSleeping, setIsSleeping] = useState(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.IS_SLEEPING);
+        return stored === 'true';
+    });
+    const [moodLightOn, setMoodLightOn] = useState(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.MOOD_LIGHT_ON);
+        return stored !== 'false'; // 기본값 true
+    });
+    const [lastInteractionTime, setLastInteractionTime] = useState(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.LAST_INTERACTION);
+        return stored ? parseInt(stored) : Date.now();
+    });
 
     // Lock 상태
     const [isAffectionLocked, setIsAffectionLocked] = useState(false);
@@ -54,15 +88,25 @@ export const PetProvider = ({ children }) => {
     // Refs
     const decayTimerRef = useRef(null);
     const autoSaveTimerRef = useRef(null);
-    const gaugesRef = useRef({ affectionGauge, airGauge, energyGauge });
+    const inactivityTimerRef = useRef(null);
+    const gaugesRef = useRef({ affectionGauge, airGauge, energyGauge, sleepGauge, hungerGauge });
 
     // ─── gaugesRef 및 localStorage 동기화 ───
     useEffect(() => {
-        gaugesRef.current = { affectionGauge, airGauge, energyGauge };
+        gaugesRef.current = { affectionGauge, airGauge, energyGauge, sleepGauge, hungerGauge };
         localStorage.setItem(STORAGE_KEYS.AFFECTION, affectionGauge);
         localStorage.setItem(STORAGE_KEYS.AIR, airGauge);
         localStorage.setItem(STORAGE_KEYS.ENERGY, energyGauge);
-    }, [affectionGauge, airGauge, energyGauge]);
+        localStorage.setItem(STORAGE_KEYS.SLEEP, sleepGauge);
+        localStorage.setItem(STORAGE_KEYS.HUNGER, hungerGauge);
+    }, [affectionGauge, airGauge, energyGauge, sleepGauge, hungerGauge]);
+
+    // ─── 수면 상태 localStorage 동기화 ───
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEYS.IS_SLEEPING, isSleeping);
+        localStorage.setItem(STORAGE_KEYS.MOOD_LIGHT_ON, moodLightOn);
+        localStorage.setItem(STORAGE_KEYS.LAST_INTERACTION, lastInteractionTime);
+    }, [isSleeping, moodLightOn, lastInteractionTime]);
 
     // ─── Lock/Unlock 로직 ───
     const checkLock = useCallback((value, currentLocked) => {
@@ -99,27 +143,74 @@ export const PetProvider = ({ children }) => {
     // ─── 게이지 자연 감소 (Decay) ───
     useEffect(() => {
         decayTimerRef.current = setInterval(() => {
-            setAffectionGauge(prev => {
-                const next = Math.max(0, prev - DECAY_AMOUNT);
-                setIsAffectionLocked(locked => checkLock(next, locked));
-                return next;
+            // 기존 게이지들 (깨어 있을 때만 감소)
+            if (!isSleeping) {
+                setAffectionGauge(prev => {
+                    const next = Math.max(0, prev - DECAY_AMOUNT);
+                    setIsAffectionLocked(locked => checkLock(next, locked));
+                    return next;
+                });
+                setAirGauge(prev => {
+                    const next = Math.max(0, prev - DECAY_AMOUNT);
+                    setIsAirLocked(locked => checkLock(next, locked));
+                    return next;
+                });
+                setEnergyGauge(prev => {
+                    const next = Math.max(0, prev - DECAY_AMOUNT);
+                    setIsEnergyLocked(locked => checkLock(next, locked));
+                    return next;
+                });
+            }
+
+            // 수면 게이지: 깨어있을 때 감소, 잘 때 회복
+            setSleepGauge(prev => {
+                if (isSleeping) {
+                    return Math.min(100, prev + SLEEP_RECOVERY_AMOUNT);
+                } else {
+                    return Math.max(0, prev - SLEEP_DECAY_AMOUNT);
+                }
             });
-            setAirGauge(prev => {
-                const next = Math.max(0, prev - DECAY_AMOUNT);
-                setIsAirLocked(locked => checkLock(next, locked));
-                return next;
-            });
-            setEnergyGauge(prev => {
-                const next = Math.max(0, prev - DECAY_AMOUNT);
-                setIsEnergyLocked(locked => checkLock(next, locked));
-                return next;
-            });
+
+            // 배고픔 게이지: 깨어있을 때만 감소
+            if (!isSleeping) {
+                setHungerGauge(prev => Math.max(0, prev - HUNGER_DECAY_AMOUNT));
+            }
         }, DECAY_INTERVAL_MS);
 
         return () => {
             if (decayTimerRef.current) clearInterval(decayTimerRef.current);
         };
-    }, [checkLock]);
+    }, [checkLock, isSleeping]);
+
+    // ─── 강제 수면 체크 (비활동 시) ───
+    useEffect(() => {
+        if (isSleeping || moodLightOn) {
+            // 자는 중이거나 무드등이 켜져있으면 타이머 초기화
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current);
+                inactivityTimerRef.current = null;
+            }
+            return;
+        }
+
+        // 수면 게이지가 10% 이하이고 5분간 입력 없으면 강제 수면
+        const checkForceSleep = () => {
+            const timeSinceLastInteraction = Date.now() - lastInteractionTime;
+            if (sleepGauge <= FORCE_SLEEP_THRESHOLD && timeSinceLastInteraction >= INACTIVITY_TIME_MS) {
+                console.log('😴 [ForceSleep] 강제 수면 진입');
+                setMoodLightOn(false);
+                setIsSleeping(true);
+            }
+        };
+
+        inactivityTimerRef.current = setTimeout(checkForceSleep, INACTIVITY_TIME_MS);
+
+        return () => {
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current);
+            }
+        };
+    }, [isSleeping, moodLightOn, sleepGauge, lastInteractionTime]);
 
     // ─── 주기적 자동 저장 (30초마다) ───
     useEffect(() => {
@@ -140,6 +231,8 @@ export const PetProvider = ({ children }) => {
                     affectionGauge: currentGauges.affectionGauge,
                     airGauge: currentGauges.airGauge,
                     energyGauge: currentGauges.energyGauge,
+                    sleepGauge: currentGauges.sleepGauge,
+                    hungerGauge: currentGauges.hungerGauge,
                     lastUpdate: new Date().toISOString()
                 });
                 console.log('💾 [AutoSave] 주기적 저장 완료');
@@ -232,6 +325,38 @@ export const PetProvider = ({ children }) => {
         return true;
     }, [isAirLocked, checkLock]);
 
+    // ─── 무드등 토글 ───
+    const toggleMoodLight = useCallback(() => {
+        setMoodLightOn(prev => {
+            const newValue = !prev;
+            if (newValue) {
+                // 무드등 켜기 (기상)
+                setIsSleeping(false);
+                console.log('💡 [MoodLight] 무드등 켜짐 - 몽글이 기상');
+            } else {
+                // 무드등 끄기 (수면)
+                setIsSleeping(true);
+                console.log('💡 [MoodLight] 무드등 꺼짐 - 몽글이 수면');
+            }
+            return newValue;
+        });
+        setLastInteractionTime(Date.now());
+    }, []);
+
+    // ─── 배고픔 게이지 증가 (식사) ───
+    const feedEmotion = useCallback((emotionType, amount = 25) => {
+        setHungerGauge(prev => {
+            const next = Math.min(100, prev + amount);
+            return next;
+        });
+        setLastInteractionTime(Date.now());
+    }, []);
+
+    // ─── 사용자 상호작용 (마지막 시간 업데이트) ───
+    const updateInteraction = useCallback(() => {
+        setLastInteractionTime(Date.now());
+    }, []);
+
     return (
         <PetContext.Provider value={{
             petStatus,
@@ -244,11 +369,23 @@ export const PetProvider = ({ children }) => {
             setAirGauge,
             energyGauge,
             setEnergyGauge,
+            sleepGauge,
+            setSleepGauge,
+            hungerGauge,
+            setHungerGauge,
+            isSleeping,
+            setIsSleeping,
+            moodLightOn,
+            setMoodLightOn,
+            lastInteractionTime,
             isAffectionLocked,
             setIsAffectionLocked,
             isAirLocked,
             isEnergyLocked,
             increaseAirGauge,
+            toggleMoodLight,
+            feedEmotion,
+            updateInteraction,
             checkLock,
             fetchPetStatus,
             handleVentilateComplete,

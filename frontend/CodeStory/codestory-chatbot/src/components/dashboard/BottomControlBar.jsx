@@ -57,14 +57,12 @@ const ControlButton = ({ icon, value, locked, onClick, gtmKey }) => {
     );
 };
 
-const BottomControlBar = ({ onVentilateClick }) => {
+const BottomControlBar = ({ onVentilateClick, onFeedClick }) => {
     const {
         affectionGauge,
-        airGauge,
-        energyGauge,
+        hungerGauge,
+        sleepGauge,
         isAffectionLocked,
-        isAirLocked,
-        isEnergyLocked
     } = usePet();
 
     return (
@@ -83,22 +81,22 @@ const BottomControlBar = ({ onVentilateClick }) => {
                     gtmKey="control-button-affection"
                 />
 
-                {/* 환기 버튼 */}
+                {/* 식사 버튼 (환기 → 식사로 변경) */}
                 <ControlButton
-                    icon="🪟"
-                    value={airGauge}
-                    locked={isAirLocked}
-                    onClick={onVentilateClick}
-                    gtmKey="control-button-air"
+                    icon="🍽️"
+                    value={hungerGauge}
+                    locked={hungerGauge >= 100}
+                    onClick={onFeedClick}
+                    gtmKey="control-button-hunger"
                 />
 
-                {/* 잠자기 버튼 (TODO: 구현 필요) */}
+                {/* 수면 버튼 */}
                 <ControlButton
                     icon="🌙"
-                    value={energyGauge}
-                    locked={isEnergyLocked}
-                    onClick={() => console.log('🌙 잠자기 기능 (구현 예정)')}
-                    gtmKey="control-button-energy"
+                    value={sleepGauge}
+                    locked={false}
+                    onClick={onVentilateClick} // 기존 환기 클릭 핸들러 재사용
+                    gtmKey="control-button-sleep"
                 />
             </div>
         </div>

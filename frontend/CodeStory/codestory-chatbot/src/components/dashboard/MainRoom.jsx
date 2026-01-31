@@ -9,6 +9,9 @@ import mongleNeutral from '../../assets/mongleNeutral.json';
 import mongleRubbing from '../../assets/mongleRubbing.json';
 import mongleCold from '../../assets/mongleCold.json';
 import mongleWarm from '../../assets/mongleWarm.json';
+import mongleSLEEP from '../../assets/mongleSLEEP.json';
+import mongleSLEEPING from '../../assets/mongleSLEEPING.json';
+import mongleTired from '../../assets/mongleTired.json';
 import { usePet } from '../../context/PetContext';
 import RubbingOverlay from './RubbingOverlay';
 import EmotionShard from './EmotionShard';
@@ -17,32 +20,52 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
     const [floatingTexts, setFloatingTexts] = useState([]);
     const [showAiThought, setShowAiThought] = useState(false);
     const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
-    const { isRubbing, emotionShards, spawnEmotionShard } = usePet();
+    const [justWokeUp, setJustWokeUp] = useState(false);
+    const { isRubbing, emotionShards, spawnEmotionShard, isSleeping, moodLightOn, sleepGauge } = usePet();
+
+    // 기상 시 Tired 애니메이션 관리
+    useEffect(() => {
+        if (!isSleeping && !moodLightOn && sleepGauge < 70) {
+            setJustWokeUp(true);
+            const timer = setTimeout(() => setJustWokeUp(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isSleeping, moodLightOn, sleepGauge]);
 
     // 0. 애니메이션 전환 로직 (확장됨)
     useEffect(() => {
-        // 1. 쓰다듭기 중: mongleRubbing
+        // 1. 수면 중: SLEEPING 애니메이션
+        if (isSleeping) {
+            setCurrentAnimation(mongleSLEEPING);
+            return;
+        }
+        // 2. 방금 깬 상태 (수면 게이지 70% 미만): Tired 애니메이션
+        if (justWokeUp) {
+            setCurrentAnimation(mongleTired);
+            return;
+        }
+        // 3. 쓰다듭기 중: mongleRubbing
         if (isRubbing) {
             setCurrentAnimation(mongleRubbing);
             return;
         }
-        // 2. 창문 30초 미폐쇄: mongleCold
+        // 4. 창문 30초 미폐쇄: mongleCold
         if (windowColdAnimation) {
             setCurrentAnimation(mongleCold);
             return;
         }
-        // 3. 창문 닫기: mongleWarm (3초 후 IDLE 복귀)
+        // 5. 창문 닫기: mongleWarm (3초 후 IDLE 복귀)
         if (windowClosedAnimation) {
             setCurrentAnimation(mongleWarm);
             const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 3000);
             return () => clearTimeout(timer);
         }
-        // 4. 로딩 중: mongleThinking
+        // 6. 로딩 중: mongleThinking
         if (isAiThinking) {
             const timer = setTimeout(() => setCurrentAnimation(mongleThinking), 0);
             return () => clearTimeout(timer);
         }
-        // 5. 답변 도착: 감정에 맞는 애니메이션
+        // 7. 답변 도착: 감정에 맞는 애니메이션
         if (emotion) {
             const emotionMap = {
                 happy: mongleHappy,
@@ -57,10 +80,15 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                 clearTimeout(hideTimer);
             };
         }
-        // 6. 기본 상태: mongleIDLE
+        // 8. 수면 게이지 < 15%: Sleepy IDLE (같은 애니메이션이지만 나중에 다른 애니메이션으로 변경 가능)
+        if (sleepGauge < 15) {
+            const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 0);
+            return () => clearTimeout(timer);
+        }
+        // 9. 기본 상태: mongleIDLE
         const timer = setTimeout(() => setCurrentAnimation(mongleIDLE), 0);
         return () => clearTimeout(timer);
-    }, [isAiThinking, emotion, isRubbing, windowColdAnimation, windowClosedAnimation]);
+    }, [isAiThinking, emotion, isRubbing, windowColdAnimation, windowClosedAnimation, isSleeping, justWokeUp, sleepGauge]);
 
     // 감정 조각 스폰 (emotion 값이 들어오면)
     useEffect(() => {

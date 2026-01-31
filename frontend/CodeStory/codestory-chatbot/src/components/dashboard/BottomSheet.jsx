@@ -105,6 +105,7 @@ const BottomSheet = ({
     onWrite,
     onCalendarClick,
     onVentilateClick,
+    onFeedClick,
     diaries,
     streakDays,
     onMindRecordClick,
@@ -118,7 +119,7 @@ const BottomSheet = ({
     const [input, setInput] = useState('');
 
     const sheetRef = useRef(null);
-    const { affectionGauge, airGauge, energyGauge } = usePet();
+    const { affectionGauge, hungerGauge, sleepGauge } = usePet();
 
     // 스냅포인트 높이 계산
     const getHeight = () => {
@@ -320,16 +321,16 @@ const BottomSheet = ({
                             onClick={() => {}}
                         />
                         <ActionButton
-                            icon="💨"
-                            label="환기"
-                            value={airGauge}
-                            onClick={() => console.log('💨 환기 기능 (비활성화)')}
+                            icon="🍽️"
+                            label="식사"
+                            value={hungerGauge}
+                            onClick={onFeedClick}
                         />
                         <ActionButton
                             icon="🌙"
                             label="잠자기"
-                            value={energyGauge}
-                            onClick={() => console.log('🌙 잠자기 기능 (비활성화)')}
+                            value={sleepGauge}
+                            onClick={onVentilateClick}
                         />
                         <ActionButton
                             icon="🏠"
