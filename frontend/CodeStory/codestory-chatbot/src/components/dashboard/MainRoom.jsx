@@ -156,39 +156,41 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                         className={`transition-all duration-500 ${showAiThought || isAiThinking ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
                         data-gtm="mainroom-mongle-speech-bubble"
                     >
-                        <div className="relative px-6 py-4 text-left min-w-[200px] max-w-[85vw] sm:max-w-md md:max-w-lg">
-                            {/* 메신저 스타일 버블 배경 */}
+                        <div className="relative px-7 py-5 text-center min-w-[220px] max-w-[90vw] sm:max-w-[420px] md:max-w-[560px]">
+                            {/* 파스텔 핑크-라벤더 버블 배경 */}
                             <div
-                                className="absolute inset-0 rounded-[24px]"
+                                className="absolute inset-0 rounded-[36px]"
                                 style={{
-                                    background: 'linear-gradient(135deg, #FFF9E6 0%, #FFE8CC 50%, #FFD4A3 100%)',
-                                    boxShadow: '0 4px 16px rgba(255, 200, 120, 0.25), 0 2px 8px rgba(0, 0, 0, 0.08)'
+                                    background: 'linear-gradient(135deg, #FFE8F5 0%, #F8E8FF 50%, #F0E8FF 100%)',
+                                    boxShadow: '0 6px 20px rgba(255, 182, 218, 0.35), 0 2px 8px rgba(240, 200, 255, 0.25)',
+                                    border: '2px solid rgba(255, 255, 255, 0.8)'
                                 }}
                             ></div>
 
                             {/* 텍스트 콘텐츠 */}
                             <p
-                                className="relative text-[15px] sm:text-base font-normal leading-relaxed break-keep"
+                                className="relative text-[15px] sm:text-base font-normal leading-relaxed break-keep px-2"
                                 style={{
-                                    color: '#5D4037',
+                                    color: '#7B3F5E',
                                     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif',
                                     wordBreak: 'break-word',
-                                    overflowWrap: 'break-word'
+                                    overflowWrap: 'break-word',
+                                    whiteSpace: 'pre-wrap'
                                 }}
                             >
                                 {isAiThinking ? "공감하는 중..." : aiResponse}
                             </p>
 
-                            {/* 메신저 스타일 꼬리 */}
+                            {/* 둥근 꼬리 */}
                             <div
-                                className="absolute -bottom-2 left-8"
+                                className="absolute -bottom-2 left-1/2 -translate-x-1/2"
                                 style={{
                                     width: 0,
                                     height: 0,
-                                    borderLeft: '12px solid transparent',
-                                    borderRight: '12px solid transparent',
-                                    borderTop: '12px solid #FFD4A3',
-                                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06))'
+                                    borderLeft: '14px solid transparent',
+                                    borderRight: '14px solid transparent',
+                                    borderTop: '14px solid #F0E8FF',
+                                    filter: 'drop-shadow(0 2px 6px rgba(240, 200, 255, 0.3))'
                                 }}
                             ></div>
                         </div>
