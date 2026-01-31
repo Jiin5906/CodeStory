@@ -170,21 +170,26 @@ const DigestionView = ({ onClose, userId }) => {
             className="fixed inset-0 z-50 flex flex-col"
             data-gtm="digestion-view"
         >
-            {/* 벽 배경 (코랄/주황색 그라데이션) */}
-            <div className="absolute inset-0 bg-gradient-to-b from-orange-300 via-orange-200 to-orange-100"></div>
+            {/* 벽 배경 (파스텔 핑크) */}
+            <div className="absolute inset-0 bg-[#FFB3C1]" style={{
+                backgroundImage: `
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.3) 0%, transparent 2.5%),
+                    radial-gradient(circle at 65% 35%, rgba(255, 255, 255, 0.25) 0%, transparent 2%),
+                    radial-gradient(circle at 40% 65%, rgba(255, 255, 255, 0.3) 0%, transparent 2.3%),
+                    radial-gradient(circle at 75% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 2.5%)
+                `,
+                backgroundSize: '100% 100%'
+            }}></div>
 
-            {/* 바닥 (노란색 타일 패턴) */}
+            {/* 바닥 (파스텔 크림/베이지) */}
             <div
-                className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-b from-yellow-200 to-yellow-300"
+                className="absolute bottom-0 left-0 right-0 h-[40%] bg-[#FFD7B5]"
                 style={{
                     backgroundImage: `
-                        linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
-                        linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
-                        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%),
-                        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%)
+                        linear-gradient(90deg, transparent 0%, rgba(255, 200, 150, 0.12) 2px, transparent 2px),
+                        linear-gradient(90deg, transparent 0%, rgba(255, 200, 150, 0.08) 1px, transparent 1px)
                     `,
-                    backgroundSize: '40px 40px',
-                    backgroundPosition: '0 0, 0 20px, 20px -20px, -20px 0px'
+                    backgroundSize: '100px 100%, 35px 100%'
                 }}
             ></div>
 
@@ -197,29 +202,25 @@ const DigestionView = ({ onClose, userId }) => {
                 >
                     ←
                 </button>
-                <div className="bg-white/60 px-4 py-2 rounded-full shadow-sm backdrop-blur-sm">
-                    <h1 className="text-sm font-bold text-gray-600 flex items-center gap-2">
-                        🍽️ 감정 냠냠 시간
-                    </h1>
-                </div>
+                <div className="w-10 h-10"></div>
                 <div className="w-10 h-10"></div>
             </header>
 
             {/* 메인 영역 */}
             <main className="flex-1 flex flex-col items-center justify-center pb-20 relative overflow-hidden">
                 {/* 벽 장식 - 왼쪽 위 액자 */}
-                <div className="absolute top-20 left-8 z-5 bg-white/80 p-3 rounded-lg shadow-md border-4 border-amber-700">
+                <div className="absolute top-20 left-8 z-5 bg-white/90 p-3 rounded-lg shadow-sm border-3 border-pink-200">
                     <div className="text-3xl">🌸</div>
                 </div>
 
                 {/* 벽 장식 - 오른쪽 위 시계 */}
-                <div className="absolute top-20 right-8 z-5 bg-white/80 p-2 rounded-full shadow-md border-3 border-amber-800">
+                <div className="absolute top-20 right-8 z-5 bg-white/90 p-2 rounded-full shadow-sm border-2 border-purple-200">
                     <div className="text-2xl">🕐</div>
                 </div>
 
                 {/* 배경 가구 - 왼쪽 선반 + 화분 */}
                 <div className="absolute top-32 left-6 z-5">
-                    <div className="bg-amber-700 w-20 h-3 rounded-sm shadow-md mb-1"></div>
+                    <div className="bg-[#E8C4A0] w-20 h-3 rounded-sm shadow-sm mb-1"></div>
                     <div className="flex justify-center">
                         <div className="text-3xl">🪴</div>
                     </div>
@@ -227,21 +228,21 @@ const DigestionView = ({ onClose, userId }) => {
 
                 {/* 배경 가구 - 오른쪽 냉장고 */}
                 <div className="absolute top-40 right-8 z-5">
-                    <div className="bg-gradient-to-b from-blue-200 to-blue-300 w-16 h-24 rounded-lg shadow-lg border-2 border-blue-400 flex flex-col items-center justify-center gap-1">
-                        <div className="w-8 h-1 bg-gray-400 rounded"></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                    <div className="bg-gradient-to-b from-blue-100 to-blue-200 w-16 h-24 rounded-lg shadow-md border-2 border-blue-200 flex flex-col items-center justify-center gap-1">
+                        <div className="w-8 h-1 bg-gray-300 rounded"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                     </div>
                 </div>
 
                 {/* 추가 장식 - 벽 스티커들 */}
-                <div className="absolute top-36 left-1/2 -translate-x-1/2 z-5 text-2xl opacity-80">⭐</div>
-                <div className="absolute top-28 left-1/3 z-5 text-xl opacity-70">🌟</div>
-                <div className="absolute top-32 right-1/3 z-5 text-xl opacity-70">✨</div>
+                <div className="absolute top-36 left-1/2 -translate-x-1/2 z-5 text-2xl opacity-70">⭐</div>
+                <div className="absolute top-28 left-1/3 z-5 text-xl opacity-60">🌟</div>
+                <div className="absolute top-32 right-1/3 z-5 text-xl opacity-60">✨</div>
 
                 {/* 바닥 러그 */}
-                <div className="absolute bottom-40 z-10 w-48 h-32 bg-gradient-to-b from-pink-200 to-pink-300 rounded-3xl opacity-40 shadow-inner"
+                <div className="absolute bottom-40 z-10 w-48 h-32 bg-gradient-to-b from-pink-100 to-pink-200 rounded-3xl opacity-50 shadow-sm"
                     style={{
-                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10%)',
+                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 10%, transparent 10%)',
                         backgroundSize: '20px 20px'
                     }}
                 ></div>
@@ -312,25 +313,25 @@ const DigestionView = ({ onClose, userId }) => {
                 {/* 전경 - 식탁 */}
                 <div className="absolute bottom-24 z-40 flex flex-col items-center">
                     {/* 식탁 상판 */}
-                    <div className="bg-gradient-to-b from-amber-600 to-amber-700 w-64 h-4 rounded-full shadow-2xl border-t-2 border-amber-500"></div>
+                    <div className="bg-gradient-to-b from-[#E8C4A0] to-[#D4B598] w-64 h-4 rounded-full shadow-lg border-t-2 border-[#EDD4BC]"></div>
                     {/* 식탁 다리 */}
                     <div className="flex gap-40">
-                        <div className="bg-amber-700 w-3 h-8 rounded-b-sm"></div>
-                        <div className="bg-amber-700 w-3 h-8 rounded-b-sm"></div>
+                        <div className="bg-[#D4B598] w-3 h-8 rounded-b-sm"></div>
+                        <div className="bg-[#D4B598] w-3 h-8 rounded-b-sm"></div>
                     </div>
                 </div>
 
                 {/* 식탁 위 접시들 */}
                 <div className="absolute bottom-28 left-1/4 z-41">
                     <div className="relative">
-                        <div className="w-8 h-8 bg-white rounded-full shadow-md border-2 border-gray-200"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-blue-100 rounded-full"></div>
+                        <div className="w-8 h-8 bg-white rounded-full shadow-sm border-2 border-gray-100"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-blue-50 rounded-full"></div>
                     </div>
                 </div>
                 <div className="absolute bottom-28 right-1/4 z-41">
                     <div className="relative">
-                        <div className="w-8 h-8 bg-white rounded-full shadow-md border-2 border-gray-200"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-pink-100 rounded-full"></div>
+                        <div className="w-8 h-8 bg-white rounded-full shadow-sm border-2 border-gray-100"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-pink-50 rounded-full"></div>
                     </div>
                 </div>
 
