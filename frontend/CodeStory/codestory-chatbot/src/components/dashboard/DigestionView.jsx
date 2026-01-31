@@ -74,6 +74,12 @@ const DigestionView = ({ onClose, userId }) => {
     const [flyingShards, setFlyingShards] = useState([]);
     const [mongleBubble, setMongleBubble] = useState('배고파요... ( •̀ ω •́ )');
 
+    // ✅ 디버깅: emotionShards 확인
+    useEffect(() => {
+        console.log('🍽️ [DigestionView] emotionShards:', emotionShards);
+        console.log('🍽️ [DigestionView] hungerGauge:', hungerGauge);
+    }, [emotionShards, hungerGauge]);
+
     // 배고픔 상태에 따른 메시지
     useEffect(() => {
         if (hungerGauge >= 90) {
@@ -248,9 +254,9 @@ const DigestionView = ({ onClose, userId }) => {
 
                 {/* 감정 조각 스크롤 영역 */}
                 <div className="w-full overflow-x-auto no-scrollbar px-6 py-2">
-                    <div className="flex gap-4 w-max">
-                        {emotionShards.length > 0 ? (
-                            emotionShards.map(shard => {
+                    {emotionShards.length > 0 ? (
+                        <div className="flex gap-4 w-max pb-2">
+                            {emotionShards.map(shard => {
                                 const color = EMOTION_COLORS[shard.emotion] || '#E0E0E0';
                                 const emoji = EMOTION_EMOJIS[shard.emotion] || '⚪';
                                 const name = EMOTION_NAMES[shard.emotion] || '중립';
@@ -259,28 +265,39 @@ const DigestionView = ({ onClose, userId }) => {
                                     <button
                                         key={shard.id}
                                         onClick={() => handleFeedEmotion(shard)}
-                                        className="group flex flex-col items-center gap-1 active:scale-90 transition-transform"
+                                        className="group flex flex-col items-center gap-2 active:scale-90 transition-transform"
                                         data-gtm={`digestion-shard-${shard.emotion}`}
                                     >
                                         <div
-                                            className="w-14 h-14 rounded-full flex items-center justify-center shadow-md border-2 border-white relative group-hover:scale-110 transition-transform"
-                                            style={{ backgroundColor: color }}
+                                            className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg border-3 border-white relative group-hover:scale-110 group-hover:shadow-xl transition-all animate-bounce-soft"
+                                            style={{
+                                                backgroundColor: color,
+                                                boxShadow: `0 4px 12px ${color}80, inset 0 -2px 8px rgba(0,0,0,0.1)`
+                                            }}
                                         >
-                                            <div className="text-2xl drop-shadow-sm">{emoji}</div>
+                                            <div className="text-3xl drop-shadow-md">{emoji}</div>
+                                            {/* 반짝이는 효과 */}
+                                            <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse" style={{ animationDuration: '2s' }}></div>
                                         </div>
-                                        <span className="text-[11px] font-bold text-gray-500">
-                                            {name}
-                                        </span>
+                                        <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+                                            <span className="text-[11px] font-bold text-gray-600">
+                                                {name}
+                                            </span>
+                                        </div>
                                     </button>
                                 );
-                            })
-                        ) : (
-                            <div className="w-full text-center py-6 text-gray-400">
-                                <p className="text-sm font-medium">아직 감정 조각이 없어요</p>
-                                <p className="text-xs mt-1">일기를 작성하면 감정 조각을 얻을 수 있어요!</p>
+                            })}
+                        </div>
+                    ) : (
+                        <div className="w-full text-center py-8 px-6">
+                            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-gray-300">
+                                <div className="text-5xl mb-3 opacity-40">🍽️</div>
+                                <p className="text-sm font-bold text-gray-500 mb-2">아직 감정 조각이 없어요</p>
+                                <p className="text-xs text-gray-400">일기를 작성하면 감정 조각을 얻을 수 있어요!</p>
+                                <p className="text-xs text-gray-400 mt-1">💝 수집한 조각으로 몽글이를 먹여주세요</p>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

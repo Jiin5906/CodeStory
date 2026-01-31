@@ -39,6 +39,7 @@ const STORAGE_KEYS = {
     IS_SLEEPING: 'pet_is_sleeping',
     MOOD_LIGHT_ON: 'pet_mood_light_on',
     LAST_INTERACTION: 'pet_last_interaction_time',
+    EMOTION_SHARDS: 'pet_emotion_shards',
 };
 
 // localStorage 유틸리티
@@ -53,7 +54,14 @@ const loadGaugeFromStorage = (key, defaultValue = 50) => {
 
 export const PetProvider = ({ children }) => {
     const [petStatus, setPetStatus] = useState(null);
-    const [emotionShards, setEmotionShards] = useState([]);
+    const [emotionShards, setEmotionShards] = useState(() => {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.EMOTION_SHARDS);
+            return stored ? JSON.parse(stored) : [];
+        } catch {
+            return [];
+        }
+    });
     const [isRubbing, setIsRubbing] = useState(false);
 
     // 게이지 상태 (localStorage 초기값)
@@ -108,6 +116,11 @@ export const PetProvider = ({ children }) => {
         localStorage.setItem(STORAGE_KEYS.LAST_INTERACTION, lastInteractionTime);
     }, [isSleeping, moodLightOn, lastInteractionTime]);
 
+    // ─── 감정 조각 localStorage 동기화 ───
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEYS.EMOTION_SHARDS, JSON.stringify(emotionShards));
+    }, [emotionShards]);
+
     // ─── Lock/Unlock 로직 ───
     const checkLock = useCallback((value, currentLocked) => {
         if (value >= LOCK_THRESHOLD) return true;
@@ -145,17 +158,26 @@ export const PetProvider = ({ children }) => {
         decayTimerRef.current = setInterval(() => {
             // 기존 게이지들 (깨어 있을 때만 감소)
             if (!isSleeping) {
+                // ✅ 쓰다듬기 게이지: Lock 상태가 아닐 때만 감소
                 setAffectionGauge(prev => {
+                    // Lock 상태면 감소하지 않음
+                    if (isAffectionLocked) return prev;
                     const next = Math.max(0, prev - DECAY_AMOUNT);
                     setIsAffectionLocked(locked => checkLock(next, locked));
                     return next;
                 });
+
                 setAirGauge(prev => {
+                    // Lock 상태면 감소하지 않음
+                    if (isAirLocked) return prev;
                     const next = Math.max(0, prev - DECAY_AMOUNT);
                     setIsAirLocked(locked => checkLock(next, locked));
                     return next;
                 });
+
                 setEnergyGauge(prev => {
+                    // Lock 상태면 감소하지 않음
+                    if (isEnergyLocked) return prev;
                     const next = Math.max(0, prev - DECAY_AMOUNT);
                     setIsEnergyLocked(locked => checkLock(next, locked));
                     return next;
@@ -180,7 +202,7 @@ export const PetProvider = ({ children }) => {
         return () => {
             if (decayTimerRef.current) clearInterval(decayTimerRef.current);
         };
-    }, [checkLock, isSleeping]);
+    }, [checkLock, isSleeping, isAffectionLocked, isAirLocked, isEnergyLocked]);
 
     // ─── 강제 수면 체크 (비활동 시) ───
     useEffect(() => {
