@@ -106,6 +106,7 @@ const BottomSheet = ({
     onCalendarClick,
     onVentilateClick,
     onFeedClick,
+    onHomeClick,
     diaries,
     streakDays,
     onMindRecordClick,
@@ -336,7 +337,7 @@ const BottomSheet = ({
                             icon="🏠"
                             label="홈"
                             value={100}
-                            onClick={onCalendarClick}
+                            onClick={onHomeClick}
                             isHome={true}
                         />
                     </div>

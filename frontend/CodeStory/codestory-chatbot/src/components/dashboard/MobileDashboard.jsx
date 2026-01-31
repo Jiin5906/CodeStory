@@ -6,6 +6,8 @@ import MindRecord from '../../change/MindRecord';
 import CircularProgressNew from './CircularProgressNew';
 import DigestionView from './DigestionView';
 import MoodLight from './MoodLight';
+import MainMenu from './MainMenu';
+import StoreView from './StoreView';
 import { diaryApi, chatApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 
@@ -16,6 +18,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
     const [isDigestionViewOpen, setIsDigestionViewOpen] = useState(false);
+    const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
+    const [isStoreViewOpen, setIsStoreViewOpen] = useState(false);
 
     // 인터랙티브 효과를 위한 상태
     const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -579,6 +583,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     onCalendarClick={onCalendarClick}
                     onVentilateClick={handleWindowClick}
                     onFeedClick={() => setIsDigestionViewOpen(true)}
+                    onHomeClick={() => setIsMainMenuOpen(true)}
                     diaries={diaries}
                     streakDays={streakDays}
                     onMindRecordClick={() => setIsMindRecordOpen(true)}
@@ -602,6 +607,20 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         userId={user?.id}
                     />
                 )}
+
+                {/* 메인 메뉴 */}
+                <MainMenu
+                    isOpen={isMainMenuOpen}
+                    onClose={() => setIsMainMenuOpen(false)}
+                    onEmotionShardsClick={onCalendarClick}
+                    onStoreClick={() => setIsStoreViewOpen(true)}
+                />
+
+                {/* 상점 */}
+                <StoreView
+                    isOpen={isStoreViewOpen}
+                    onClose={() => setIsStoreViewOpen(false)}
+                />
             </div>
         </div>
     );
