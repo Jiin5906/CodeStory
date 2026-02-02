@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
 
 import { authApi, diaryApi } from './services/api';
@@ -177,35 +177,39 @@ function AppContent() {
                     </div>
                 } />
 
-                {/* 모바일 레이아웃 (Layout Pattern with Outlet) */}
+                {/* 모바일 레이아웃 (Pathless Layout Route Pattern) */}
                 {isMobile ? (
-                    <Route path="/*" element={<MobileLayout />}>
-                        <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} onCalendarClick={() => setShowCalendarModal(true)} />} />
-                        <Route path="calendar" element={<CalendarView diaries={diaries} />} />
-                        <Route path="stats" element={<ReportView user={user} diaries={diaries} />} />
-                        <Route path="settings" element={<SettingsView user={user} />} />
+                    <>
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    </Route>
+                        <Route element={<MobileLayout />}>
+                            <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} onCalendarClick={() => setShowCalendarModal(true)} />} />
+                            <Route path="calendar" element={<CalendarView diaries={diaries} />} />
+                            <Route path="stats" element={<ReportView user={user} diaries={diaries} />} />
+                            <Route path="settings" element={<SettingsView user={user} />} />
+                        </Route>
+                    </>
                 ) : (
-                    /* 데스크톱 레이아웃 */
-                    <Route path="/*" element={
-                        <div className="layout-container animate-fade-in" data-gtm="main-layout-wrapper">
-                            <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />
-                            <main className="content-area" style={{flex:1, overflow:'hidden'}} data-gtm="page-content-main">
-                                <Routes>
-                                    <Route path="dashboard" element={<MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />} />
-                                    <Route path="calendar" element={<CalendarView diaries={diaries} />} />
-                                    <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
-                                    <Route path="shared" element={<SharedFeed />} />
-                                    <Route path="shop" element={<ShopPage />} />
-                                    <Route path="diary/:id" element={<DiaryDetail />} />
-                                    <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} onLogout={handleLogout} />} />
-                                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                                </Routes>
-                            </main>
-                            <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />
-                        </div>
-                    } />
+                    /* 데스크톱 레이아웃 (Pathless Layout Route Pattern) */
+                    <>
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                        <Route element={
+                            <div className="layout-container animate-fade-in" data-gtm="main-layout-wrapper">
+                                <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />
+                                <main className="content-area" style={{flex:1, overflow:'hidden'}} data-gtm="page-content-main">
+                                    <Outlet />
+                                </main>
+                                <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />
+                            </div>
+                        }>
+                            <Route path="dashboard" element={<MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />} />
+                            <Route path="calendar" element={<CalendarView diaries={diaries} />} />
+                            <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
+                            <Route path="shared" element={<SharedFeed />} />
+                            <Route path="shop" element={<ShopPage />} />
+                            <Route path="diary/:id" element={<DiaryDetail />} />
+                            <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} onLogout={handleLogout} />} />
+                        </Route>
+                    </>
                 )}
             </Routes>
 
