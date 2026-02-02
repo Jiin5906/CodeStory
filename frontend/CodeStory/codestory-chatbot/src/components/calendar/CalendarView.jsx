@@ -3,7 +3,7 @@ import { format, eachDayOfInterval, isSameDay, getDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import './CalendarView.css';
 
-const CalendarView = ({ user, diaries }) => {
+const CalendarView = ({ diaries }) => {
     const currentYear = new Date().getFullYear();
     const startDate = new Date(currentYear, 0, 1);
     const endDate = new Date(currentYear, 11, 31);
@@ -79,7 +79,6 @@ const CalendarView = ({ user, diaries }) => {
                 <div className="grass-scroll-area">
                     <div className="grass-columns">
                         {weeks.map((week, wIdx) => {
-                            const firstValidDate = week.find(d => d !== null);
                             const showMonthLabel = week.some(d => d && d.getDate() === 1);
                             
                             return (

@@ -1,7 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO } from 'date-fns';
 import MainRoom from './MainRoom';
-import BottomSheet from './BottomSheet';
+import ChatInputBar from './ChatInputBar';
+import BottomTabBar from './BottomTabBar';
+import CalendarView from '../calendar/CalendarView';
+import ReportView from './ReportView';
+import SettingsView from './SettingsView';
 import MindRecord from '../../change/MindRecord';
 import CircularProgressNew from './CircularProgressNew';
 import MoodLight from './MoodLight';
@@ -18,6 +22,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const [isMindRecordOpen, setIsMindRecordOpen] = useState(false);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
     const [isStoreViewOpen, setIsStoreViewOpen] = useState(false);
+
+    // 탭바 상태 (home, diary, report, settings)
+    const [activeTab, setActiveTab] = useState('home');
 
     // 인터랙티브 효과를 위한 상태
     const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -190,14 +197,35 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         }
     };
 
+    // 탭 변경 핸들러
+    const handleTabChange = (tabId) => {
+        setActiveTab(tabId);
+
+        // 기존 콜백 호출 (호환성 유지)
+        if (tabId === 'report' && onStatsClick) {
+            onStatsClick();
+        } else if (tabId === 'settings' && onSettingsClick) {
+            onSettingsClick();
+        }
+    };
+
+    // 중앙 FAB 클릭 핸들러
+    const handleCentralAction = () => {
+        // 감정 기록 열기
+        setIsMindRecordOpen(true);
+    };
+
     return (
         <div className="bg-gradient-to-br from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body" data-gtm="view-mobile-dashboard-new">
 
-            {/* 폰 프레임 컨테이너 */}
-            <div className="relative flex h-[100dvh] md:h-[800px] w-full md:max-w-[375px] flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]">
+            {/* 폰 프레임 컨테이너 - 최대 너비 430px로 제한 */}
+            <div className="relative flex h-[100dvh] md:h-[800px] w-full max-w-[430px] mx-auto flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]">
 
-                {/* 메인 화면 영역 (배경 + MainRoom) */}
+                {/* 메인 화면 영역 - 탭에 따라 다른 콘텐츠 표시 */}
                 <div className="relative w-full flex-1 overflow-hidden">
+                    {/* 홈 탭: 다마고치 룸 표시 */}
+                    {activeTab === 'home' && (
+                        <div className="absolute inset-0">
                     {/* 💡 무드등 OFF 시 어두운 오버레이 */}
                     {!moodLightOn && (
                         <div
@@ -582,49 +610,66 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             animationDuration: '3s'
                         }}></div>
                     </div>
+                        </div>
+                    )}
+
+                    {/* 일기 탭: 캘린더 뷰 표시 */}
+                    {activeTab === 'diary' && (
+                        <div className="absolute inset-0 bg-white">
+                            <CalendarView diaries={diaries} />
+                        </div>
+                    )}
+
+                    {/* 리포트 탭: 통계 뷰 표시 */}
+                    {activeTab === 'report' && (
+                        <div className="absolute inset-0">
+                            <ReportView user={user} diaries={diaries} />
+                        </div>
+                    )}
+
+                    {/* 설정 탭: 설정 뷰 표시 */}
+                    {activeTab === 'settings' && (
+                        <div className="absolute inset-0">
+                            <SettingsView user={user} />
+                        </div>
+                    )}
                 </div>
 
-                {/* 헤더 영역 (스트릭 배지만) */}
-                <div
-                    className="absolute top-0 z-40 flex w-full items-end justify-end px-6 md:px-8 pointer-events-none"
-                    style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
-                    data-gtm="mobile-dashboard-header"
-                >
-                    {/* 스트릭 배지 - 따뜻한 스타일 */}
-                    <div
-                        className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 border-[#FFD4DC]/40 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
-                        onClick={onCalendarClick}
-                        data-gtm="mobile-dashboard-streak-indicator"
-                    >
-                        <span className="text-xs font-bold text-[#FFB5C2]">
-                            🌸 {streakDays}일차
-                        </span>
-                    </div>
-                </div>
+                {/* 헤더 영역 (스트릭 배지만) - 홈 탭에서만 표시 */}
+                {activeTab === 'home' && (
+                    <>
+                        <div
+                            className="absolute top-0 z-40 flex w-full items-end justify-end px-6 md:px-8 pointer-events-none"
+                            style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
+                            data-gtm="mobile-dashboard-header"
+                        >
+                            {/* 스트릭 배지 - 따뜻한 스타일 */}
+                            <div
+                                className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 border-[#FFD4DC]/40 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
+                                onClick={onCalendarClick}
+                                data-gtm="mobile-dashboard-streak-indicator"
+                            >
+                                <span className="text-xs font-bold text-[#FFB5C2]">
+                                    🌸 {streakDays}일차
+                                </span>
+                            </div>
+                        </div>
 
-                {/* CircularProgressNew — 좌측 상단 레벨 HUD (safe-area 적용) */}
-                <div
-                    className="pointer-events-auto"
-                    style={{ position: 'absolute', top: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-top)))', left: '1.5rem', zIndex: 50 }}
-                >
-                    <CircularProgressNew
-                        level={petStatus?.level ?? 1}
-                        percent={petStatus ? (petStatus.currentExp / petStatus.requiredExp) * 100 : 0}
-                    />
-                </div>
+                        {/* CircularProgressNew — 좌측 상단 레벨 HUD (safe-area 적용) */}
+                        <div
+                            className="pointer-events-auto"
+                            style={{ position: 'absolute', top: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-top)))', left: '1.5rem', zIndex: 50 }}
+                        >
+                            <CircularProgressNew
+                                level={petStatus?.level ?? 1}
+                                percent={petStatus ? (petStatus.currentExp / petStatus.requiredExp) * 100 : 0}
+                            />
+                        </div>
+                    </>
+                )}
 
-                {/* 따뜻한 공감일기 BottomSheet */}
-                <BottomSheet
-                    onWrite={handleWrite}
-                    onCalendarClick={onCalendarClick}
-                    onVentilateClick={handleWindowClick}
-                    onHomeClick={() => setIsMainMenuOpen(true)}
-                    diaries={diaries}
-                    streakDays={streakDays}
-                    onMindRecordClick={() => setIsMindRecordOpen(true)}
-                    onStatsClick={onStatsClick}
-                    onSettingsClick={onSettingsClick}
-                />
+                {/* 채팅 입력창 - 홈 탭에서만 표시 */}
+                {activeTab === 'home' && <ChatInputBar onSubmit={handleWrite} />}
 
                 {/* 마음 기록 오버레이 */}
                 <MindRecord
@@ -647,6 +692,13 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 <StoreView
                     isOpen={isStoreViewOpen}
                     onClose={() => setIsStoreViewOpen(false)}
+                />
+
+                {/* 하단 탭바 - 항상 표시 */}
+                <BottomTabBar
+                    activeTab={activeTab}
+                    onTabChange={handleTabChange}
+                    onCentralAction={handleCentralAction}
                 />
             </div>
         </div>
