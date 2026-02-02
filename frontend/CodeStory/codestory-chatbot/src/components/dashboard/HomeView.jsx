@@ -209,6 +209,150 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                     backgroundSize: '120px 100%, 40px 100%'
                 }}></div>
 
+                {/* 🪟 Left Wall - Arch Window (교체 가능한 장식) */}
+                <div
+                    className="absolute left-4 top-[25%] z-10 pointer-events-none"
+                    data-decoration-type="window"
+                    data-decoration-id="arch-window-01"
+                    data-gtm="decoration-arch-window"
+                >
+                    {/* Window Frame */}
+                    <div className="relative w-28 h-36">
+                        {/* Arch Shape */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#8B7355] to-[#6B5638] rounded-t-full shadow-lg border-4 border-[#5D4037]"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-br from-[#8B7355] to-[#6B5638] border-4 border-t-0 border-[#5D4037]"></div>
+
+                        {/* Window Panes - Day/Night Sky */}
+                        <div className={`absolute inset-4 rounded-t-full overflow-hidden transition-all duration-1000 ${
+                            isNightTime
+                                ? 'bg-gradient-to-b from-[#1a1a2e] via-[#0f3460] to-[#16213e]'
+                                : 'bg-gradient-to-b from-[#87CEEB] via-[#B0E0E6] to-[#E0F6FF]'
+                        }`}>
+                            {/* Stars at night */}
+                            {isNightTime && (
+                                <>
+                                    <div className="absolute top-2 left-3 w-1 h-1 bg-white rounded-full animate-pulse"></div>
+                                    <div className="absolute top-5 right-4 w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                                    <div className="absolute top-8 left-5 w-0.5 h-0.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                                    <div className="absolute top-3 right-2 w-1.5 h-1.5 bg-yellow-200 rounded-full shadow-lg shadow-yellow-200/50"></div>
+                                </>
+                            )}
+                            {/* Sun/Clouds during day */}
+                            {!isNightTime && (
+                                <>
+                                    <div className="absolute top-2 right-3 w-6 h-6 bg-yellow-300 rounded-full shadow-lg shadow-yellow-200/50"></div>
+                                    <div className="absolute top-6 left-2 w-8 h-3 bg-white/60 rounded-full"></div>
+                                    <div className="absolute top-10 right-2 w-6 h-2 bg-white/40 rounded-full"></div>
+                                </>
+                            )}
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4 h-16 bg-gradient-to-b from-transparent to-white/10 rounded-b-lg"></div>
+
+                        {/* Window Cross Divider */}
+                        <div className="absolute top-1/2 left-4 right-4 h-1 bg-[#5D4037]"></div>
+                        <div className="absolute top-4 bottom-4 left-1/2 w-1 bg-[#5D4037] -translate-x-1/2"></div>
+                    </div>
+                </div>
+
+                {/* 📚 Right Wall - Wall Shelf with Items (교체 가능한 장식) */}
+                <div
+                    className="absolute right-4 top-[28%] z-10 pointer-events-none"
+                    data-decoration-type="shelf"
+                    data-decoration-id="wall-shelf-01"
+                    data-gtm="decoration-wall-shelf"
+                >
+                    <div className="relative w-32 h-24">
+                        {/* Shelf */}
+                        <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-b from-[#8B7355] to-[#6B5638] rounded-md shadow-lg"></div>
+                        <div className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[#5D4037] rounded-md"></div>
+
+                        {/* Shelf Items */}
+                        {/* Book Stack */}
+                        <div className="absolute bottom-3 left-2 flex flex-col gap-0.5">
+                            <div className="w-10 h-3 bg-gradient-to-r from-[#FF9AAB] to-[#FFB5C2] rounded-sm shadow-sm"></div>
+                            <div className="w-9 h-3 bg-gradient-to-r from-[#D4A5F5] to-[#E0B3FF] rounded-sm shadow-sm ml-0.5"></div>
+                            <div className="w-11 h-3 bg-gradient-to-r from-[#87CEEB] to-[#B0E0E6] rounded-sm shadow-sm"></div>
+                        </div>
+
+                        {/* Small Potted Plant */}
+                        <div className="absolute bottom-3 right-3 flex flex-col items-center">
+                            {/* Leaves */}
+                            <div className="relative w-8 h-6">
+                                <div className="absolute top-0 left-1 w-3 h-4 bg-[#90EE90] rounded-full transform -rotate-12"></div>
+                                <div className="absolute top-0 right-1 w-3 h-4 bg-[#98FB98] rounded-full transform rotate-12"></div>
+                                <div className="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-4 bg-[#7CFC00] rounded-full"></div>
+                            </div>
+                            {/* Pot */}
+                            <div className="w-6 h-3 bg-gradient-to-b from-[#D2691E] to-[#A0522D] rounded-b-lg shadow-sm"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 🪴 Bottom Right - Large Potted Plant (교체 가능한 장식) */}
+                <div
+                    className="absolute right-8 bottom-[8%] z-20 pointer-events-none"
+                    data-decoration-type="plant"
+                    data-decoration-id="potted-plant-01"
+                    data-gtm="decoration-potted-plant"
+                >
+                    <div className="relative w-24 h-32 flex flex-col items-center justify-end">
+                        {/* Plant Leaves */}
+                        <div className="relative w-full h-20 mb-2">
+                            {/* Center leaves */}
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-14 bg-gradient-to-t from-[#228B22] to-[#32CD32] rounded-t-full shadow-md"></div>
+                            <div className="absolute bottom-2 left-1/4 w-7 h-12 bg-gradient-to-t from-[#228B22] to-[#3CB371] rounded-t-full shadow-md transform -rotate-20"></div>
+                            <div className="absolute bottom-2 right-1/4 w-7 h-12 bg-gradient-to-t from-[#228B22] to-[#90EE90] rounded-t-full shadow-md transform rotate-20"></div>
+                            {/* Outer leaves */}
+                            <div className="absolute bottom-4 left-2 w-6 h-10 bg-gradient-to-t from-[#2E8B57] to-[#66CDAA] rounded-t-full shadow-sm transform -rotate-35"></div>
+                            <div className="absolute bottom-4 right-2 w-6 h-10 bg-gradient-to-t from-[#2E8B57] to-[#7CFC00] rounded-t-full shadow-sm transform rotate-35"></div>
+                        </div>
+
+                        {/* Large Pot */}
+                        <div className="relative">
+                            <div className="w-20 h-12 bg-gradient-to-b from-[#D2691E] to-[#8B4513] rounded-b-2xl shadow-xl border-2 border-[#A0522D]"></div>
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-[#A0522D] rounded-t-md"></div>
+                            {/* Pot decoration */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-[#CD853F] opacity-30"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 🛋️ Center Floor - Circular Rug/Cushion under Mongle (교체 가능한 장식) */}
+                <div
+                    className="absolute left-1/2 top-[63%] -translate-x-1/2 z-10 pointer-events-none"
+                    data-decoration-type="rug"
+                    data-decoration-id="circular-rug-01"
+                    data-gtm="decoration-circular-rug"
+                >
+                    <div className="relative w-48 h-12">
+                        {/* Rug Shadow */}
+                        <div className="absolute inset-0 bg-black/10 rounded-[50%] blur-md"></div>
+
+                        {/* Main Rug */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#FFB5C2] via-[#FFD4DC] to-[#FF9AAB] rounded-[50%] shadow-lg overflow-hidden">
+                            {/* Rug Pattern - Concentric circles */}
+                            <div className="absolute inset-2 border-2 border-white/30 rounded-[50%]"></div>
+                            <div className="absolute inset-4 border-2 border-[#FFB5C2]/40 rounded-[50%]"></div>
+
+                            {/* Decorative dots */}
+                            <div className="absolute top-1/2 left-[20%] w-2 h-2 bg-white/40 rounded-full"></div>
+                            <div className="absolute top-1/2 right-[20%] w-2 h-2 bg-white/40 rounded-full"></div>
+                            <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-2 h-2 bg-white/40 rounded-full"></div>
+                            <div className="absolute bottom-[30%] left-1/2 -translate-x-1/2 w-2 h-2 bg-white/40 rounded-full"></div>
+                        </div>
+
+                        {/* Rug Fringe/Tassels */}
+                        <div className="absolute -left-1 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                            <div className="w-2 h-0.5 bg-[#FF9AAB] rounded-full"></div>
+                            <div className="w-2 h-0.5 bg-[#FFB5C2] rounded-full"></div>
+                        </div>
+                        <div className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                            <div className="w-2 h-0.5 bg-[#FF9AAB] rounded-full"></div>
+                            <div className="w-2 h-0.5 bg-[#FFB5C2] rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* MainRoom 컴포넌트 배치 */}
                 <div className="absolute top-[53%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
                     <div className="w-40 h-40 rounded-full pointer-events-auto flex items-center justify-center">

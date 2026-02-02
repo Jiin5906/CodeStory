@@ -137,3 +137,8 @@ button{
 .transition-slow {
   transition: all 0.3s ease;
 }
+
+/* 🎨 Cute Font (Jua) 유틸리티 클래스 */
+.font-cute {
+  font-family: 'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+}

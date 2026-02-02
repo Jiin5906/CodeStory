@@ -47,7 +47,7 @@ const CircularProgressNew = ({ level = 1, percent = 0 }) => {
 
                 {/* 중앙 레벨 숫자 */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-[#FFB5C2]">
+                    <span className="text-2xl font-bold text-[#FFB5C2] leading-none">
                         {level}
                     </span>
                 </div>
