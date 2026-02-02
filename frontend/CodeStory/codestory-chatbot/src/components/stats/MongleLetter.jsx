@@ -15,7 +15,6 @@ const MongleLetter = ({ diaries }) => {
             return {
                 title: "아직 배우는 중이에요",
                 content: "몽글이가 아직 너에 대해 배우고 있어! 대화를 더 많이 들려줘 ( •̀ ω •́ )✧",
-                emoji: "📚"
             };
         }
 
@@ -28,25 +27,21 @@ const MongleLetter = ({ diaries }) => {
             return {
                 title: "행복이 가득한 한 달",
                 content: `${count}개의 기록을 함께했어! 이번 달은 정말 밝고 행복한 순간들이 많았구나. 이 기운을 계속 이어가자!`,
-                emoji: "🌟"
             };
         } else if (avgMood >= 60) {
             return {
                 title: "평온한 나날들",
                 content: `${count}개의 이야기를 들려줘서 고마워! 잔잔하고 평화로운 하루들이었네. 소소한 행복들을 계속 발견해 나가자.`,
-                emoji: "🍃"
             };
         } else if (avgMood >= 40) {
             return {
                 title: "조금씩 나아가는 중",
                 content: `${count}번이나 마음을 나눠줘서 고마워. 힘든 날도 있었지만, 기록하며 마음을 다독인 거 자체가 정말 대단해!`,
-                emoji: "💪"
             };
         } else {
             return {
                 title: "함께 있어줄게",
                 content: `${count}개의 솔직한 마음을 들려줘서 고마워. 많이 힘들었구나... 몽글이는 언제나 네 곁에 있을게. 조금씩 괜찮아질 거야.`,
-                emoji: "💝"
             };
         }
     };

@@ -96,7 +96,7 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                             </div>
                         )}
                         <h3 className="cover-title">
-                            {monthlyDiaries.length > 0 ? "당신의 찬란한 순간들 ✨" : "기록을 시작해보세요"}
+                            {monthlyDiaries.length > 0 ? "당신의 찬란한 순간들" : "기록을 시작해보세요"}
                         </h3>
                     </div>
                 </div>

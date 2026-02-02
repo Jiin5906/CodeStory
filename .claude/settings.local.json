@@ -31,7 +31,12 @@
       "Bash(then grep -E \"^DB_|^MYSQL_\" .env)",
       "Bash(else echo \".env 파일이 없습니다\")",
       "Bash(fi)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(timeout:*)",
+      "Bash(test:*)",
+      "Bash(docker ps:*)",
+      "Bash(git rm:*)",
+      "Bash(findstr:*)"
     ],
     "env": {
       "ENABLE_MCP_SERVER_MEMORY": "true"

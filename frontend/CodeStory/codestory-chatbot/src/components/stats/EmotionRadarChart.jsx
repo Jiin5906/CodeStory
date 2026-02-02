@@ -25,7 +25,7 @@ const EmotionRadarChart = ({ emotionData }) => {
     return (
         <div className="bg-white rounded-3xl shadow-sm p-6" data-gtm="emotion-radar-chart">
             <h3 className="text-lg font-cute text-gray-700 mb-1 flex items-center gap-2">
-                🎨 감정 팔레트
+                감정 팔레트
             </h3>
             <p className="text-xs font-cute text-gray-400 mb-6">
                 몽글이와 나눈 대화의 감정 분포

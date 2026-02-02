@@ -210,14 +210,14 @@ const SettingsView = ({ user }) => {
                                     className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#87CEEB] to-[#6BB6D6] text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
                                     data-gtm="settings-data-backup"
                                 >
-                                    📦 백업하기
+                                    백업하기
                                 </button>
                                 <button
                                     onClick={handleRestore}
                                     className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#90EE90] to-[#76D476] text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
                                     data-gtm="settings-data-restore"
                                 >
-                                    📂 복원하기
+                                    복원하기
                                 </button>
                             </div>
                         </div>

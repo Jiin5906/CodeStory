@@ -32,11 +32,11 @@ jobs:
           cp -r frontend/CodeStory/codestory-chatbot/dist/* diary/src/main/resources/static/
 
       # 3. Java 빌드 (프론트 파일이 포함된 상태로 패키징)
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Build with Gradle
         run: |
