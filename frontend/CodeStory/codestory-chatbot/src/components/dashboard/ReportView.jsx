@@ -24,7 +24,7 @@ const ReportView = ({ user, diaries }) => {
                 </div>
 
                 {/* 통계 컴포넌트 */}
-                <MonthlyReport user={user} diaries={diaries} />
+                <MonthlyReport user={user} diaries={diaries} currentMonth={new Date()} />
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaQuoteLeft, FaImage, FaListUl, FaHashtag, FaRobot, FaArrowLeft } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +10,17 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
     const navigate = useNavigate();
     const [showTimeline, setShowTimeline] = useState(false);
 
+    // 🛡️ Safe Date Utility: 유효하지 않은 날짜를 오늘 날짜로 대체
+    const safeDate = (date) => {
+        if (!date) return new Date();
+        const d = new Date(date);
+        return isValid(d) ? d : new Date();
+    };
+
     const monthlyDiaries = useMemo(() => {
-        const targetMonth = format(currentMonth, 'yyyy-MM');
+        const targetMonth = format(safeDate(currentMonth), 'yyyy-MM');
         return diaries
-            .filter(d => d.date.startsWith(targetMonth))
+            .filter(d => d.date && d.date.startsWith(targetMonth))
             .sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [diaries, currentMonth]);
 
@@ -78,8 +85,8 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
             >
                 <div className="cover-overlay">
                     <div className="cover-header">
-                        <span className="cover-year">{format(currentMonth, 'yyyy')}</span>
-                        <span className="cover-month">{format(currentMonth, '.MM')}</span>
+                        <span className="cover-year">{format(safeDate(currentMonth), 'yyyy')}</span>
+                        <span className="cover-month">{format(safeDate(currentMonth), '.MM')}</span>
                     </div>
 
                     <div className="cover-footer">
@@ -156,8 +163,8 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                                         data-gtm={`report-timeline-item-${diary.id}`}
                                     >
                                         <div className="timeline-left">
-                                            <span className="day-num">{format(parseISO(diary.date), 'dd')}</span>
-                                            <span className="day-week">{format(parseISO(diary.date), 'EEEE', { locale: ko })}</span>
+                                            <span className="day-num">{diary.date ? format(safeDate(parseISO(diary.date)), 'dd') : '--'}</span>
+                                            <span className="day-week">{diary.date ? format(safeDate(parseISO(diary.date)), 'EEEE', { locale: ko }) : '-'}</span>
                                         </div>
                                         <div className="timeline-content-card">
                                             <div className="card-header">

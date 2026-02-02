@@ -1,12 +1,20 @@
 import React from 'react';
-import { format, getDaysInMonth } from 'date-fns';
+import { format, getDaysInMonth, isValid } from 'date-fns';
 
 const MoodGraph = ({ diaries, currentMonth }) => {
-    const totalDays = getDaysInMonth(currentMonth);
+    // 🛡️ Safe Date Utility: 유효하지 않은 날짜를 오늘 날짜로 대체
+    const safeDate = (date) => {
+        if (!date) return new Date();
+        const d = new Date(date);
+        return isValid(d) ? d : new Date();
+    };
+
+    const safeMonth = safeDate(currentMonth);
+    const totalDays = getDaysInMonth(safeMonth);
 
     const graphData = Array.from({ length: totalDays }, (_, i) => {
         const dayNum = i + 1;
-        const dateStr = format(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayNum), 'yyyy-MM-dd');
+        const dateStr = format(new Date(safeMonth.getFullYear(), safeMonth.getMonth(), dayNum), 'yyyy-MM-dd');
         const diary = diaries.find(d => d.date === dateStr);
         return {
             day: dayNum,
