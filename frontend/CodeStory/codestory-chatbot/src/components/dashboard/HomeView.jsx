@@ -209,247 +209,311 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                     backgroundSize: '120px 100%, 40px 100%'
                 }}></div>
 
-                {/* 🪟 Right Wall - Large Window (교체 가능한 장식) */}
+                {/* 🪟 대형 창문 (우측) - 다마고치 스타일, 일부 잘림 (교체 가능한 장식) */}
                 <div
-                    className="absolute right-0 top-[12%] z-10 pointer-events-none"
+                    className="absolute top-[5%] right-[-12%] z-20 w-[40%] h-[48%]"
                     data-decoration-type="window"
                     data-decoration-id="large-window-01"
-                    data-gtm="decoration-large-window"
+                    data-gtm="decoration-window-click"
+                    style={{
+                        filter: 'drop-shadow(-4px 8px 16px rgba(0,0,0,0.25))'
+                    }}
                 >
-                    <div className="relative w-56 h-72">
-                        {/* Window Frame - Blue */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#7DD3FC] to-[#38BDF8] rounded-3xl shadow-2xl border-4 border-[#0EA5E9]"></div>
+                    <div className="relative w-full h-full">
+                        {/* 창문 틀 (큰 아치형) - 파란색 두꺼운 테두리 */}
+                        <div className="absolute inset-0 rounded-tl-[45%] rounded-tr-[45%] rounded-b-2xl border-[10px] border-[#5DADE2] overflow-hidden" style={{
+                            boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.15), inset 0 -4px 8px rgba(255,255,255,0.3), 0 0 0 2px rgba(255,255,255,0.4)',
+                            background: 'linear-gradient(135deg, #6EC1E4 0%, #5DADE2 100%)'
+                        }}>
+                            {/* 하늘 배경 (낮/밤 조건부 렌더링) */}
+                            <div className={`absolute inset-0 transition-colors duration-1000 ${
+                                isNightTime
+                                    ? 'bg-gradient-to-b from-slate-900 via-indigo-950 to-indigo-900'
+                                    : 'bg-gradient-to-b from-[#87CEEB] via-[#A8D8F0] to-[#C8EDF9]'
+                            }`}>
+                                {/* 밤하늘 장식 (별과 달) */}
+                                {isNightTime && (
+                                    <>
+                                        {/* 🌙 달 */}
+                                        <div className="absolute top-[15%] right-[20%] text-4xl animate-pulse" style={{ animationDuration: '3s' }}>
+                                            🌙
+                                        </div>
+                                        {/* ✨ 별들 */}
+                                        <div className="absolute top-[20%] left-[15%] text-xl animate-pulse" style={{ animationDuration: '2s' }}>⭐</div>
+                                        <div className="absolute top-[10%] left-[30%] text-sm animate-pulse" style={{ animationDuration: '2.5s' }}>✨</div>
+                                        <div className="absolute top-[25%] right-[35%] text-base animate-pulse" style={{ animationDuration: '3s' }}>⭐</div>
+                                        <div className="absolute top-[35%] left-[25%] text-xs animate-pulse" style={{ animationDuration: '2.2s' }}>✨</div>
+                                    </>
+                                )}
+                            </div>
 
-                        {/* Window Content - Sky */}
-                        <div className="absolute inset-3 rounded-2xl overflow-hidden bg-gradient-to-b from-[#87CEEB] via-[#B0E0E6] to-[#7DD3FC]">
-                            {/* Clouds */}
-                            <div className="absolute top-6 left-4 w-16 h-6 bg-white/80 rounded-full blur-sm"></div>
-                            <div className="absolute top-8 left-8 w-12 h-5 bg-white/70 rounded-full blur-sm"></div>
-                            <div className="absolute top-10 right-6 w-20 h-7 bg-white/75 rounded-full blur-sm"></div>
-                            <div className="absolute top-14 right-10 w-14 h-5 bg-white/65 rounded-full blur-sm"></div>
+                            {/* 마을 풍경 (항상 표시) - 사실적 레이어링 */}
+                            <div className="absolute inset-0 overflow-hidden">
+                                {/* ☁️ 구름 레이어 (뒤쪽) */}
+                                <div className="absolute top-[12%] left-[8%] flex gap-1 opacity-70">
+                                    <div className="w-6 h-3.5 bg-white/70 rounded-full"></div>
+                                    <div className="w-7 h-4.5 bg-white/80 rounded-full -ml-3"></div>
+                                    <div className="w-5 h-3.5 bg-white/70 rounded-full -ml-2"></div>
+                                </div>
+                                <div className="absolute top-[20%] right-[12%] flex gap-1 opacity-60">
+                                    <div className="w-5 h-3 bg-white/60 rounded-full"></div>
+                                    <div className="w-6 h-3.5 bg-white/70 rounded-full -ml-2"></div>
+                                    <div className="w-4 h-3 bg-white/60 rounded-full -ml-1"></div>
+                                </div>
 
-                            {/* Ground Section */}
-                            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-[#7EC850] to-[#5FA839]">
-                                {/* Grass texture */}
-                                <div className="absolute inset-0 opacity-20" style={{
-                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)'
+                                {/* 🌄 땅/잔디 레이어 (하단) */}
+                                <div className="absolute bottom-0 left-0 right-0 h-[35%] bg-gradient-to-b from-[#9CCC65] via-[#8BC34A] to-[#7CB342]" style={{
+                                    boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.1)'
+                                }}>
+                                    {/* 잔디 질감 */}
+                                    <div className="absolute inset-0" style={{
+                                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(124,179,66,0.3) 3px, rgba(124,179,66,0.3) 4px)',
+                                        opacity: 0.5
+                                    }}></div>
+                                </div>
+
+                                {/* 🏠 집 (좌측 뒤편 - 작고 높게) */}
+                                <div className="absolute bottom-[32%] left-[8%]" style={{
+                                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                                }}>
+                                    <div className="w-10 h-8 bg-gradient-to-b from-[#FFE8B3] to-[#FFDAA0] rounded-md"></div>
+                                    <div className="absolute -top-4 -left-1 w-12 h-6 bg-gradient-to-b from-[#7CB5E8] to-[#5A9FD4]" style={{
+                                        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                                    }}></div>
+                                    <div className="absolute top-1 right-2 w-2.5 h-2.5 bg-[#FFE8CC]/90 rounded-sm border border-[#8B6F47]"></div>
+                                </div>
+
+                                {/* 🌳 나무 (좌측 뒤편) */}
+                                <div className="absolute bottom-[30%] left-[22%]">
+                                    <div className="w-2 h-9 bg-gradient-to-b from-[#8B6F47] to-[#6B5537] rounded-full" style={{
+                                        boxShadow: 'inset -1px 0 2px rgba(0,0,0,0.3)'
+                                    }}></div>
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-7 h-7 bg-gradient-to-br from-[#81C784] to-[#558B2F] rounded-full opacity-90" style={{
+                                        boxShadow: 'inset -2px -2px 4px rgba(0,0,0,0.15)'
+                                    }}></div>
+                                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full opacity-90"></div>
+                                </div>
+
+                                {/* 🏠 집 (중앙 앞쪽 - 크고 낮게) */}
+                                <div className="absolute bottom-[28%] left-[38%]" style={{
+                                    filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.25))'
+                                }}>
+                                    <div className="w-14 h-11 bg-gradient-to-b from-[#FFDA9E] to-[#FFB88C] rounded-lg"></div>
+                                    <div className="absolute -top-7 -left-1 w-16 h-9 bg-gradient-to-b from-[#E85D75] to-[#D4476B]" style={{
+                                        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                                    }}></div>
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-6 bg-[#8B6F47] rounded-t-lg"></div>
+                                    <div className="absolute top-2 left-2 w-3.5 h-3.5 bg-[#FFE8CC] rounded-sm border border-[#8B6F47]"></div>
+                                    <div className="absolute top-2 right-2 w-3.5 h-3.5 bg-[#FFE8CC] rounded-sm border border-[#8B6F47]"></div>
+                                </div>
+
+                                {/* 🌳 나무 (좌측 앞쪽 - 크게) */}
+                                <div className="absolute bottom-[26%] left-[5%]">
+                                    <div className="w-3 h-14 bg-gradient-to-b from-[#8B6F47] to-[#6B5537] rounded-full" style={{
+                                        boxShadow: 'inset -1px 0 3px rgba(0,0,0,0.3)'
+                                    }}></div>
+                                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 w-11 h-11 bg-gradient-to-br from-[#81C784] to-[#558B2F] rounded-full" style={{
+                                        boxShadow: 'inset -2px -2px 5px rgba(0,0,0,0.2), inset 2px 2px 5px rgba(255,255,255,0.25)'
+                                    }}></div>
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full" style={{
+                                        boxShadow: 'inset -1px -1px 3px rgba(0,0,0,0.15)'
+                                    }}></div>
+                                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-6 bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full"></div>
+                                </div>
+
+                                {/* 🌳 나무 (우측 - 일부만 보임, 크게) */}
+                                <div className="absolute bottom-[24%] right-[-8%]">
+                                    <div className="w-3.5 h-16 bg-gradient-to-b from-[#8B6F47] to-[#6B5537] rounded-full" style={{
+                                        boxShadow: 'inset -2px 0 3px rgba(0,0,0,0.3)'
+                                    }}></div>
+                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full" style={{
+                                        boxShadow: 'inset -3px -3px 6px rgba(0,0,0,0.2), inset 2px 2px 5px rgba(255,255,255,0.25)'
+                                    }}></div>
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-9 h-9 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full"></div>
+                                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-7 h-7 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full"></div>
+                                </div>
+
+                                {/* 🌿 잔디 디테일 (앞쪽) */}
+                                <div className="absolute bottom-[22%] left-[15%] w-4 h-6 bg-gradient-to-t from-[#7CB342] to-[#8BC34A] opacity-80" style={{
+                                    clipPath: 'polygon(50% 0%, 30% 40%, 10% 80%, 0% 100%, 25% 100%, 40% 70%, 50% 100%, 60% 70%, 75% 100%, 100% 100%, 90% 80%, 70% 40%)'
+                                }}></div>
+                                <div className="absolute bottom-[23%] left-[62%] w-3.5 h-5 bg-gradient-to-t from-[#7CB342] to-[#8BC34A] opacity-70" style={{
+                                    clipPath: 'polygon(50% 0%, 30% 40%, 10% 80%, 0% 100%, 25% 100%, 40% 70%, 50% 100%, 60% 70%, 75% 100%, 100% 100%, 90% 80%, 70% 40%)'
                                 }}></div>
                             </div>
 
-                            {/* Trees */}
-                            {/* Left Tree */}
-                            <div className="absolute bottom-16 left-8 flex flex-col items-center">
-                                {/* Tree Crown */}
-                                <div className="relative w-12 h-12">
-                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-90"></div>
-                                    <div className="absolute bottom-2 left-0 w-8 h-8 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-80"></div>
-                                    <div className="absolute bottom-2 right-0 w-8 h-8 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-80"></div>
-                                </div>
-                                {/* Tree Trunk */}
-                                <div className="w-2 h-8 bg-gradient-to-b from-[#8D6E63] to-[#6D4C41] rounded-t-sm"></div>
-                            </div>
+                            {/* 창살 (세로) - 밝은 색상 */}
+                            <div className="absolute left-1/2 top-0 bottom-0 w-2 -translate-x-1/2 bg-[#4A9FD4] opacity-60" style={{
+                                boxShadow: 'inset 0 0 4px rgba(0,0,0,0.2)'
+                            }}></div>
 
-                            {/* Right Tree */}
-                            <div className="absolute bottom-16 right-24 flex flex-col items-center">
-                                {/* Tree Crown */}
-                                <div className="relative w-10 h-10">
-                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-90"></div>
-                                    <div className="absolute bottom-2 left-0 w-6 h-6 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-80"></div>
-                                    <div className="absolute bottom-2 right-0 w-6 h-6 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-80"></div>
-                                </div>
-                                {/* Tree Trunk */}
-                                <div className="w-2 h-7 bg-gradient-to-b from-[#8D6E63] to-[#6D4C41] rounded-t-sm"></div>
-                            </div>
+                            {/* 창살 (가로) - 밝은 색상 */}
+                            <div className="absolute top-1/2 left-0 right-0 h-2 -translate-y-1/2 bg-[#4A9FD4] opacity-60" style={{
+                                boxShadow: 'inset 0 0 4px rgba(0,0,0,0.2)'
+                            }}></div>
 
-                            {/* Small House */}
-                            <div className="absolute bottom-12 right-6 flex flex-col items-center">
-                                {/* Roof */}
-                                <div className="relative w-14 h-8">
-                                    <div className="absolute bottom-0 left-0 w-0 h-0 border-l-[28px] border-l-transparent border-r-[28px] border-r-transparent border-b-[32px] border-b-[#FF6B6B]"></div>
-                                </div>
-                                {/* House Body */}
-                                <div className="w-12 h-10 bg-gradient-to-b from-[#FFE082] to-[#FFD54F] rounded-b-lg shadow-md">
-                                    {/* Windows */}
-                                    <div className="flex justify-center gap-2 pt-2">
-                                        <div className="w-3 h-3 bg-[#64B5F6] rounded-sm"></div>
-                                        <div className="w-3 h-3 bg-[#64B5F6] rounded-sm"></div>
-                                    </div>
-                                    {/* Door */}
-                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-5 bg-[#8D6E63] rounded-t-md"></div>
-                                </div>
-                            </div>
+                            {/* 창문 내부 그림자 (입체감) */}
+                            <div className="absolute inset-0 pointer-events-none" style={{
+                                boxShadow: 'inset 0 8px 16px rgba(0,0,0,0.1)'
+                            }}></div>
                         </div>
-
-                        {/* Window Cross Dividers */}
-                        <div className="absolute top-1/2 left-3 right-3 h-1 bg-[#0EA5E9]"></div>
-                        <div className="absolute top-3 bottom-3 left-1/2 w-1 bg-[#0EA5E9] -translate-x-1/2"></div>
                     </div>
                 </div>
 
-                {/* 📚 Left Wall - 2-Tier Shelf (교체 가능한 장식) */}
+                {/* 📚 좌측 선반 2단 (다마고치 스타일) - 교체 가능한 장식 */}
                 <div
-                    className="absolute left-4 top-[32%] z-10 pointer-events-none"
+                    className="absolute top-[28%] left-[8%] z-20 pointer-events-none"
                     data-decoration-type="shelf"
-                    data-decoration-id="wall-shelf-01"
+                    data-decoration-id="wall-shelf-2tier-01"
                     data-gtm="decoration-wall-shelf"
+                    style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
                 >
-                    <div className="relative w-36 h-32">
-                        {/* Top Shelf */}
-                        <div className="absolute top-0 left-0 right-0">
-                            <div className="h-2.5 bg-gradient-to-b from-[#D7CCC8] to-[#BCAAA4] rounded-md shadow-md"></div>
-                            <div className="h-1 bg-[#A1887F] rounded-b-sm"></div>
-                        </div>
+                    {/* 상단 선반 */}
+                    <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md mb-8" style={{
+                        boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}>
+                        {/* 선반 위 소품들 */}
+                        <div className="absolute -top-10 left-2 flex gap-2 items-end">
+                            {/* 📚 책 */}
+                            <div className="w-4 h-10 bg-gradient-to-br from-[#FF8FA3] to-[#FF6B8A] rounded-sm" style={{
+                                boxShadow: '2px 0 0 rgba(0,0,0,0.1)'
+                            }}></div>
+                            <div className="w-3 h-8 bg-gradient-to-br from-[#FFB5C2] to-[#FF9FB1] rounded-sm mt-2" style={{
+                                boxShadow: '2px 0 0 rgba(0,0,0,0.1)'
+                            }}></div>
 
-                        {/* Bottom Shelf */}
-                        <div className="absolute bottom-0 left-0 right-0">
-                            <div className="h-2.5 bg-gradient-to-b from-[#D7CCC8] to-[#BCAAA4] rounded-md shadow-md"></div>
-                            <div className="h-1 bg-[#A1887F] rounded-b-sm"></div>
-                        </div>
-
-                        {/* Top Shelf Items - Small Potted Plant */}
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            {/* Leaves */}
-                            <div className="relative w-10 h-8">
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-5 bg-gradient-to-t from-[#4CAF50] to-[#66BB6A] rounded-full"></div>
-                                <div className="absolute bottom-1 left-1 w-3.5 h-4 bg-gradient-to-t from-[#4CAF50] to-[#66BB6A] rounded-full transform -rotate-20"></div>
-                                <div className="absolute bottom-1 right-1 w-3.5 h-4 bg-gradient-to-t from-[#4CAF50] to-[#66BB6A] rounded-full transform rotate-20"></div>
-                            </div>
-                            {/* Pot */}
-                            <div className="w-8 h-4 bg-gradient-to-b from-[#FF8A65] to-[#FF6E40] rounded-b-lg shadow-sm"></div>
-                        </div>
-
-                        {/* Bottom Shelf Items */}
-                        {/* Apple (left) */}
-                        <div className="absolute bottom-4 left-4">
-                            <div className="w-7 h-7 bg-gradient-to-br from-[#FF6B6B] to-[#EE5A52] rounded-full shadow-md"></div>
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-2 bg-[#8D6E63] rounded-t-full"></div>
-                            <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-white/40 rounded-full"></div>
-                        </div>
-
-                        {/* Purple Book (right) */}
-                        <div className="absolute bottom-4 right-4">
-                            <div className="w-10 h-12 bg-gradient-to-br from-[#AB47BC] to-[#8E24AA] rounded-sm shadow-md border-l-2 border-[#7B1FA2]">
-                                {/* Book spine lines */}
-                                <div className="absolute top-2 left-1 right-1 h-px bg-white/20"></div>
-                                <div className="absolute bottom-2 left-1 right-1 h-px bg-white/20"></div>
+                            {/* 📷 카메라 */}
+                            <div className="relative w-7 h-6 bg-gradient-to-br from-[#FF9FB1] to-[#FF8FA3] rounded-md" style={{
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                            }}>
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white/80 rounded-full"></div>
+                                <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-white/60 rounded-full"></div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* 💡 Left Bottom - Floor Lamp (교체 가능한 장식) */}
-                <div
-                    className="absolute left-6 bottom-[8%] z-20 pointer-events-none"
-                    data-decoration-type="lamp"
-                    data-decoration-id="floor-lamp-01"
-                    data-gtm="decoration-floor-lamp"
-                >
-                    <div className="relative w-20 h-40 flex flex-col items-center">
-                        {/* Lamp Shade */}
-                        <div className="relative w-16 h-20 mb-2">
-                            {/* Shade body */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF9E6] via-[#FFF3CC] to-[#FFECB3] rounded-b-full shadow-lg" style={{
-                                clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
-                            }}></div>
-                            {/* Vertical lines texture */}
-                            <div className="absolute inset-0 opacity-20" style={{
-                                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 3px)'
-                            }}></div>
-                            {/* Top rim */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-2 bg-[#D4AF37] rounded-full shadow-sm"></div>
-                            {/* Light glow effect */}
-                            <div className="absolute inset-2 bg-gradient-to-b from-[#FFFACD]/60 to-transparent blur-sm"></div>
-                        </div>
+                    {/* 하단 선반 */}
+                    <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md" style={{
+                        boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}>
+                        {/* 선반 위 소품들 */}
+                        <div className="absolute -top-12 left-2 flex gap-3 items-end">
+                            {/* 🌵 선인장 화분 */}
+                            <div className="relative w-8 h-12">
+                                {/* 화분 */}
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-5 bg-gradient-to-b from-[#FF9980] to-[#FF8060] rounded-b-md" style={{
+                                    clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                                }}></div>
+                                {/* 선인장 몸통 */}
+                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4 h-7 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-lg"></div>
+                                {/* 선인장 팔 */}
+                                <div className="absolute bottom-5 left-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                <div className="absolute bottom-5 right-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                            </div>
 
-                        {/* Lamp Pole */}
-                        <div className="w-1.5 h-12 bg-gradient-to-b from-[#424242] to-[#212121] rounded-full shadow-md"></div>
-
-                        {/* Lamp Base */}
-                        <div className="relative w-12 h-8">
-                            <div className="absolute bottom-0 w-full h-3 bg-gradient-to-b from-[#424242] to-[#212121] rounded-full shadow-lg"></div>
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-4 bg-gradient-to-b from-[#616161] to-[#424242] rounded-full"></div>
+                            {/* 📦 박스 */}
+                            <div className="relative w-6 h-7 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-sm" style={{
+                                boxShadow: '2px 2px 0 rgba(0,0,0,0.1)'
+                            }}>
+                                <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/30"></div>
+                                <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/30"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 🌳 Right Bottom - Large Bush/Tree (교체 가능한 장식) */}
+                {/* 💜 고급 방석 (바닥 중앙 - 캐릭터 뒤) - 교체 가능한 장식 */}
                 <div
-                    className="absolute right-8 bottom-[8%] z-20 pointer-events-none"
-                    data-decoration-type="plant"
-                    data-decoration-id="large-bush-01"
-                    data-gtm="decoration-large-bush"
-                >
-                    <div className="relative w-28 h-36 flex flex-col items-center justify-end">
-                        {/* Bush Leaves - Fluffy circular bush */}
-                        <div className="relative w-full h-24 mb-2">
-                            {/* Main bush body */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-20 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full shadow-lg"></div>
-
-                            {/* Additional leaf layers for depth */}
-                            <div className="absolute bottom-4 left-2 w-16 h-14 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-90"></div>
-                            <div className="absolute bottom-4 right-2 w-16 h-14 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-90"></div>
-                            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-18 h-16 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full opacity-85"></div>
-
-                            {/* Highlight spots */}
-                            <div className="absolute top-4 left-6 w-8 h-8 bg-gradient-to-br from-[#C8E6C9] to-transparent rounded-full opacity-40"></div>
-                            <div className="absolute top-6 right-8 w-6 h-6 bg-gradient-to-br from-[#C8E6C9] to-transparent rounded-full opacity-30"></div>
-                        </div>
-
-                        {/* Large Pot - Coral/Orange color */}
-                        <div className="relative">
-                            <div className="w-24 h-14 bg-gradient-to-b from-[#FF8A65] via-[#FF7043] to-[#FF5722] rounded-b-3xl shadow-2xl border-2 border-[#F4511E]"></div>
-                            <div className="absolute top-0 left-0 right-0 h-3 bg-[#F4511E] rounded-t-lg"></div>
-                            {/* Pot highlight */}
-                            <div className="absolute top-2 left-4 w-12 h-6 bg-gradient-to-br from-white/20 to-transparent rounded-full"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 🛋️ Center Floor - Purple Circular Cushion under Mongle (교체 가능한 장식) */}
-                <div
-                    className="absolute left-1/2 top-[63%] -translate-x-1/2 z-10 pointer-events-none"
+                    className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-15 pointer-events-none"
                     data-decoration-type="rug"
-                    data-decoration-id="purple-cushion-01"
-                    data-gtm="decoration-purple-cushion"
+                    data-decoration-id="premium-cushion-01"
+                    data-gtm="decoration-premium-cushion"
                 >
-                    <div className="relative w-52 h-14">
-                        {/* Cushion Shadow */}
-                        <div className="absolute inset-0 bg-black/15 rounded-[50%] blur-lg"></div>
+                    <div className="relative w-52 h-28">
+                        {/* 방석 본체 (타원형) */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
+                            style={{
+                                filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+                                boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
+                            }}
+                        ></div>
 
-                        {/* Main Cushion - Purple */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#CE93D8] via-[#BA68C8] to-[#AB47BC] rounded-[50%] shadow-xl overflow-hidden">
-                            {/* Dotted border pattern */}
-                            <svg className="absolute inset-0 w-full h-full" style={{ transform: 'scaleY(0.27)' }}>
-                                <ellipse
-                                    cx="50%"
-                                    cy="50%"
-                                    rx="45%"
-                                    ry="45%"
-                                    fill="none"
-                                    stroke="white"
-                                    strokeWidth="2"
-                                    strokeDasharray="6 6"
-                                    opacity="0.4"
-                                />
-                                <ellipse
-                                    cx="50%"
-                                    cy="50%"
-                                    rx="35%"
-                                    ry="35%"
-                                    fill="none"
-                                    stroke="white"
-                                    strokeWidth="1.5"
-                                    strokeDasharray="4 4"
-                                    opacity="0.3"
-                                />
-                            </svg>
-
-                            {/* Center highlight */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-4 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-full"></div>
+                        {/* 방석 중앙 패턴 (십자형 스티치) */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16">
+                            {/* 가로 스티치 라인 */}
+                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
+                            {/* 세로 스티치 라인 */}
+                            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/40 rounded-full -translate-x-1/2"></div>
                         </div>
 
-                        {/* Cushion edge stitching effect */}
-                        <div className="absolute inset-1 rounded-[50%] border border-[#E1BEE7]/30"></div>
+                        {/* 방석 테두리 스티치 (점선) */}
+                        <div className="absolute inset-3 rounded-[50%] border-2 border-dashed border-white/35"></div>
+
+                        {/* 방석 모서리 장식 (4개 코너) */}
+                        <div className="absolute top-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                        <div className="absolute top-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                        <div className="absolute bottom-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                        <div className="absolute bottom-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+
+                        {/* 방석 푹신한 질감 (세로 주름) */}
+                        <div className="absolute inset-0 overflow-hidden rounded-[50%]">
+                            <div className="absolute left-[15%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                            <div className="absolute left-[30%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                            <div className="absolute left-[45%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                            <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                            <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                            <div className="absolute left-[85%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                        </div>
+
+                        {/* 방석 하이라이트 (상단 빛 반사) */}
+                        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-8 bg-white/45 rounded-[50%] blur-md"></div>
+
+                        {/* 방석 그림자 (바닥) */}
+                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/25 rounded-[50%] blur-lg"></div>
+                    </div>
+                </div>
+
+                {/* 🪴 우측 하단 대형 화분 (크기 증가) - 교체 가능한 장식 */}
+                <div
+                    className="absolute bottom-[26%] right-[6%] z-20 pointer-events-none"
+                    data-decoration-type="plant"
+                    data-decoration-id="large-potted-plant-01"
+                    data-gtm="decoration-large-plant"
+                    style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}
+                >
+                    <div className="relative w-24 h-44">
+                        {/* 화분 */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-3xl" style={{
+                            clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
+                            boxShadow: '0 6px 12px rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.3)'
+                        }}></div>
+
+                        {/* 중앙 큰 잎 */}
+                        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 bg-gradient-to-t from-[#66BB6A] to-[#81C784] rounded-full"></div>
+
+                        {/* 좌측 잎들 (크기 2배) */}
+                        <div className="absolute bottom-16 left-0 w-11 h-18 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full rotate-[-35deg]" style={{
+                            boxShadow: 'inset -3px 3px 6px rgba(0,0,0,0.12)'
+                        }}></div>
+                        <div className="absolute bottom-22 left-[-2px] w-9 h-15 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-25deg]"></div>
+
+                        {/* 우측 잎들 (크기 2배) */}
+                        <div className="absolute bottom-16 right-0 w-11 h-18 bg-gradient-to-bl from-[#81C784] to-[#66BB6A] rounded-full rotate-[35deg]" style={{
+                            boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.12)'
+                        }}></div>
+                        <div className="absolute bottom-22 right-[-2px] w-9 h-15 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[25deg]"></div>
+
+                        {/* 상단 작은 잎들 (크기 2배) */}
+                        <div className="absolute bottom-28 left-3 w-8 h-12 bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[-15deg]"></div>
+                        <div className="absolute bottom-28 right-3 w-8 h-12 bg-gradient-to-bl from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[15deg]"></div>
+
+                        {/* 추가 잎들로 더 풍성하게 */}
+                        <div className="absolute bottom-20 left-1 w-7 h-10 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-40deg]" style={{
+                            opacity: 0.9
+                        }}></div>
+                        <div className="absolute bottom-20 right-1 w-7 h-10 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[40deg]" style={{
+                            opacity: 0.9
+                        }}></div>
                     </div>
                 </div>
 
