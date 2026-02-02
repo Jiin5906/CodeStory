@@ -15,10 +15,10 @@ import { usePet } from '../../context/PetContext';
  */
 
 
-// 스냅포인트 높이 (EXPANDED 제거)
+// 스냅포인트 높이 (최적화 - 캐릭터 공간 확보)
 const SNAP_POINTS = {
-    COLLAPSED: 110,  // 채팅만 (버튼 숨김)
-    HALF: 220        // 채팅 + 버튼
+    COLLAPSED: 80,   // 채팅만 (버튼 숨김) - 축소
+    HALF: 150        // 채팅 + 버튼 - 축소
 };
 
 // 액션 버튼 컴포넌트
@@ -55,13 +55,13 @@ const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={handleClick}>
+        <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={handleClick}>
             <button
-                className={`w-16 h-16 rounded-2xl relative overflow-hidden shadow-lg active:scale-95 transition-all duration-200 ${
+                className={`w-12 h-12 rounded-xl relative overflow-hidden shadow-md active:scale-95 transition-all duration-200 ${
                     isHome
-                        ? 'bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] hover:shadow-xl'
-                        : 'bg-white hover:shadow-xl'
-                } border-2 border-white`}
+                        ? 'bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] hover:shadow-lg'
+                        : 'bg-white hover:shadow-lg'
+                } border border-white`}
             >
                 {/* 게이지 배경 */}
                 {!isHome && (
@@ -77,7 +77,7 @@ const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
                 {/* 아이콘 */}
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                     <span
-                        className={`text-2xl transition-all duration-300 ${
+                        className={`text-xl transition-all duration-300 ${
                             isHome ? 'text-white drop-shadow-sm' : getIconColor()
                         } ${getIconAnimation()}`}
                     >
@@ -88,7 +88,7 @@ const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
 
             {/* 라벨 */}
             <span
-                className={`text-[11px] font-semibold transition-all duration-300 ${
+                className={`text-[9px] font-semibold transition-all duration-300 ${
                     showPercent ? 'text-[#FFB5C2] scale-110' : 'text-gray-500'
                 }`}
             >
@@ -240,9 +240,9 @@ const BottomSheet = ({
     return (
         <div
             ref={sheetRef}
-            className="absolute w-full z-50 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t-2 border-[#FFD4DC]/30 rounded-t-[32px] shadow-[0_-8px_32px_rgba(255,181,194,0.15)] flex flex-col"
+            className="absolute w-full z-50 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
             style={{
-                bottom: '5rem', // 탭바 높이(80px = 5rem) 위에 배치
+                bottom: '3.5rem', // 탭바 높이(56px = 3.5rem) 위에 배치
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -251,7 +251,7 @@ const BottomSheet = ({
         >
             {/* 핸들바 영역 (드래그 가능) */}
             <div
-                className="pt-4 pb-3 px-6 cursor-grab active:cursor-grabbing"
+                className="pt-2 pb-1 px-4 cursor-grab active:cursor-grabbing"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -260,30 +260,30 @@ const BottomSheet = ({
             >
                 {/* 핸들바 */}
                 <div
-                    className="w-12 h-1.5 bg-[#FFB5C2]/40 rounded-full mx-auto mb-4 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
+                    className="w-10 h-1 bg-[#FFB5C2]/40 rounded-full mx-auto mb-2 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
                     onClick={handleHandleClick}
                 ></div>
             </div>
 
             {/* 채팅 입력창 - 항상 표시 */}
-            <div className="px-6 pb-5" onClick={(e) => e.stopPropagation()}>
+            <div className="px-4 pb-3" onClick={(e) => e.stopPropagation()}>
                 <div
-                    className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-[22px] border-2 border-[#FFD4DC]/40 shadow-lg group focus-within:border-[#FFB5C2] focus-within:shadow-xl transition-all duration-300"
+                    className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-2xl border border-[#FFD4DC]/40 shadow-md group focus-within:border-[#FFB5C2] focus-within:shadow-lg transition-all duration-300"
                     data-gtm="chat-input-area"
                 >
-                    <div className="pl-5 pr-2 text-xl opacity-70">✏️</div>
+                    <div className="pl-3 pr-1 text-lg opacity-70">✏️</div>
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
                         placeholder="오늘의 마음을 들려주세요..."
-                        className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-14 text-[15px] leading-relaxed"
+                        className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-10 text-sm leading-relaxed"
                         data-gtm="chat-input-field"
                     />
                     <button
                         onClick={handleSubmit}
-                        className="m-2 w-11 h-11 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-lg active:scale-95 hover:shadow-xl transition-all duration-200 flex items-center justify-center font-bold text-lg"
+                        className="m-1.5 w-9 h-9 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-md active:scale-95 hover:shadow-lg transition-all duration-200 flex items-center justify-center font-bold text-base"
                         data-gtm="chat-submit-button"
                     >
                         ↑
@@ -293,8 +293,8 @@ const BottomSheet = ({
 
             {/* 액션 버튼 그룹 - HALF에서만 표시 (홈 버튼 제거) */}
             {snapPoint === 'HALF' && (
-                <div className="px-6 pb-5 animate-fade-in-up">
-                    <div className="flex justify-around items-end gap-2 px-1" data-gtm="action-buttons">
+                <div className="px-4 pb-3 animate-fade-in-up">
+                    <div className="flex justify-around items-end gap-1" data-gtm="action-buttons">
                         <ActionButton
                             icon="🤚"
                             label="쓰다듬기"

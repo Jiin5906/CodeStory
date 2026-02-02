@@ -20,9 +20,9 @@ const BottomTabBar = ({ activeTab, onTabChange }) => {
 
     return (
         <div
-            className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-xl border-t-2 border-[#FFD4DC]/30 shadow-[0_-4px_20px_rgba(255,181,194,0.15)] flex justify-around items-center h-20"
+            className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 shadow-[0_-2px_10px_rgba(255,181,194,0.1)] flex justify-around items-center h-14"
             style={{
-                paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+                paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))',
                 maxWidth: '430px',
                 margin: '0 auto'
             }}
@@ -36,18 +36,18 @@ const BottomTabBar = ({ activeTab, onTabChange }) => {
                     <button
                         key={tab.id}
                         onClick={() => onTabChange(tab.id)}
-                        className="flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-300 active:scale-95 flex-1"
+                        className="flex flex-col items-center justify-center gap-0.5 px-2 py-1 transition-all duration-300 active:scale-95 flex-1"
                         data-gtm={tab.gtm}
                     >
                         <Icon
-                            className={`text-2xl transition-all duration-300 ${
+                            className={`text-lg transition-all duration-300 ${
                                 isActive
-                                    ? 'text-[#FFB5C2] drop-shadow-[0_2px_8px_rgba(255,181,194,0.6)]'
+                                    ? 'text-[#FFB5C2] drop-shadow-[0_1px_4px_rgba(255,181,194,0.6)]'
                                     : 'text-gray-400'
                             }`}
                         />
                         <span
-                            className={`text-[10px] font-bold transition-all duration-300 ${
+                            className={`text-[9px] font-bold transition-all duration-300 ${
                                 isActive ? 'text-[#FFB5C2]' : 'text-gray-400'
                             }`}
                         >
