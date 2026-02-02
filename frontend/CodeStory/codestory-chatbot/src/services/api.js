@@ -206,4 +206,17 @@ export const petApi = {
     }
 };
 
+// Feedback API
+export const feedbackApi = {
+    submitFeedback: async (userId, email, category, content) => {
+        const response = await api.post('/feedback', {
+            userId,
+            email,
+            category,
+            content
+        });
+        return response.data;
+    }
+};
+
 export default api;

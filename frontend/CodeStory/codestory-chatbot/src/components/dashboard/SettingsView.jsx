@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { FaUser, FaPaw, FaDatabase, FaUndo, FaEnvelope, FaInfoCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaDatabase, FaUndo, FaEnvelope, FaInfoCircle, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { feedbackApi } from '../../services/api';
 
 /**
  * SettingsView — 설정 페이지 (완전 개편)
  *
  * 메뉴 구조:
- * 1. 프로필 설정 (닉네임, 몽글이 이름)
+ * 1. 프로필 설정 (닉네임)
  * 2. 데이터 관리 (백업/복원, 초기화)
  * 3. 지원 및 정보 (문의, 버전)
  *
@@ -17,9 +18,14 @@ const SettingsView = ({ user }) => {
 
     // 프로필 수정 상태
     const [isEditingNickname, setIsEditingNickname] = useState(false);
-    const [isEditingPetName, setIsEditingPetName] = useState(false);
     const [newNickname, setNewNickname] = useState(user?.nickname || '');
-    const [newPetName, setNewPetName] = useState('몽글이'); // TODO: PetContext에서 가져오기
+
+    // 피드백 모달 상태
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+    const [feedbackCategory, setFeedbackCategory] = useState('문의');
+    const [feedbackEmail, setFeedbackEmail] = useState(user?.email || '');
+    const [feedbackContent, setFeedbackContent] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLogout = () => {
         if (window.confirm('정말 로그아웃 하시겠습니까?')) {
@@ -30,17 +36,20 @@ const SettingsView = ({ user }) => {
 
     const handleSaveNickname = () => {
         if (newNickname.trim()) {
-            // TODO: API 호출로 닉네임 변경
-            alert(`닉네임이 "${newNickname}"(으)로 변경되었습니다!`);
-            setIsEditingNickname(false);
-        }
-    };
+            // localStorage에서 현재 사용자 가져오기
+            const currentUser = JSON.parse(localStorage.getItem('diaryUser') || '{}');
 
-    const handleSavePetName = () => {
-        if (newPetName.trim()) {
-            // TODO: PetContext API 호출로 몽글이 이름 변경
-            alert(`몽글이 이름이 "${newPetName}"(으)로 변경되었습니다!`);
-            setIsEditingPetName(false);
+            // 닉네임 업데이트
+            const updatedUser = { ...currentUser, nickname: newNickname.trim() };
+
+            // localStorage에 저장
+            localStorage.setItem('diaryUser', JSON.stringify(updatedUser));
+
+            alert(`닉네임이 "${newNickname.trim()}"(으)로 변경되었습니다!`);
+            setIsEditingNickname(false);
+
+            // 페이지 새로고침으로 변경사항 반영 (Dashboard에서 user prop 재로드)
+            window.location.reload();
         }
     };
 
@@ -62,7 +71,42 @@ const SettingsView = ({ user }) => {
     };
 
     const handleContact = () => {
-        alert('문의하기 기능은 곧 출시될 예정이에요! 💌\n\n현재는 이메일로 문의해주세요:\ncontact@codestory.app');
+        setIsFeedbackModalOpen(true);
+    };
+
+    const handleSubmitFeedback = async () => {
+        if (!feedbackContent.trim()) {
+            alert('내용을 입력해주세요.');
+            return;
+        }
+
+        if (!feedbackEmail.trim()) {
+            alert('이메일 주소를 입력해주세요.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await feedbackApi.submitFeedback(
+                user?.id,
+                feedbackEmail.trim(),
+                feedbackCategory,
+                feedbackContent.trim()
+            );
+
+            // 성공 메시지
+            alert('소중한 의견 감사합니다! 빠른 시일 내에 답변드리겠습니다.');
+
+            // 모달 닫기 및 초기화
+            setIsFeedbackModalOpen(false);
+            setFeedbackContent('');
+            setFeedbackCategory('문의');
+        } catch (error) {
+            console.error('피드백 전송 실패:', error);
+            alert('전송에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -141,62 +185,6 @@ const SettingsView = ({ user }) => {
                                 </div>
                             )}
                         </div>
-
-                        {/* 몽글이 이름 수정 */}
-                        <div data-gtm="settings-petname-section">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-11 h-11 bg-gradient-to-br from-[#C8A882] to-[#A89070] rounded-2xl flex items-center justify-center shadow-md">
-                                    <FaPaw className="text-white text-lg" />
-                                </div>
-                                <span className="text-[#4A4A4A] font-bold text-lg font-cute">
-                                    몽글이 이름
-                                </span>
-                            </div>
-
-                            {isEditingPetName ? (
-                                <div className="flex gap-2 ml-14">
-                                    <input
-                                        type="text"
-                                        value={newPetName}
-                                        onChange={(e) => setNewPetName(e.target.value)}
-                                        className="flex-1 px-4 py-2 bg-[#FFF8F3] border-2 border-[#C8A882] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A89070] font-cute text-[#4A4A4A]"
-                                        placeholder="몽글이의 새 이름을 입력하세요"
-                                        maxLength={15}
-                                        data-gtm="settings-petname-input"
-                                    />
-                                    <button
-                                        onClick={handleSavePetName}
-                                        className="px-5 py-2 bg-gradient-to-r from-[#C8A882] to-[#A89070] text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
-                                        data-gtm="settings-petname-save"
-                                    >
-                                        저장
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setNewPetName('몽글이');
-                                            setIsEditingPetName(false);
-                                        }}
-                                        className="px-4 py-2 bg-[#F8F6F4] text-[#8B8B8B] font-bold rounded-xl hover:bg-[#FFD4DC]/30 transition-all duration-200 font-cute"
-                                        data-gtm="settings-petname-cancel"
-                                    >
-                                        취소
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-between ml-14">
-                                    <span className="text-[#8B8B8B] text-base font-cute">
-                                        {newPetName}
-                                    </span>
-                                    <button
-                                        onClick={() => setIsEditingPetName(true)}
-                                        className="px-4 py-1.5 bg-[#F5E6D3]/60 text-[#C8A882] text-sm font-bold rounded-lg hover:bg-[#F5E6D3] transition-all duration-200 font-cute"
-                                        data-gtm="settings-petname-edit"
-                                    >
-                                        변경
-                                    </button>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
 
@@ -246,7 +234,7 @@ const SettingsView = ({ user }) => {
                             </div>
                             <button
                                 onClick={handleReset}
-                                className="ml-14 w-full max-w-xs px-4 py-2.5 bg-white border-2 border-[#FF6B6B] text-[#FF6B6B] font-bold rounded-xl shadow-sm hover:bg-[#FF6B6B] hover:text-white hover:shadow-lg transition-all duration-200 font-cute"
+                                className="ml-0 sm:ml-14 w-full sm:max-w-xs px-4 py-2.5 bg-white border-2 border-[#FF6B6B] text-[#FF6B6B] font-bold rounded-xl shadow-sm hover:bg-[#FF6B6B] hover:text-white hover:shadow-lg transition-all duration-200 font-cute whitespace-nowrap"
                                 data-gtm="settings-data-reset"
                             >
                                 ⚠️ 모든 데이터 삭제
@@ -307,6 +295,129 @@ const SettingsView = ({ user }) => {
                     </p>
                 </div>
             </div>
+
+            {/* 피드백 모달 */}
+            {isFeedbackModalOpen && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setIsFeedbackModalOpen(false)}
+                    data-gtm="feedback-modal-overlay"
+                >
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                        data-gtm="feedback-modal"
+                    >
+                        {/* 모달 헤더 */}
+                        <div className="bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] px-6 py-4 flex items-center justify-between">
+                            <h3 className="text-white font-bold text-xl font-cute">문의하기 / 건의하기</h3>
+                            <button
+                                onClick={() => setIsFeedbackModalOpen(false)}
+                                className="text-white hover:bg-white/20 rounded-full p-2 transition-all"
+                                data-gtm="feedback-modal-close"
+                            >
+                                <FaTimes className="text-lg" />
+                            </button>
+                        </div>
+
+                        {/* 모달 본문 */}
+                        <div className="p-6 space-y-4">
+                            {/* 카테고리 선택 */}
+                            <div>
+                                <label className="block text-sm font-bold text-[#4A4A4A] mb-2 font-cute">
+                                    분류
+                                </label>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setFeedbackCategory('문의')}
+                                        className={`flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all ${
+                                            feedbackCategory === '문의'
+                                                ? 'bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white shadow-md'
+                                                : 'bg-[#F8F6F4] text-[#8B8B8B] hover:bg-[#FFD4DC]/30'
+                                        }`}
+                                        data-gtm="feedback-category-inquiry"
+                                    >
+                                        문의
+                                    </button>
+                                    <button
+                                        onClick={() => setFeedbackCategory('건의')}
+                                        className={`flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all ${
+                                            feedbackCategory === '건의'
+                                                ? 'bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white shadow-md'
+                                                : 'bg-[#F8F6F4] text-[#8B8B8B] hover:bg-[#FFD4DC]/30'
+                                        }`}
+                                        data-gtm="feedback-category-suggestion"
+                                    >
+                                        건의
+                                    </button>
+                                    <button
+                                        onClick={() => setFeedbackCategory('버그 제보')}
+                                        className={`flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all ${
+                                            feedbackCategory === '버그 제보'
+                                                ? 'bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white shadow-md'
+                                                : 'bg-[#F8F6F4] text-[#8B8B8B] hover:bg-[#FFD4DC]/30'
+                                        }`}
+                                        data-gtm="feedback-category-bug"
+                                    >
+                                        버그 제보
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 이메일 */}
+                            <div>
+                                <label className="block text-sm font-bold text-[#4A4A4A] mb-2 font-cute">
+                                    이메일
+                                </label>
+                                <input
+                                    type="email"
+                                    value={feedbackEmail}
+                                    onChange={(e) => setFeedbackEmail(e.target.value)}
+                                    placeholder="답변 받으실 이메일을 입력하세요"
+                                    className="w-full px-4 py-2.5 bg-[#FFF8F3] border-2 border-[#FFD4DC]/40 rounded-xl focus:outline-none focus:border-[#FFB5C2] focus:ring-2 focus:ring-[#FFB5C2]/20 font-cute text-[#4A4A4A] placeholder:text-[#B8B8B8]"
+                                    data-gtm="feedback-email-input"
+                                />
+                            </div>
+
+                            {/* 내용 */}
+                            <div>
+                                <label className="block text-sm font-bold text-[#4A4A4A] mb-2 font-cute">
+                                    내용
+                                </label>
+                                <textarea
+                                    value={feedbackContent}
+                                    onChange={(e) => setFeedbackContent(e.target.value)}
+                                    placeholder="문의하실 내용이나 건의사항을 상세히 적어주세요"
+                                    rows={5}
+                                    className="w-full px-4 py-3 bg-[#FFF8F3] border-2 border-[#FFD4DC]/40 rounded-xl focus:outline-none focus:border-[#FFB5C2] focus:ring-2 focus:ring-[#FFB5C2]/20 font-cute text-[#4A4A4A] placeholder:text-[#B8B8B8] resize-none"
+                                    data-gtm="feedback-content-textarea"
+                                />
+                            </div>
+
+                            {/* 제출 버튼 */}
+                            <div className="flex gap-2 pt-2">
+                                <button
+                                    onClick={() => setIsFeedbackModalOpen(false)}
+                                    className="flex-1 px-4 py-3 bg-[#F8F6F4] text-[#8B8B8B] font-bold rounded-xl hover:bg-[#FFD4DC]/30 transition-all duration-200 font-cute"
+                                    data-gtm="feedback-cancel"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={handleSubmitFeedback}
+                                    disabled={isSubmitting}
+                                    className={`flex-1 px-4 py-3 bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 font-cute ${
+                                        isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+                                    }`}
+                                    data-gtm="feedback-submit"
+                                >
+                                    {isSubmitting ? '전송 중...' : '제출하기'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

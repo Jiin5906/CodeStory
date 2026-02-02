@@ -55,7 +55,7 @@ const MoodTrendChart = ({ diaries }) => {
     return (
         <div className="bg-white rounded-3xl shadow-sm p-6" data-gtm="mood-trend-chart">
             <h3 className="text-lg font-cute text-gray-700 mb-1 flex items-center gap-2">
-                ☀️ 마음 날씨
+                마음 날씨
             </h3>
             <p className="text-xs font-cute text-gray-400 mb-6">
                 일기에 기록한 기분 점수의 변화
@@ -98,7 +98,7 @@ const MoodTrendChart = ({ diaries }) => {
             <div className="mt-4 bg-[#FFF8F3] rounded-2xl p-4 border border-[#FFD4DC]/30">
                 <p className="text-sm font-cute text-gray-600 text-center">
                     평균 기분 점수: <span className="text-[#FFB5C2] font-bold">{avgScore}점</span>
-                    {avgScore >= 70 ? ' 정말 좋았네요! 🌈' : avgScore >= 50 ? ' 평온한 날들이었어요 🍃' : ' 힘든 시간을 견뎌냈어요 💪'}
+                    {avgScore >= 70 ? ' 정말 좋았네요!' : avgScore >= 50 ? ' 평온한 날들이었어요' : ' 힘든 시간을 견뎌냈어요'}
                 </p>
             </div>
         </div>
