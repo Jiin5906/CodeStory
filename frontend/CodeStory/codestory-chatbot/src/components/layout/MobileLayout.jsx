@@ -16,7 +16,8 @@ const MobileLayout = () => {
         const path = location.pathname;
         if (path.includes('/stats') || path.includes('/report')) return 'report';
         if (path.includes('/settings')) return 'settings';
-        if (path.includes('/calendar') || path.includes('/diary')) return 'diary';
+        if (path.includes('/diary')) return 'diary';
+        if (path.includes('/calendar')) return 'diary'; // calendar도 diary 탭으로 간주
         return 'home';
     };
 
@@ -29,7 +30,7 @@ const MobileLayout = () => {
         // 라우트 매핑
         const routeMap = {
             home: '/dashboard',
-            diary: '/calendar',
+            diary: '/diary',
             report: '/stats',
             settings: '/settings'
         };

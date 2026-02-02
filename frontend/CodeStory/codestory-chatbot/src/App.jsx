@@ -14,6 +14,7 @@ import SettingsView from './components/dashboard/SettingsView';
 import RightPanel from './components/layout/RightPanel';
 import DiaryEditor from './components/diary/DiaryEditor';
 import DiaryDetail from './components/diary/DiaryDetail';
+import DiaryView from './components/diary/DiaryView';
 import EmotionModal from './components/diary/EmotionModal';
 import ErrorBanner from './components/common/ErrorBanner';
 import CalendarView from './components/calendar/CalendarView';
@@ -24,6 +25,7 @@ import SharedFeed from './components/feed/SharedFeed';
 import ShopPage from './components/shop/ShopPage';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { PetProvider, usePet } from './context/PetContext';
+import { DiaryProvider } from './context/DiaryContext';
 
 function AppContent() {
     const { currentTheme } = useTheme();
@@ -183,6 +185,7 @@ function AppContent() {
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route element={<MobileLayout />}>
                             <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} onCalendarClick={() => setShowCalendarModal(true)} />} />
+                            <Route path="diary" element={<DiaryView />} />
                             <Route path="calendar" element={<CalendarView diaries={diaries} />} />
                             <Route path="stats" element={<ReportView user={user} diaries={diaries} />} />
                             <Route path="settings" element={<SettingsView user={user} />} />
@@ -251,9 +254,11 @@ function App() {
     return (
         <ThemeProvider>
             <PetProvider>
-                <Router>
-                    <AppContent />
-                </Router>
+                <DiaryProvider>
+                    <Router>
+                        <AppContent />
+                    </Router>
+                </DiaryProvider>
             </PetProvider>
         </ThemeProvider>
     );
