@@ -6,8 +6,11 @@ import './App.css';
 import { authApi, diaryApi } from './services/api';
 import Login from './components/auth/Login';
 import Sidebar from './components/layout/Sidebar';
+import MobileLayout from './components/layout/MobileLayout';
 import MainDashboard from './components/dashboard/MainDashboard';
-import MobileDashboard from './components/dashboard/MobileDashboard';
+import HomeView from './components/dashboard/HomeView';
+import ReportView from './components/dashboard/ReportView';
+import SettingsView from './components/dashboard/SettingsView';
 import RightPanel from './components/layout/RightPanel';
 import DiaryEditor from './components/diary/DiaryEditor';
 import DiaryDetail from './components/diary/DiaryDetail';
@@ -174,27 +177,24 @@ function AppContent() {
                     </div>
                 } />
 
-                <Route path="/*" element={
-                    <>
+                {/* 모바일 레이아웃 (Layout Pattern with Outlet) */}
+                {isMobile ? (
+                    <Route path="/*" element={<MobileLayout />}>
+                        <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} onCalendarClick={() => setShowCalendarModal(true)} />} />
+                        <Route path="calendar" element={<CalendarView diaries={diaries} />} />
+                        <Route path="stats" element={<ReportView user={user} diaries={diaries} />} />
+                        <Route path="settings" element={<SettingsView user={user} />} />
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    </Route>
+                ) : (
+                    /* 데스크톱 레이아웃 */
+                    <Route path="/*" element={
                         <div className="layout-container animate-fade-in" data-gtm="main-layout-wrapper">
-                            {!isMobile && <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />}
-
+                            <Sidebar onWriteClick={() => {setSelectedDate(new Date()); navigate('/editor');}} currentView={location.pathname.substring(1) || 'dashboard'} onChangeView={(v) => navigate(`/${v}`)} />
                             <main className="content-area" style={{flex:1, overflow:'hidden'}} data-gtm="page-content-main">
                                 <Routes>
-                                    <Route path="dashboard" element={
-                                        isMobile
-                                            ? <MobileDashboard
-                                                user={user}
-                                                diaries={diaries}
-                                                onWriteClick={() => fetchDiaries(user?.id)}
-                                                onCalendarClick={() => setShowCalendarModal(true)}
-                                                onFeedClick={() => navigate('/shared')}
-                                                onStatsClick={() => navigate('/stats')}
-                                                onSettingsClick={() => navigate('/settings')}
-                                            />
-                                            : <MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />
-                                    } />
-                                    <Route path="calendar" element={<CalendarView user={user} diaries={diaries} />} />
+                                    <Route path="dashboard" element={<MainDashboard user={user} diaries={diaries} selectedDate={selectedDate} onDateChange={setSelectedDate} onRefresh={() => fetchDiaries(user.id)} />} />
+                                    <Route path="calendar" element={<CalendarView diaries={diaries} />} />
                                     <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
                                     <Route path="shared" element={<SharedFeed />} />
                                     <Route path="shop" element={<ShopPage />} />
@@ -203,11 +203,10 @@ function AppContent() {
                                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                                 </Routes>
                             </main>
-
-                            {!isMobile && <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />}
+                            <RightPanel user={user} selectedDate={selectedDate} onDateSelect={(d) => {setSelectedDate(d); navigate('/dashboard');}} diaries={diaries} onLogout={handleLogout} onLogin={() => navigate('/login')} />
                         </div>
-                    </>
-                } />
+                    } />
+                )}
             </Routes>
 
             <ErrorBanner message={error} />
