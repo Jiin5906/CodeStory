@@ -209,147 +209,247 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                     backgroundSize: '120px 100%, 40px 100%'
                 }}></div>
 
-                {/* 🪟 Left Wall - Arch Window (교체 가능한 장식) */}
+                {/* 🪟 Right Wall - Large Window (교체 가능한 장식) */}
                 <div
-                    className="absolute left-4 top-[25%] z-10 pointer-events-none"
+                    className="absolute right-0 top-[12%] z-10 pointer-events-none"
                     data-decoration-type="window"
-                    data-decoration-id="arch-window-01"
-                    data-gtm="decoration-arch-window"
+                    data-decoration-id="large-window-01"
+                    data-gtm="decoration-large-window"
                 >
-                    {/* Window Frame */}
-                    <div className="relative w-28 h-36">
-                        {/* Arch Shape */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#8B7355] to-[#6B5638] rounded-t-full shadow-lg border-4 border-[#5D4037]"></div>
-                        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-br from-[#8B7355] to-[#6B5638] border-4 border-t-0 border-[#5D4037]"></div>
+                    <div className="relative w-56 h-72">
+                        {/* Window Frame - Blue */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#7DD3FC] to-[#38BDF8] rounded-3xl shadow-2xl border-4 border-[#0EA5E9]"></div>
 
-                        {/* Window Panes - Day/Night Sky */}
-                        <div className={`absolute inset-4 rounded-t-full overflow-hidden transition-all duration-1000 ${
-                            isNightTime
-                                ? 'bg-gradient-to-b from-[#1a1a2e] via-[#0f3460] to-[#16213e]'
-                                : 'bg-gradient-to-b from-[#87CEEB] via-[#B0E0E6] to-[#E0F6FF]'
-                        }`}>
-                            {/* Stars at night */}
-                            {isNightTime && (
-                                <>
-                                    <div className="absolute top-2 left-3 w-1 h-1 bg-white rounded-full animate-pulse"></div>
-                                    <div className="absolute top-5 right-4 w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                                    <div className="absolute top-8 left-5 w-0.5 h-0.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                                    <div className="absolute top-3 right-2 w-1.5 h-1.5 bg-yellow-200 rounded-full shadow-lg shadow-yellow-200/50"></div>
-                                </>
-                            )}
-                            {/* Sun/Clouds during day */}
-                            {!isNightTime && (
-                                <>
-                                    <div className="absolute top-2 right-3 w-6 h-6 bg-yellow-300 rounded-full shadow-lg shadow-yellow-200/50"></div>
-                                    <div className="absolute top-6 left-2 w-8 h-3 bg-white/60 rounded-full"></div>
-                                    <div className="absolute top-10 right-2 w-6 h-2 bg-white/40 rounded-full"></div>
-                                </>
-                            )}
+                        {/* Window Content - Sky */}
+                        <div className="absolute inset-3 rounded-2xl overflow-hidden bg-gradient-to-b from-[#87CEEB] via-[#B0E0E6] to-[#7DD3FC]">
+                            {/* Clouds */}
+                            <div className="absolute top-6 left-4 w-16 h-6 bg-white/80 rounded-full blur-sm"></div>
+                            <div className="absolute top-8 left-8 w-12 h-5 bg-white/70 rounded-full blur-sm"></div>
+                            <div className="absolute top-10 right-6 w-20 h-7 bg-white/75 rounded-full blur-sm"></div>
+                            <div className="absolute top-14 right-10 w-14 h-5 bg-white/65 rounded-full blur-sm"></div>
+
+                            {/* Ground Section */}
+                            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-[#7EC850] to-[#5FA839]">
+                                {/* Grass texture */}
+                                <div className="absolute inset-0 opacity-20" style={{
+                                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)'
+                                }}></div>
+                            </div>
+
+                            {/* Trees */}
+                            {/* Left Tree */}
+                            <div className="absolute bottom-16 left-8 flex flex-col items-center">
+                                {/* Tree Crown */}
+                                <div className="relative w-12 h-12">
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-90"></div>
+                                    <div className="absolute bottom-2 left-0 w-8 h-8 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-80"></div>
+                                    <div className="absolute bottom-2 right-0 w-8 h-8 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-80"></div>
+                                </div>
+                                {/* Tree Trunk */}
+                                <div className="w-2 h-8 bg-gradient-to-b from-[#8D6E63] to-[#6D4C41] rounded-t-sm"></div>
+                            </div>
+
+                            {/* Right Tree */}
+                            <div className="absolute bottom-16 right-24 flex flex-col items-center">
+                                {/* Tree Crown */}
+                                <div className="relative w-10 h-10">
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-8 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-90"></div>
+                                    <div className="absolute bottom-2 left-0 w-6 h-6 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-80"></div>
+                                    <div className="absolute bottom-2 right-0 w-6 h-6 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-80"></div>
+                                </div>
+                                {/* Tree Trunk */}
+                                <div className="w-2 h-7 bg-gradient-to-b from-[#8D6E63] to-[#6D4C41] rounded-t-sm"></div>
+                            </div>
+
+                            {/* Small House */}
+                            <div className="absolute bottom-12 right-6 flex flex-col items-center">
+                                {/* Roof */}
+                                <div className="relative w-14 h-8">
+                                    <div className="absolute bottom-0 left-0 w-0 h-0 border-l-[28px] border-l-transparent border-r-[28px] border-r-transparent border-b-[32px] border-b-[#FF6B6B]"></div>
+                                </div>
+                                {/* House Body */}
+                                <div className="w-12 h-10 bg-gradient-to-b from-[#FFE082] to-[#FFD54F] rounded-b-lg shadow-md">
+                                    {/* Windows */}
+                                    <div className="flex justify-center gap-2 pt-2">
+                                        <div className="w-3 h-3 bg-[#64B5F6] rounded-sm"></div>
+                                        <div className="w-3 h-3 bg-[#64B5F6] rounded-sm"></div>
+                                    </div>
+                                    {/* Door */}
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-5 bg-[#8D6E63] rounded-t-md"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="absolute bottom-4 left-4 right-4 h-16 bg-gradient-to-b from-transparent to-white/10 rounded-b-lg"></div>
 
-                        {/* Window Cross Divider */}
-                        <div className="absolute top-1/2 left-4 right-4 h-1 bg-[#5D4037]"></div>
-                        <div className="absolute top-4 bottom-4 left-1/2 w-1 bg-[#5D4037] -translate-x-1/2"></div>
+                        {/* Window Cross Dividers */}
+                        <div className="absolute top-1/2 left-3 right-3 h-1 bg-[#0EA5E9]"></div>
+                        <div className="absolute top-3 bottom-3 left-1/2 w-1 bg-[#0EA5E9] -translate-x-1/2"></div>
                     </div>
                 </div>
 
-                {/* 📚 Right Wall - Wall Shelf with Items (교체 가능한 장식) */}
+                {/* 📚 Left Wall - 2-Tier Shelf (교체 가능한 장식) */}
                 <div
-                    className="absolute right-4 top-[28%] z-10 pointer-events-none"
+                    className="absolute left-4 top-[32%] z-10 pointer-events-none"
                     data-decoration-type="shelf"
                     data-decoration-id="wall-shelf-01"
                     data-gtm="decoration-wall-shelf"
                 >
-                    <div className="relative w-32 h-24">
-                        {/* Shelf */}
-                        <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-b from-[#8B7355] to-[#6B5638] rounded-md shadow-lg"></div>
-                        <div className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[#5D4037] rounded-md"></div>
-
-                        {/* Shelf Items */}
-                        {/* Book Stack */}
-                        <div className="absolute bottom-3 left-2 flex flex-col gap-0.5">
-                            <div className="w-10 h-3 bg-gradient-to-r from-[#FF9AAB] to-[#FFB5C2] rounded-sm shadow-sm"></div>
-                            <div className="w-9 h-3 bg-gradient-to-r from-[#D4A5F5] to-[#E0B3FF] rounded-sm shadow-sm ml-0.5"></div>
-                            <div className="w-11 h-3 bg-gradient-to-r from-[#87CEEB] to-[#B0E0E6] rounded-sm shadow-sm"></div>
+                    <div className="relative w-36 h-32">
+                        {/* Top Shelf */}
+                        <div className="absolute top-0 left-0 right-0">
+                            <div className="h-2.5 bg-gradient-to-b from-[#D7CCC8] to-[#BCAAA4] rounded-md shadow-md"></div>
+                            <div className="h-1 bg-[#A1887F] rounded-b-sm"></div>
                         </div>
 
-                        {/* Small Potted Plant */}
-                        <div className="absolute bottom-3 right-3 flex flex-col items-center">
+                        {/* Bottom Shelf */}
+                        <div className="absolute bottom-0 left-0 right-0">
+                            <div className="h-2.5 bg-gradient-to-b from-[#D7CCC8] to-[#BCAAA4] rounded-md shadow-md"></div>
+                            <div className="h-1 bg-[#A1887F] rounded-b-sm"></div>
+                        </div>
+
+                        {/* Top Shelf Items - Small Potted Plant */}
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
                             {/* Leaves */}
-                            <div className="relative w-8 h-6">
-                                <div className="absolute top-0 left-1 w-3 h-4 bg-[#90EE90] rounded-full transform -rotate-12"></div>
-                                <div className="absolute top-0 right-1 w-3 h-4 bg-[#98FB98] rounded-full transform rotate-12"></div>
-                                <div className="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-4 bg-[#7CFC00] rounded-full"></div>
+                            <div className="relative w-10 h-8">
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-5 bg-gradient-to-t from-[#4CAF50] to-[#66BB6A] rounded-full"></div>
+                                <div className="absolute bottom-1 left-1 w-3.5 h-4 bg-gradient-to-t from-[#4CAF50] to-[#66BB6A] rounded-full transform -rotate-20"></div>
+                                <div className="absolute bottom-1 right-1 w-3.5 h-4 bg-gradient-to-t from-[#4CAF50] to-[#66BB6A] rounded-full transform rotate-20"></div>
                             </div>
                             {/* Pot */}
-                            <div className="w-6 h-3 bg-gradient-to-b from-[#D2691E] to-[#A0522D] rounded-b-lg shadow-sm"></div>
+                            <div className="w-8 h-4 bg-gradient-to-b from-[#FF8A65] to-[#FF6E40] rounded-b-lg shadow-sm"></div>
+                        </div>
+
+                        {/* Bottom Shelf Items */}
+                        {/* Apple (left) */}
+                        <div className="absolute bottom-4 left-4">
+                            <div className="w-7 h-7 bg-gradient-to-br from-[#FF6B6B] to-[#EE5A52] rounded-full shadow-md"></div>
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-2 bg-[#8D6E63] rounded-t-full"></div>
+                            <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+                        </div>
+
+                        {/* Purple Book (right) */}
+                        <div className="absolute bottom-4 right-4">
+                            <div className="w-10 h-12 bg-gradient-to-br from-[#AB47BC] to-[#8E24AA] rounded-sm shadow-md border-l-2 border-[#7B1FA2]">
+                                {/* Book spine lines */}
+                                <div className="absolute top-2 left-1 right-1 h-px bg-white/20"></div>
+                                <div className="absolute bottom-2 left-1 right-1 h-px bg-white/20"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 🪴 Bottom Right - Large Potted Plant (교체 가능한 장식) */}
+                {/* 💡 Left Bottom - Floor Lamp (교체 가능한 장식) */}
+                <div
+                    className="absolute left-6 bottom-[8%] z-20 pointer-events-none"
+                    data-decoration-type="lamp"
+                    data-decoration-id="floor-lamp-01"
+                    data-gtm="decoration-floor-lamp"
+                >
+                    <div className="relative w-20 h-40 flex flex-col items-center">
+                        {/* Lamp Shade */}
+                        <div className="relative w-16 h-20 mb-2">
+                            {/* Shade body */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF9E6] via-[#FFF3CC] to-[#FFECB3] rounded-b-full shadow-lg" style={{
+                                clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                            }}></div>
+                            {/* Vertical lines texture */}
+                            <div className="absolute inset-0 opacity-20" style={{
+                                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 3px)'
+                            }}></div>
+                            {/* Top rim */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-2 bg-[#D4AF37] rounded-full shadow-sm"></div>
+                            {/* Light glow effect */}
+                            <div className="absolute inset-2 bg-gradient-to-b from-[#FFFACD]/60 to-transparent blur-sm"></div>
+                        </div>
+
+                        {/* Lamp Pole */}
+                        <div className="w-1.5 h-12 bg-gradient-to-b from-[#424242] to-[#212121] rounded-full shadow-md"></div>
+
+                        {/* Lamp Base */}
+                        <div className="relative w-12 h-8">
+                            <div className="absolute bottom-0 w-full h-3 bg-gradient-to-b from-[#424242] to-[#212121] rounded-full shadow-lg"></div>
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-4 bg-gradient-to-b from-[#616161] to-[#424242] rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 🌳 Right Bottom - Large Bush/Tree (교체 가능한 장식) */}
                 <div
                     className="absolute right-8 bottom-[8%] z-20 pointer-events-none"
                     data-decoration-type="plant"
-                    data-decoration-id="potted-plant-01"
-                    data-gtm="decoration-potted-plant"
+                    data-decoration-id="large-bush-01"
+                    data-gtm="decoration-large-bush"
                 >
-                    <div className="relative w-24 h-32 flex flex-col items-center justify-end">
-                        {/* Plant Leaves */}
-                        <div className="relative w-full h-20 mb-2">
-                            {/* Center leaves */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-14 bg-gradient-to-t from-[#228B22] to-[#32CD32] rounded-t-full shadow-md"></div>
-                            <div className="absolute bottom-2 left-1/4 w-7 h-12 bg-gradient-to-t from-[#228B22] to-[#3CB371] rounded-t-full shadow-md transform -rotate-20"></div>
-                            <div className="absolute bottom-2 right-1/4 w-7 h-12 bg-gradient-to-t from-[#228B22] to-[#90EE90] rounded-t-full shadow-md transform rotate-20"></div>
-                            {/* Outer leaves */}
-                            <div className="absolute bottom-4 left-2 w-6 h-10 bg-gradient-to-t from-[#2E8B57] to-[#66CDAA] rounded-t-full shadow-sm transform -rotate-35"></div>
-                            <div className="absolute bottom-4 right-2 w-6 h-10 bg-gradient-to-t from-[#2E8B57] to-[#7CFC00] rounded-t-full shadow-sm transform rotate-35"></div>
+                    <div className="relative w-28 h-36 flex flex-col items-center justify-end">
+                        {/* Bush Leaves - Fluffy circular bush */}
+                        <div className="relative w-full h-24 mb-2">
+                            {/* Main bush body */}
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-20 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full shadow-lg"></div>
+
+                            {/* Additional leaf layers for depth */}
+                            <div className="absolute bottom-4 left-2 w-16 h-14 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full opacity-90"></div>
+                            <div className="absolute bottom-4 right-2 w-16 h-14 bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] rounded-full opacity-90"></div>
+                            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-18 h-16 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full opacity-85"></div>
+
+                            {/* Highlight spots */}
+                            <div className="absolute top-4 left-6 w-8 h-8 bg-gradient-to-br from-[#C8E6C9] to-transparent rounded-full opacity-40"></div>
+                            <div className="absolute top-6 right-8 w-6 h-6 bg-gradient-to-br from-[#C8E6C9] to-transparent rounded-full opacity-30"></div>
                         </div>
 
-                        {/* Large Pot */}
+                        {/* Large Pot - Coral/Orange color */}
                         <div className="relative">
-                            <div className="w-20 h-12 bg-gradient-to-b from-[#D2691E] to-[#8B4513] rounded-b-2xl shadow-xl border-2 border-[#A0522D]"></div>
-                            <div className="absolute top-0 left-0 right-0 h-2 bg-[#A0522D] rounded-t-md"></div>
-                            {/* Pot decoration */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-[#CD853F] opacity-30"></div>
+                            <div className="w-24 h-14 bg-gradient-to-b from-[#FF8A65] via-[#FF7043] to-[#FF5722] rounded-b-3xl shadow-2xl border-2 border-[#F4511E]"></div>
+                            <div className="absolute top-0 left-0 right-0 h-3 bg-[#F4511E] rounded-t-lg"></div>
+                            {/* Pot highlight */}
+                            <div className="absolute top-2 left-4 w-12 h-6 bg-gradient-to-br from-white/20 to-transparent rounded-full"></div>
                         </div>
                     </div>
                 </div>
 
-                {/* 🛋️ Center Floor - Circular Rug/Cushion under Mongle (교체 가능한 장식) */}
+                {/* 🛋️ Center Floor - Purple Circular Cushion under Mongle (교체 가능한 장식) */}
                 <div
                     className="absolute left-1/2 top-[63%] -translate-x-1/2 z-10 pointer-events-none"
                     data-decoration-type="rug"
-                    data-decoration-id="circular-rug-01"
-                    data-gtm="decoration-circular-rug"
+                    data-decoration-id="purple-cushion-01"
+                    data-gtm="decoration-purple-cushion"
                 >
-                    <div className="relative w-48 h-12">
-                        {/* Rug Shadow */}
-                        <div className="absolute inset-0 bg-black/10 rounded-[50%] blur-md"></div>
+                    <div className="relative w-52 h-14">
+                        {/* Cushion Shadow */}
+                        <div className="absolute inset-0 bg-black/15 rounded-[50%] blur-lg"></div>
 
-                        {/* Main Rug */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#FFB5C2] via-[#FFD4DC] to-[#FF9AAB] rounded-[50%] shadow-lg overflow-hidden">
-                            {/* Rug Pattern - Concentric circles */}
-                            <div className="absolute inset-2 border-2 border-white/30 rounded-[50%]"></div>
-                            <div className="absolute inset-4 border-2 border-[#FFB5C2]/40 rounded-[50%]"></div>
+                        {/* Main Cushion - Purple */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#CE93D8] via-[#BA68C8] to-[#AB47BC] rounded-[50%] shadow-xl overflow-hidden">
+                            {/* Dotted border pattern */}
+                            <svg className="absolute inset-0 w-full h-full" style={{ transform: 'scaleY(0.27)' }}>
+                                <ellipse
+                                    cx="50%"
+                                    cy="50%"
+                                    rx="45%"
+                                    ry="45%"
+                                    fill="none"
+                                    stroke="white"
+                                    strokeWidth="2"
+                                    strokeDasharray="6 6"
+                                    opacity="0.4"
+                                />
+                                <ellipse
+                                    cx="50%"
+                                    cy="50%"
+                                    rx="35%"
+                                    ry="35%"
+                                    fill="none"
+                                    stroke="white"
+                                    strokeWidth="1.5"
+                                    strokeDasharray="4 4"
+                                    opacity="0.3"
+                                />
+                            </svg>
 
-                            {/* Decorative dots */}
-                            <div className="absolute top-1/2 left-[20%] w-2 h-2 bg-white/40 rounded-full"></div>
-                            <div className="absolute top-1/2 right-[20%] w-2 h-2 bg-white/40 rounded-full"></div>
-                            <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-2 h-2 bg-white/40 rounded-full"></div>
-                            <div className="absolute bottom-[30%] left-1/2 -translate-x-1/2 w-2 h-2 bg-white/40 rounded-full"></div>
+                            {/* Center highlight */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-4 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-full"></div>
                         </div>
 
-                        {/* Rug Fringe/Tassels */}
-                        <div className="absolute -left-1 top-1/2 -translate-y-1/2 flex flex-col gap-1">
-                            <div className="w-2 h-0.5 bg-[#FF9AAB] rounded-full"></div>
-                            <div className="w-2 h-0.5 bg-[#FFB5C2] rounded-full"></div>
-                        </div>
-                        <div className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col gap-1">
-                            <div className="w-2 h-0.5 bg-[#FF9AAB] rounded-full"></div>
-                            <div className="w-2 h-0.5 bg-[#FFB5C2] rounded-full"></div>
-                        </div>
+                        {/* Cushion edge stitching effect */}
+                        <div className="absolute inset-1 rounded-[50%] border border-[#E1BEE7]/30"></div>
                     </div>
                 </div>
 
