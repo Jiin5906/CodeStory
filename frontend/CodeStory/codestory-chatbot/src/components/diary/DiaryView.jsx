@@ -122,7 +122,7 @@ const DiaryView = () => {
                         </button>
                     </div>
                 ) : (
-                    /* List Mode (흰색 배경 + 파스텔 테두리) */}
+                    /* List Mode (흰색 배경 + 파스텔 테두리) */
                     <div className="space-y-4 animate-fade-in" data-gtm="diary-list-section">
                         {diaries.map((diary) => (
                             <div

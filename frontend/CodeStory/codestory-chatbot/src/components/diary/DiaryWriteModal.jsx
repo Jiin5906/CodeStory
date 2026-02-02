@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { FaTimes, FaSave, FaCalendar } from 'react-icons/fa6';
+import { FaXmark, FaFloppyDisk, FaCalendar } from 'react-icons/fa6';
 import MoodSlider from './MoodSlider';
 
 /**
@@ -77,7 +77,7 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
                         className="text-xl text-gray-300 hover:text-gray-500 hover:scale-110 transition-transform"
                         data-gtm="diary-write-close-btn"
                     >
-                        <FaTimes />
+                        <FaXmark />
                     </button>
                 </div>
 
@@ -139,7 +139,7 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
                         className="w-full py-3 bg-white text-[#FFB5C2] font-cute rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border-2 border-[#FFD4DC]/40"
                         data-gtm="diary-save-btn"
                     >
-                        <FaSave />
+                        <FaFloppyDisk />
                         {isSaving ? '저장 중...' : '일기 저장하기'}
                     </button>
                 </div>
