@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { FaHandSparkles, FaUtensils, FaMoon, FaHome } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 
 /**
@@ -22,16 +23,16 @@ const SNAP_POINTS = {
 };
 
 // 액션 버튼 컴포넌트
-const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
+const ActionButton = ({ icon: Icon, value, onClick, isHome = false }) => {
     const [showPercent, setShowPercent] = useState(false);
-    const [labelText, setLabelText] = useState(label);
 
     const gaugeHeight = Math.min(100, Math.max(0, value));
 
     const getIconColor = () => {
+        if (isHome) return 'text-white';
         if (value < 20) return 'text-red-400';
         if (value >= 50) return 'text-white';
-        return 'text-gray-400';
+        return 'text-gray-600';
     };
 
     const getIconAnimation = () => {
@@ -44,10 +45,8 @@ const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
 
         if (!isHome && value < 100) {
             setShowPercent(true);
-            setLabelText(`${Math.round(value)}%`);
             setTimeout(() => {
                 setShowPercent(false);
-                setLabelText(label);
             }, 1500);
         }
 
@@ -55,52 +54,48 @@ const ActionButton = ({ icon, label, value, onClick, isHome = false }) => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={handleClick}>
-            <button
-                className={`w-12 h-12 rounded-xl relative overflow-hidden shadow-md active:scale-95 transition-all duration-200 ${
-                    isHome
-                        ? 'bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] hover:shadow-lg'
-                        : 'bg-white hover:shadow-lg'
-                } border border-white`}
-            >
-                {/* 게이지 배경 */}
-                {!isHome && (
-                    <div
-                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#FFB5C2] to-[#FFD4DC] transition-all duration-500 ease-out rounded-b-[14px]"
-                        style={{
-                            height: `${gaugeHeight}%`,
-                            opacity: value < 20 ? 1 : 0.85
-                        }}
-                    />
-                )}
+        <button
+            onClick={handleClick}
+            className={`w-12 h-12 rounded-xl relative overflow-hidden shadow-md active:scale-95 transition-all duration-200 ${
+                isHome
+                    ? 'bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] hover:shadow-lg'
+                    : 'bg-white hover:shadow-lg'
+            } border border-white`}
+        >
+            {/* 게이지 배경 */}
+            {!isHome && (
+                <div
+                    className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#FFB5C2] to-[#FFD4DC] transition-all duration-500 ease-out rounded-b-xl"
+                    style={{
+                        height: `${gaugeHeight}%`,
+                        opacity: value < 20 ? 1 : 0.85
+                    }}
+                />
+            )}
 
-                {/* 아이콘 */}
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <span
-                        className={`text-xl transition-all duration-300 ${
-                            isHome ? 'text-white drop-shadow-sm' : getIconColor()
-                        } ${getIconAnimation()}`}
-                    >
-                        {icon}
+            {/* 아이콘 */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+                <Icon
+                    className={`text-lg transition-all duration-300 ${getIconColor()} ${getIconAnimation()} drop-shadow-sm`}
+                />
+            </div>
+
+            {/* 퍼센트 오버레이 (클릭 시 또는 활성 상태) */}
+            {showPercent && !isHome && (
+                <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/30 backdrop-blur-sm rounded-xl">
+                    <span className="text-white font-bold text-sm drop-shadow-md">
+                        {Math.round(value)}%
                     </span>
                 </div>
-            </button>
-
-            {/* 라벨 */}
-            <span
-                className={`text-[9px] font-semibold transition-all duration-300 ${
-                    showPercent ? 'text-[#FFB5C2] scale-110' : 'text-gray-500'
-                }`}
-            >
-                {labelText}
-            </span>
-        </div>
+            )}
+        </button>
     );
 };
 
 const BottomSheet = ({
     onWrite,
-    onVentilateClick
+    onVentilateClick,
+    onHomeClick
 }) => {
     const [snapPoint, setSnapPoint] = useState('COLLAPSED'); // COLLAPSED, HALF만 사용
     const [dragStartY, setDragStartY] = useState(0);
@@ -291,27 +286,30 @@ const BottomSheet = ({
                 </div>
             </div>
 
-            {/* 액션 버튼 그룹 - HALF에서만 표시 (홈 버튼 제거) */}
+            {/* 액션 버튼 그룹 - HALF에서만 표시 */}
             {snapPoint === 'HALF' && (
                 <div className="px-4 pb-3 animate-fade-in-up">
-                    <div className="flex justify-around items-end gap-1" data-gtm="action-buttons">
+                    <div className="flex justify-around items-center gap-2" data-gtm="action-buttons">
                         <ActionButton
-                            icon="🤚"
-                            label="쓰다듬기"
+                            icon={FaHandSparkles}
                             value={affectionGauge}
                             onClick={() => {}}
                         />
                         <ActionButton
-                            icon="🍽️"
-                            label="식사"
+                            icon={FaUtensils}
                             value={hungerGauge}
                             onClick={() => {}}
                         />
                         <ActionButton
-                            icon="🌙"
-                            label="잠자기"
+                            icon={FaMoon}
                             value={sleepGauge}
                             onClick={onVentilateClick}
+                        />
+                        <ActionButton
+                            icon={FaHome}
+                            value={100}
+                            onClick={onHomeClick}
+                            isHome={true}
                         />
                     </div>
                 </div>
