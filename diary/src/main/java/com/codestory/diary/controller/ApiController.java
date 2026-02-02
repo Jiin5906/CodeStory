@@ -22,8 +22,10 @@ import com.codestory.diary.dto.ChatResponseDto;
 import com.codestory.diary.dto.CommentDto;
 import com.codestory.diary.dto.DiaryDto;
 import com.codestory.diary.dto.DiaryRequestDto;
+import com.codestory.diary.dto.FeedbackRequest;
 import com.codestory.diary.entity.ChatMessage;
 import com.codestory.diary.entity.Diary;
+import com.codestory.diary.entity.Feedback;
 import com.codestory.diary.entity.Member;
 import com.codestory.diary.repository.CommentRepository;
 import com.codestory.diary.repository.DiaryRepository;
@@ -33,6 +35,7 @@ import com.codestory.diary.dto.PetActionRequestDto;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.ChatService;
 import com.codestory.diary.service.DiaryService;
+import com.codestory.diary.service.FeedbackService;
 import com.codestory.diary.service.PetService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +49,7 @@ public class ApiController {
     private final AuthService authService;
     private final DiaryService diaryService;
     private final ChatService chatService;
+    private final FeedbackService feedbackService;
     private final PetService petService;
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
@@ -222,6 +226,52 @@ public class ApiController {
                 request.getAirGauge(),
                 request.getEnergyGauge()
         ));
+    }
+
+    // --- 피드백 API ---
+
+    /**
+     * 피드백 제출
+     * POST /api/feedback
+     */
+    @PostMapping("/feedback")
+    public ResponseEntity<?> submitFeedback(@RequestBody FeedbackRequest request) {
+        try {
+            Feedback feedback = feedbackService.submitFeedback(request);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "피드백이 성공적으로 제출되었습니다.",
+                "feedbackId", feedback.getId()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                "success", false,
+                "message", "피드백 제출 중 오류가 발생했습니다."
+            ));
+        }
+    }
+
+    /**
+     * 모든 피드백 조회 (관리자용)
+     * GET /api/feedback/all
+     */
+    @GetMapping("/feedback/all")
+    public ResponseEntity<List<Feedback>> getAllFeedback() {
+        return ResponseEntity.ok(feedbackService.getAllFeedback());
+    }
+
+    /**
+     * 사용자별 피드백 조회
+     * GET /api/feedback?userId={userId}
+     */
+    @GetMapping("/feedback")
+    public ResponseEntity<List<Feedback>> getFeedbackByUserId(@RequestParam Long userId) {
+        return ResponseEntity.ok(feedbackService.getFeedbackByUserId(userId));
     }
 
     // Helper: 클라이언트 IP 추출
