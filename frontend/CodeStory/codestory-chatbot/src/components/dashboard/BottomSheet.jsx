@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaHandSparkles, FaUtensils, FaMoon, FaHome } from 'react-icons/fa';
+import { FaHandSparkles, FaUtensils, FaMoon, FaStore } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 
 /**
@@ -95,7 +95,7 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false }) => {
 const BottomSheet = ({
     onWrite,
     onVentilateClick,
-    onHomeClick
+    onStoreClick
 }) => {
     const [snapPoint, setSnapPoint] = useState('COLLAPSED'); // COLLAPSED, HALF만 사용
     const [dragStartY, setDragStartY] = useState(0);
@@ -306,9 +306,9 @@ const BottomSheet = ({
                             onClick={onVentilateClick}
                         />
                         <ActionButton
-                            icon={FaHome}
+                            icon={FaStore}
                             value={100}
-                            onClick={onHomeClick}
+                            onClick={onStoreClick}
                             isHome={true}
                         />
                     </div>

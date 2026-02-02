@@ -11,7 +11,7 @@ const ReportView = ({ user, diaries }) => {
     return (
         <div
             className="w-full h-full overflow-y-auto bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0]"
-            style={{ paddingBottom: '6rem' }} // 하단 탭바 공간 확보
+            style={{ paddingBottom: '4.5rem' }} // 하단 탭바 공간 확보 (56px + 여백)
             data-gtm="view-report"
         >
             <div className="px-6 py-8">

@@ -667,7 +667,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     <BottomSheet
                         onWrite={handleWrite}
                         onVentilateClick={handleWindowClick}
-                        onHomeClick={() => setActiveTab('home')}
+                        onStoreClick={() => setIsStoreViewOpen(true)}
                     />
                 )}
 

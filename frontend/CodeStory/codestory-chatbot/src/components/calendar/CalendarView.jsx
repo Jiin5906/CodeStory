@@ -53,7 +53,11 @@ const CalendarView = ({ diaries }) => {
     const filledRate = Math.round((totalDiaries / allDates.length) * 100);
 
     return (
-        <div className="calendar-view-container animate-fade-in" data-gtm="view-calendar-main">
+        <div
+            className="calendar-view-container animate-fade-in"
+            style={{ paddingBottom: '4.5rem' }} // 하단 탭바 공간 확보
+            data-gtm="view-calendar-main"
+        >
             <div className="calendar-header">
                 <div>
                     <h2 className="calendar-title">{currentYear}년의 감정 지도</h2>
