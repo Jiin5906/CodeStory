@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO } from 'date-fns';
 import MainRoom from './MainRoom';
-import ChatInputBar from './ChatInputBar';
+import BottomSheet from './BottomSheet';
 import BottomTabBar from './BottomTabBar';
 import CalendarView from '../calendar/CalendarView';
 import ReportView from './ReportView';
@@ -207,12 +207,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         } else if (tabId === 'settings' && onSettingsClick) {
             onSettingsClick();
         }
-    };
-
-    // 중앙 FAB 클릭 핸들러
-    const handleCentralAction = () => {
-        // 감정 기록 열기
-        setIsMindRecordOpen(true);
     };
 
     return (
@@ -668,8 +662,13 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     </>
                 )}
 
-                {/* 채팅 입력창 - 홈 탭에서만 표시 */}
-                {activeTab === 'home' && <ChatInputBar onSubmit={handleWrite} />}
+                {/* BottomSheet - 홈 탭에서만 표시 */}
+                {activeTab === 'home' && (
+                    <BottomSheet
+                        onWrite={handleWrite}
+                        onVentilateClick={handleWindowClick}
+                    />
+                )}
 
                 {/* 마음 기록 오버레이 */}
                 <MindRecord
@@ -698,7 +697,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                 <BottomTabBar
                     activeTab={activeTab}
                     onTabChange={handleTabChange}
-                    onCentralAction={handleCentralAction}
                 />
             </div>
         </div>
