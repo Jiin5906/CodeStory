@@ -210,10 +210,18 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     };
 
     return (
-        <div className="bg-gradient-to-br from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] md:flex md:min-h-screen md:items-center md:justify-center md:p-4 font-body" data-gtm="view-mobile-dashboard-new">
+        <div className="bg-gradient-to-br from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] md:flex md:min-h-screen md:items-center md:justify-center font-body" data-gtm="view-mobile-dashboard-new">
 
-            {/* 폰 프레임 컨테이너 - 최대 너비 430px로 제한 */}
-            <div className="relative flex h-[100dvh] md:h-[800px] w-full max-w-[430px] mx-auto flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]">
+            {/* 반응형 비율 유지 래퍼 (3-레이어) */}
+            <div className="relative w-full h-[100dvh] flex items-center justify-center">
+                <div
+                    className="relative flex w-full flex-col overflow-hidden md:rounded-[3rem] md:border-[10px] md:border-white bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] md:shadow-[0_30px_80px_-15px_rgba(255,181,194,0.4)] md:ring-1 md:ring-[#FFD4DC]"
+                    style={{
+                        aspectRatio: '9 / 19.5',
+                        maxHeight: '100dvh',
+                        maxWidth: 'calc(100dvh * 9 / 19.5)',
+                    }}
+                >
 
                 {/* 메인 화면 영역 - 탭에 따라 다른 콘텐츠 표시 */}
                 <div className="relative w-full flex-1 overflow-hidden">
@@ -404,54 +412,54 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     {/* 📚 좌측 선반 2단 (다마고치 스타일) */}
                     <div className="absolute top-[28%] left-[8%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
                         {/* 상단 선반 */}
-                        <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md mb-8" style={{
+                        <div className="relative w-[26.05%] h-[0.58%] bg-[#D7B896] rounded-md mb-[1.86%]" style={{
                             boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
                         }}>
                             {/* 선반 위 소품들 */}
-                            <div className="absolute -top-10 left-2 flex gap-2 items-end">
+                            <div className="absolute -top-[2.33%] left-[7.14%] flex gap-[7.14%] items-end">
                                 {/* 📚 책 */}
-                                <div className="w-4 h-10 bg-gradient-to-br from-[#FF8FA3] to-[#FF6B8A] rounded-sm" style={{
+                                <div className="w-[14.29%] h-[2.33%] bg-gradient-to-br from-[#FF8FA3] to-[#FF6B8A] rounded-sm" style={{
                                     boxShadow: '2px 0 0 rgba(0,0,0,0.1)'
                                 }}></div>
-                                <div className="w-3 h-8 bg-gradient-to-br from-[#FFB5C2] to-[#FF9FB1] rounded-sm mt-2" style={{
+                                <div className="w-[10.71%] h-[1.86%] bg-gradient-to-br from-[#FFB5C2] to-[#FF9FB1] rounded-sm mt-[0.47%]" style={{
                                     boxShadow: '2px 0 0 rgba(0,0,0,0.1)'
                                 }}></div>
 
                                 {/* 📷 카메라 */}
-                                <div className="relative w-7 h-6 bg-gradient-to-br from-[#FF9FB1] to-[#FF8FA3] rounded-md" style={{
+                                <div className="relative w-[25%] h-[1.40%] bg-gradient-to-br from-[#FF9FB1] to-[#FF8FA3] rounded-md" style={{
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
                                 }}>
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white/80 rounded-full"></div>
-                                    <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-white/60 rounded-full"></div>
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[10.71%] h-[0.70%] bg-white/80 rounded-full"></div>
+                                    <div className="absolute top-[0.23%] right-[3.57%] w-[5.36%] h-[0.35%] bg-white/60 rounded-full"></div>
                                 </div>
                             </div>
                         </div>
 
                         {/* 하단 선반 */}
-                        <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md" style={{
+                        <div className="relative w-[26.05%] h-[0.58%] bg-[#D7B896] rounded-md" style={{
                             boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
                         }}>
                             {/* 선반 위 소품들 */}
-                            <div className="absolute -top-12 left-2 flex gap-3 items-end">
+                            <div className="absolute -top-[2.79%] left-[7.14%] flex gap-[10.71%] items-end">
                                 {/* 🌵 선인장 화분 */}
-                                <div className="relative w-8 h-12">
+                                <div className="relative w-[28.57%] h-[2.79%]">
                                     {/* 화분 */}
-                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-5 bg-gradient-to-b from-[#FF9980] to-[#FF8060] rounded-b-md" style={{
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[25%] h-[1.16%] bg-gradient-to-b from-[#FF9980] to-[#FF8060] rounded-b-md" style={{
                                         clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
                                     }}></div>
                                     {/* 선인장 몸통 */}
-                                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4 h-7 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-lg"></div>
+                                    <div className="absolute bottom-[0.70%] left-1/2 -translate-x-1/2 w-[14.29%] h-[1.63%] bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-lg"></div>
                                     {/* 선인장 팔 */}
-                                    <div className="absolute bottom-5 left-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
-                                    <div className="absolute bottom-5 right-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                    <div className="absolute bottom-[1.16%] left-0 w-[7.14%] h-[0.70%] bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                    <div className="absolute bottom-[1.16%] right-0 w-[7.14%] h-[0.70%] bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
                                 </div>
 
                                 {/* 📦 박스 */}
-                                <div className="relative w-6 h-7 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-sm" style={{
+                                <div className="relative w-[21.43%] h-[1.63%] bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-sm" style={{
                                     boxShadow: '2px 2px 0 rgba(0,0,0,0.1)'
                                 }}>
-                                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/30"></div>
-                                    <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/30"></div>
+                                    <div className="absolute top-0 left-0 right-0 h-[0.35%] bg-white/30"></div>
+                                    <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1.79%] bg-white/30"></div>
                                 </div>
                             </div>
                         </div>
@@ -459,7 +467,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
                     {/* 💜 고급 방석 (바닥 중앙 - 캐릭터 뒤) */}
                     <div className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
-                        <div className="relative w-52 h-28">
+                        <div className="relative w-[48.37%] h-[6.51%]">
                             {/* 방석 본체 (타원형) */}
                             <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
                                 style={{
@@ -469,7 +477,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             ></div>
 
                             {/* 방석 중앙 패턴 (십자형 스티치) */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[26.05%] h-[3.72%]">
                                 {/* 가로 스티치 라인 */}
                                 <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
                                 {/* 세로 스티치 라인 */}
@@ -496,16 +504,16 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             </div>
 
                             {/* 방석 하이라이트 (상단 빛 반사) */}
-                            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-8 bg-white/45 rounded-[50%] blur-md"></div>
+                            <div className="absolute top-[0.70%] left-1/2 -translate-x-1/2 w-[33.49%] h-[1.86%] bg-white/45 rounded-[50%] blur-md"></div>
 
                             {/* 방석 그림자 (바닥) */}
-                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/25 rounded-[50%] blur-lg"></div>
+                            <div className="absolute -bottom-[0.70%] left-1/2 -translate-x-1/2 w-[44.65%] h-[0.93%] bg-black/25 rounded-[50%] blur-lg"></div>
                         </div>
                     </div>
 
                     {/* MainRoom 컴포넌트 배치 */}
-                    <div className="absolute top-[53%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-                        <div className="w-40 h-40 rounded-full pointer-events-auto flex items-center justify-center">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+                        <div className="w-[37.21%] rounded-full pointer-events-auto flex items-center justify-center" style={{ aspectRatio: '1 / 1' }}>
                             <MainRoom
                                 latestLog={latestLog}
                                 aiResponse={aiResponse}
@@ -524,37 +532,37 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
                     {/* 🪴 우측 하단 대형 화분 (크기 증가) */}
                     <div className="absolute bottom-[26%] right-[3%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
-                        <div className="relative w-24 h-44">
+                        <div className="relative w-[22.33%] h-[10.23%]">
                             {/* 화분 */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-3xl" style={{
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[18.60%] h-[3.72%] bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-3xl" style={{
                                 clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
                                 boxShadow: '0 6px 12px rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.3)'
                             }}></div>
 
                             {/* 중앙 큰 잎 */}
-                            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 bg-gradient-to-t from-[#66BB6A] to-[#81C784] rounded-full"></div>
+                            <div className="absolute bottom-[3.26%] left-1/2 -translate-x-1/2 w-[5.58%] h-[6.05%] bg-gradient-to-t from-[#66BB6A] to-[#81C784] rounded-full"></div>
 
                             {/* 좌측 잎들 (크기 2배) */}
-                            <div className="absolute bottom-16 left-0 w-11 h-18 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full rotate-[-35deg]" style={{
+                            <div className="absolute bottom-[3.72%] left-0 w-[10.23%] h-[4.19%] bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full rotate-[-35deg]" style={{
                                 boxShadow: 'inset -3px 3px 6px rgba(0,0,0,0.12)'
                             }}></div>
-                            <div className="absolute bottom-22 left-[-2px] w-9 h-15 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-25deg]"></div>
+                            <div className="absolute bottom-[5.12%] left-[-0.47%] w-[8.37%] h-[3.49%] bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-25deg]"></div>
 
                             {/* 우측 잎들 (크기 2배) */}
-                            <div className="absolute bottom-16 right-0 w-11 h-18 bg-gradient-to-bl from-[#81C784] to-[#66BB6A] rounded-full rotate-[35deg]" style={{
+                            <div className="absolute bottom-[3.72%] right-0 w-[10.23%] h-[4.19%] bg-gradient-to-bl from-[#81C784] to-[#66BB6A] rounded-full rotate-[35deg]" style={{
                                 boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.12)'
                             }}></div>
-                            <div className="absolute bottom-22 right-[-2px] w-9 h-15 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[25deg]"></div>
+                            <div className="absolute bottom-[5.12%] right-[-0.47%] w-[8.37%] h-[3.49%] bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[25deg]"></div>
 
                             {/* 상단 작은 잎들 (크기 2배) */}
-                            <div className="absolute bottom-28 left-3 w-8 h-12 bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[-15deg]"></div>
-                            <div className="absolute bottom-28 right-3 w-8 h-12 bg-gradient-to-bl from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[15deg]"></div>
+                            <div className="absolute bottom-[6.51%] left-[2.79%] w-[7.44%] h-[2.79%] bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[-15deg]"></div>
+                            <div className="absolute bottom-[6.51%] right-[2.79%] w-[7.44%] h-[2.79%] bg-gradient-to-bl from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[15deg]"></div>
 
                             {/* 추가 잎들로 더 풍성하게 */}
-                            <div className="absolute bottom-20 left-1 w-7 h-10 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-40deg]" style={{
+                            <div className="absolute bottom-[4.65%] left-[0.93%] w-[6.51%] h-[2.33%] bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-40deg]" style={{
                                 opacity: 0.9
                             }}></div>
-                            <div className="absolute bottom-20 right-1 w-7 h-10 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[40deg]" style={{
+                            <div className="absolute bottom-[4.65%] right-[0.93%] w-[6.51%] h-[2.33%] bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[40deg]" style={{
                                 opacity: 0.9
                             }}></div>
                         </div>
@@ -564,8 +572,9 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     {emotionShards && emotionShards.map(shard => (
                         <div
                             key={shard.id}
-                            className={`absolute z-25 w-8 h-8 rounded-full cursor-pointer pointer-events-auto animate-bounce active:scale-90 transition-transform duration-200 ${getEmotionColor(shard.emotion)}`}
+                            className={`absolute z-25 w-[7.44%] rounded-full cursor-pointer pointer-events-auto animate-bounce active:scale-90 transition-transform duration-200 ${getEmotionColor(shard.emotion)}`}
                             style={{
+                                aspectRatio: '1 / 1',
                                 left: `${shard.x}%`,
                                 bottom: `${shard.y}%`,
                                 animationDuration: '1.5s'
@@ -582,21 +591,24 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
 
                     {/* ✨ 반짝이는 별 장식 (다이아몬드 모양) */}
                     <div className="absolute top-[12%] left-[15%] z-5 pointer-events-none">
-                        <div className="relative w-8 h-8 rotate-45 bg-white/60 animate-pulse" style={{
+                        <div className="relative w-[7.44%] rotate-45 bg-white/60 animate-pulse" style={{
+                            aspectRatio: '1 / 1',
                             clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
                             filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.8))',
                             animationDuration: '2s'
                         }}></div>
                     </div>
                     <div className="absolute top-[25%] right-[20%] z-5 pointer-events-none">
-                        <div className="relative w-6 h-6 rotate-45 bg-white/50 animate-pulse" style={{
+                        <div className="relative w-[5.58%] rotate-45 bg-white/50 animate-pulse" style={{
+                            aspectRatio: '1 / 1',
                             clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
                             filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.7))',
                             animationDuration: '2.5s'
                         }}></div>
                     </div>
                     <div className="absolute top-[18%] right-[35%] z-5 pointer-events-none">
-                        <div className="relative w-5 h-5 rotate-45 bg-white/40 animate-pulse" style={{
+                        <div className="relative w-[4.65%] rotate-45 bg-white/40 animate-pulse" style={{
+                            aspectRatio: '1 / 1',
                             clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
                             filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.6))',
                             animationDuration: '3s'
@@ -697,6 +709,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     activeTab={activeTab}
                     onTabChange={handleTabChange}
                 />
+                </div>
             </div>
         </div>
     );

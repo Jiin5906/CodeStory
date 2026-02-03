@@ -161,7 +161,7 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                         data-gtm="mainroom-mongle-speech-bubble"
                     >
                         <div
-                            className="relative p-6 text-center min-w-[240px] max-w-[85vw] sm:max-w-[400px] md:max-w-[480px] min-h-[64px] h-auto"
+                            className="relative p-6 text-center min-w-[240px] max-w-[95%] sm:max-w-[400px] md:max-w-[480px] min-h-[64px] h-auto"
                         >
                             {/* ☁️ Cloud-like Soft Bubble Background */}
                             <div
