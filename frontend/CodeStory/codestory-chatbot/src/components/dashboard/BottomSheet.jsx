@@ -18,8 +18,8 @@ import { usePet } from '../../context/PetContext';
 
 // 스냅포인트 높이 (Shrink: 캐릭터 발 아래 유지)
 const SNAP_POINTS = {
-    COLLAPSED: 58,   // 채팅만 (타이트하게 줄임)
-    HALF: 100        // 채팅 + 버튼 (몽글이 가림 방지)
+    COLLAPSED: 60,   // 채팅만 (입력창 전체 표시)
+    HALF: '35vh'     // 채팅 + 버튼 (화면의 35%, 캐릭터 발 밑에서 멈춤)
 };
 
 // 액션 버튼 컴포넌트
@@ -109,7 +109,7 @@ const BottomSheet = ({
     // 스냅포인트 높이 계산 (EXPANDED 제거)
     const getHeight = () => {
         if (snapPoint === 'HALF') {
-            return `${SNAP_POINTS.HALF}px`;
+            return SNAP_POINTS.HALF; // 이미 '35vh' 문자열
         } else {
             return `${SNAP_POINTS.COLLAPSED}px`;
         }
@@ -215,19 +215,19 @@ const BottomSheet = ({
     // 드래그 중 transform 계산 (개선된 경계 처리)
     const getTransform = () => {
         if (isDragging && currentY !== 0) {
-            // 경계 저항 강화 (0.3으로 낮춤)
-            const resistance = 0.3;
+            // 경계 저항 강화 (0.25로 더 낮춤)
+            const resistance = 0.25;
 
-            // COLLAPSED 상태에서 아래로 드래그 시 저항
+            // COLLAPSED 상태에서 아래로 드래그 시 저항 (탭바 뒤로 들어가지 않도록)
             if (snapPoint === 'COLLAPSED' && currentY > 0) {
-                return `translateY(${Math.min(currentY * resistance, 30)}px)`;
+                return `translateY(${Math.min(currentY * resistance, 20)}px)`;
             }
-            // EXPANDED 상태에서 위로 드래그 시 저항
-            else if (snapPoint === 'EXPANDED' && currentY < 0) {
+            // HALF 상태에서 위로 드래그 시 저항 (캐릭터 가리지 않도록)
+            else if (snapPoint === 'HALF' && currentY < 0) {
                 return `translateY(${Math.max(currentY * resistance, -30)}px)`;
             }
             // 정상 범위 내 드래그
-            return `translateY(${Math.max(-200, Math.min(200, currentY))}px)`;
+            return `translateY(${Math.max(-150, Math.min(150, currentY))}px)`;
         }
         return 'translateY(0)';
     };
@@ -235,9 +235,9 @@ const BottomSheet = ({
     return (
         <div
             ref={sheetRef}
-            className="absolute w-full z-[70] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
+            className="absolute w-full z-40 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col pb-[200px] -mb-[200px]"
             style={{
-                bottom: '3.5rem', // Lift: 탭바(h-14 = 56px) 정확히 위에 배치
+                bottom: 'calc(3.5rem + env(safe-area-inset-bottom))', // 탭바(h-14 = 56px) + safe-area 위에 배치
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
