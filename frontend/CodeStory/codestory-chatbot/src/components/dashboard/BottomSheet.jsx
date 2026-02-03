@@ -237,10 +237,12 @@ const BottomSheet = ({
             ref={sheetRef}
             className="absolute w-full z-50 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
             style={{
-                bottom: '5.5rem', // 탭바 위로 충분한 여유 확보 (88px = 5.5rem)
+                bottom: '3.5rem',
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                paddingBottom: '100vh',
+                marginBottom: '-100vh'
             }}
             data-gtm="bottomsheet-container"
         >
