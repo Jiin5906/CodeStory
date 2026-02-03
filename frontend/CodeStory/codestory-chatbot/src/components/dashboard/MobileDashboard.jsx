@@ -346,8 +346,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                             clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
                                         }}></div>
                                         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-6 bg-[#8B6F47] rounded-t-lg"></div>
-                                        <div className="absolute top-2 left-2 w-3.5 h-3.5 bg-[#FFE8CC] rounded-sm border border-[#8B6F47]"></div>
-                                        <div className="absolute top-2 right-2 w-3.5 h-3.5 bg-[#FFE8CC] rounded-sm border border-[#8B6F47]"></div>
                                     </div>
 
                                     {/* 🌳 나무 (좌측 앞쪽 - 크게) */}
@@ -525,7 +523,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     <MoodLight />
 
                     {/* 🪴 우측 하단 대형 화분 (크기 증가) */}
-                    <div className="absolute bottom-[26%] right-[6%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
+                    <div className="absolute bottom-[26%] right-[3%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                         <div className="relative w-24 h-44">
                             {/* 화분 */}
                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-3xl" style={{
