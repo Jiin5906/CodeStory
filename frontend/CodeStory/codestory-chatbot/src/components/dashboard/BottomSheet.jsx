@@ -16,10 +16,10 @@ import { usePet } from '../../context/PetContext';
  */
 
 
-// 스냅포인트 높이 (Shrink: 캐릭터 발 아래 유지)
+// 스냅포인트 높이 (캐릭터 가림 방지 + 슬림화)
 const SNAP_POINTS = {
-    COLLAPSED: 58,   // 채팅만 (타이트하게 줄임)
-    HALF: 100        // 채팅 + 버튼 (몽글이 가림 방지)
+    COLLAPSED: 68,   // 채팅만 (슬림화)
+    HALF: 120        // 채팅 + 버튼 (화면의 ~30% 이내)
 };
 
 // 액션 버튼 컴포넌트
@@ -56,10 +56,11 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false }) => {
     return (
         <button
             onClick={handleClick}
-            className={`w-12 h-12 rounded-xl relative overflow-hidden shadow-md active:scale-95 transition-all duration-200 ${isHome
+            className={`w-12 h-12 rounded-xl relative overflow-hidden shadow-md active:scale-95 transition-all duration-200 ${
+                isHome
                     ? 'bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] hover:shadow-lg'
                     : 'bg-white hover:shadow-lg'
-                } border border-white`}
+            } border border-white`}
         >
             {/* 게이지 배경 */}
             {!isHome && (
@@ -236,12 +237,10 @@ const BottomSheet = ({
             ref={sheetRef}
             className="absolute w-full z-[70] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
             style={{
-                bottom: '3.5rem', // Lift: 탭바(h-14 = 56px) 정확히 위에 배치
+                bottom: '3.25rem', // 탭바(3.5rem)와 시각적으로 연결 (gap 제거)
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                paddingBottom: '100vh',
-                marginBottom: '-100vh'
             }}
             data-gtm="bottomsheet-container"
         >
@@ -294,12 +293,12 @@ const BottomSheet = ({
                         <ActionButton
                             icon={FaHandSparkles}
                             value={affectionGauge}
-                            onClick={() => { }}
+                            onClick={() => {}}
                         />
                         <ActionButton
                             icon={FaUtensils}
                             value={hungerGauge}
-                            onClick={() => { }}
+                            onClick={() => {}}
                         />
                         <ActionButton
                             icon={FaMoon}
