@@ -234,17 +234,16 @@ const BottomSheet = ({
     return (
         <div
             ref={sheetRef}
-            className="absolute w-full z-[70] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
+            className="absolute w-full z-[50] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
             style={{
-                bottom: '3.4rem', // 탭바(3.5rem)와 시각적으로 연결 (gap 제거)
+                bottom: '4.1rem', // 탭바(3.5rem)와 시각적으로 연결 (gap 제거)
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                paddingBottom: '100vh',
-                marginBottom: '-100vh'
             }}
             data-gtm="bottomsheet-container"
         >
+            <div className="absolute top-0 left-0 right-0 h-[200vh] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl -z-10 rounded-t-3xl border-t border-[#FFD4DC]/30" />
             {/* 핸들바 영역 (드래그 가능) - 슬림화 */}
             <div
                 className="pt-1.5 pb-0.5 px-4 cursor-grab active:cursor-grabbing"
