@@ -16,10 +16,10 @@ import { usePet } from '../../context/PetContext';
  */
 
 
-// 스냅포인트 높이 (Shrink: 캐릭터 발 아래 유지)
+// 스냅포인트 높이 (최적화 - 캐릭터 공간 확보)
 const SNAP_POINTS = {
-    COLLAPSED: 60,   // 채팅만 (입력창 전체 표시)
-    HALF: '35vh'     // 채팅 + 버튼 (화면의 35%, 캐릭터 발 밑에서 멈춤)
+    COLLAPSED: 80,   // 채팅만 (버튼 숨김) - 축소
+    HALF: 150        // 채팅 + 버튼 - 축소
 };
 
 // 액션 버튼 컴포넌트
@@ -109,7 +109,7 @@ const BottomSheet = ({
     // 스냅포인트 높이 계산 (EXPANDED 제거)
     const getHeight = () => {
         if (snapPoint === 'HALF') {
-            return SNAP_POINTS.HALF; // 이미 '35vh' 문자열
+            return `${SNAP_POINTS.HALF}px`;
         } else {
             return `${SNAP_POINTS.COLLAPSED}px`;
         }
@@ -215,19 +215,19 @@ const BottomSheet = ({
     // 드래그 중 transform 계산 (개선된 경계 처리)
     const getTransform = () => {
         if (isDragging && currentY !== 0) {
-            // 경계 저항 강화 (0.25로 더 낮춤)
-            const resistance = 0.25;
+            // 경계 저항 강화 (0.3으로 낮춤)
+            const resistance = 0.3;
 
-            // COLLAPSED 상태에서 아래로 드래그 시 저항 (탭바 뒤로 들어가지 않도록)
+            // COLLAPSED 상태에서 아래로 드래그 시 저항
             if (snapPoint === 'COLLAPSED' && currentY > 0) {
-                return `translateY(${Math.min(currentY * resistance, 20)}px)`;
+                return `translateY(${Math.min(currentY * resistance, 30)}px)`;
             }
-            // HALF 상태에서 위로 드래그 시 저항 (캐릭터 가리지 않도록)
-            else if (snapPoint === 'HALF' && currentY < 0) {
+            // EXPANDED 상태에서 위로 드래그 시 저항
+            else if (snapPoint === 'EXPANDED' && currentY < 0) {
                 return `translateY(${Math.max(currentY * resistance, -30)}px)`;
             }
             // 정상 범위 내 드래그
-            return `translateY(${Math.max(-150, Math.min(150, currentY))}px)`;
+            return `translateY(${Math.max(-200, Math.min(200, currentY))}px)`;
         }
         return 'translateY(0)';
     };
@@ -235,17 +235,18 @@ const BottomSheet = ({
     return (
         <div
             ref={sheetRef}
-            className="absolute w-full bottom-14 z-40 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
+            className="absolute w-full z-50 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
             style={{
+                bottom: '5.5rem', // 탭바 위로 충분한 여유 확보 (88px = 5.5rem)
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}
             data-gtm="bottomsheet-container"
         >
-            {/* 핸들바 영역 (드래그 가능) - 슬림화 */}
+            {/* 핸들바 영역 (드래그 가능) */}
             <div
-                className="pt-1.5 pb-0.5 px-4 cursor-grab active:cursor-grabbing"
+                className="pt-2 pb-1 px-4 cursor-grab active:cursor-grabbing"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -254,30 +255,30 @@ const BottomSheet = ({
             >
                 {/* 핸들바 */}
                 <div
-                    className="w-10 h-1 bg-[#FFB5C2]/40 rounded-full mx-auto mb-1 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
+                    className="w-10 h-1 bg-[#FFB5C2]/40 rounded-full mx-auto mb-2 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
                     onClick={handleHandleClick}
                 ></div>
             </div>
 
-            {/* 채팅 입력창 - 슬림화 (공간 최적화) */}
-            <div className="px-4 pb-2" onClick={(e) => e.stopPropagation()}>
+            {/* 채팅 입력창 - 항상 표시 */}
+            <div className="px-4 pb-3" onClick={(e) => e.stopPropagation()}>
                 <div
                     className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-2xl border border-[#FFD4DC]/40 shadow-md group focus-within:border-[#FFB5C2] focus-within:shadow-lg transition-all duration-300"
                     data-gtm="chat-input-area"
                 >
-                    <div className="pl-2.5 pr-1 text-base opacity-70">✏️</div>
+                    <div className="pl-3 pr-1 text-lg opacity-70">✏️</div>
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
                         placeholder="오늘의 마음을 들려주세요..."
-                        className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-9 text-sm leading-tight"
+                        className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400 h-10 text-sm leading-relaxed"
                         data-gtm="chat-input-field"
                     />
                     <button
                         onClick={handleSubmit}
-                        className="m-1 w-8 h-8 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-md active:scale-95 hover:shadow-lg transition-all duration-200 flex items-center justify-center font-bold text-sm"
+                        className="m-1.5 w-9 h-9 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-full text-white shadow-md active:scale-95 hover:shadow-lg transition-all duration-200 flex items-center justify-center font-bold text-base"
                         data-gtm="chat-submit-button"
                     >
                         ↑
@@ -287,7 +288,7 @@ const BottomSheet = ({
 
             {/* 액션 버튼 그룹 - HALF에서만 표시 */}
             {snapPoint === 'HALF' && (
-                <div className="px-4 pb-2 animate-fade-in-up">
+                <div className="px-4 pb-3 animate-fade-in-up">
                     <div className="flex justify-around items-center gap-2" data-gtm="action-buttons">
                         <ActionButton
                             icon={FaHandSparkles}

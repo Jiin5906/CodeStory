@@ -20,7 +20,7 @@ const BottomTabBar = ({ activeTab, onTabChange }) => {
 
     return (
         <div
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 shadow-[0_-2px_10px_rgba(255,181,194,0.1)] flex justify-around items-center h-14"
+            className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 shadow-[0_-2px_10px_rgba(255,181,194,0.1)] flex justify-around items-center h-14"
             style={{
                 paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))',
                 maxWidth: '430px',
