@@ -235,7 +235,7 @@ const BottomSheet = ({
     return (
         <div
             ref={sheetRef}
-            className="absolute w-full z-40 bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col pb-[200px] -mb-[200px]"
+            className="absolute w-full z-[60] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col pb-[200px] -mb-[200px]"
             style={{
                 bottom: 'calc(3.5rem + env(safe-area-inset-bottom))', // 탭바(h-14 = 56px) + safe-area 위에 배치
                 height: getHeight(),
