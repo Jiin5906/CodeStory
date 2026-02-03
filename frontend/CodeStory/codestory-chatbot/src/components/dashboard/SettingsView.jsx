@@ -118,7 +118,7 @@ const SettingsView = ({ user }) => {
             <div className="px-6 py-8 max-w-2xl mx-auto">
                 {/* 헤더 */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-[#C8A882] mb-2 font-cute">⚙️ 설정</h1>
+                    <h1 className="text-4xl font-bold text-[#C8A882] mb-2 font-cute">설정</h1>
                     <p className="text-[#8B8B8B] text-base font-cute">
                         나만의 공감일기를 꾸며보세요
                     </p>
@@ -194,34 +194,6 @@ const SettingsView = ({ user }) => {
                         데이터 관리
                     </h3>
                     <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg border-2 border-[#FFB5C2]/20">
-                        {/* 백업/복원 */}
-                        <div className="mb-4 pb-4 border-b border-[#FFD4DC]/40">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-11 h-11 bg-gradient-to-br from-[#87CEEB] to-[#6BB6D6] rounded-2xl flex items-center justify-center shadow-md">
-                                    <FaDatabase className="text-white text-lg" />
-                                </div>
-                                <span className="text-[#4A4A4A] font-bold text-lg font-cute">
-                                    앱 데이터 백업 / 복원
-                                </span>
-                            </div>
-                            <div className="flex gap-2 ml-14">
-                                <button
-                                    onClick={handleBackup}
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#87CEEB] to-[#6BB6D6] text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
-                                    data-gtm="settings-data-backup"
-                                >
-                                    백업하기
-                                </button>
-                                <button
-                                    onClick={handleRestore}
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#90EE90] to-[#76D476] text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
-                                    data-gtm="settings-data-restore"
-                                >
-                                    복원하기
-                                </button>
-                            </div>
-                        </div>
-
                         {/* 초기화 */}
                         <div>
                             <div className="flex items-center gap-3 mb-3">
@@ -237,7 +209,7 @@ const SettingsView = ({ user }) => {
                                 className="ml-0 sm:ml-14 w-full sm:max-w-xs px-4 py-2.5 bg-white border-2 border-[#FF6B6B] text-[#FF6B6B] font-bold rounded-xl shadow-sm hover:bg-[#FF6B6B] hover:text-white hover:shadow-lg transition-all duration-200 font-cute whitespace-nowrap"
                                 data-gtm="settings-data-reset"
                             >
-                                ⚠️ 모든 데이터 삭제
+                                모든 데이터 삭제
                             </button>
                         </div>
                     </div>
@@ -291,7 +263,7 @@ const SettingsView = ({ user }) => {
                 {/* Footer */}
                 <div className="mt-10 text-center opacity-60">
                     <p className="text-sm text-[#8B8B8B] font-cute">
-                        Made with 💝 by CodeStory Team
+                        Made with by Logam Team
                     </p>
                 </div>
             </div>
