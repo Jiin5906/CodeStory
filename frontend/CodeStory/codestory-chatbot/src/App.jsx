@@ -26,6 +26,7 @@ import ShopPage from './components/shop/ShopPage';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { PetProvider, usePet } from './context/PetContext';
 import { DiaryProvider } from './context/DiaryContext';
+import { StoreProvider } from './context/StoreContext';
 
 function AppContent() {
     const { currentTheme } = useTheme();
@@ -253,13 +254,15 @@ function AppContent() {
 function App() {
     return (
         <ThemeProvider>
-            <PetProvider>
-                <DiaryProvider>
-                    <Router>
-                        <AppContent />
-                    </Router>
-                </DiaryProvider>
-            </PetProvider>
+            <StoreProvider>
+                <PetProvider>
+                    <DiaryProvider>
+                        <Router>
+                            <AppContent />
+                        </Router>
+                    </DiaryProvider>
+                </PetProvider>
+            </StoreProvider>
         </ThemeProvider>
     );
 }

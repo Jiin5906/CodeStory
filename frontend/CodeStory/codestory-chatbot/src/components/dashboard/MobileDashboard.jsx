@@ -13,6 +13,7 @@ import MainMenu from './MainMenu';
 import StoreView from './StoreView';
 import { chatApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
+import { useStore } from '../../context/StoreContext';
 
 const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStatsClick, onSettingsClick }) => {
     const [latestLog, setLatestLog] = useState(null);
@@ -37,6 +38,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const coldTimerRef = useRef(null);
 
     const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn } = usePet();
+    const { getEquippedItem } = useStore();
+
+    // 장착된 아이템 가져오기
+    const equippedTheme = getEquippedItem('theme');
+    const equippedShelf = getEquippedItem('shelf');
+    const equippedLight = getEquippedItem('light');
+    const equippedPot = getEquippedItem('pot');
+    const equippedCushion = getEquippedItem('cushion');
 
     const today = startOfDay(new Date());
 
@@ -236,8 +245,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     />
                                 )}
 
-                                {/* 🎨 벽 배경 (상단 60%) - 핑크색 + 다이아몬드 패턴 */}
-                                <div className="absolute inset-0 bg-[#FF9EAA]" style={{
+                                {/* 🎨 벽 배경 (상단 60%) - 테마에 따라 변경 */}
+                                <div className={`absolute inset-0 bg-gradient-to-br ${equippedTheme?.gradient || 'from-purple-100 via-pink-50 to-yellow-50'}`} style={{
                                     backgroundImage: `
                             radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 3%),
                             radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.3) 0%, transparent 2.5%),
@@ -589,6 +598,26 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                         <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse"></div>
                                     </div>
                                 ))}
+
+                                {/* 🪑 장착된 가구 렌더링 */}
+                                {/* 선반 (벽 상단) */}
+                                {equippedShelf && (
+                                    <div className="absolute top-[15%] left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                                        <div className="text-6xl drop-shadow-2xl">{equippedShelf.emoji}</div>
+                                    </div>
+                                )}
+                                {/* 화분 (바닥 좌측) */}
+                                {equippedPot && (
+                                    <div className="absolute bottom-[5%] left-[10%] z-20 pointer-events-none">
+                                        <div className="text-7xl drop-shadow-2xl">{equippedPot.emoji}</div>
+                                    </div>
+                                )}
+                                {/* 방석 (바닥 중앙) */}
+                                {equippedCushion && (
+                                    <div className="absolute bottom-[3%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
+                                        <div className="text-8xl drop-shadow-2xl">{equippedCushion.emoji}</div>
+                                    </div>
+                                )}
 
                                 {/* ✨ 반짝이는 별 장식 (다이아몬드 모양) */}
                                 <div className="absolute top-[12%] left-[15%] z-5 pointer-events-none">
