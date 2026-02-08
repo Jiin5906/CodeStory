@@ -4,11 +4,109 @@ import { useStore } from '../../context/StoreContext';
 import { THEMES, SHELVES, LIGHTS, POTS, CUSHIONS, getItemsByType } from '../../data/StoreData';
 
 /**
+ * 아이템 미리보기 렌더링 컴포넌트
+ */
+const ItemPreview = ({ item }) => {
+    // 테마 미리보기
+    if (item.category === 'theme') {
+        return (
+            <div className={`w-full h-full rounded-xl bg-gradient-to-br ${item.gradient} border-2 border-white/50`}>
+                <div className="flex items-center justify-center h-full text-4xl">
+                    {item.emoji}
+                </div>
+            </div>
+        );
+    }
+
+    // 선반 미리보기
+    if (item.type === 'shelf') {
+        return (
+            <div className="w-full h-full flex items-center justify-center">
+                <div
+                    className="w-4/5 h-3 rounded-md shadow-md"
+                    style={{
+                        background: `linear-gradient(to bottom, ${item.colorLight}, ${item.color})`,
+                        boxShadow: `0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3)`
+                    }}
+                ></div>
+            </div>
+        );
+    }
+
+    // 무드등 미리보기
+    if (item.type === 'light') {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-1">
+                {/* 전구 갓 */}
+                <div
+                    className="w-10 h-10 rounded-t-lg"
+                    style={{
+                        background: `linear-gradient(to bottom, ${item.shadeColor}, ${item.shadeColorDark})`,
+                        boxShadow: `0 0 15px ${item.shadeColor}, inset 0 2px 4px rgba(255,255,255,0.3)`,
+                        clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                    }}
+                ></div>
+                {/* 스탠드 */}
+                <div
+                    className="w-1 h-8 rounded-full"
+                    style={{
+                        background: `linear-gradient(to right, #3A3A3A, ${item.standColor}, #3A3A3A)`
+                    }}
+                ></div>
+                {/* 받침대 */}
+                <div
+                    className="w-8 h-2 rounded-full"
+                    style={{
+                        background: `linear-gradient(to bottom, ${item.standColor}, #1A1A1A)`
+                    }}
+                ></div>
+            </div>
+        );
+    }
+
+    // 화분 미리보기
+    if (item.type === 'pot') {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-end pb-2">
+                {/* 식물 */}
+                <div
+                    className="w-8 h-8 rounded-full mb-1"
+                    style={{
+                        background: `radial-gradient(circle, ${item.plantColor}, ${item.plantColor}DD)`
+                    }}
+                ></div>
+                {/* 화분 */}
+                <div
+                    className="w-10 h-6 rounded-b-lg"
+                    style={{
+                        background: `linear-gradient(to bottom, ${item.potColor}, ${item.potColor}CC)`,
+                        clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                    }}
+                ></div>
+            </div>
+        );
+    }
+
+    // 방석 미리보기
+    if (item.type === 'cushion') {
+        return (
+            <div className="w-full h-full flex items-center justify-center">
+                <div
+                    className="w-14 h-10 rounded-2xl"
+                    style={{
+                        background: `radial-gradient(ellipse at center, ${item.color}, ${item.colorDark})`,
+                        boxShadow: `0 4px 8px rgba(0,0,0,0.2), inset 0 -2px 6px rgba(0,0,0,0.1)`
+                    }}
+                ></div>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+/**
  * StoreView — 상점 (방 꾸미기 중심)
- *
- * 카테고리:
- * - 테마 (Themes): 배경 테마
- * - 가구 (Furniture): 선반, 무드등, 화분, 방석
  */
 const StoreView = ({ isOpen, onClose }) => {
     const { coins, buyItem, equipItem, isOwned, isEquipped } = useStore();
@@ -155,13 +253,8 @@ const StoreView = ({ isOpen, onClose }) => {
                                 data-gtm={`store-item-${item.id}`}
                             >
                                 {/* 아이템 미리보기 */}
-                                <div
-                                    className="h-20 mb-3 rounded-xl flex items-center justify-center text-4xl"
-                                    style={{
-                                        background: item.gradient || item.color || '#f0f0f0'
-                                    }}
-                                >
-                                    {item.emoji}
+                                <div className="h-20 mb-3 rounded-xl bg-gradient-to-b from-gray-50 to-gray-100">
+                                    <ItemPreview item={item} />
                                 </div>
 
                                 {/* 아이템 정보 */}

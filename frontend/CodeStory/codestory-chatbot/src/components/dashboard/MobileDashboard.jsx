@@ -602,20 +602,46 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                 {/* 🪑 장착된 가구 렌더링 */}
                                 {/* 선반 (벽 상단) */}
                                 {equippedShelf && (
-                                    <div className="absolute top-[15%] left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                                        <div className="text-6xl drop-shadow-2xl">{equippedShelf.emoji}</div>
+                                    <div className="absolute top-[28%] left-[8%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
+                                        <div
+                                            className="w-[26.05%] h-[0.58%] rounded-md"
+                                            style={{
+                                                background: `linear-gradient(to bottom, ${equippedShelf.colorLight}, ${equippedShelf.color})`,
+                                                boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
+                                            }}
+                                        ></div>
                                     </div>
                                 )}
-                                {/* 화분 (바닥 좌측) */}
+                                {/* 화분 (바닥 우측) */}
                                 {equippedPot && (
-                                    <div className="absolute bottom-[5%] left-[10%] z-20 pointer-events-none">
-                                        <div className="text-7xl drop-shadow-2xl">{equippedPot.emoji}</div>
+                                    <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+                                        {/* 식물 */}
+                                        <div
+                                            className="w-[8vw] h-[8vw] rounded-full mb-1 mx-auto"
+                                            style={{
+                                                background: `radial-gradient(circle, ${equippedPot.plantColor}, ${equippedPot.plantColor}DD)`
+                                            }}
+                                        ></div>
+                                        {/* 화분 */}
+                                        <div
+                                            className="w-[10vw] h-[6vw] rounded-b-lg"
+                                            style={{
+                                                background: `linear-gradient(to bottom, ${equippedPot.potColor}, ${equippedPot.potColor}CC)`,
+                                                clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                                            }}
+                                        ></div>
                                     </div>
                                 )}
-                                {/* 방석 (바닥 중앙) */}
+                                {/* 방석 (바닥 중앙 - 몽글이 아래) */}
                                 {equippedCushion && (
-                                    <div className="absolute bottom-[3%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
-                                        <div className="text-8xl drop-shadow-2xl">{equippedCushion.emoji}</div>
+                                    <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+                                        <div
+                                            className="w-[20vw] h-[14vw] rounded-3xl"
+                                            style={{
+                                                background: `radial-gradient(ellipse at center, ${equippedCushion.color}, ${equippedCushion.colorDark})`,
+                                                boxShadow: `0 6px 12px rgba(0,0,0,0.3), inset 0 -4px 10px rgba(0,0,0,0.15)`
+                                            }}
+                                        ></div>
                                     </div>
                                 )}
 

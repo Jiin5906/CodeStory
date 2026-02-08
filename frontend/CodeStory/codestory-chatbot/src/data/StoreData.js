@@ -1,6 +1,6 @@
 /**
  * StoreData.js
- * 상점 아이템 데이터 정의
+ * 상점 아이템 데이터 정의 (div 기반 디자인 스타일)
  */
 
 // ─── 테마 (Themes) ───
@@ -12,7 +12,8 @@ export const THEMES = [
         price: 150,
         emoji: '🌸',
         description: '봄날의 벚꽃이 흩날리는 배경',
-        gradient: 'from-pink-100 via-pink-50 to-white'
+        gradient: 'from-pink-100 via-pink-50 to-white',
+        wallColor: '#FFB6C1'
     },
     {
         id: 'theme_ocean',
@@ -21,7 +22,8 @@ export const THEMES = [
         price: 150,
         emoji: '🌊',
         description: '시원한 여름 바다 배경',
-        gradient: 'from-blue-100 via-cyan-50 to-white'
+        gradient: 'from-blue-100 via-cyan-50 to-white',
+        wallColor: '#87CEEB'
     },
     {
         id: 'theme_autumn',
@@ -30,7 +32,8 @@ export const THEMES = [
         price: 150,
         emoji: '🍂',
         description: '가을 단풍이 아름다운 배경',
-        gradient: 'from-orange-100 via-yellow-50 to-white'
+        gradient: 'from-orange-100 via-yellow-50 to-white',
+        wallColor: '#FFB347'
     },
     {
         id: 'theme_galaxy',
@@ -39,7 +42,8 @@ export const THEMES = [
         price: 200,
         emoji: '🌌',
         description: '반짝이는 별빛 은하수 배경',
-        gradient: 'from-purple-900 via-indigo-800 to-blue-900'
+        gradient: 'from-purple-900 via-indigo-800 to-blue-900',
+        wallColor: '#4B0082'
     },
     {
         id: 'theme_default',
@@ -48,7 +52,8 @@ export const THEMES = [
         price: 0,
         emoji: '🏠',
         description: '따뜻한 기본 배경',
-        gradient: 'from-purple-100 via-pink-50 to-yellow-50'
+        gradient: 'from-purple-100 via-pink-50 to-yellow-50',
+        wallColor: '#FF9EAA'
     }
 ];
 
@@ -61,7 +66,8 @@ export const SHELVES = [
         category: 'furniture',
         price: 80,
         emoji: '📦',
-        color: '#8B4513',
+        color: '#D7B896',
+        colorLight: '#E8CBA8',
         description: '따뜻한 원목 선반'
     },
     {
@@ -72,6 +78,7 @@ export const SHELVES = [
         price: 80,
         emoji: '🗄️',
         color: '#FFFFFF',
+        colorLight: '#F8F8F8',
         description: '깔끔한 화이트 선반'
     },
     {
@@ -82,6 +89,7 @@ export const SHELVES = [
         price: 100,
         emoji: '💝',
         color: '#FFB6C1',
+        colorLight: '#FFC8D3',
         description: '부드러운 파스텔 핑크 선반'
     },
     {
@@ -92,71 +100,83 @@ export const SHELVES = [
         price: 100,
         emoji: '🍃',
         color: '#98FF98',
+        colorLight: '#B0FFB0',
         description: '상쾌한 민트 선반'
     },
     {
-        id: 'shelf_rainbow',
-        name: '무지개 선반',
+        id: 'shelf_lavender',
+        name: '라벤더 선반',
         type: 'shelf',
         category: 'furniture',
         price: 150,
-        emoji: '🌈',
-        color: 'linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3)',
-        description: '화려한 무지개 그라데이션 선반'
+        emoji: '💜',
+        color: '#E6E6FA',
+        colorLight: '#F0F0FF',
+        description: '우아한 라벤더 선반'
     }
 ];
 
 // ─── 가구: 무드등 (Mood Light) ───
 export const LIGHTS = [
     {
-        id: 'light_moon',
-        name: '달 무드등',
+        id: 'light_warm',
+        name: '웜 무드등',
         type: 'light',
         category: 'furniture',
         price: 100,
-        emoji: '🌙',
-        color: '#FFE4B5',
-        description: '초승달 모양 무드등'
+        emoji: '💡',
+        shadeColor: '#FFF8DC',
+        shadeColorDark: '#FFE4B5',
+        standColor: '#2C2C2C',
+        description: '따뜻한 노란빛 무드등'
     },
     {
-        id: 'light_star',
-        name: '별 무드등',
+        id: 'light_pink',
+        name: '핑크 무드등',
         type: 'light',
         category: 'furniture',
         price: 100,
-        emoji: '⭐',
-        color: '#FFD700',
-        description: '반짝이는 별 모양'
-    },
-    {
-        id: 'light_heart',
-        name: '하트 무드등',
-        type: 'light',
-        category: 'furniture',
-        price: 120,
         emoji: '💖',
-        color: '#FF69B4',
-        description: '사랑스러운 하트 모양'
+        shadeColor: '#FFB6C1',
+        shadeColorDark: '#FF69B4',
+        standColor: '#8B4789',
+        description: '로맨틱 핑크 무드등'
     },
     {
-        id: 'light_cloud',
-        name: '구름 무드등',
+        id: 'light_mint',
+        name: '민트 무드등',
         type: 'light',
         category: 'furniture',
         price: 120,
-        emoji: '☁️',
-        color: '#F0F8FF',
-        description: '포근한 구름 모양'
+        emoji: '🌿',
+        shadeColor: '#98FF98',
+        shadeColorDark: '#7FFF7F',
+        standColor: '#2F4F2F',
+        description: '상쾌한 민트 무드등'
     },
     {
-        id: 'light_crystal',
-        name: '크리스탈 무드등',
+        id: 'light_blue',
+        name: '블루 무드등',
+        type: 'light',
+        category: 'furniture',
+        price: 120,
+        emoji: '💙',
+        shadeColor: '#ADD8E6',
+        shadeColorDark: '#87CEEB',
+        standColor: '#191970',
+        description: '차분한 블루 무드등'
+    },
+    {
+        id: 'light_rainbow',
+        name: '레인보우 무드등',
         type: 'light',
         category: 'furniture',
         price: 180,
-        emoji: '🔮',
-        color: '#E6E6FA',
-        description: '신비로운 수정구'
+        emoji: '🌈',
+        shadeColor: '#FFD700',
+        shadeColorDark: '#FFA500',
+        standColor: '#4B0082',
+        description: '화려한 무지개 무드등'
     }
 ];
 
@@ -169,7 +189,8 @@ export const POTS = [
         category: 'furniture',
         price: 90,
         emoji: '🌵',
-        color: '#228B22',
+        potColor: '#D2691E',
+        plantColor: '#228B22',
         description: '귀여운 선인장'
     },
     {
@@ -179,7 +200,8 @@ export const POTS = [
         category: 'furniture',
         price: 110,
         emoji: '🌿',
-        color: '#2E8B57',
+        potColor: '#8B4513',
+        plantColor: '#2E8B57',
         description: '싱그러운 몬스테라'
     },
     {
@@ -189,28 +211,31 @@ export const POTS = [
         category: 'furniture',
         price: 100,
         emoji: '🌺',
-        color: '#FF1493',
+        potColor: '#FF69B4',
+        plantColor: '#FF1493',
         description: '화사한 꽃 화분'
     },
     {
-        id: 'pot_palm',
-        name: '야자수 화분',
+        id: 'pot_lavender',
+        name: '라벤더 화분',
         type: 'pot',
         category: 'furniture',
         price: 130,
-        emoji: '🌴',
-        color: '#32CD32',
-        description: '열대 야자수'
+        emoji: '💜',
+        potColor: '#DDA0DD',
+        plantColor: '#9370DB',
+        description: '향기로운 라벤더'
     },
     {
-        id: 'pot_bonsai',
-        name: '분재 화분',
+        id: 'pot_rose',
+        name: '장미 화분',
         type: 'pot',
         category: 'furniture',
         price: 150,
-        emoji: '🎋',
-        color: '#556B2F',
-        description: '고급스러운 분재'
+        emoji: '🌹',
+        potColor: '#8B0000',
+        plantColor: '#DC143C',
+        description: '고급스러운 장미'
     }
 ];
 
@@ -224,6 +249,7 @@ export const CUSHIONS = [
         price: 70,
         emoji: '💗',
         color: '#FFC0CB',
+        colorDark: '#FFB6C1',
         description: '보들보들 핑크 방석'
     },
     {
@@ -234,6 +260,7 @@ export const CUSHIONS = [
         price: 70,
         emoji: '💙',
         color: '#87CEEB',
+        colorDark: '#6495ED',
         description: '시원한 블루 방석'
     },
     {
@@ -244,27 +271,30 @@ export const CUSHIONS = [
         price: 80,
         emoji: '💜',
         color: '#DA70D6',
+        colorDark: '#BA55D3',
         description: '우아한 퍼플 방석'
     },
     {
-        id: 'cushion_star',
-        name: '별 방석',
+        id: 'cushion_yellow',
+        name: '옐로우 방석',
         type: 'cushion',
         category: 'furniture',
         price: 100,
-        emoji: '⭐',
+        emoji: '💛',
         color: '#FFD700',
-        description: '반짝이는 별 모양 방석'
+        colorDark: '#FFA500',
+        description: '밝은 옐로우 방석'
     },
     {
-        id: 'cushion_cloud',
-        name: '구름 방석',
+        id: 'cushion_mint',
+        name: '민트 방석',
         type: 'cushion',
         category: 'furniture',
         price: 120,
-        emoji: '☁️',
-        color: '#F5F5F5',
-        description: '폭신폭신 구름 방석'
+        emoji: '💚',
+        color: '#98FF98',
+        colorDark: '#7FFF7F',
+        description: '상쾌한 민트 방석'
     }
 ];
 
