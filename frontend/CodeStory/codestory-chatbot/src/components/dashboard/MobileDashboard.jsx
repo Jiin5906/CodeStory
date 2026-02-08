@@ -38,14 +38,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const coldTimerRef = useRef(null);
 
     const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn } = usePet();
-    const { getEquippedItem } = useStore();
+    const { equippedItems, getEquippedItem } = useStore();
 
-    // 장착된 아이템 가져오기
-    const equippedTheme = getEquippedItem('theme');
-    const equippedShelf = getEquippedItem('shelf');
-    const equippedLight = getEquippedItem('light');
-    const equippedPot = getEquippedItem('pot');
-    const equippedCushion = getEquippedItem('cushion');
+    // 장착된 아이템 가져오기 (equippedItems 변경 시 자동 재계산)
+    const equippedTheme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+    const equippedShelf = useMemo(() => getEquippedItem('shelf'), [equippedItems, getEquippedItem]);
+    const equippedLight = useMemo(() => getEquippedItem('light'), [equippedItems, getEquippedItem]);
+    const equippedPot = useMemo(() => getEquippedItem('pot'), [equippedItems, getEquippedItem]);
+    const equippedCushion = useMemo(() => getEquippedItem('cushion'), [equippedItems, getEquippedItem]);
 
     const today = startOfDay(new Date());
 

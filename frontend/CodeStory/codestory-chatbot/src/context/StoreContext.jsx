@@ -157,7 +157,7 @@ export const StoreProvider = ({ children }) => {
         <StoreContext.Provider value={{
             coins,
             ownedItems,
-            equippedItems,
+            equippedItems, // ✅ 리렌더링을 위해 필수
             addCoins,
             subtractCoins,
             buyItem,
