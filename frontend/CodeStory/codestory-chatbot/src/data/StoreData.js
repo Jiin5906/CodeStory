@@ -6,16 +6,6 @@
 // ─── 테마 (Themes) ───
 export const THEMES = [
     {
-        id: 'theme_sakura',
-        name: '벚꽃 테마',
-        category: 'theme',
-        price: 150,
-        emoji: '🌸',
-        description: '봄날의 벚꽃이 흩날리는 배경',
-        gradient: 'from-pink-100 via-pink-50 to-white',
-        wallColor: '#FFB6C1'
-    },
-    {
         id: 'theme_ocean',
         name: '바다 테마',
         category: 'theme',
@@ -23,7 +13,16 @@ export const THEMES = [
         emoji: '🌊',
         description: '시원한 여름 바다 배경',
         gradient: 'from-blue-100 via-cyan-50 to-white',
-        wallColor: '#87CEEB'
+        wallColor: '#87CEEB',
+        floorColor: '#E0F2F7',
+        windowBorderColor: '#4FC3F7',
+        accentColor: '#29B6F6',
+        buttonColor: '#03A9F4',
+        decorationColors: {
+            primary: '#81D4FA',
+            secondary: '#B3E5FC',
+            highlight: '#0288D1'
+        }
     },
     {
         id: 'theme_autumn',
@@ -33,7 +32,16 @@ export const THEMES = [
         emoji: '🍂',
         description: '가을 단풍이 아름다운 배경',
         gradient: 'from-orange-100 via-yellow-50 to-white',
-        wallColor: '#FFB347'
+        wallColor: '#FFB347',
+        floorColor: '#FFE5B4',
+        windowBorderColor: '#FF8C42',
+        accentColor: '#FF7043',
+        buttonColor: '#FF6F00',
+        decorationColors: {
+            primary: '#FFCC80',
+            secondary: '#FFE0B2',
+            highlight: '#F57C00'
+        }
     },
     {
         id: 'theme_galaxy',
@@ -43,7 +51,16 @@ export const THEMES = [
         emoji: '🌌',
         description: '반짝이는 별빛 은하수 배경',
         gradient: 'from-purple-900 via-indigo-800 to-blue-900',
-        wallColor: '#4B0082'
+        wallColor: '#4B0082',
+        floorColor: '#5C4D7D',
+        windowBorderColor: '#7B68EE',
+        accentColor: '#9370DB',
+        buttonColor: '#8B7AB8',
+        decorationColors: {
+            primary: '#B39DDB',
+            secondary: '#D1C4E9',
+            highlight: '#673AB7'
+        }
     },
     {
         id: 'theme_default',
@@ -53,7 +70,16 @@ export const THEMES = [
         emoji: '🏠',
         description: '따뜻한 기본 배경',
         gradient: 'from-purple-100 via-pink-50 to-yellow-50',
-        wallColor: '#FF9EAA'
+        wallColor: '#FF9EAA',
+        floorColor: '#FFCC80',
+        windowBorderColor: '#5DADE2',
+        accentColor: '#FFB5C2',
+        buttonColor: '#FF8FA3',
+        decorationColors: {
+            primary: '#FFD4DC',
+            secondary: '#FFE4E9',
+            highlight: '#FF6B8A'
+        }
     }
 ];
 

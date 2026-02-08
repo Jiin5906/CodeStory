@@ -261,11 +261,12 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     backgroundPosition: '0 0'
                                 }}></div>
 
-                                {/* 🪵 바닥 (하단 40%) - 오렌지 우드톤 + 나무 질감 */}
-                                <div className="absolute bottom-0 w-full h-[40%] bg-[#FFCC80]" style={{
+                                {/* 🪵 바닥 (하단 40%) - 테마에 따라 변경 */}
+                                <div className="absolute bottom-0 w-full h-[40%]" style={{
+                                    backgroundColor: equippedTheme?.floorColor || '#FFCC80',
                                     backgroundImage: `
-                            linear-gradient(90deg, transparent 0%, rgba(255, 180, 100, 0.15) 2px, transparent 2px),
-                            linear-gradient(90deg, transparent 0%, rgba(255, 180, 100, 0.1) 1px, transparent 1px)
+                            linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                            linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
                         `,
                                     backgroundSize: '120px 100%, 40px 100%',
                                     backgroundPosition: '0 0, 0 0'
@@ -280,10 +281,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     }}
                                 >
                                     <div className="relative w-full h-full">
-                                        {/* 창문 틀 (큰 아치형) - 파란색 두꺼운 테두리 */}
-                                        <div className="absolute inset-0 rounded-tl-[45%] rounded-tr-[45%] rounded-b-2xl border-[10px] border-[#5DADE2] overflow-hidden" style={{
+                                        {/* 창문 틀 (큰 아치형) - 테마에 따라 변경 */}
+                                        <div className="absolute inset-0 rounded-tl-[45%] rounded-tr-[45%] rounded-b-2xl border-[10px] overflow-hidden" style={{
+                                            borderColor: equippedTheme?.windowBorderColor || '#5DADE2',
                                             boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.15), inset 0 -4px 8px rgba(255,255,255,0.3), 0 0 0 2px rgba(255,255,255,0.4)',
-                                            background: 'linear-gradient(135deg, #6EC1E4 0%, #5DADE2 100%)'
+                                            background: `linear-gradient(135deg, ${equippedTheme?.windowBorderColor || '#6EC1E4'} 0%, ${equippedTheme?.windowBorderColor || '#5DADE2'} 100%)`
                                         }}>
                                             {/* 하늘 배경 (낮/밤 조건부 렌더링) */}
                                             <div className={`absolute inset-0 transition-colors duration-1000 ${isNightTime
@@ -703,14 +705,19 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                 style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
                                 data-gtm="mobile-dashboard-header"
                             >
-                                {/* 스트릭 배지 - 따뜻한 스타일 */}
+                                {/* 스트릭 배지 - 테마에 따라 변경 */}
                                 <div
-                                    className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 border-[#FFD4DC]/40 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
+                                    className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
                                     onClick={onCalendarClick}
                                     data-gtm="mobile-dashboard-streak-indicator"
+                                    style={{
+                                        borderColor: `${equippedTheme?.decorationColors?.primary || '#FFD4DC'}40`
+                                    }}
                                 >
-                                    <span className="text-xs font-bold text-[#FFB5C2]">
-                                        🌸 {streakDays}일차
+                                    <span className="text-xs font-bold" style={{
+                                        color: equippedTheme?.accentColor || '#FFB5C2'
+                                    }}>
+                                        {equippedTheme?.emoji || '🌸'} {streakDays}일차
                                     </span>
                                 </div>
                             </div>
