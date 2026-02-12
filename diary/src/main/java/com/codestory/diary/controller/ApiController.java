@@ -37,6 +37,7 @@ import com.codestory.diary.service.ChatService;
 import com.codestory.diary.service.CoinService;
 import com.codestory.diary.service.DiaryService;
 import com.codestory.diary.service.FeedbackService;
+import com.codestory.diary.service.MongleTalkService;
 import com.codestory.diary.service.PetService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,6 +54,7 @@ public class ApiController {
     private final CoinService coinService;
     private final FeedbackService feedbackService;
     private final PetService petService;
+    private final MongleTalkService mongleTalkService;
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
     private final LikesRepository likesRepository;
@@ -254,6 +256,18 @@ public class ApiController {
         Long userId = Long.valueOf(request.get("userId").toString());
         Long amount = Long.valueOf(request.get("amount").toString());
         return ResponseEntity.ok(coinService.spendCoins(userId, amount));
+    }
+
+    // --- 몽글이 능동적 대화 API ---
+
+    @GetMapping("/mongle/greeting")
+    public ResponseEntity<?> getMongleGreeting(@RequestParam Long userId) {
+        return ResponseEntity.ok(mongleTalkService.getGreeting(userId));
+    }
+
+    @GetMapping("/mongle/alive-question")
+    public ResponseEntity<?> getMongleAliveQuestion(@RequestParam Long userId) {
+        return ResponseEntity.ok(mongleTalkService.getAliveQuestion(userId));
     }
 
     // --- 피드백 API ---

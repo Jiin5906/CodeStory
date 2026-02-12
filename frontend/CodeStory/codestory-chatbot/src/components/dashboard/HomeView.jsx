@@ -7,7 +7,7 @@ import CircularProgressNew from './CircularProgressNew';
 import MoodLight from './MoodLight';
 import MainMenu from './MainMenu';
 import StoreView from './StoreView';
-import { chatApi } from '../../services/api';
+import { chatApi, mongleApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 import { useStore } from '../../context/StoreContext';
 
@@ -31,6 +31,10 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const [windowClosedAnimation, setWindowClosedAnimation] = useState(false);
 
     const coldTimerRef = useRef(null);
+    const aliveTimerRef = useRef(null);
+
+    // 능동적 대화 타이머 간격 (개발: 10초, 배포: 10분)
+    const ALIVE_INTERVAL_MS = 600000; // 10분 (배포용)
 
     const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
@@ -105,11 +109,59 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     useEffect(() => {
         return () => {
             if (coldTimerRef.current) clearTimeout(coldTimerRef.current);
+            if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
         };
     }, []);
 
+    // ━━━ 몽글이 능동적 대화 시스템 ━━━
+
+    // 능동적 대화 타이머 리셋 함수
+    const resetAliveTimer = () => {
+        if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
+        if (!user?.id) return;
+
+        aliveTimerRef.current = setInterval(async () => {
+            try {
+                const data = await mongleApi.getAliveQuestion(user.id);
+                if (data?.message) {
+                    setAiResponse(data.message);
+                    setEmotion(null);
+                }
+            } catch (e) {
+                console.error('[HomeView] alive-question 실패:', e);
+            }
+        }, ALIVE_INTERVAL_MS);
+    };
+
+    // 초기 진입: 인삿말 API 호출 + 타이머 시작
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const fetchGreeting = async () => {
+            try {
+                const data = await mongleApi.getGreeting(user.id);
+                if (data?.message) {
+                    setAiResponse(data.message);
+                }
+            } catch (e) {
+                console.error('[HomeView] greeting 실패:', e);
+            }
+        };
+
+        fetchGreeting();
+        resetAliveTimer();
+
+        return () => {
+            if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
+
     // 채팅 및 AI 응답 핸들러
     const handleWrite = async (content) => {
+        // 사용자 인터랙션 시 능동적 대화 타이머 리셋
+        resetAliveTimer();
+
         setLatestLog(content);
         setIsAiThinking(true);
         setAiResponse(null);

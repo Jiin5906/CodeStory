@@ -129,11 +129,11 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
         };
     }, [latestLog]);
 
-    // AI 답변 도착 시 말풍선 표시
+    // AI 답변 또는 능동적 대화 도착 시 말풍선 표시 (8초간 유지)
     useEffect(() => {
         if (aiResponse) {
             const showTimer = setTimeout(() => setShowAiThought(true), 0);
-            const hideTimer = setTimeout(() => setShowAiThought(false), 3000);
+            const hideTimer = setTimeout(() => setShowAiThought(false), 8000);
             return () => {
                 clearTimeout(showTimer);
                 clearTimeout(hideTimer);

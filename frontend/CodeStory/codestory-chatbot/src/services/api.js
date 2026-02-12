@@ -226,6 +226,18 @@ export const coinApi = {
     },
 };
 
+// Mongle Talk API (능동적 대화)
+export const mongleApi = {
+    getGreeting: async (userId) => {
+        const response = await api.get(`/mongle/greeting?userId=${userId}`);
+        return response.data;
+    },
+    getAliveQuestion: async (userId) => {
+        const response = await api.get(`/mongle/alive-question?userId=${userId}`);
+        return response.data;
+    },
+};
+
 // Feedback API
 export const feedbackApi = {
     submitFeedback: async (userId, email, category, content) => {
