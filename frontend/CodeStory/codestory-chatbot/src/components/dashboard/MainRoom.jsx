@@ -151,77 +151,36 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
             <div className="flex-1 flex flex-col items-center justify-center pb-20 pt-32 relative" data-gtm="mainroom-character-area">
 
                 <div className="flex flex-col items-center gap-6 relative">
-                    {/* (1) 몽글이의 말풍선 - 둥글둥글 귀여운 풍선 스타일 */}
+                    {/* (1) 몽글이의 말풍선 */}
                     <div
-                        className={`transition-all duration-700 ease-out ${
+                        className={`transition-all duration-700 ease-out mb-4 ${
                             showAiThought || isAiThinking
-                                ? 'opacity-100 translate-y-0 scale-100 animate-bubble-bounce'
+                                ? 'opacity-100 translate-y-0 scale-100'
                                 : 'opacity-0 -translate-y-6 scale-95 pointer-events-none'
                         }`}
                         data-gtm="mainroom-mongle-speech-bubble"
                     >
-                        <div
-                            className="relative text-center min-w-[180px] max-w-[85vw] sm:max-w-[360px] md:max-w-[420px]"
-                            style={{
-                                padding: '18px 28px',
-                                background: 'linear-gradient(145deg, #FFFFFF 0%, #FFF0F5 50%, #FFE4EE 100%)',
-                                borderRadius: '50px',
-                                boxShadow: '0 6px 20px rgba(255, 182, 193, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.8)',
-                                border: '2.5px solid rgba(255, 190, 210, 0.45)',
-                            }}
-                        >
-                            {/* ✨ 하이라이트 반사 효과 */}
-                            <div
-                                className="absolute top-[6px] left-[15%] right-[15%] h-[30%] rounded-full pointer-events-none"
-                                style={{
-                                    background: 'linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%)',
-                                    borderRadius: '50px',
-                                }}
-                            ></div>
+                        {/* 말풍선 본체 */}
+                        <div className="relative bg-white/90 rounded-[2rem] p-6 max-w-xs sm:max-w-sm min-h-[48px] h-auto shadow-lg shadow-pink-100/60 backdrop-blur-sm">
 
-                            {/* 📝 텍스트 - auto-sizing */}
+                            {/* 📝 텍스트 — h-auto + break-words → 절대 잘리지 않음 */}
                             <p
-                                className="relative text-sm sm:text-base leading-relaxed break-words text-gray-700"
+                                className="relative text-sm sm:text-base leading-relaxed break-words text-gray-700 text-center"
                                 style={{
                                     fontFamily: "'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
                                     whiteSpace: 'pre-wrap',
-                                    letterSpacing: '-0.01em',
                                 }}
                             >
                                 {isAiThinking ? "공감하는 중..." : aiResponse}
                             </p>
 
-                            {/* 💭 둥근 말풍선 꼬리 (원형 3개) */}
-                            <div className="absolute -bottom-[14px] left-1/2 -translate-x-1/2 flex flex-col items-center">
-                                <div style={{
-                                    width: '16px',
-                                    height: '12px',
-                                    background: '#FFE4EE',
-                                    borderRadius: '50%',
-                                    border: '2px solid rgba(255, 190, 210, 0.45)',
-                                    borderTop: 'none',
-                                }}></div>
-                            </div>
-                            <div className="absolute -bottom-[24px] left-1/2 translate-x-[2px] flex flex-col items-center">
-                                <div style={{
-                                    width: '10px',
-                                    height: '10px',
-                                    background: '#FFE4EE',
-                                    borderRadius: '50%',
-                                    boxShadow: '0 2px 6px rgba(255, 182, 193, 0.2)',
-                                }}></div>
-                            </div>
-                            <div className="absolute -bottom-[32px] left-1/2 translate-x-[6px] flex flex-col items-center">
-                                <div style={{
-                                    width: '6px',
-                                    height: '6px',
-                                    background: '#FFEBF1',
-                                    borderRadius: '50%',
-                                    boxShadow: '0 1px 4px rgba(255, 182, 193, 0.15)',
-                                }}></div>
-                            </div>
+                            {/* 💭 꼬리 — absolute div, 본체 색상과 동일 */}
+                            <div
+                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/90 rounded-br-lg"
+                                style={{ transform: 'translateX(-50%) rotate(45deg)' }}
+                            />
                         </div>
                     </div>
 
