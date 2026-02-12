@@ -15,4 +15,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     // [유지] 인스타그램 피드용 (공개된 일기만 최신순)
     List<Diary> findByIsPublicTrueOrderByCreatedAtDesc();
+
+    // 특정 날짜에 작성한 일기 수 (코인 보상 중복 방지용)
+    int countByUserIdAndDate(Long userId, java.time.LocalDate date);
 }

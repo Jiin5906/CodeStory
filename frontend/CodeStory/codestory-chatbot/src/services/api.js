@@ -178,10 +178,6 @@ export const petApi = {
         const response = await api.get(`/pet/status?userId=${userId}`);
         return response.data;
     },
-    ventilate: async (userId) => {
-        const response = await api.post('/pet/ventilate', { userId, action: 'ventilate' });
-        return response.data;
-    },
     affectionComplete: async (userId) => {
         const response = await api.post('/pet/affection-complete', { userId, action: 'affection-complete' });
         return response.data;
@@ -204,6 +200,26 @@ export const petApi = {
             throw error;
         }
     }
+};
+
+// Coin (코인) API
+export const coinApi = {
+    getCoins: async (userId) => {
+        const response = await api.get(`/coins?userId=${userId}`);
+        return response.data;
+    },
+    giveGaugeReward: async (userId, gaugeType) => {
+        const response = await api.post('/coins/gauge', { userId, gaugeType });
+        return response.data;
+    },
+    giveShardReward: async (userId) => {
+        const response = await api.post('/coins/shard', { userId });
+        return response.data;
+    },
+    giveDiaryReward: async (userId) => {
+        const response = await api.post('/coins/diary', { userId });
+        return response.data;
+    },
 };
 
 // Feedback API

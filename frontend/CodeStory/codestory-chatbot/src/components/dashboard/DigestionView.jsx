@@ -3,6 +3,8 @@ import Lottie from 'lottie-react';
 import mongleEATING from '../../assets/mongleEATING.json';
 import mongleIDLE from '../../assets/mongleIDLE.json';
 import { usePet } from '../../context/PetContext';
+import { HeartShard, StarShard, DropShard, FireShard } from './EmotionShardSVG';
+import { getEmotionBase, getShardGlow } from './emotionShardUtils';
 
 /**
  * DigestionView — 감정 소화 시스템 (식당 뷰)
@@ -319,9 +321,9 @@ const DigestionView = ({ onClose, userId }) => {
                     {emotionShards.length > 0 ? (
                         <div className="flex gap-4 w-max pb-2">
                             {emotionShards.map(shard => {
-                                const color = EMOTION_COLORS[shard.emotion] || '#E0E0E0';
-                                const emoji = EMOTION_EMOJIS[shard.emotion] || '⚪';
                                 const name = EMOTION_NAMES[shard.emotion] || '중립';
+                                const glowColor = getShardGlow(shard.emotion);
+                                const base = getEmotionBase(shard.emotion);
 
                                 return (
                                     <button
@@ -331,13 +333,18 @@ const DigestionView = ({ onClose, userId }) => {
                                         data-gtm={`digestion-shard-${shard.emotion}`}
                                     >
                                         <div
-                                            className="w-14 h-14 rounded-full flex items-center justify-center shadow-md border-2 border-white/50 relative group-hover:scale-105 group-hover:shadow-lg transition-all"
+                                            className="w-14 h-14 rounded-2xl flex items-center justify-center relative group-hover:scale-105 transition-all"
                                             style={{
-                                                backgroundColor: color,
-                                                boxShadow: `0 2px 8px ${color}60`
+                                                background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
+                                                boxShadow: `0 4px 12px ${glowColor}`,
                                             }}
                                         >
-                                            <div className="text-2xl">{emoji}</div>
+                                            <div className="drop-shadow-md">
+                                                {base === 'happy' && <HeartShard size={36} />}
+                                                {base === 'sad' && <DropShard size={36} />}
+                                                {base === 'angry' && <FireShard size={36} />}
+                                                {base === 'neutral' && <StarShard size={36} />}
+                                            </div>
                                         </div>
                                         <div className="bg-white/70 backdrop-blur-sm px-2.5 py-0.5 rounded-full">
                                             <span className="text-[10px] font-medium text-gray-600">

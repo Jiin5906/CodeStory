@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaHome, FaBook, FaChartPie, FaCog } from 'react-icons/fa';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * BottomTabBar — 고정형 하단 탭바
@@ -11,6 +12,12 @@ import { FaHome, FaBook, FaChartPie, FaCog } from 'react-icons/fa';
  * 4. 설정 (Settings)
  */
 const BottomTabBar = ({ activeTab, onTabChange }) => {
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+
     const tabs = [
         { id: 'home', icon: FaHome, label: '홈', gtm: 'tab-home' },
         { id: 'diary', icon: FaBook, label: '일기', gtm: 'tab-diary' },
@@ -20,8 +27,9 @@ const BottomTabBar = ({ activeTab, onTabChange }) => {
 
     return (
         <div
-            className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 shadow-[0_-2px_10px_rgba(255,181,194,0.1)] flex justify-around items-center h-14"
+            className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-xl border-t shadow-sm flex justify-around items-center h-14"
             style={{
+                borderColor: `${primaryColor}4D`,
                 paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))'
             }}
             data-gtm="bottom-tab-bar"
@@ -38,16 +46,15 @@ const BottomTabBar = ({ activeTab, onTabChange }) => {
                         data-gtm={tab.gtm}
                     >
                         <Icon
-                            className={`text-lg transition-all duration-300 ${
-                                isActive
-                                    ? 'text-[#FFB5C2] drop-shadow-[0_1px_4px_rgba(255,181,194,0.6)]'
-                                    : 'text-gray-400'
-                            }`}
+                            className={`text-lg transition-all duration-300 ${isActive ? '' : 'text-gray-400'}`}
+                            style={isActive ? {
+                                color: accentColor,
+                                filter: `drop-shadow(0 1px 4px ${accentColor}99)`
+                            } : undefined}
                         />
                         <span
-                            className={`text-[9px] font-bold transition-all duration-300 ${
-                                isActive ? 'text-[#FFB5C2]' : 'text-gray-400'
-                            }`}
+                            className={`text-[9px] font-bold transition-all duration-300 ${isActive ? '' : 'text-gray-400'}`}
+                            style={isActive ? { color: accentColor } : undefined}
                         >
                             {tab.label}
                         </span>

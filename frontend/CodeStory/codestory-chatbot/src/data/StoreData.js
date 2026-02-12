@@ -12,12 +12,14 @@ export const THEMES = [
         price: 150,
         emoji: '🌊',
         description: '시원한 여름 바다 배경',
-        gradient: 'from-blue-100 via-cyan-50 to-white',
+        gradient: 'from-sky-300 via-sky-200 to-cyan-100',
         wallColor: '#87CEEB',
-        floorColor: '#E0F2F7',
+        floorColor: '#C8B88A',
         windowBorderColor: '#4FC3F7',
         accentColor: '#29B6F6',
         buttonColor: '#03A9F4',
+        bgFrom: '#F0F8FF',
+        bgTo: '#E0F2FF',
         decorationColors: {
             primary: '#81D4FA',
             secondary: '#B3E5FC',
@@ -37,6 +39,8 @@ export const THEMES = [
         windowBorderColor: '#FF8C42',
         accentColor: '#FF7043',
         buttonColor: '#FF6F00',
+        bgFrom: '#FFFAF0',
+        bgTo: '#FFF3E0',
         decorationColors: {
             primary: '#FFCC80',
             secondary: '#FFE0B2',
@@ -56,6 +60,8 @@ export const THEMES = [
         windowBorderColor: '#7B68EE',
         accentColor: '#9370DB',
         buttonColor: '#8B7AB8',
+        bgFrom: '#F3F0FF',
+        bgTo: '#EDE7F6',
         decorationColors: {
             primary: '#B39DDB',
             secondary: '#D1C4E9',
@@ -75,6 +81,8 @@ export const THEMES = [
         windowBorderColor: '#5DADE2',
         accentColor: '#FFB5C2',
         buttonColor: '#FF8FA3',
+        bgFrom: '#FFF8F3',
+        bgTo: '#FFE8F0',
         decorationColors: {
             primary: '#FFD4DC',
             secondary: '#FFE4E9',

@@ -34,6 +34,7 @@ import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.dto.PetActionRequestDto;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.ChatService;
+import com.codestory.diary.service.CoinService;
 import com.codestory.diary.service.DiaryService;
 import com.codestory.diary.service.FeedbackService;
 import com.codestory.diary.service.PetService;
@@ -49,6 +50,7 @@ public class ApiController {
     private final AuthService authService;
     private final DiaryService diaryService;
     private final ChatService chatService;
+    private final CoinService coinService;
     private final FeedbackService feedbackService;
     private final PetService petService;
     private final DiaryRepository diaryRepository;
@@ -203,11 +205,6 @@ public class ApiController {
         return ResponseEntity.ok(petService.getPetStatusDto(userId));
     }
 
-    @PostMapping("/pet/ventilate")
-    public ResponseEntity<?> ventilate(@RequestBody PetActionRequestDto request) {
-        return ResponseEntity.ok(petService.ventilate(request.getUserId()));
-    }
-
     @PostMapping("/pet/affection-complete")
     public ResponseEntity<?> affectionComplete(@RequestBody PetActionRequestDto request) {
         return ResponseEntity.ok(petService.affectionComplete(request.getUserId()));
@@ -223,9 +220,33 @@ public class ApiController {
         return ResponseEntity.ok(petService.saveGauges(
                 request.getUserId(),
                 request.getAffectionGauge(),
-                request.getAirGauge(),
                 request.getEnergyGauge()
         ));
+    }
+
+    // --- 코인 API ---
+    @GetMapping("/coins")
+    public ResponseEntity<?> getCoins(@RequestParam Long userId) {
+        return ResponseEntity.ok(coinService.getCoins(userId));
+    }
+
+    @PostMapping("/coins/gauge")
+    public ResponseEntity<?> giveGaugeReward(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        String gaugeType = request.get("gaugeType").toString();
+        return ResponseEntity.ok(coinService.giveGaugeReward(userId, gaugeType));
+    }
+
+    @PostMapping("/coins/shard")
+    public ResponseEntity<?> giveShardReward(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        return ResponseEntity.ok(coinService.giveShardReward(userId));
+    }
+
+    @PostMapping("/coins/diary")
+    public ResponseEntity<?> giveDiaryReward(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        return ResponseEntity.ok(coinService.giveDiaryReward(userId));
     }
 
     // --- 피드백 API ---

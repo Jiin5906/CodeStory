@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * CircularProgress — 따뜻한 감성 레벨 표시
@@ -9,6 +10,13 @@ import React from 'react';
  *   percent    {number} 경험치 퍼센트 (0~100)
  */
 const CircularProgressNew = ({ level = 1, percent = 0 }) => {
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const buttonColor = theme?.buttonColor || '#FF9AAB';
+
     const radius = 26;
     const circumference = 2 * Math.PI * radius;
     const clampedPercent = Math.min(100, Math.max(0, percent));
@@ -25,17 +33,17 @@ const CircularProgressNew = ({ level = 1, percent = 0 }) => {
                         cx="32"
                         cy="32"
                         r={radius}
-                        stroke="#FFD4DC"
+                        stroke={primaryColor}
                         strokeWidth="4"
                         fill="transparent"
                         opacity="0.3"
                     />
-                    {/* 진행 링 - 따뜻한 피치 색상 */}
+                    {/* 진행 링 */}
                     <circle
                         cx="32"
                         cy="32"
                         r={radius}
-                        stroke="#FFB5C2"
+                        stroke={accentColor}
                         strokeWidth="4"
                         fill="transparent"
                         strokeDasharray={circumference}
@@ -47,13 +55,16 @@ const CircularProgressNew = ({ level = 1, percent = 0 }) => {
 
                 {/* 중앙 레벨 숫자 */}
                 <div className="absolute inset-0 flex items-center justify-center pb-1">
-                    <span className="text-2xl font-bold text-[#FFB5C2] leading-none">
+                    <span className="text-2xl font-bold leading-none" style={{ color: accentColor }}>
                         {level}
                     </span>
                 </div>
 
                 {/* 하단 LV 배지 */}
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white text-[9px] px-2 py-0.5 rounded-full font-bold border-2 border-white shadow-md">
+                <div
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-white text-[9px] px-2 py-0.5 rounded-full font-bold border-2 border-white shadow-md"
+                    style={{ background: `linear-gradient(to right, ${accentColor}, ${buttonColor})` }}
+                >
                     LV
                 </div>
             </div>

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import BottomTabBar from '../dashboard/BottomTabBar';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * MobileLayout — 모바일 전용 레이아웃

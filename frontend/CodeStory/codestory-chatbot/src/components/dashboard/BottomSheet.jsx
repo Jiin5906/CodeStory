@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { FaHandSparkles, FaUtensils, FaMoon, FaStore } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * BottomSheet — 간소화된 2단계 시스템 (3단계 EXPANDED 제거)
@@ -23,7 +24,7 @@ const SNAP_POINTS = {
 };
 
 // 액션 버튼 컴포넌트
-const ActionButton = ({ icon: Icon, value, onClick, isHome = false }) => {
+const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor }) => {
     const [showPercent, setShowPercent] = useState(false);
 
     const gaugeHeight = Math.min(100, Math.max(0, value));
@@ -57,17 +58,19 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false }) => {
         <button
             onClick={handleClick}
             className={`w-12 h-12 rounded-xl relative overflow-hidden shadow-md active:scale-95 transition-all duration-200 ${isHome
-                    ? 'bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] hover:shadow-lg'
+                    ? 'hover:shadow-lg'
                     : 'bg-white hover:shadow-lg'
                 } border border-white`}
+            style={isHome ? { background: `linear-gradient(to bottom right, ${accentColor}, ${buttonColor})` } : undefined}
         >
             {/* 게이지 배경 */}
             {!isHome && (
                 <div
-                    className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#FFB5C2] to-[#FFD4DC] transition-all duration-500 ease-out rounded-b-xl"
+                    className="absolute bottom-0 left-0 w-full transition-all duration-500 ease-out rounded-b-xl"
                     style={{
                         height: `${gaugeHeight}%`,
-                        opacity: value < 20 ? 1 : 0.85
+                        opacity: value < 20 ? 1 : 0.85,
+                        background: `linear-gradient(to top, ${accentColor}, ${primaryColor})`
                     }}
                 />
             )}
@@ -93,7 +96,7 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false }) => {
 
 const BottomSheet = ({
     onWrite,
-    onVentilateClick,
+    onSleepClick,
     onStoreClick
 }) => {
     const [snapPoint, setSnapPoint] = useState('COLLAPSED'); // COLLAPSED, HALF만 사용
@@ -104,6 +107,13 @@ const BottomSheet = ({
 
     const sheetRef = useRef(null);
     const { affectionGauge, hungerGauge, sleepGauge } = usePet();
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const buttonColor = theme?.buttonColor || '#FF9AAB';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
 
     // 스냅포인트 높이 계산 (EXPANDED 제거)
     const getHeight = () => {
@@ -234,16 +244,25 @@ const BottomSheet = ({
     return (
         <div
             ref={sheetRef}
-            className="absolute w-full z-[50] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl border-t border-[#FFD4DC]/30 rounded-t-3xl shadow-[0_-4px_16px_rgba(255,181,194,0.1)] flex flex-col"
+            className="absolute w-full z-[50] backdrop-blur-xl rounded-t-3xl flex flex-col"
             style={{
-                bottom: '4.1rem', // 탭바(3.5rem)와 시각적으로 연결 (gap 제거)
+                bottom: '4.1rem',
                 height: getHeight(),
                 transform: getTransform(),
                 transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                background: `linear-gradient(to bottom, rgba(255,255,255,0.95), ${bgFrom}f2)`,
+                borderTop: `1px solid ${primaryColor}4D`,
+                boxShadow: `0 -4px 16px ${accentColor}1A`
             }}
             data-gtm="bottomsheet-container"
         >
-            <div className="absolute top-0 left-0 right-0 h-[200vh] bg-gradient-to-b from-white/95 to-[#FFF8F3]/95 backdrop-blur-xl -z-10 rounded-t-3xl border-t border-[#FFD4DC]/30" />
+            <div
+                className="absolute top-0 left-0 right-0 h-[200vh] backdrop-blur-xl -z-10 rounded-t-3xl"
+                style={{
+                    background: `linear-gradient(to bottom, rgba(255,255,255,0.95), ${bgFrom}f2)`,
+                    borderTop: `1px solid ${primaryColor}4D`
+                }}
+            />
             {/* 핸들바 영역 (드래그 가능) - 슬림화 */}
             <div
                 className="pt-1.5 pb-0.5 px-4 cursor-grab active:cursor-grabbing"
@@ -255,7 +274,8 @@ const BottomSheet = ({
             >
                 {/* 핸들바 */}
                 <div
-                    className="w-10 h-1 bg-[#FFB5C2]/40 rounded-full mx-auto mb-1 cursor-pointer hover:bg-[#FFB5C2]/60 transition-colors"
+                    className="w-10 h-1 rounded-full mx-auto mb-1 cursor-pointer transition-colors"
+                    style={{ backgroundColor: `${accentColor}66` }}
                     onClick={handleHandleClick}
                 ></div>
             </div>
@@ -263,7 +283,11 @@ const BottomSheet = ({
             {/* 채팅 입력창 - 슬림화 (공간 최적화) */}
             <div className="px-4 pb-2" onClick={(e) => e.stopPropagation()}>
                 <div
-                    className="relative flex items-center bg-gradient-to-r from-[#FFF8F3] to-white rounded-2xl border border-[#FFD4DC]/40 shadow-md group focus-within:border-[#FFB5C2] focus-within:shadow-lg transition-all duration-300"
+                    className="relative flex items-center rounded-2xl shadow-md group transition-all duration-300"
+                    style={{
+                        background: `linear-gradient(to right, ${bgFrom}, white)`,
+                        border: `1px solid ${primaryColor}66`,
+                    }}
                     data-gtm="chat-input-area"
                 >
                     <div className="pl-2.5 pr-1 text-base opacity-70">✏️</div>
@@ -294,22 +318,34 @@ const BottomSheet = ({
                             icon={FaHandSparkles}
                             value={affectionGauge}
                             onClick={() => { }}
+                            accentColor={accentColor}
+                            primaryColor={primaryColor}
+                            buttonColor={buttonColor}
                         />
                         <ActionButton
                             icon={FaUtensils}
                             value={hungerGauge}
                             onClick={() => { }}
+                            accentColor={accentColor}
+                            primaryColor={primaryColor}
+                            buttonColor={buttonColor}
                         />
                         <ActionButton
                             icon={FaMoon}
                             value={sleepGauge}
-                            onClick={onVentilateClick}
+                            onClick={onSleepClick}
+                            accentColor={accentColor}
+                            primaryColor={primaryColor}
+                            buttonColor={buttonColor}
                         />
                         <ActionButton
                             icon={FaStore}
                             value={100}
                             onClick={onStoreClick}
                             isHome={true}
+                            accentColor={accentColor}
+                            primaryColor={primaryColor}
+                            buttonColor={buttonColor}
                         />
                     </div>
                 </div>

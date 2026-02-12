@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaPlus, FaTrash, FaBookOpen, FaFaceSmile, FaFaceMeh, FaFaceFrown, FaFaceSadTear, FaFaceGrinBeam } from 'react-icons/fa6';
 import { useDiary } from '../../context/DiaryContext';
+import { usePet } from '../../context/PetContext';
+import { useStore } from '../../context/StoreContext';
 import DiaryWriteModal from './DiaryWriteModal';
 
 /**
@@ -12,11 +14,23 @@ import DiaryWriteModal from './DiaryWriteModal';
  */
 const DiaryView = () => {
     const { diaries, addDiary, deleteDiary, loading } = useDiary();
+    const { triggerDiaryReward } = usePet();
     const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
+
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
+    const bgTo = theme?.bgTo || '#FFE8F0';
 
     const handleSaveDiary = async (diaryData) => {
         addDiary(diaryData);
         console.log('일기 저장됨:', diaryData);
+
+        // 코인 보상
+        triggerDiaryReward();
 
         // GTM 이벤트
         if (window.dataLayer) {
@@ -37,27 +51,27 @@ const DiaryView = () => {
 
     // 점수에 따른 FontAwesome 아이콘 반환
     const getMoodIcon = (score) => {
-        if (score >= 80) return <FaFaceGrinBeam className="text-[#FFB5C2]" />; // 아주 좋음
+        if (score >= 80) return <FaFaceGrinBeam style={{ color: accentColor }} />; // 아주 좋음
         if (score >= 60) return <FaFaceSmile className="text-[#FFD4A5]" />; // 좋음
         if (score >= 40) return <FaFaceMeh className="text-gray-400" />; // 보통
         if (score >= 20) return <FaFaceFrown className="text-blue-300" />; // 나쁨
         return <FaFaceSadTear className="text-blue-400" />; // 아주 나쁨
     };
 
-    // 점수에 따른 테두리 색상 반환 (흰색 배경 + 파스텔 테두리)
-    const getMoodBorderColor = (score) => {
-        if (score >= 80) return 'border-[#FFB5C2]';
-        if (score >= 60) return 'border-[#FFD4A5]';
-        if (score >= 40) return 'border-gray-300';
-        if (score >= 20) return 'border-blue-200';
-        return 'border-blue-300';
+    // 점수에 따른 테두리 색상 반환
+    const getMoodBorderStyle = (score) => {
+        if (score >= 80) return { borderColor: accentColor };
+        if (score >= 60) return { borderColor: '#FFD4A5' };
+        if (score >= 40) return { borderColor: '#D1D5DB' };
+        if (score >= 20) return { borderColor: '#BFDBFE' };
+        return { borderColor: '#93C5FD' };
     };
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full" data-gtm="diary-loading">
                 <div className="text-center">
-                    <FaBookOpen className="text-6xl text-[#FFB5C2]/50 mb-4 mx-auto animate-bounce" />
+                    <FaBookOpen className="text-6xl mb-4 mx-auto animate-bounce" style={{ color: `${accentColor}80` }} />
                     <p className="text-gray-500 font-cute">일기를 불러오는 중...</p>
                 </div>
             </div>
@@ -66,16 +80,22 @@ const DiaryView = () => {
 
     return (
         <div
-            className="relative w-full h-full overflow-y-auto bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0]"
-            style={{ paddingBottom: '4.5rem' }}
+            className="relative w-full h-full overflow-y-auto"
+            style={{
+                paddingBottom: '4.5rem',
+                background: `linear-gradient(to bottom, ${bgFrom}, ${bgTo})`
+            }}
             data-gtm="view-diary"
         >
             {/* 헤더 (투명 배경 + Jua 폰트) */}
-            <div className="sticky top-0 z-10 bg-white/60 backdrop-blur-md border-b border-[#FFD4DC]/30 px-6 py-4">
+            <div
+                className="sticky top-0 z-10 bg-white/60 backdrop-blur-md px-6 py-4"
+                style={{ borderBottom: `1px solid ${primaryColor}4D` }}
+            >
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-cute text-gray-700 flex items-center gap-2">
-                            <FaBookOpen className="text-[#FFB5C2]" />
+                            <FaBookOpen style={{ color: accentColor }} />
                             나의 일기
                         </h1>
                         <p className="text-xs text-gray-500 mt-1 font-cute">
@@ -86,7 +106,8 @@ const DiaryView = () => {
                     </div>
                     <button
                         onClick={() => setIsWriteModalOpen(true)}
-                        className="w-12 h-12 bg-white text-[#FFB5C2] rounded-full shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center border-2 border-[#FFD4DC]/40"
+                        className="w-12 h-12 bg-white rounded-full shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center border-2"
+                        style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                         data-gtm="diary-fab-write-btn"
                     >
                         <FaPlus className="text-xl" />
@@ -114,7 +135,8 @@ const DiaryView = () => {
                         </p>
                         <button
                             onClick={() => setIsWriteModalOpen(true)}
-                            className="px-6 py-3 bg-white text-[#FFB5C2] font-cute rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center gap-2 border-2 border-[#FFD4DC]/40"
+                            className="px-6 py-3 bg-white font-cute rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center gap-2 border-2"
+                            style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                             data-gtm="diary-empty-write-btn"
                         >
                             <FaPlus />
@@ -127,7 +149,8 @@ const DiaryView = () => {
                         {diaries.map((diary) => (
                             <div
                                 key={diary.id}
-                                className={`bg-white rounded-3xl p-6 border-2 ${getMoodBorderColor(diary.moodScore)} shadow-sm hover:shadow-md transition-all`}
+                                className="bg-white rounded-3xl p-6 border-2 shadow-sm hover:shadow-md transition-all"
+                                style={getMoodBorderStyle(diary.moodScore)}
                                 data-gtm={`diary-card-${diary.id}`}
                             >
                                 {/* 카드 헤더 */}
@@ -146,7 +169,14 @@ const DiaryView = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <div className="px-3 py-1 bg-[#FFF8F3] rounded-full text-xs font-cute text-[#FFB5C2] border border-[#FFD4DC]/30">
+                                        <div
+                                            className="px-3 py-1 rounded-full text-xs font-cute border"
+                                            style={{
+                                                backgroundColor: bgFrom,
+                                                color: accentColor,
+                                                borderColor: `${primaryColor}4D`
+                                            }}
+                                        >
                                             {diary.moodScore}점
                                         </div>
                                         <button
@@ -160,7 +190,7 @@ const DiaryView = () => {
                                 </div>
 
                                 {/* 카드 내용 */}
-                                <div className="bg-[#FFF8F3]/50 rounded-2xl p-4">
+                                <div className="rounded-2xl p-4" style={{ backgroundColor: `${bgFrom}80` }}>
                                     <p className="text-gray-600 leading-relaxed whitespace-pre-wrap font-cute text-sm">
                                         {diary.content.length > 150
                                             ? `${diary.content.substring(0, 150)}...`
@@ -175,7 +205,8 @@ const DiaryView = () => {
                                     </span>
                                     {diary.content.length > 150 && (
                                         <button
-                                            className="text-xs text-[#FFB5C2] font-cute hover:underline"
+                                            className="text-xs font-cute hover:underline"
+                                            style={{ color: accentColor }}
                                             data-gtm={`diary-read-more-${diary.id}`}
                                         >
                                             더 보기 →
@@ -192,7 +223,8 @@ const DiaryView = () => {
             {diaries.length > 0 && (
                 <button
                     onClick={() => setIsWriteModalOpen(true)}
-                    className="fixed bottom-24 right-6 w-14 h-14 bg-white text-[#FFB5C2] rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center text-2xl z-50 border-2 border-[#FFD4DC]/40"
+                    className="fixed bottom-24 right-6 w-14 h-14 bg-white rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center text-2xl z-50 border-2"
+                    style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                     data-gtm="diary-fab-floating-btn"
                 >
                     <FaPlus />

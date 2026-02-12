@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * MoodTrendChart - 일기 기분 점수 추이 영역 차트
@@ -9,6 +10,13 @@ import { ko } from 'date-fns/locale';
  * Mongle Pastel Theme
  */
 const MoodTrendChart = ({ diaries }) => {
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
+
     // 일기 데이터를 차트 데이터로 변환
     const chartData = diaries && diaries.length > 0
         ? diaries
@@ -38,14 +46,20 @@ const MoodTrendChart = ({ diaries }) => {
         ? Math.round(chartData.reduce((sum, item) => sum + item.score, 0) / chartData.length)
         : 0;
 
+    // 고유 gradient ID (동일 페이지에 여러 차트 방지)
+    const gradientId = useMemo(() => `colorScore-${Math.random().toString(36).substr(2, 9)}`, []);
+
     // 커스텀 툴팁
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-white rounded-xl shadow-md p-3 border border-[#FFD4DC]/40">
+                <div
+                    className="bg-white rounded-xl shadow-md p-3 border"
+                    style={{ borderColor: `${primaryColor}66` }}
+                >
                     <p className="text-xs font-cute text-gray-500">{data.displayDate}</p>
-                    <p className="text-sm font-cute text-[#FFB5C2] font-bold">{data.score}점</p>
+                    <p className="text-sm font-cute font-bold" style={{ color: accentColor }}>{data.score}점</p>
                 </div>
             );
         }
@@ -66,9 +80,9 @@ const MoodTrendChart = ({ diaries }) => {
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
-                            <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#FFB5C2" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#FFB5C2" stopOpacity={0} />
+                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor={accentColor} stopOpacity={0.3} />
+                                <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
@@ -86,18 +100,24 @@ const MoodTrendChart = ({ diaries }) => {
                         <Area
                             type="monotone"
                             dataKey="score"
-                            stroke="#FFB5C2"
+                            stroke={accentColor}
                             strokeWidth={2}
-                            fill="url(#colorScore)"
+                            fill={`url(#${gradientId})`}
                         />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
 
             {/* Average Score */}
-            <div className="mt-4 bg-[#FFF8F3] rounded-2xl p-4 border border-[#FFD4DC]/30">
+            <div
+                className="mt-4 rounded-2xl p-4 border"
+                style={{
+                    backgroundColor: bgFrom,
+                    borderColor: `${primaryColor}4D`
+                }}
+            >
                 <p className="text-sm font-cute text-gray-600 text-center">
-                    평균 기분 점수: <span className="text-[#FFB5C2] font-bold">{avgScore}점</span>
+                    평균 기분 점수: <span className="font-bold" style={{ color: accentColor }}>{avgScore}점</span>
                     {avgScore >= 70 ? ' 정말 좋았네요!' : avgScore >= 50 ? ' 평온한 날들이었어요' : ' 힘든 시간을 견뎌냈어요'}
                 </p>
             </div>

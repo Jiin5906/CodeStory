@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.time.LocalDate;
 import java.util.Random;
 
 @Service
@@ -36,8 +35,6 @@ public class PetService {
     @Transactional(readOnly = true)
     public PetStatusDto getPetStatusDto(Long userId) {
         PetStatus pet = getOrCreatePetStatus(userId);
-        boolean ventilationAvailable = pet.getLastVentilationDate() == null
-                || !pet.getLastVentilationDate().isEqual(LocalDate.now());
 
         return PetStatusDto.builder()
                 .userId(userId)
@@ -47,42 +44,10 @@ public class PetService {
                 .sunlight(pet.getSunlight())
                 .affection(pet.getAffection())
                 .evolutionStage(pet.getEvolutionStage())
-                .ventilationAvailable(ventilationAvailable)
                 .affectionGauge(pet.getAffectionGauge())
-                .airGauge(pet.getAirGauge())
                 .energyGauge(pet.getEnergyGauge())
                 .lastUpdate(pet.getLastUpdate())
                 .build();
-    }
-
-    // 환기: 하루 1회 제한
-    @Transactional
-    @Retryable(
-        retryFor = {ObjectOptimisticLockingFailureException.class},
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 100, multiplier = 2.0)
-    )
-    public PetStatusDto ventilate(Long userId) {
-        PetStatus pet = getOrCreatePetStatus(userId);
-
-        if (pet.getLastVentilationDate() != null && pet.getLastVentilationDate().isEqual(LocalDate.now())) {
-            System.out.println("🌬️ [PetService] 환기 제한: 오늘 이미 환기했음 - User: " + userId);
-            return getPetStatusDto(userId);
-        }
-
-        long expReward = 5L * pet.getLevel();
-        long sunlightReward = 3L * pet.getLevel();
-
-        pet.addExp(expReward);
-        pet.addSunlight(sunlightReward);
-        pet.setLastVentilationDate(LocalDate.now());
-
-        // 명시적으로 저장 (낙관적 락으로 충돌 방지, 실패 시 재시도)
-        petStatusRepository.save(pet);
-
-        System.out.println("🌬️ [PetService] 환기 완료 - EXP+" + expReward + ", Sunlight+" + sunlightReward + " - User: " + userId);
-
-        return getPetStatusDto(userId);
     }
 
     // 쓰다듬기 완료: EXP 30~50 랜덤, affection 리셋
@@ -156,15 +121,15 @@ public class PetService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 100, multiplier = 2.0)
     )
-    public PetStatusDto saveGauges(Long userId, double affectionGauge, double airGauge, double energyGauge) {
+    public PetStatusDto saveGauges(Long userId, double affectionGauge, double energyGauge) {
         PetStatus pet = getOrCreatePetStatus(userId);
-        pet.updateGauges(affectionGauge, airGauge, energyGauge);
+        pet.updateGauges(affectionGauge, energyGauge);
 
         // 명시적으로 저장 (낙관적 락으로 충돌 방지, 실패 시 재시도)
         petStatusRepository.save(pet);
 
         System.out.println("💾 [PetService] 게이지 저장 완료 - Affection: " + affectionGauge +
-                ", Air: " + airGauge + ", Energy: " + energyGauge + " - User: " + userId);
+                ", Energy: " + energyGauge + " - User: " + userId);
 
         return getPetStatusDto(userId);
     }

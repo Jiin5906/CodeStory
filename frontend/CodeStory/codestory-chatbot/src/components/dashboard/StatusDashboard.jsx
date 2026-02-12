@@ -69,16 +69,14 @@ const StatusCard = ({ icon, label, value, locked, gtmKey }) => {
 const StatusDashboard = () => {
     const {
         affectionGauge,
-        airGauge,
         energyGauge,
         isAffectionLocked,
-        isAirLocked,
         isEnergyLocked
     } = usePet();
 
     return (
         <div
-            className="grid grid-cols-3 gap-2 w-full"
+            className="grid grid-cols-2 gap-2 w-full"
             data-gtm="status-dashboard"
         >
             <StatusCard
@@ -87,13 +85,6 @@ const StatusDashboard = () => {
                 value={affectionGauge}
                 locked={isAffectionLocked}
                 gtmKey="status-card-affection"
-            />
-            <StatusCard
-                icon="🪟"
-                label="환기"
-                value={airGauge}
-                locked={isAirLocked}
-                gtmKey="status-card-air"
             />
             <StatusCard
                 icon="🌙"

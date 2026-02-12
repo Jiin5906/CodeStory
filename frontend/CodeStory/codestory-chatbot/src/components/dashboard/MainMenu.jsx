@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaHeart, FaStore, FaTimes } from 'react-icons/fa';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * MainMenu — 홈 버튼 클릭 시 열리는 메인 메뉴
@@ -9,6 +10,14 @@ import { FaHeart, FaStore, FaTimes } from 'react-icons/fa';
  * 2. 상점(Store)
  */
 const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const secondaryColor = theme?.decorationColors?.secondary || '#FFE4E9';
+    const highlightColor = theme?.decorationColors?.highlight || '#FF6B8A';
+
     if (!isOpen) return null;
 
     return (
@@ -25,9 +34,9 @@ const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
                 className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[90%] max-w-md animate-scale-in"
                 data-gtm="main-menu-modal"
             >
-                <div className="bg-gradient-to-br from-white via-pink-50 to-purple-50 rounded-3xl shadow-2xl border-4 border-white overflow-hidden">
+                <div className="bg-white rounded-3xl shadow-2xl border-4 border-white overflow-hidden">
                     {/* 헤더 */}
-                    <div className="relative bg-gradient-to-r from-pink-400 to-purple-400 p-6 text-white">
+                    <div className="relative p-6 text-white" style={{ background: `linear-gradient(to right, ${accentColor}, ${highlightColor})` }}>
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                         <div className="relative flex items-center justify-between">
                             <div>
@@ -55,10 +64,16 @@ const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
                             className="w-full group"
                             data-gtm="main-menu-emotion-shards"
                         >
-                            <div className="bg-white hover:bg-pink-50 rounded-2xl p-6 shadow-md border-2 border-pink-100 hover:border-pink-300 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div
+                                className="bg-white rounded-2xl p-6 shadow-md border-2 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                                style={{ borderColor: `${primaryColor}80` }}
+                            >
                                 <div className="flex items-center gap-4">
                                     {/* 아이콘 */}
-                                    <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <div
+                                        className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
+                                        style={{ background: `linear-gradient(to bottom right, ${accentColor}, ${highlightColor})` }}
+                                    >
                                         <FaHeart className="text-white text-2xl" />
                                     </div>
                                     {/* 텍스트 */}
@@ -71,7 +86,7 @@ const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
                                         </p>
                                     </div>
                                     {/* 화살표 */}
-                                    <div className="text-pink-400 group-hover:translate-x-1 transition-transform">
+                                    <div className="group-hover:translate-x-1 transition-transform" style={{ color: accentColor }}>
                                         →
                                     </div>
                                 </div>
@@ -116,7 +131,7 @@ const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
 
                     {/* 푸터 */}
                     <div className="px-6 pb-6">
-                        <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl p-4 text-center">
+                        <div className="rounded-2xl p-4 text-center" style={{ background: `linear-gradient(to right, ${primaryColor}66, ${secondaryColor || primaryColor}66)` }}>
                             <p className="text-xs text-gray-600">
                                 💝 몽글이와 함께하는 감정 여행
                             </p>

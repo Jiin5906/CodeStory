@@ -18,11 +18,9 @@ public class PetStatusDto {
     private long sunlight;
     private int affection;
     private String evolutionStage;
-    private boolean ventilationAvailable;
 
     // 게이지 데이터 (프론트엔드 연동)
     private double affectionGauge;
-    private double airGauge;
     private double energyGauge;
     private java.time.LocalDateTime lastUpdate;
 }

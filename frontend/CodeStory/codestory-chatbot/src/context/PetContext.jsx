@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useCallback, useEffect, useRef } from 'react';
-import { petApi } from '../services/api';
+import { petApi, coinApi } from '../services/api';
 
 const PetContext = createContext();
 
@@ -35,7 +35,6 @@ const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
 // localStorage 키
 const STORAGE_KEYS = {
     AFFECTION: 'pet_affection_gauge',
-    AIR: 'pet_air_gauge',
     ENERGY: 'pet_energy_gauge',
     SLEEP: 'pet_sleep_gauge',
     HUNGER: 'pet_hunger_gauge',
@@ -70,7 +69,6 @@ export const PetProvider = ({ children }) => {
 
     // 게이지 상태 (localStorage 초기값)
     const [affectionGauge, setAffectionGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.AFFECTION));
-    const [airGauge, setAirGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.AIR));
     const [energyGauge, setEnergyGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.ENERGY));
     const [sleepGauge, setSleepGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.SLEEP, 100));
     const [hungerGauge, setHungerGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.HUNGER, 50));
@@ -95,8 +93,11 @@ export const PetProvider = ({ children }) => {
         const stored = localStorage.getItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL);
         return stored ? parseInt(stored) : null;
     });
-    const [isAirLocked, setIsAirLocked] = useState(false);
     const [isEnergyLocked, setIsEnergyLocked] = useState(false);
+
+    // ━━━ 코인 시스템 ━━━
+    const [coins, setCoins] = useState(0);
+    const [coinToast, setCoinToast] = useState(null);
 
     // ✅ 동시성 제어 플래그
     const [isApiLoading, setIsApiLoading] = useState(false);
@@ -105,17 +106,16 @@ export const PetProvider = ({ children }) => {
     const decayTimerRef = useRef(null);
     const autoSaveTimerRef = useRef(null);
     const inactivityTimerRef = useRef(null);
-    const gaugesRef = useRef({ affectionGauge, airGauge, energyGauge, sleepGauge, hungerGauge });
+    const gaugesRef = useRef({ affectionGauge, energyGauge, sleepGauge, hungerGauge });
 
     // ─── gaugesRef 및 localStorage 동기화 ───
     useEffect(() => {
-        gaugesRef.current = { affectionGauge, airGauge, energyGauge, sleepGauge, hungerGauge };
+        gaugesRef.current = { affectionGauge, energyGauge, sleepGauge, hungerGauge };
         localStorage.setItem(STORAGE_KEYS.AFFECTION, affectionGauge);
-        localStorage.setItem(STORAGE_KEYS.AIR, airGauge);
         localStorage.setItem(STORAGE_KEYS.ENERGY, energyGauge);
         localStorage.setItem(STORAGE_KEYS.SLEEP, sleepGauge);
         localStorage.setItem(STORAGE_KEYS.HUNGER, hungerGauge);
-    }, [affectionGauge, airGauge, energyGauge, sleepGauge, hungerGauge]);
+    }, [affectionGauge, energyGauge, sleepGauge, hungerGauge]);
 
     // ─── 수면 상태 localStorage 동기화 ───
     useEffect(() => {
@@ -190,7 +190,6 @@ export const PetProvider = ({ children }) => {
                 }
 
                 // 다른 게이지들은 항상 동기화
-                if (data.airGauge !== undefined) setAirGauge(data.airGauge);
                 if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
             }
         } catch (e) {
@@ -203,8 +202,25 @@ export const PetProvider = ({ children }) => {
         const user = JSON.parse(localStorage.getItem('diaryUser'));
         if (user?.id) {
             fetchPetStatus(user.id);
+            fetchCoins(user.id);
         }
-    }, [fetchPetStatus]);
+    }, [fetchPetStatus, fetchCoins]);
+
+    // ─── 게이지 100% 코인 보상 자동 감지 ───
+    const prevGaugesRef = useRef({ affectionGauge: 0, hungerGauge: 0, sleepGauge: 0 });
+    useEffect(() => {
+        const prev = prevGaugesRef.current;
+        if (affectionGauge >= 100 && prev.affectionGauge < 100) {
+            triggerGaugeReward('affection');
+        }
+        if (hungerGauge >= 100 && prev.hungerGauge < 100) {
+            triggerGaugeReward('hunger');
+        }
+        if (sleepGauge >= 100 && prev.sleepGauge < 100) {
+            triggerGaugeReward('sleep');
+        }
+        prevGaugesRef.current = { affectionGauge, hungerGauge, sleepGauge };
+    }, [affectionGauge, hungerGauge, sleepGauge, triggerGaugeReward]);
 
     // ─── 게이지 자연 감소 (Decay) ───
     useEffect(() => {
@@ -217,14 +233,6 @@ export const PetProvider = ({ children }) => {
                     if (isAffectionLocked) return prev;
                     const next = Math.max(0, prev - DECAY_AMOUNT);
                     setIsAffectionLocked(locked => checkLock(next, locked));
-                    return next;
-                });
-
-                setAirGauge(prev => {
-                    // Lock 상태면 감소하지 않음
-                    if (isAirLocked) return prev;
-                    const next = Math.max(0, prev - DECAY_AMOUNT);
-                    setIsAirLocked(locked => checkLock(next, locked));
                     return next;
                 });
 
@@ -255,7 +263,7 @@ export const PetProvider = ({ children }) => {
         return () => {
             if (decayTimerRef.current) clearInterval(decayTimerRef.current);
         };
-    }, [checkLock, isSleeping, isAffectionLocked, isAirLocked, isEnergyLocked]);
+    }, [checkLock, isSleeping, isAffectionLocked, isEnergyLocked]);
 
     // ─── 강제 수면 체크 (비활동 시) ───
     useEffect(() => {
@@ -304,7 +312,6 @@ export const PetProvider = ({ children }) => {
                 const currentGauges = gaugesRef.current;
                 await petApi.saveGauges(user.id, {
                     affectionGauge: currentGauges.affectionGauge,
-                    airGauge: currentGauges.airGauge,
                     energyGauge: currentGauges.energyGauge,
                     sleepGauge: currentGauges.sleepGauge,
                     hungerGauge: currentGauges.hungerGauge,
@@ -337,7 +344,6 @@ export const PetProvider = ({ children }) => {
 
             // ✅ 서버 응답으로 로컬 게이지 동기화
             if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
-            if (data.airGauge !== undefined) setAirGauge(data.airGauge);
             if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
         } catch (e) {
             console.error('❌ [handleAction] API 호출 실패:', e);
@@ -354,11 +360,6 @@ export const PetProvider = ({ children }) => {
             setIsApiLoading(false);
         }
     }, [isApiLoading, fetchPetStatus]);
-
-    // ─── 환기 완료 ───
-    const handleVentilateComplete = useCallback((userId) => {
-        handleAction(() => petApi.ventilate(userId));
-    }, [handleAction]);
 
     // ─── 쓰다듬기 완료 ───
     const handleAffectionComplete = useCallback(async (userId) => {
@@ -383,7 +384,6 @@ export const PetProvider = ({ children }) => {
 
             // ✅ CRITICAL: affectionGauge는 서버 응답으로 덮어쓰지 않고 100% 유지
             // 다른 게이지들만 동기화
-            if (data.airGauge !== undefined) setAirGauge(data.airGauge);
             if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
 
             console.log('💕 [AffectionComplete] 완료 - 게이지 100% 유지');
@@ -399,9 +399,11 @@ export const PetProvider = ({ children }) => {
         handleAction(async () => {
             const data = await petApi.collectShard(userId);
             setEmotionShards(prev => prev.filter(s => s.id !== shardId));
+            // 감정 조각 수집 코인 보상
+            triggerShardReward();
             return data;
         });
-    }, [handleAction]);
+    }, [handleAction, triggerShardReward]);
 
     // ─── 감정 조각 생성 ───
     const spawnEmotionShard = useCallback((emotion) => {
@@ -418,16 +420,67 @@ export const PetProvider = ({ children }) => {
         }, 10000);
     }, []);
 
-    // ─── Air Gauge 증가 (환기 버튼 클릭) ───
-    const increaseAirGauge = useCallback((amount = 10) => {
-        if (isAirLocked) return false;
-        setAirGauge(prev => {
-            const next = Math.min(LOCK_THRESHOLD, prev + amount);
-            setIsAirLocked(checkLock(next, false));
-            return next;
-        });
-        return true;
-    }, [isAirLocked, checkLock]);
+    // ─── 코인 조회 ───
+    const fetchCoins = useCallback(async (userId) => {
+        if (!userId) return;
+        try {
+            const data = await coinApi.getCoins(userId);
+            if (data?.coins !== undefined) setCoins(data.coins);
+        } catch (e) {
+            console.error('[PetContext] fetchCoins 실패:', e);
+        }
+    }, []);
+
+    // ─── 코인 토스트 표시 ───
+    const showCoinToast = useCallback((amount) => {
+        setCoinToast(`+${amount}원 획득!`);
+        setTimeout(() => setCoinToast(null), 2500);
+    }, []);
+
+    // ─── 게이지 100% 코인 보상 ───
+    const triggerGaugeReward = useCallback(async (gaugeType) => {
+        const user = JSON.parse(localStorage.getItem('diaryUser'));
+        if (!user?.id) return;
+        try {
+            const data = await coinApi.giveGaugeReward(user.id, gaugeType);
+            if (data?.rewarded) {
+                setCoins(data.coins);
+                showCoinToast(data.amount);
+            }
+        } catch (e) {
+            console.error('[PetContext] triggerGaugeReward 실패:', e);
+        }
+    }, [showCoinToast]);
+
+    // ─── 감정 조각 코인 보상 ───
+    const triggerShardReward = useCallback(async () => {
+        const user = JSON.parse(localStorage.getItem('diaryUser'));
+        if (!user?.id) return;
+        try {
+            const data = await coinApi.giveShardReward(user.id);
+            if (data?.rewarded) {
+                setCoins(data.coins);
+                showCoinToast(data.amount);
+            }
+        } catch (e) {
+            console.error('[PetContext] triggerShardReward 실패:', e);
+        }
+    }, [showCoinToast]);
+
+    // ─── 일기 작성 코인 보상 ───
+    const triggerDiaryReward = useCallback(async () => {
+        const user = JSON.parse(localStorage.getItem('diaryUser'));
+        if (!user?.id) return;
+        try {
+            const data = await coinApi.giveDiaryReward(user.id);
+            if (data?.rewarded) {
+                setCoins(data.coins);
+                showCoinToast(data.amount);
+            }
+        } catch (e) {
+            console.error('[PetContext] triggerDiaryReward 실패:', e);
+        }
+    }, [showCoinToast]);
 
     // ─── 무드등 토글 ───
     const toggleMoodLight = useCallback(() => {
@@ -469,8 +522,6 @@ export const PetProvider = ({ children }) => {
             setIsRubbing,
             affectionGauge,
             setAffectionGauge,
-            airGauge,
-            setAirGauge,
             energyGauge,
             setEnergyGauge,
             sleepGauge,
@@ -484,18 +535,21 @@ export const PetProvider = ({ children }) => {
             lastInteractionTime,
             isAffectionLocked,
             setIsAffectionLocked,
-            isAirLocked,
             isEnergyLocked,
-            increaseAirGauge,
             toggleMoodLight,
             feedEmotion,
             updateInteraction,
             checkLock,
             fetchPetStatus,
-            handleVentilateComplete,
             handleAffectionComplete,
             handleCollectShard,
-            spawnEmotionShard
+            spawnEmotionShard,
+            coins,
+            coinToast,
+            fetchCoins,
+            triggerGaugeReward,
+            triggerShardReward,
+            triggerDiaryReward
         }}>
             {children}
         </PetContext.Provider>

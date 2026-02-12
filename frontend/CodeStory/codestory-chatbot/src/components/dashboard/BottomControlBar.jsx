@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaHandSparkles, FaUtensils, FaMoon } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 
 /**
@@ -43,7 +44,7 @@ const ControlButton = ({ icon, value, locked, onClick, gtmKey }) => {
             />
 
             {/* 아이콘 (중앙 배치) */}
-            <div className="absolute inset-0 flex items-center justify-center z-10 text-3xl drop-shadow-sm">
+            <div className="absolute inset-0 flex items-center justify-center z-10 text-2xl drop-shadow-sm text-gray-600">
                 {icon}
             </div>
 
@@ -57,7 +58,7 @@ const ControlButton = ({ icon, value, locked, onClick, gtmKey }) => {
     );
 };
 
-const BottomControlBar = ({ onVentilateClick, onFeedClick }) => {
+const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
     const {
         affectionGauge,
         hungerGauge,
@@ -74,16 +75,16 @@ const BottomControlBar = ({ onVentilateClick, onFeedClick }) => {
             <div className="flex gap-4 pointer-events-auto">
                 {/* 쓰다듬기 버튼 (게이지만 표시, 상호작용은 RubbingOverlay에서) */}
                 <ControlButton
-                    icon="🤚"
+                    icon={<FaHandSparkles />}
                     value={affectionGauge}
                     locked={isAffectionLocked}
                     onClick={() => {}} // 비활성 (드래그 인터랙션)
                     gtmKey="control-button-affection"
                 />
 
-                {/* 식사 버튼 (환기 → 식사로 변경) */}
+                {/* 식사 버튼 */}
                 <ControlButton
-                    icon="🍽️"
+                    icon={<FaUtensils />}
                     value={hungerGauge}
                     locked={hungerGauge >= 100}
                     onClick={onFeedClick}
@@ -92,10 +93,10 @@ const BottomControlBar = ({ onVentilateClick, onFeedClick }) => {
 
                 {/* 수면 버튼 */}
                 <ControlButton
-                    icon="🌙"
+                    icon={<FaMoon />}
                     value={sleepGauge}
                     locked={false}
-                    onClick={onVentilateClick} // 기존 환기 클릭 핸들러 재사용
+                    onClick={onSleepClick}
                     gtmKey="control-button-sleep"
                 />
             </div>

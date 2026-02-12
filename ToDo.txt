@@ -1,4 +1,4 @@
-1. 바텀시트를 좀 수정해서 바텀탭과 안 겹치도록 만들기 중요함. 
+
 2. 백업하기, 복원하기 이거 없애버려도 무방, 개같은 이모티콘 삭제. 끝
 3. 
 이제 마스코트 캐릭터 넣어야함.
@@ -10,3 +10,112 @@
 4. 상점에 여러 가구들, 몽글이 스킨 3종류만 추가
 
 이것들만 끝내면 앱 출시 가능. 결국 1번과 4번은 같이 진행해야함.
+
+내일 할 일은 이제 로티 애니메이션 만들기 
+2/5 IDLE(15s), Rubbing
+2/6 Full, Eating
+2/7 Sleep, Sleeping
+2/8 Angry, Sad
+2/9 Cold, Tired
+등등...
+
+==============================화폐==============================
+
+  1️⃣ Backend (Spring Boot)                                                                                              
+
+
+  ✅ Entity 수정
+
+  - Member.java: coins 필드 추가 (Long, default: 0)
+  - PetStatus.java (또는 DTO): 게이지 달성 여부 추적 필드 추가
+    - affectionRewardGiven (Boolean)
+    - sleepRewardGiven (Boolean)
+    - hungerRewardGiven (Boolean)
+    - lastDiaryRewardDate (LocalDate)
+
+  ✅ Repository 추가
+
+  - DiaryRepository.java: 특정 날짜에 일기 작성 여부 확인 쿼리
+  @Query("SELECT COUNT(d) FROM Diary d WHERE d.userId = :userId AND d.date = :date")
+  int countByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
+
+  ✅ Service 생성
+
+  - CoinService.java: 코인 지급 비즈니스 로직
+    - giveGaugeReward(userId, gaugeType) - 게이지 100% 달성 보상 (20원)
+    - giveShardReward(userId) - 감정 조각 수집 보상 (5원)
+    - giveDiaryReward(userId) - 일기 작성 보상 (50원, 하루 1회)
+    - getCoins(userId) - 현재 코인 조회
+
+  ✅ Controller 수정
+
+  - ApiController.java: 코인 관련 엔드포인트 추가
+  GET  /api/coins?userId={id}           // 코인 조회
+  POST /api/coins/gauge?userId={id}&type={affection|sleep|hunger}  // 게이지 보상
+  POST /api/coins/shard?userId={id}     // 감정 조각 보상
+  POST /api/coins/diary?userId={id}     // 일기 작성 보상
+
+  ---
+  2️⃣ Frontend (React)                                                                                                   
+
+
+  ✅ API Client
+
+  - src/services/api.js: 코인 API 추가
+  export const coinApi = {
+    getCoins: (userId) => api.get(`/api/coins?userId=${userId}`),
+    rewardGauge: (userId, type) => api.post(`/api/coins/gauge?userId=${userId}&type=${type}`),
+    rewardShard: (userId) => api.post(`/api/coins/shard?userId=${userId}`),
+    rewardDiary: (userId) => api.post(`/api/coins/diary?userId=${userId}`)
+  };
+
+  ✅ Context 수정
+
+  - PetContext.jsx:
+    - coins 상태 추가
+    - 게이지 100% 달성 시 coinApi.rewardGauge() 호출
+    - handleCollectShard() 수정: 감정 조각 수집 시 coinApi.rewardShard() 호출
+  - DiaryContext.jsx:
+    - 일기 작성 완료 시 coinApi.rewardDiary() 호출 (하루 1회 체크)
+
+  ✅ UI 컴포넌트
+
+  - 코인 표시 UI (헤더 또는 상단):
+  <div className="flex items-center gap-2">
+    <span>💰</span>
+    <span className="font-bold">{coins}원</span>
+  </div>
+  - 코인 획득 알림 (Toast/Notification):
+  // 예: "+20원 획득! (애정 게이지 달성)"
+
+  ---
+  3️⃣ 데이터베이스 스키마 변경                                                                                           
+
+
+  -- member 테이블에 coins 컬럼 추가
+  ALTER TABLE member ADD COLUMN coins BIGINT DEFAULT 0;
+
+  -- pet_status 테이블 (또는 새로운 테이블 생성)
+  CREATE TABLE coin_reward_status (
+      user_id BIGINT PRIMARY KEY,
+      affection_reward_given BOOLEAN DEFAULT FALSE,
+      sleep_reward_given BOOLEAN DEFAULT FALSE,
+      hunger_reward_given BOOLEAN DEFAULT FALSE,
+      last_diary_reward_date DATE,
+      FOREIGN KEY (user_id) REFERENCES member(id)
+  );
+
+  ---
+  🚀 구현 진행 방법
+
+  제가 다음과 같이 진행하겠습니다:
+
+  1. Backend 구현 (Entity → Repository → Service → Controller)
+  2. Frontend API 연동 (api.js → Context → UI)
+  3. 빌드 검증 (Backend: Gradle, Frontend: npm lint)
+  4. 커밋 & 푸시
+
+  이대로 진행할까요? 아니면 수정하고 싶은 부분이 있으신가요? 😊
+상점 할 것
+1. 가구들
+무드등 스킨 위치를 가구 변경으로 바꾸기.  현재 바꿀 수 있는 가구는 벽의 선반, 무드등, 거대한 화분, 바닥의 방석이 있음. 이걸 각각 5개씩 모양과 색을 변형시켜 가구를 변경가능 하도록 해야함. 배경 테마도 많이는 필요 없음 5개 정도면 충분함. 감정조각 팩과 경험치부스트는 없애주세요.

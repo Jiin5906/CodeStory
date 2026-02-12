@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaCalendar, FaHeart } from 'react-icons/fa6';
 import { useDiary } from '../../context/DiaryContext';
+import { useStore } from '../../context/StoreContext';
 import EmotionRadarChart from '../stats/EmotionRadarChart';
 import MoodTrendChart from '../stats/MoodTrendChart';
 import MongleLetter from '../stats/MongleLetter';
@@ -14,14 +15,24 @@ import MongleLetter from '../stats/MongleLetter';
  */
 const ReportView = ({ user, diaries: propDiaries }) => {
     const { diaries: contextDiaries } = useDiary();
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
     const diaries = propDiaries || contextDiaries || [];
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
+    const bgTo = theme?.bgTo || '#FFE8F0';
 
     const currentMonth = format(new Date(), 'M월', { locale: ko });
 
     return (
         <div
-            className="w-full h-full overflow-y-auto bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0]"
-            style={{ paddingBottom: '4.5rem' }}
+            className="w-full h-full overflow-y-auto"
+            style={{
+                paddingBottom: '4.5rem',
+                background: `linear-gradient(to bottom, ${bgFrom}, ${bgTo})`
+            }}
             data-gtm="view-report"
         >
             <div className="px-6 py-6 space-y-6">
@@ -29,7 +40,7 @@ const ReportView = ({ user, diaries: propDiaries }) => {
                 <div className="flex items-center justify-between" data-gtm="report-header">
                     <div>
                         <h1 className="text-2xl font-cute text-gray-700 flex items-center gap-2">
-                            <FaCalendar className="text-[#FFB5C2]" />
+                            <FaCalendar style={{ color: accentColor }} />
                             {currentMonth}의 마음 기록
                         </h1>
                         <p className="text-xs font-cute text-gray-400 mt-1">
@@ -37,7 +48,7 @@ const ReportView = ({ user, diaries: propDiaries }) => {
                         </p>
                     </div>
                     <div className="text-3xl animate-bounce" style={{ animationDuration: '2s' }}>
-                        <FaHeart className="text-[#FFB5C2]" />
+                        <FaHeart style={{ color: accentColor }} />
                     </div>
                 </div>
 
@@ -46,7 +57,7 @@ const ReportView = ({ user, diaries: propDiaries }) => {
                     <div className="grid grid-cols-3 gap-3" data-gtm="report-stats-summary">
                         <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
                             <p className="text-xs font-cute text-gray-400 mb-1">총 기록</p>
-                            <p className="text-2xl font-cute text-[#FFB5C2] font-bold">{diaries.length}</p>
+                            <p className="text-2xl font-cute font-bold" style={{ color: accentColor }}>{diaries.length}</p>
                         </div>
                         <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
                             <p className="text-xs font-cute text-gray-400 mb-1">평균 점수</p>

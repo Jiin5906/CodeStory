@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FaUser, FaDatabase, FaUndo, FaEnvelope, FaInfoCircle, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { feedbackApi } from '../../services/api';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * SettingsView — 설정 페이지 (완전 개편)
@@ -15,6 +16,14 @@ import { feedbackApi } from '../../services/api';
  */
 const SettingsView = ({ user }) => {
     const navigate = useNavigate();
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const buttonColor = theme?.buttonColor || '#FF9AAB';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
+    const bgTo = theme?.bgTo || '#FFE8F0';
 
     // 프로필 수정 상태
     const [isEditingNickname, setIsEditingNickname] = useState(false);
@@ -109,10 +118,20 @@ const SettingsView = ({ user }) => {
         }
     };
 
+    const categoryButtonStyle = (isActive) => ({
+        background: isActive ? `linear-gradient(to right, ${accentColor}, ${buttonColor})` : '#F8F6F4',
+        color: isActive ? 'white' : '#8B8B8B',
+        boxShadow: isActive ? '0 4px 6px -1px rgba(0,0,0,0.1)' : 'none'
+    });
+
     return (
         <div
-            className="w-full h-full overflow-y-auto bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0]"
-            style={{ paddingBottom: '5rem', fontFamily: "'Jua', 'Noto Sans KR', sans-serif" }}
+            className="w-full h-full overflow-y-auto"
+            style={{
+                paddingBottom: '5rem',
+                fontFamily: "'Jua', 'Noto Sans KR', sans-serif",
+                background: `linear-gradient(to bottom, ${bgFrom}, ${bgTo})`
+            }}
             data-gtm="view-settings"
         >
             <div className="px-6 py-8 max-w-2xl mx-auto">
@@ -129,11 +148,11 @@ const SettingsView = ({ user }) => {
                     <h3 className="text-sm font-bold text-[#B8B8B8] mb-3 px-2 uppercase tracking-wider font-cute">
                         프로필 설정
                     </h3>
-                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg border-2 border-[#FFB5C2]/20">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ border: `2px solid ${accentColor}33` }}>
                         {/* 닉네임 수정 */}
-                        <div className="mb-4 pb-4 border-b border-[#FFD4DC]/40" data-gtm="settings-nickname-section">
+                        <div className="mb-4 pb-4" style={{ borderBottom: `1px solid ${primaryColor}66` }} data-gtm="settings-nickname-section">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-11 h-11 bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] rounded-2xl flex items-center justify-center shadow-md">
+                                <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-md" style={{ background: `linear-gradient(to bottom right, ${accentColor}, ${buttonColor})` }}>
                                     <FaUser className="text-white text-lg" />
                                 </div>
                                 <span className="text-[#4A4A4A] font-bold text-lg font-cute">
@@ -147,14 +166,20 @@ const SettingsView = ({ user }) => {
                                         type="text"
                                         value={newNickname}
                                         onChange={(e) => setNewNickname(e.target.value)}
-                                        className="flex-1 px-4 py-2 bg-[#FFF8F3] border-2 border-[#FFB5C2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF9AAB] font-cute text-[#4A4A4A]"
+                                        className="flex-1 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 font-cute text-[#4A4A4A]"
+                                        style={{
+                                            backgroundColor: bgFrom,
+                                            border: `2px solid ${accentColor}`,
+                                            outlineColor: buttonColor
+                                        }}
                                         placeholder="새 닉네임을 입력하세요"
                                         maxLength={20}
                                         data-gtm="settings-nickname-input"
                                     />
                                     <button
                                         onClick={handleSaveNickname}
-                                        className="px-5 py-2 bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
+                                        className="px-5 py-2 text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 font-cute"
+                                        style={{ background: `linear-gradient(to right, ${accentColor}, ${buttonColor})` }}
                                         data-gtm="settings-nickname-save"
                                     >
                                         저장
@@ -164,7 +189,7 @@ const SettingsView = ({ user }) => {
                                             setNewNickname(user?.nickname || '');
                                             setIsEditingNickname(false);
                                         }}
-                                        className="px-4 py-2 bg-[#F8F6F4] text-[#8B8B8B] font-bold rounded-xl hover:bg-[#FFD4DC]/30 transition-all duration-200 font-cute"
+                                        className="px-4 py-2 bg-[#F8F6F4] text-[#8B8B8B] font-bold rounded-xl transition-all duration-200 font-cute"
                                         data-gtm="settings-nickname-cancel"
                                     >
                                         취소
@@ -177,7 +202,11 @@ const SettingsView = ({ user }) => {
                                     </span>
                                     <button
                                         onClick={() => setIsEditingNickname(true)}
-                                        className="px-4 py-1.5 bg-[#FFD4DC]/50 text-[#FFB5C2] text-sm font-bold rounded-lg hover:bg-[#FFD4DC] transition-all duration-200 font-cute"
+                                        className="px-4 py-1.5 text-sm font-bold rounded-lg transition-all duration-200 font-cute"
+                                        style={{
+                                            backgroundColor: `${primaryColor}80`,
+                                            color: accentColor
+                                        }}
                                         data-gtm="settings-nickname-edit"
                                     >
                                         변경
@@ -193,7 +222,7 @@ const SettingsView = ({ user }) => {
                     <h3 className="text-sm font-bold text-[#B8B8B8] mb-3 px-2 uppercase tracking-wider font-cute">
                         데이터 관리
                     </h3>
-                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg border-2 border-[#FFB5C2]/20">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ border: `2px solid ${accentColor}33` }}>
                         {/* 초기화 */}
                         <div>
                             <div className="flex items-center gap-3 mb-3">
@@ -220,11 +249,12 @@ const SettingsView = ({ user }) => {
                     <h3 className="text-sm font-bold text-[#B8B8B8] mb-3 px-2 uppercase tracking-wider font-cute">
                         지원 및 정보
                     </h3>
-                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg border-2 border-[#FFB5C2]/20">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ border: `2px solid ${accentColor}33` }}>
                         {/* 문의하기 */}
                         <button
                             onClick={handleContact}
-                            className="w-full flex items-center gap-3 p-4 rounded-2xl hover:bg-[#FFB5C2]/10 transition-all duration-200 mb-3"
+                            className="w-full flex items-center gap-3 p-4 rounded-2xl transition-all duration-200 mb-3"
+                            style={{ '--hover-bg': `${accentColor}1A` }}
                             data-gtm="settings-contact"
                         >
                             <div className="w-11 h-11 bg-gradient-to-br from-[#D4A5F5] to-[#C48EE5] rounded-2xl flex items-center justify-center shadow-md">
@@ -237,7 +267,7 @@ const SettingsView = ({ user }) => {
 
                         {/* 앱 버전 정보 */}
                         <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#F8F6F4]/60">
-                            <div className="w-11 h-11 bg-gradient-to-br from-[#FFB5C2] to-[#FF9AAB] rounded-2xl flex items-center justify-center shadow-md">
+                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-md" style={{ background: `linear-gradient(to bottom right, ${accentColor}, ${buttonColor})` }}>
                                 <FaInfoCircle className="text-white text-lg" />
                             </div>
                             <div className="flex-1">
@@ -281,7 +311,7 @@ const SettingsView = ({ user }) => {
                         data-gtm="feedback-modal"
                     >
                         {/* 모달 헤더 */}
-                        <div className="bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] px-6 py-4 flex items-center justify-between">
+                        <div className="px-6 py-4 flex items-center justify-between" style={{ background: `linear-gradient(to right, ${accentColor}, ${buttonColor})` }}>
                             <h3 className="text-white font-bold text-xl font-cute">문의하기 / 건의하기</h3>
                             <button
                                 onClick={() => setIsFeedbackModalOpen(false)}
@@ -300,39 +330,17 @@ const SettingsView = ({ user }) => {
                                     분류
                                 </label>
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setFeedbackCategory('문의')}
-                                        className={`flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all ${
-                                            feedbackCategory === '문의'
-                                                ? 'bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white shadow-md'
-                                                : 'bg-[#F8F6F4] text-[#8B8B8B] hover:bg-[#FFD4DC]/30'
-                                        }`}
-                                        data-gtm="feedback-category-inquiry"
-                                    >
-                                        문의
-                                    </button>
-                                    <button
-                                        onClick={() => setFeedbackCategory('건의')}
-                                        className={`flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all ${
-                                            feedbackCategory === '건의'
-                                                ? 'bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white shadow-md'
-                                                : 'bg-[#F8F6F4] text-[#8B8B8B] hover:bg-[#FFD4DC]/30'
-                                        }`}
-                                        data-gtm="feedback-category-suggestion"
-                                    >
-                                        건의
-                                    </button>
-                                    <button
-                                        onClick={() => setFeedbackCategory('버그 제보')}
-                                        className={`flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all ${
-                                            feedbackCategory === '버그 제보'
-                                                ? 'bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white shadow-md'
-                                                : 'bg-[#F8F6F4] text-[#8B8B8B] hover:bg-[#FFD4DC]/30'
-                                        }`}
-                                        data-gtm="feedback-category-bug"
-                                    >
-                                        버그 제보
-                                    </button>
+                                    {['문의', '건의', '버그 제보'].map((cat) => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => setFeedbackCategory(cat)}
+                                            className="flex-1 px-4 py-2 rounded-xl font-bold font-cute transition-all"
+                                            style={categoryButtonStyle(feedbackCategory === cat)}
+                                            data-gtm={`feedback-category-${cat}`}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
@@ -346,7 +354,11 @@ const SettingsView = ({ user }) => {
                                     value={feedbackEmail}
                                     onChange={(e) => setFeedbackEmail(e.target.value)}
                                     placeholder="답변 받으실 이메일을 입력하세요"
-                                    className="w-full px-4 py-2.5 bg-[#FFF8F3] border-2 border-[#FFD4DC]/40 rounded-xl focus:outline-none focus:border-[#FFB5C2] focus:ring-2 focus:ring-[#FFB5C2]/20 font-cute text-[#4A4A4A] placeholder:text-[#B8B8B8]"
+                                    className="w-full px-4 py-2.5 rounded-xl focus:outline-none font-cute text-[#4A4A4A] placeholder:text-[#B8B8B8]"
+                                    style={{
+                                        backgroundColor: bgFrom,
+                                        border: `2px solid ${primaryColor}66`,
+                                    }}
                                     data-gtm="feedback-email-input"
                                 />
                             </div>
@@ -361,7 +373,11 @@ const SettingsView = ({ user }) => {
                                     onChange={(e) => setFeedbackContent(e.target.value)}
                                     placeholder="문의하실 내용이나 건의사항을 상세히 적어주세요"
                                     rows={5}
-                                    className="w-full px-4 py-3 bg-[#FFF8F3] border-2 border-[#FFD4DC]/40 rounded-xl focus:outline-none focus:border-[#FFB5C2] focus:ring-2 focus:ring-[#FFB5C2]/20 font-cute text-[#4A4A4A] placeholder:text-[#B8B8B8] resize-none"
+                                    className="w-full px-4 py-3 rounded-xl focus:outline-none font-cute text-[#4A4A4A] placeholder:text-[#B8B8B8] resize-none"
+                                    style={{
+                                        backgroundColor: bgFrom,
+                                        border: `2px solid ${primaryColor}66`,
+                                    }}
                                     data-gtm="feedback-content-textarea"
                                 />
                             </div>
@@ -370,7 +386,7 @@ const SettingsView = ({ user }) => {
                             <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={() => setIsFeedbackModalOpen(false)}
-                                    className="flex-1 px-4 py-3 bg-[#F8F6F4] text-[#8B8B8B] font-bold rounded-xl hover:bg-[#FFD4DC]/30 transition-all duration-200 font-cute"
+                                    className="flex-1 px-4 py-3 bg-[#F8F6F4] text-[#8B8B8B] font-bold rounded-xl transition-all duration-200 font-cute"
                                     data-gtm="feedback-cancel"
                                 >
                                     취소
@@ -378,9 +394,10 @@ const SettingsView = ({ user }) => {
                                 <button
                                     onClick={handleSubmitFeedback}
                                     disabled={isSubmitting}
-                                    className={`flex-1 px-4 py-3 bg-gradient-to-r from-[#FFB5C2] to-[#FF9AAB] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 font-cute ${
+                                    className={`flex-1 px-4 py-3 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 font-cute ${
                                         isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
                                     }`}
+                                    style={{ background: `linear-gradient(to right, ${accentColor}, ${buttonColor})` }}
                                     data-gtm="feedback-submit"
                                 >
                                     {isSubmitting ? '전송 중...' : '제출하기'}

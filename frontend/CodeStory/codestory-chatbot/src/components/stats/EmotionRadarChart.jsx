@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * EmotionRadarChart - 대화 감정 분포 방사형 차트
@@ -7,6 +8,13 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Responsi
  * Mongle Pastel Theme
  */
 const EmotionRadarChart = ({ emotionData }) => {
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
+
     // 모의 데이터 (실제로는 props로 받아야 함)
     const mockData = emotionData || [
         { emotion: '행복', value: 85, fullMark: 100 },
@@ -35,7 +43,7 @@ const EmotionRadarChart = ({ emotionData }) => {
             <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={mockData}>
-                        <PolarGrid strokeDasharray="3 3" stroke="#FFD4DC" opacity={0.3} />
+                        <PolarGrid strokeDasharray="3 3" stroke={primaryColor} opacity={0.3} />
                         <PolarAngleAxis
                             dataKey="emotion"
                             tick={{ fill: '#9CA3AF', fontSize: 12, fontFamily: 'Jua' }}
@@ -48,8 +56,8 @@ const EmotionRadarChart = ({ emotionData }) => {
                         <Radar
                             name="감정 점수"
                             dataKey="value"
-                            stroke="#FFB5C2"
-                            fill="#FFB5C2"
+                            stroke={accentColor}
+                            fill={accentColor}
                             fillOpacity={0.6}
                         />
                     </RadarChart>
@@ -57,9 +65,15 @@ const EmotionRadarChart = ({ emotionData }) => {
             </div>
 
             {/* Insight Text */}
-            <div className="mt-4 bg-[#FFF8F3] rounded-2xl p-4 border border-[#FFD4DC]/30">
+            <div
+                className="mt-4 rounded-2xl p-4 border"
+                style={{
+                    backgroundColor: bgFrom,
+                    borderColor: `${primaryColor}4D`
+                }}
+            >
                 <p className="text-sm font-cute text-gray-600 text-center">
-                    이번 달은 <span className="text-[#FFB5C2] font-bold">{topEmotion.emotion}</span>한 대화를 많이 했네요! ✨
+                    이번 달은 <span className="font-bold" style={{ color: accentColor }}>{topEmotion.emotion}</span>한 대화를 많이 했네요! ✨
                 </p>
             </div>
         </div>

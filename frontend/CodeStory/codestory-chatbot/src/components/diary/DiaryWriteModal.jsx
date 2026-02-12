@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaXmark, FaFloppyDisk, FaCalendar } from 'react-icons/fa6';
+import { useStore } from '../../context/StoreContext';
 import MoodSlider from './MoodSlider';
 
 /**
@@ -14,6 +15,14 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
     const [moodScore, setMoodScore] = useState(50);
     const [content, setContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    const { equippedItems, getEquippedItem } = useStore();
+    const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+
+    const accentColor = theme?.accentColor || '#FFB5C2';
+    const primaryColor = theme?.decorationColors?.primary || '#FFD4DC';
+    const bgFrom = theme?.bgFrom || '#FFF8F3';
+    const bgTo = theme?.bgTo || '#FFE8F0';
 
     const handleSave = async () => {
         if (!content.trim()) {
@@ -65,12 +74,16 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
             data-gtm="diary-write-modal-overlay"
         >
             <div
-                className="relative w-full max-w-[430px] h-[85vh] bg-gradient-to-b from-[#FFF8F3] to-[#FFE8F0] rounded-3xl shadow-lg overflow-hidden animate-slide-up mx-4"
+                className="relative w-full max-w-[430px] h-[85vh] rounded-3xl shadow-lg overflow-hidden animate-slide-up mx-4"
+                style={{ background: `linear-gradient(to bottom, ${bgFrom}, ${bgTo})` }}
                 onClick={(e) => e.stopPropagation()}
                 data-gtm="diary-write-modal-content"
             >
                 {/* 헤더 (흰색 배경 + Jua 폰트) */}
-                <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white/60 backdrop-blur-md border-b border-[#FFD4DC]/30">
+                <div
+                    className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white/60 backdrop-blur-md"
+                    style={{ borderBottom: `1px solid ${primaryColor}4D` }}
+                >
                     <h2 className="text-xl font-cute text-gray-700">일기 작성</h2>
                     <button
                         onClick={onClose}
@@ -86,14 +99,17 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
                     {/* 날짜 선택 */}
                     <div data-gtm="diary-date-section">
                         <label className="flex items-center gap-2 text-sm font-cute text-gray-600 mb-2">
-                            <FaCalendar className="text-[#FFB5C2]" />
+                            <FaCalendar style={{ color: accentColor }} />
                             날짜 선택
                         </label>
                         <input
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="w-full px-4 py-3 bg-white rounded-2xl border border-[#FFD4DC]/40 focus:border-[#FFB5C2] focus:outline-none transition-colors text-gray-600 font-cute"
+                            className="w-full px-4 py-3 bg-white rounded-2xl border focus:outline-none transition-colors text-gray-600 font-cute"
+                            style={{
+                                borderColor: `${primaryColor}66`,
+                            }}
                             data-gtm="diary-date-input"
                         />
                         <p className="mt-2 text-xs text-gray-400 font-cute">
@@ -115,7 +131,10 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             placeholder="오늘 하루 어떤 일이 있었나요? 몽글이에게 들려주세요..."
-                            className="w-full h-48 px-4 py-3 bg-white rounded-2xl border border-[#FFD4DC]/40 focus:border-[#FFB5C2] focus:outline-none transition-colors resize-none text-gray-600 placeholder:text-gray-300 font-cute text-sm"
+                            className="w-full h-48 px-4 py-3 bg-white rounded-2xl border focus:outline-none transition-colors resize-none text-gray-600 placeholder:text-gray-300 font-cute text-sm"
+                            style={{
+                                borderColor: `${primaryColor}66`,
+                            }}
                             data-gtm="diary-content-textarea"
                         />
                         <div className="flex justify-between items-center mt-2">
@@ -123,7 +142,7 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
                                 {content.length} / 1000자
                             </span>
                             {content.length > 0 && (
-                                <span className="text-xs text-[#FFB5C2] font-cute animate-fade-in">
+                                <span className="text-xs font-cute animate-fade-in" style={{ color: accentColor }}>
                                     좋아요! 계속 써주세요
                                 </span>
                             )}
@@ -132,11 +151,15 @@ const DiaryWriteModal = ({ isOpen, onClose, onSave, initialDate = new Date() }) 
                 </div>
 
                 {/* 푸터 (저장 버튼) */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/60 backdrop-blur-md border-t border-[#FFD4DC]/30">
+                <div
+                    className="absolute bottom-0 left-0 right-0 p-6 bg-white/60 backdrop-blur-md"
+                    style={{ borderTop: `1px solid ${primaryColor}4D` }}
+                >
                     <button
                         onClick={handleSave}
                         disabled={isSaving || !content.trim()}
-                        className="w-full py-3 bg-white text-[#FFB5C2] font-cute rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border-2 border-[#FFD4DC]/40"
+                        className="w-full py-3 bg-white font-cute rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border-2"
+                        style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                         data-gtm="diary-save-btn"
                     >
                         <FaFloppyDisk />

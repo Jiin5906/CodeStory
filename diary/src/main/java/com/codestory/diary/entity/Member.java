@@ -28,6 +28,10 @@ public class Member {
     @Column(nullable = false)
     private String nickname;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Long coins = 0L;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -35,5 +39,9 @@ public class Member {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void addCoins(long amount) {
+        this.coins = Math.max(0, this.coins + amount);
     }
 }

@@ -2,7 +2,6 @@ package com.codestory.diary.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "pet_status")
@@ -33,9 +32,6 @@ public class PetStatus {
     @Builder.Default
     private int affection = 0;
 
-    @Column(name = "last_ventilation_date")
-    private LocalDate lastVentilationDate;
-
     @Builder.Default
     @Column(name = "evolution_stage", length = 10)
     private String evolutionStage = "BABY";
@@ -46,10 +42,6 @@ public class PetStatus {
     private Double affectionGauge = 50.0;
 
     @Builder.Default
-    @Column(name = "air_gauge")
-    private Double airGauge = 50.0;
-
-    @Builder.Default
     @Column(name = "energy_gauge")
     private Double energyGauge = 50.0;
 
@@ -57,12 +49,9 @@ public class PetStatus {
     private java.time.LocalDateTime lastUpdate;
 
     // 게이지 업데이트 메소드
-    public void updateGauges(Double affection, Double air, Double energy) {
+    public void updateGauges(Double affection, Double energy) {
         if (affection != null) {
             this.affectionGauge = Math.max(0.0, Math.min(100.0, affection));
-        }
-        if (air != null) {
-            this.airGauge = Math.max(0.0, Math.min(100.0, air));
         }
         if (energy != null) {
             this.energyGauge = Math.max(0.0, Math.min(100.0, energy));
@@ -88,10 +77,6 @@ public class PetStatus {
 
     public void resetAffection() {
         this.affection = 0;
-    }
-
-    public void setLastVentilationDate(LocalDate date) {
-        this.lastVentilationDate = date;
     }
 
     // 레벨업 로직 (다중 레벨 처리)

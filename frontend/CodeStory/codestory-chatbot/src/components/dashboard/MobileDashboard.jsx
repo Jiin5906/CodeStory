@@ -34,14 +34,18 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const [windowColdAnimation, setWindowColdAnimation] = useState(false);
     const [windowClosedAnimation, setWindowClosedAnimation] = useState(false);
 
-    const ventilateTimerRef = useRef(null);
     const coldTimerRef = useRef(null);
 
-    const { handleVentilateComplete, petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn } = usePet();
+    const { petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn, coins, coinToast } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
 
     // 장착된 아이템 가져오기 (equippedItems 변경 시 자동 재계산)
-    const equippedTheme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+    const equippedTheme = useMemo(() => {
+        const theme = getEquippedItem('theme');
+        console.log('🎨 [MobileDashboard] 장착된 테마:', theme);
+        console.log('📦 [MobileDashboard] equippedItems:', equippedItems);
+        return theme;
+    }, [equippedItems, getEquippedItem]);
     const equippedShelf = useMemo(() => getEquippedItem('shelf'), [equippedItems, getEquippedItem]);
     const equippedLight = useMemo(() => getEquippedItem('light'), [equippedItems, getEquippedItem]);
     const equippedPot = useMemo(() => getEquippedItem('pot'), [equippedItems, getEquippedItem]);
@@ -124,17 +128,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
             setIsWindowOpen(true);
             setWindowColdAnimation(false);
 
-            // 환기 가능 시 10초 카운트
-            const ventilationAvailable = petStatus?.ventilationAvailable !== false;
-            if (ventilationAvailable) {
-                ventilateTimerRef.current = setTimeout(() => {
-                    handleVentilateComplete(user?.id);
-                    setAiResponse('환기가 완료 된 것 같아요! 😊');
-                    setEmotion(null);
-                    ventilateTimerRef.current = null;
-                }, 10000);
-            }
-
             // 30초 미폐쇄 감지
             coldTimerRef.current = setTimeout(() => {
                 setWindowColdAnimation(true);
@@ -145,10 +138,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
             setWindowClosedAnimation(true);
 
             // 타이머 정리
-            if (ventilateTimerRef.current) {
-                clearTimeout(ventilateTimerRef.current);
-                ventilateTimerRef.current = null;
-            }
             if (coldTimerRef.current) {
                 clearTimeout(coldTimerRef.current);
                 coldTimerRef.current = null;
@@ -165,7 +154,6 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     // 컴포넌트 정리 시 타이머 방지 누수
     useEffect(() => {
         return () => {
-            if (ventilateTimerRef.current) clearTimeout(ventilateTimerRef.current);
             if (coldTimerRef.current) clearTimeout(coldTimerRef.current);
         };
     }, []);
@@ -475,67 +463,62 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     </div>
                                 </div>
 
-                                {/* 💜 고급 방석 (바닥 중앙 - 캐릭터 뒤) */}
-                                <div className="absolute bottom-[25%] left-1/2 -translate-x-1/2 z-15 pointer-events-none">
-                                    <div className="relative w-[48.37%] h-[6.51%]">
-                                        {/* 방석 본체 (타원형) */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
-                                            style={{
-                                                filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
-                                                boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
-                                            }}
-                                        ></div>
-
-                                        {/* 방석 중앙 패턴 (십자형 스티치) */}
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[26.05%] h-[3.72%]">
-                                            {/* 가로 스티치 라인 */}
-                                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
-                                            {/* 세로 스티치 라인 */}
-                                            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/40 rounded-full -translate-x-1/2"></div>
+                                {/* 💜 펫 + 방석 통합 컨테이너 (반응형 동기화) */}
+                                <div
+                                    className="absolute bottom-[22%] left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none"
+                                    data-gtm="pet-cushion-container"
+                                >
+                                    {/* 펫 (MainRoom) */}
+                                    <div className="-mb-6 z-30 pointer-events-auto">
+                                        <div className="w-[37.21vw] max-w-40 rounded-full flex items-center justify-center" style={{ aspectRatio: '1 / 1' }}>
+                                            <MainRoom
+                                                latestLog={latestLog}
+                                                aiResponse={aiResponse}
+                                                emotion={emotion}
+                                                isAiThinking={isAiThinking}
+                                                user={user}
+                                                windowColdAnimation={windowColdAnimation}
+                                                windowClosedAnimation={windowClosedAnimation}
+                                            />
                                         </div>
+                                    </div>
 
-                                        {/* 방석 테두리 스티치 (점선) */}
-                                        <div className="absolute inset-3 rounded-[50%] border-2 border-dashed border-white/35"></div>
+                                    {/* 방석 */}
+                                    <div data-gtm="decoration-premium-cushion">
+                                        <div className="relative w-52 h-28">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
+                                                style={{
+                                                    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+                                                    boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
+                                                }}
+                                            ></div>
 
-                                        {/* 방석 모서리 장식 (4개 코너) */}
-                                        <div className="absolute top-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
-                                        <div className="absolute top-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
-                                        <div className="absolute bottom-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
-                                        <div className="absolute bottom-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16">
+                                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
+                                                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/40 rounded-full -translate-x-1/2"></div>
+                                            </div>
 
-                                        {/* 방석 푹신한 질감 (세로 주름) */}
-                                        <div className="absolute inset-0 overflow-hidden rounded-[50%]">
-                                            <div className="absolute left-[15%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
-                                            <div className="absolute left-[30%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                                            <div className="absolute left-[45%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
-                                            <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                                            <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
-                                            <div className="absolute left-[85%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                            <div className="absolute inset-3 rounded-[50%] border-2 border-dashed border-white/35"></div>
+
+                                            <div className="absolute top-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                            <div className="absolute top-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                            <div className="absolute bottom-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                            <div className="absolute bottom-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+
+                                            <div className="absolute inset-0 overflow-hidden rounded-[50%]">
+                                                <div className="absolute left-[15%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                                <div className="absolute left-[30%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                                <div className="absolute left-[45%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                                <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                                <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                                <div className="absolute left-[85%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                            </div>
+
+                                            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-8 bg-white/45 rounded-[50%] blur-md"></div>
+                                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/25 rounded-[50%] blur-lg"></div>
                                         </div>
-
-                                        {/* 방석 하이라이트 (상단 빛 반사) */}
-                                        <div className="absolute top-[0.70%] left-1/2 -translate-x-1/2 w-[33.49%] h-[1.86%] bg-white/45 rounded-[50%] blur-md"></div>
-
-                                        {/* 방석 그림자 (바닥) */}
-                                        <div className="absolute -bottom-[0.70%] left-1/2 -translate-x-1/2 w-[44.65%] h-[0.93%] bg-black/25 rounded-[50%] blur-lg"></div>
                                     </div>
                                 </div>
-
-                                {/* MainRoom 컴포넌트 배치 */}
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-                                    <div className="w-[37.21%] rounded-full pointer-events-auto flex items-center justify-center" style={{ aspectRatio: '1 / 1' }}>
-                                        <MainRoom
-                                            latestLog={latestLog}
-                                            aiResponse={aiResponse}
-                                            emotion={emotion}
-                                            isAiThinking={isAiThinking}
-                                            user={user}
-                                            windowColdAnimation={windowColdAnimation}
-                                            windowClosedAnimation={windowClosedAnimation}
-                                        />
-                                    </div>
-                                </div>
-
 
                                 {/* 💡 무드등 (좌측 하단) */}
                                 <div className="absolute bottom-[26%] left-[6%] z-25 w-[15%] h-[37%] pointer-events-none flex items-end justify-center">
@@ -701,10 +684,23 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     {activeTab === 'home' && (
                         <>
                             <div
-                                className="absolute top-0 z-40 flex w-full items-end justify-end px-6 md:px-8 pointer-events-none"
+                                className="absolute top-0 z-40 flex w-full items-end justify-end gap-2 px-6 md:px-8 pointer-events-none"
                                 style={{ paddingTop: 'max(3.5rem, calc(1rem + env(safe-area-inset-top)))' }}
                                 data-gtm="mobile-dashboard-header"
                             >
+                                {/* 코인 표시 */}
+                                <div
+                                    className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 pointer-events-auto"
+                                    data-gtm="mobile-coin-display"
+                                    style={{
+                                        borderColor: `${equippedTheme?.decorationColors?.primary || '#FFD4DC'}40`
+                                    }}
+                                >
+                                    <span className="text-xs font-bold text-amber-500">
+                                        💰 {coins}원
+                                    </span>
+                                </div>
+
                                 {/* 스트릭 배지 - 테마에 따라 변경 */}
                                 <div
                                     className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
@@ -721,6 +717,15 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     </span>
                                 </div>
                             </div>
+
+                            {/* 코인 획득 토스트 */}
+                            {coinToast && (
+                                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[200] animate-bounce">
+                                    <div className="rounded-full bg-amber-400 text-white px-5 py-2 shadow-lg text-sm font-bold">
+                                        {coinToast}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* CircularProgressNew — 좌측 상단 레벨 HUD (safe-area 적용) */}
                             <div
@@ -739,7 +744,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                     {activeTab === 'home' && (
                         <BottomSheet
                             onWrite={handleWrite}
-                            onVentilateClick={handleWindowClick}
+                            onSleepClick={handleWindowClick}
                             onStoreClick={() => setIsStoreViewOpen(true)}
                         />
                     )}
