@@ -220,6 +220,10 @@ export const coinApi = {
         const response = await api.post('/coins/diary', { userId });
         return response.data;
     },
+    spendCoins: async (userId, amount) => {
+        const response = await api.post('/coins/spend', { userId, amount });
+        return response.data;
+    },
 };
 
 // Feedback API

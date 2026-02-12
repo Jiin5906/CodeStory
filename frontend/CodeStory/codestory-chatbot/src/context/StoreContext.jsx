@@ -1,11 +1,11 @@
 import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { DEFAULT_EQUIPPED, getItemById } from '../data/StoreData';
+import { usePet } from '../context/PetContext';
 
 const StoreContext = createContext();
 
 // localStorage 키
 const STORAGE_KEYS = {
-    COINS: 'store_coins',
     OWNED_ITEMS: 'store_owned_items',
     EQUIPPED_ITEMS: 'store_equipped_items'
 };
@@ -30,16 +30,14 @@ const saveToStorage = (key, value) => {
 };
 
 export const StoreProvider = ({ children }) => {
+    // ─── PetContext에서 코인 상태 가져오기 (화폐 동기화) ───
+    const { coins, spendCoins: petSpendCoins } = usePet();
+
     // ─── 상태 관리 ───
-    const [coins, setCoins] = useState(() => loadFromStorage(STORAGE_KEYS.COINS, 1000)); // 초기 코인 1000원
     const [ownedItems, setOwnedItems] = useState(() => loadFromStorage(STORAGE_KEYS.OWNED_ITEMS, ['theme_default'])); // 기본 테마는 기본 보유
     const [equippedItems, setEquippedItems] = useState(() => loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, DEFAULT_EQUIPPED));
 
     // ─── localStorage 동기화 ───
-    useEffect(() => {
-        saveToStorage(STORAGE_KEYS.COINS, coins);
-    }, [coins]);
-
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.OWNED_ITEMS, ownedItems);
     }, [ownedItems]);
@@ -48,26 +46,8 @@ export const StoreProvider = ({ children }) => {
         saveToStorage(STORAGE_KEYS.EQUIPPED_ITEMS, equippedItems);
     }, [equippedItems]);
 
-    // ─── 코인 추가 ───
-    const addCoins = useCallback((amount) => {
-        setCoins(prev => {
-            const newAmount = prev + amount;
-            console.log(`💰 [StoreContext] 코인 획득: +${amount}원 (총: ${newAmount}원)`);
-            return newAmount;
-        });
-    }, []);
-
-    // ─── 코인 차감 ───
-    const subtractCoins = useCallback((amount) => {
-        setCoins(prev => {
-            const newAmount = Math.max(0, prev - amount);
-            console.log(`💰 [StoreContext] 코인 사용: -${amount}원 (총: ${newAmount}원)`);
-            return newAmount;
-        });
-    }, []);
-
     // ─── 아이템 구매 ───
-    const buyItem = useCallback((itemId) => {
+    const buyItem = useCallback(async (itemId) => {
         const item = getItemById(itemId);
 
         if (!item) {
@@ -85,13 +65,17 @@ export const StoreProvider = ({ children }) => {
             return { success: false, message: `코인이 부족합니다. (필요: ${item.price}원)` };
         }
 
-        // 구매 처리
-        subtractCoins(item.price);
+        // 구매 처리 (PetContext의 spendCoins를 통해 백엔드 연동)
+        const result = await petSpendCoins(item.price);
+        if (!result?.success) {
+            return { success: false, message: result?.message || '코인 차감에 실패했습니다.' };
+        }
+
         setOwnedItems(prev => [...prev, itemId]);
 
         console.log(`🛒 [StoreContext] 아이템 구매 완료:`, item.name);
         return { success: true, message: `${item.name}을(를) 구매했습니다!` };
-    }, [coins, ownedItems, subtractCoins]);
+    }, [coins, ownedItems, petSpendCoins]);
 
     // ─── 아이템 장착 ───
     const equipItem = useCallback((itemId) => {
@@ -158,8 +142,6 @@ export const StoreProvider = ({ children }) => {
             coins,
             ownedItems,
             equippedItems, // ✅ 리렌더링을 위해 필수
-            addCoins,
-            subtractCoins,
             buyItem,
             equipItem,
             unequipItem,

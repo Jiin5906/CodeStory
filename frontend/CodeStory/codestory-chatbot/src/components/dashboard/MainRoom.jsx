@@ -151,7 +151,7 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
             <div className="flex-1 flex flex-col items-center justify-center pb-20 pt-32 relative" data-gtm="mainroom-character-area">
 
                 <div className="flex flex-col items-center gap-6 relative">
-                    {/* (1) 몽글이의 말풍선 - Cloud-like Soft Bubble Design */}
+                    {/* (1) 몽글이의 말풍선 - Soft & Rounded Cute Design */}
                     <div
                         className={`transition-all duration-700 ease-out ${
                             showAiThought || isAiThinking
@@ -161,50 +161,50 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
                         data-gtm="mainroom-mongle-speech-bubble"
                     >
                         <div
-                            className="relative p-6 text-center min-w-[240px] max-w-[95%] sm:max-w-[400px] md:max-w-[480px] min-h-[64px] h-auto"
+                            className="relative text-center min-w-[200px] max-w-[90vw] sm:max-w-[380px] md:max-w-[440px]"
+                            style={{
+                                padding: '16px 24px',
+                                background: 'linear-gradient(145deg, #FFFFFF 0%, #FFF0F5 40%, #FFE8F0 100%)',
+                                borderRadius: '24px',
+                                boxShadow: '0 8px 24px rgba(255, 182, 193, 0.25), 0 2px 8px rgba(0, 0, 0, 0.06)',
+                                border: '2px solid rgba(255, 200, 220, 0.5)',
+                            }}
                         >
-                            {/* ☁️ Cloud-like Soft Bubble Background */}
+                            {/* ✨ Inner Glow Effect */}
                             <div
-                                className="absolute inset-0 rounded-[32px] shadow-lg"
-                                style={{
-                                    background: 'linear-gradient(135deg, #FFFFFF 0%, #FFF8FA 50%, #FFF5F7 100%)',
-                                    boxShadow: '0 10px 30px rgba(200, 200, 200, 0.3), 0 4px 12px rgba(0, 0, 0, 0.08)',
-                                    border: '1px solid rgba(255, 245, 250, 0.8)'
-                                }}
+                                className="absolute top-2 left-4 w-12 h-10 rounded-full bg-white/60 blur-xl pointer-events-none"
                             ></div>
 
-                            {/* ✨ Inner Glow Effect (귀여운 빛 반사) */}
-                            <div
-                                className="absolute top-3 left-5 w-16 h-16 rounded-full bg-white/50 blur-2xl pointer-events-none"
-                                style={{ mixBlendMode: 'overlay' }}
-                            ></div>
-
-                            {/* 📝 Text Content */}
+                            {/* 📝 Text Content - auto-sizing */}
                             <p
-                                className="relative text-base sm:text-lg leading-relaxed break-words text-gray-700 px-2"
+                                className="relative text-sm sm:text-base leading-relaxed break-words text-gray-700"
                                 style={{
                                     fontFamily: "'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
                                     whiteSpace: 'pre-wrap',
-                                    letterSpacing: '-0.01em'
+                                    letterSpacing: '-0.01em',
                                 }}
                             >
                                 {isAiThinking ? "공감하는 중..." : aiResponse}
                             </p>
 
-                            {/* 💭 Soft Bubble Tail (캐릭터 방향) */}
+                            {/* 💭 Rounded Bubble Tail */}
                             <div
-                                className="absolute -bottom-3 left-1/2 -translate-x-1/2"
-                                style={{
-                                    width: 0,
-                                    height: 0,
-                                    borderLeft: '16px solid transparent',
-                                    borderRight: '16px solid transparent',
-                                    borderTop: '16px solid #FFF5F7',
-                                    filter: 'drop-shadow(0 4px 8px rgba(200, 200, 200, 0.25))'
-                                }}
-                            ></div>
+                                className="absolute -bottom-[10px] left-1/2 -translate-x-1/2"
+                            >
+                                <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    background: '#FFE8F0',
+                                    borderRadius: '0 0 50% 0',
+                                    transform: 'rotate(45deg)',
+                                    boxShadow: '4px 4px 8px rgba(255, 182, 193, 0.15)',
+                                    border: '2px solid rgba(255, 200, 220, 0.5)',
+                                    borderTop: 'none',
+                                    borderLeft: 'none',
+                                }}></div>
+                            </div>
                         </div>
                     </div>
 

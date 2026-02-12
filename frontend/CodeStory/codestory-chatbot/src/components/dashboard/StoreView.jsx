@@ -124,8 +124,8 @@ const StoreView = ({ isOpen, onClose }) => {
     };
 
     // ─── 구매 핸들러 ───
-    const handleBuy = (itemId) => {
-        const result = buyItem(itemId);
+    const handleBuy = async (itemId) => {
+        const result = await buyItem(itemId);
         showToast(result.message, result.success ? 'success' : 'error');
     };
 
@@ -205,6 +205,7 @@ const StoreView = ({ isOpen, onClose }) => {
                                 : 'bg-transparent text-gray-600 hover:bg-white/50'
                         }`}
                         data-gtm="store-tab-furniture"
+                        style={{ display: 'none' }}
                     >
                         🪑 가구
                     </button>

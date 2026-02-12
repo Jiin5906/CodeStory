@@ -193,6 +193,22 @@ export const PetProvider = ({ children }) => {
         }
     }, [showCoinToast]);
 
+    // ─── 코인 사용 (상점 구매 등) ───
+    const spendCoins = useCallback(async (amount) => {
+        const user = JSON.parse(localStorage.getItem('diaryUser'));
+        if (!user?.id) return { success: false };
+        try {
+            const data = await coinApi.spendCoins(user.id, amount);
+            if (data?.success) {
+                setCoins(data.coins);
+            }
+            return data;
+        } catch (e) {
+            console.error('[PetContext] spendCoins 실패:', e);
+            return { success: false };
+        }
+    }, []);
+
     // ─── 일기 작성 코인 보상 ───
     const triggerDiaryReward = useCallback(async () => {
         const user = JSON.parse(localStorage.getItem('diaryUser'));
@@ -555,6 +571,7 @@ export const PetProvider = ({ children }) => {
             coins,
             coinToast,
             fetchCoins,
+            spendCoins,
             triggerGaugeReward,
             triggerShardReward,
             triggerDiaryReward

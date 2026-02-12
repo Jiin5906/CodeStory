@@ -249,6 +249,13 @@ public class ApiController {
         return ResponseEntity.ok(coinService.giveDiaryReward(userId));
     }
 
+    @PostMapping("/coins/spend")
+    public ResponseEntity<?> spendCoins(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        Long amount = Long.valueOf(request.get("amount").toString());
+        return ResponseEntity.ok(coinService.spendCoins(userId, amount));
+    }
+
     // --- 피드백 API ---
 
     /**

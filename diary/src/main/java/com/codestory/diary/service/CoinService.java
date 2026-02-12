@@ -119,6 +119,29 @@ public class CoinService {
         return Map.of("userId", userId, "coins", member.getCoins(), "rewarded", true, "amount", DIARY_REWARD);
     }
 
+    // 코인 사용 (상점 구매 등)
+    @Transactional
+    @Retryable(
+        retryFor = {ObjectOptimisticLockingFailureException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 100, multiplier = 2.0)
+    )
+    public Map<String, Object> spendCoins(Long userId, Long amount) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (member.getCoins() < amount) {
+            return Map.of("userId", userId, "coins", member.getCoins(), "success", false, "message", "코인이 부족합니다.");
+        }
+
+        member.addCoins(-amount);
+        memberRepository.save(member);
+
+        System.out.println("💸 [CoinService] 코인 사용 -" + amount + "원 - User: " + userId);
+
+        return Map.of("userId", userId, "coins", member.getCoins(), "success", true, "spent", amount);
+    }
+
     // 게이지 리셋 시 보상 플래그 해제
     @Transactional
     public void resetGaugeReward(Long userId, String gaugeType) {

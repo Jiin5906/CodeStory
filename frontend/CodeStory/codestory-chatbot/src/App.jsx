@@ -185,7 +185,7 @@ function AppContent() {
                     <>
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route element={<MobileLayout />}>
-                            <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} onCalendarClick={() => setShowCalendarModal(true)} />} />
+                            <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} />} />
                             <Route path="diary" element={<DiaryView />} />
                             <Route path="calendar" element={<CalendarView diaries={diaries} />} />
                             <Route path="stats" element={<ReportView user={user} diaries={diaries} />} />
@@ -254,15 +254,15 @@ function AppContent() {
 function App() {
     return (
         <ThemeProvider>
-            <StoreProvider>
-                <PetProvider>
+            <PetProvider>
+                <StoreProvider>
                     <DiaryProvider>
                         <Router>
                             <AppContent />
                         </Router>
                     </DiaryProvider>
-                </PetProvider>
-            </StoreProvider>
+                </StoreProvider>
+            </PetProvider>
         </ThemeProvider>
     );
 }

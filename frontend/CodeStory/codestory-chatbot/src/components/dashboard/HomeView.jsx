@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { startOfDay, parseISO } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import MainRoom from './MainRoom';
 import BottomSheet from './BottomSheet';
 import CircularProgressNew from './CircularProgressNew';
@@ -15,7 +16,8 @@ import { useStore } from '../../context/StoreContext';
  *
  * 몽글이와 상호작용하는 메인 화면
  */
-const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
+const HomeView = ({ user, diaries, onWriteClick }) => {
+    const navigate = useNavigate();
     const [latestLog, setLatestLog] = useState(null);
     const [aiResponse, setAiResponse] = useState(null);
     const [emotion, setEmotion] = useState(null);
@@ -30,7 +32,7 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
 
     const coldTimerRef = useRef(null);
 
-    const { petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn, coins, coinToast } = usePet();
+    const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
 
     // 장착된 테마 (equippedItems 변경 시 자동 재계산)
@@ -39,33 +41,6 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
     const today = startOfDay(new Date());
     const currentHour = new Date().getHours();
     const isNightTime = currentHour >= 18 || currentHour < 6;
-
-    // 감정별 색상 매핑
-    const getEmotionColor = (emotion) => {
-        const emotionMap = {
-            'anger': 'bg-gradient-to-br from-red-500 to-red-700 shadow-[0_0_15px_rgba(239,68,68,0.6)]',
-            'happiness': 'bg-gradient-to-br from-pink-400 to-pink-600 shadow-[0_0_15px_rgba(236,72,153,0.6)]',
-            'depression': 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-[0_0_15px_rgba(59,130,246,0.6)]',
-            'sadness': 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-[0_0_15px_rgba(96,165,250,0.6)]',
-            'anxiety': 'bg-gradient-to-br from-orange-500 to-orange-700 shadow-[0_0_15px_rgba(249,115,22,0.6)]',
-            'fear': 'bg-gradient-to-br from-purple-600 to-purple-800 shadow-[0_0_15px_rgba(147,51,234,0.6)]',
-            'surprise': 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-[0_0_15px_rgba(250,204,21,0.6)]',
-            'love': 'bg-gradient-to-br from-rose-400 to-rose-600 shadow-[0_0_15px_rgba(251,113,133,0.6)]',
-            'calm': 'bg-gradient-to-br from-teal-400 to-teal-600 shadow-[0_0_15px_rgba(45,212,191,0.6)]',
-            'neutral': 'bg-gradient-to-br from-gray-300 to-gray-500 shadow-[0_0_15px_rgba(156,163,175,0.6)]',
-            'normal': 'bg-gradient-to-br from-white to-gray-200 shadow-[0_0_15px_rgba(229,231,235,0.6)]',
-            'happy': 'bg-gradient-to-br from-pink-400 to-pink-600 shadow-[0_0_15px_rgba(236,72,153,0.6)]',
-            'sad': 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-[0_0_15px_rgba(96,165,250,0.6)]',
-            'angry': 'bg-gradient-to-br from-red-500 to-red-700 shadow-[0_0_15px_rgba(239,68,68,0.6)]',
-            'anxious': 'bg-gradient-to-br from-orange-500 to-orange-700 shadow-[0_0_15px_rgba(249,115,22,0.6)]',
-            'scared': 'bg-gradient-to-br from-purple-600 to-purple-800 shadow-[0_0_15px_rgba(147,51,234,0.6)]',
-            'surprised': 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-[0_0_15px_rgba(250,204,21,0.6)]',
-            'loving': 'bg-gradient-to-br from-rose-400 to-rose-600 shadow-[0_0_15px_rgba(251,113,133,0.6)]',
-            'peaceful': 'bg-gradient-to-br from-teal-400 to-teal-600 shadow-[0_0_15px_rgba(45,212,191,0.6)]',
-            'depressed': 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-[0_0_15px_rgba(59,130,246,0.6)]'
-        };
-        return emotionMap[emotion.toLowerCase()] || emotionMap['normal'];
-    };
 
     // 스트릭(연속 작성일) 계산
     const streakDays = useMemo(() => {
@@ -272,7 +247,6 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                                     <div className="absolute -top-4 -left-1 w-12 h-6 bg-gradient-to-b from-[#7CB5E8] to-[#5A9FD4]" style={{
                                         clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
                                     }}></div>
-                                    <div className="absolute top-1 right-2 w-2.5 h-2.5 bg-[#FFE8CC]/90 rounded-sm border border-[#8B6F47]"></div>
                                 </div>
 
                                 {/* 🌳 나무 (좌측 뒤편) */}
@@ -295,8 +269,6 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                                         clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
                                     }}></div>
                                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-6 bg-[#8B6F47] rounded-t-lg"></div>
-                                    <div className="absolute top-2 left-2 w-3.5 h-3.5 bg-[#FFE8CC] rounded-sm border border-[#8B6F47]"></div>
-                                    <div className="absolute top-2 right-2 w-3.5 h-3.5 bg-[#FFE8CC] rounded-sm border border-[#8B6F47]"></div>
                                 </div>
 
                                 {/* 🌳 나무 (좌측 앞쪽 - 크게) */}
@@ -531,24 +503,7 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                 <MoodLight />
 
 
-                {/* 🧩 감정 조각 */}
-                {emotionShards && emotionShards.map(shard => (
-                    <div
-                        key={shard.id}
-                        className={`absolute z-25 w-8 h-8 rounded-full cursor-pointer pointer-events-auto animate-bounce active:scale-90 transition-transform duration-200 ${getEmotionColor(shard.emotion)}`}
-                        style={{
-                            left: `${shard.x}%`,
-                            bottom: `${shard.y}%`,
-                            animationDuration: '1.5s'
-                        }}
-                        onClick={() => {
-                            handleCollectShard(user?.id, shard.id);
-                        }}
-                        data-gtm="emotion-shard-collect"
-                    >
-                        <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse"></div>
-                    </div>
-                ))}
+                {/* 🧩 감정 조각 - 로티 애니메이션만 사용 (MainRoom의 EmotionShard 컴포넌트에서 렌더링) */}
             </div>
 
             {/* 헤더 영역 (코인 + 스트릭 배지 + 레벨 HUD) */}
@@ -569,10 +524,10 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                     </span>
                 </div>
 
-                {/* 스트릭 배지 */}
+                {/* 스트릭 배지 - 클릭 시 일기 페이지로 이동 */}
                 <div
                     className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-2 shadow-lg border-2 pointer-events-auto cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-200"
-                    onClick={onCalendarClick}
+                    onClick={() => navigate('/diary')}
                     data-gtm="streak-indicator"
                     style={{
                         borderColor: `${equippedTheme?.decorationColors?.primary || '#FFD4DC'}40`
@@ -581,7 +536,7 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
                     <span className="text-xs font-bold" style={{
                         color: equippedTheme?.accentColor || '#FFB5C2'
                     }}>
-                        {equippedTheme?.emoji || '🌸'} {streakDays}일차
+                        {streakDays}일차
                     </span>
                 </div>
             </div>
@@ -616,7 +571,7 @@ const HomeView = ({ user, diaries, onWriteClick, onCalendarClick }) => {
             <MainMenu
                 isOpen={isMainMenuOpen}
                 onClose={() => setIsMainMenuOpen(false)}
-                onEmotionShardsClick={onCalendarClick}
+                onEmotionShardsClick={() => navigate('/diary')}
                 onStoreClick={() => setIsStoreViewOpen(true)}
             />
 

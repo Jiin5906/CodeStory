@@ -62,8 +62,8 @@ export default function EmotionShard({ shard, userId }) {
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
             />
 
-            {/* Lottie 감정 조각 */}
-            <div className="relative z-10 drop-shadow-lg">
+            {/* Lottie 감정 조각 (1.2배 확대) */}
+            <div className="relative z-10 drop-shadow-lg" style={{ transform: 'scale(1.2)' }}>
                 <ShardIcon emotion={emotion} size={44} />
             </div>
 
