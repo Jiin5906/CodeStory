@@ -470,7 +470,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                 ? 'opacity-100 translate-y-0 scale-100'
                                 : 'opacity-0 -translate-y-4 scale-95'
                         }`}
-                        style={{ bottom: '100%', marginBottom: '20px', width: 'max-content', maxWidth: '85vw' }}
+                        style={{ bottom: '70%', marginBottom: '20px', width: 'max-content', maxWidth: '85vw' }}
                         data-gtm="mongle-speech-bubble"
                     >
                         <div className="relative bg-white/95 rounded-[2rem] p-6 max-w-xs sm:max-w-sm h-auto shadow-lg shadow-pink-100/60 backdrop-blur-sm pointer-events-auto">
