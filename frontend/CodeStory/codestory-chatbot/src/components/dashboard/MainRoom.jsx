@@ -9,7 +9,6 @@ import mongleNeutral from '../../assets/mongleNeutral.json';
 import mongleRubbing from '../../assets/mongleRubbing.json';
 import mongleCold from '../../assets/mongleCold.json';
 import mongleWarm from '../../assets/mongleWarm.json';
-import mongleSLEEP from '../../assets/mongleSLEEP.json';
 import mongleSLEEPING from '../../assets/mongleSLEEPING.json';
 import mongleTired from '../../assets/mongleTired.json';
 import mongleFull from '../../assets/mongleFull.json';
@@ -129,47 +128,45 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
     }, [latestLog]);
 
     return (
-        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500" data-gtm="mainroom-container">
+        <div className="relative flex items-center justify-center" style={{ overflow: 'visible' }} data-gtm="mainroom-container">
+            {/* 몽글이 캐릭터 + 쓰다듬기 오버레이 + 감정조각 */}
+            <div
+                className="relative w-40 h-40 transition-transform duration-500 group"
+                style={{ overflow: 'visible' }}
+                data-gtm="mainroom-character"
+            >
+                {/* 호버 글로우 */}
+                <div className="absolute inset-[-50%] bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-            {/* 중앙 캐릭터 영역 */}
-            <div className="flex-1 flex flex-col items-center justify-center relative" data-gtm="mainroom-character-area">
+                {/* Lottie 캐릭터 — 컨테이너보다 크게 렌더링, 중앙 정렬 */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" style={{ overflow: 'visible' }}>
+                    <Lottie
+                        animationData={currentAnimation}
+                        loop={true}
+                        autoplay={true}
+                        className="w-full h-full drop-shadow-2xl"
+                        style={{ filter: 'saturate(1.1)' }}
+                    />
+                </div>
 
-                <div className="flex flex-col items-center gap-6 relative">
-                    {/* 몽글이 캐릭터 + 쓰다듬기 오버레이 + 감정조각 */}
-                    <div
-                        className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-transform duration-500 group"
-                        data-gtm="mainroom-character"
-                    >
-                        {/* 호버 글로우 */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                {/* 쓰다듬기 오버레이 — 캐릭터 전체 영역 커버 */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" style={{ overflow: 'visible' }}>
+                    <RubbingOverlay userId={user?.id} onShowFullAnimation={handleShowFullAnimation} />
+                </div>
 
-                        {/* Lottie 캐릭터 */}
-                        <Lottie
-                            animationData={currentAnimation}
-                            loop={true}
-                            autoplay={true}
-                            className="w-full h-full drop-shadow-2xl"
-                            style={{ filter: 'saturate(1.1)' }}
-                        />
+                {/* 감정 조각 */}
+                {emotionShards.map(shard => (
+                    <EmotionShard key={shard.id} shard={shard} userId={user?.id} />
+                ))}
+            </div>
 
-                        {/* 쓰다듬기 오버레이 */}
-                        <RubbingOverlay userId={user?.id} onShowFullAnimation={handleShowFullAnimation} />
-
-                        {/* 감정 조각 (캐릭터 영역 같은 level) */}
-                        {emotionShards.map(shard => (
-                            <EmotionShard key={shard.id} shard={shard} userId={user?.id} />
-                        ))}
+            {/* 플로팅 텍스트 */}
+            <div className="absolute bottom-full w-60 text-center pointer-events-none z-20" style={{ marginBottom: '-20px' }}>
+                {floatingTexts.map(item => (
+                    <div key={item.id} className="text-[#5D4037] text-xl font-medium absolute w-full left-0 animate-[float-up-fade_3s_ease-out_forwards]">
+                        "{item.text}"
                     </div>
-                </div>
-
-                {/* (3) 플로팅 텍스트 */}
-                <div className="absolute bottom-40 w-full px-10 text-center pointer-events-none z-20">
-                    {floatingTexts.map(item => (
-                        <div key={item.id} className="text-[#5D4037] text-xl font-medium absolute w-full left-0 animate-[float-up-fade_3s_ease-out_forwards]">
-                            "{item.text}"
-                        </div>
-                    ))}
-                </div>
+                ))}
             </div>
         </div>
     );

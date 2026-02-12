@@ -457,43 +457,44 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     </div>
                 </div>
 
-                {/* 💬 말풍선 — 펫 위에 absolute 배치, z-[100]으로 최상단 */}
-                <div
-                    className={`absolute left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-700 ease-out ${
-                        showBubble
-                            ? 'opacity-100 translate-y-0 scale-100'
-                            : 'opacity-0 -translate-y-4 scale-95'
-                    }`}
-                    style={{ bottom: 'calc(22% + 180px)', maxWidth: '85%' }}
-                    data-gtm="mongle-speech-bubble"
-                >
-                    <div className="relative bg-white/95 rounded-[2rem] p-6 max-w-xs sm:max-w-sm h-auto shadow-lg shadow-pink-100/60 backdrop-blur-sm pointer-events-auto">
-                        <p
-                            className="text-sm sm:text-base leading-relaxed whitespace-normal break-words text-gray-700 text-center"
-                            style={{
-                                fontFamily: "'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
-                            }}
-                        >
-                            {isAiThinking ? "공감하는 중..." : aiResponse}
-                        </p>
-                        {/* 꼬리 */}
-                        <div
-                            className="absolute -bottom-2 left-1/2 w-4 h-4 bg-white/95 rounded-br-lg"
-                            style={{ transform: 'translateX(-50%) rotate(45deg)' }}
-                        />
-                    </div>
-                </div>
-
                 {/* 💜 펫 + 방석 통합 컨테이너 (반응형 동기화) */}
                 <div
                     className="absolute bottom-[22%] left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none"
+                    style={{ overflow: 'visible' }}
                     data-gtm="pet-cushion-container"
                 >
+                    {/* 💬 말풍선 — 펫 컨테이너 내부, 캐릭터 위에 배치 */}
+                    <div
+                        className={`absolute left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-700 ease-out ${
+                            showBubble
+                                ? 'opacity-100 translate-y-0 scale-100'
+                                : 'opacity-0 -translate-y-4 scale-95'
+                        }`}
+                        style={{ bottom: '100%', marginBottom: '20px', width: 'max-content', maxWidth: '85vw' }}
+                        data-gtm="mongle-speech-bubble"
+                    >
+                        <div className="relative bg-white/95 rounded-[2rem] p-6 max-w-xs sm:max-w-sm h-auto shadow-lg shadow-pink-100/60 backdrop-blur-sm pointer-events-auto">
+                            <p
+                                className="text-sm sm:text-base leading-relaxed whitespace-normal break-words text-gray-700 text-center"
+                                style={{
+                                    fontFamily: "'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                }}
+                            >
+                                {isAiThinking ? "공감하는 중..." : aiResponse}
+                            </p>
+                            {/* 꼬리 */}
+                            <div
+                                className="absolute -bottom-2 left-1/2 w-4 h-4 bg-white/95 rounded-br-lg"
+                                style={{ transform: 'translateX(-50%) rotate(45deg)' }}
+                            />
+                        </div>
+                    </div>
+
                     {/* 펫 (MainRoom) */}
-                    <div className="-mb-6 z-30 pointer-events-auto">
-                        <div className="w-40 h-40 rounded-full flex items-center justify-center">
+                    <div className="-mb-6 z-30 pointer-events-auto" style={{ overflow: 'visible' }}>
+                        <div className="flex items-center justify-center" style={{ overflow: 'visible' }}>
                             <MainRoom
                                 latestLog={latestLog}
                                 emotion={emotion}
