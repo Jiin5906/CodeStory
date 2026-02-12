@@ -24,6 +24,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
     const [isStoreViewOpen, setIsStoreViewOpen] = useState(false);
+    const [showBubble, setShowBubble] = useState(false);
 
     // 인터랙티브 효과를 위한 상태
     const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -32,6 +33,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
 
     const coldTimerRef = useRef(null);
     const aliveTimerRef = useRef(null);
+    const bubbleTimerRef = useRef(null);
 
     // 능동적 대화 타이머 간격 (개발: 10초, 배포: 10분)
     const ALIVE_INTERVAL_MS = 600000; // 10분 (배포용)
@@ -105,11 +107,28 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
         }
     };
 
+    // aiResponse 변경 시 말풍선 8초 표시
+    useEffect(() => {
+        if (aiResponse || isAiThinking) {
+            setShowBubble(true);
+            if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+            if (aiResponse && !isAiThinking) {
+                bubbleTimerRef.current = setTimeout(() => setShowBubble(false), 8000);
+            }
+        } else {
+            setShowBubble(false);
+        }
+        return () => {
+            if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+        };
+    }, [aiResponse, isAiThinking]);
+
     // 컴포넌트 정리 시 타이머 방지 누수
     useEffect(() => {
         return () => {
             if (coldTimerRef.current) clearTimeout(coldTimerRef.current);
             if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
+            if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
         };
     }, []);
 
@@ -438,6 +457,35 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     </div>
                 </div>
 
+                {/* 💬 말풍선 — 펫 위에 absolute 배치, z-[100]으로 최상단 */}
+                <div
+                    className={`absolute left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-700 ease-out ${
+                        showBubble
+                            ? 'opacity-100 translate-y-0 scale-100'
+                            : 'opacity-0 -translate-y-4 scale-95'
+                    }`}
+                    style={{ bottom: 'calc(22% + 180px)', maxWidth: '85%' }}
+                    data-gtm="mongle-speech-bubble"
+                >
+                    <div className="relative bg-white/95 rounded-[2rem] p-6 max-w-xs sm:max-w-sm h-auto shadow-lg shadow-pink-100/60 backdrop-blur-sm pointer-events-auto">
+                        <p
+                            className="text-sm sm:text-base leading-relaxed whitespace-normal break-words text-gray-700 text-center"
+                            style={{
+                                fontFamily: "'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                            }}
+                        >
+                            {isAiThinking ? "공감하는 중..." : aiResponse}
+                        </p>
+                        {/* 꼬리 */}
+                        <div
+                            className="absolute -bottom-2 left-1/2 w-4 h-4 bg-white/95 rounded-br-lg"
+                            style={{ transform: 'translateX(-50%) rotate(45deg)' }}
+                        />
+                    </div>
+                </div>
+
                 {/* 💜 펫 + 방석 통합 컨테이너 (반응형 동기화) */}
                 <div
                     className="absolute bottom-[22%] left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none"
@@ -448,7 +496,6 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                         <div className="w-40 h-40 rounded-full flex items-center justify-center">
                             <MainRoom
                                 latestLog={latestLog}
-                                aiResponse={aiResponse}
                                 emotion={emotion}
                                 isAiThinking={isAiThinking}
                                 user={user}

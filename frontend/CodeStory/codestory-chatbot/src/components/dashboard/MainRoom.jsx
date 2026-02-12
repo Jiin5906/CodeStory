@@ -17,9 +17,8 @@ import { usePet } from '../../context/PetContext';
 import RubbingOverlay from './RubbingOverlay';
 import EmotionShard from './EmotionShard';
 
-const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowColdAnimation, windowClosedAnimation }) => {
+const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation, windowClosedAnimation }) => {
     const [floatingTexts, setFloatingTexts] = useState([]);
-    const [showAiThought, setShowAiThought] = useState(false);
     const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
     const [justWokeUp, setJustWokeUp] = useState(false);
     const [showFullAnimation, setShowFullAnimation] = useState(false);
@@ -129,62 +128,14 @@ const MainRoom = ({ latestLog, aiResponse, emotion, isAiThinking, user, windowCo
         };
     }, [latestLog]);
 
-    // AI 답변 또는 능동적 대화 도착 시 말풍선 표시 (8초간 유지)
-    useEffect(() => {
-        if (aiResponse) {
-            const showTimer = setTimeout(() => setShowAiThought(true), 0);
-            const hideTimer = setTimeout(() => setShowAiThought(false), 8000);
-            return () => {
-                clearTimeout(showTimer);
-                clearTimeout(hideTimer);
-            };
-        } else {
-            const timer = setTimeout(() => setShowAiThought(false), 0);
-            return () => clearTimeout(timer);
-        }
-    }, [aiResponse]);
-
     return (
-        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500 overflow-hidden" data-gtm="mainroom-container">
+        <div className="flex-1 flex flex-col relative w-full transition-colors duration-500" data-gtm="mainroom-container">
 
             {/* 중앙 캐릭터 영역 */}
-            <div className="flex-1 flex flex-col items-center justify-center pb-20 pt-32 relative" data-gtm="mainroom-character-area">
+            <div className="flex-1 flex flex-col items-center justify-center relative" data-gtm="mainroom-character-area">
 
                 <div className="flex flex-col items-center gap-6 relative">
-                    {/* (1) 몽글이의 말풍선 */}
-                    <div
-                        className={`transition-all duration-700 ease-out mb-4 ${
-                            showAiThought || isAiThinking
-                                ? 'opacity-100 translate-y-0 scale-100'
-                                : 'opacity-0 -translate-y-6 scale-95 pointer-events-none'
-                        }`}
-                        data-gtm="mainroom-mongle-speech-bubble"
-                    >
-                        {/* 말풍선 본체 */}
-                        <div className="relative bg-white/90 rounded-[2rem] p-6 max-w-xs sm:max-w-sm min-h-[48px] h-auto shadow-lg shadow-pink-100/60 backdrop-blur-sm">
-
-                            {/* 📝 텍스트 — h-auto + break-words → 절대 잘리지 않음 */}
-                            <p
-                                className="relative text-sm sm:text-base leading-relaxed break-words text-gray-700 text-center"
-                                style={{
-                                    fontFamily: "'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
-                                    wordBreak: 'break-word',
-                                    overflowWrap: 'break-word',
-                                    whiteSpace: 'pre-wrap',
-                                }}
-                            >
-                                {isAiThinking ? "공감하는 중..." : aiResponse}
-                            </p>
-
-                            {/* 💭 꼬리 — absolute div, 본체 색상과 동일 */}
-                            <div
-                                className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/90 rounded-br-lg"
-                                style={{ transform: 'translateX(-50%) rotate(45deg)' }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* (2) 몽글이 캐릭터 + 쓰다듭기 오버레이 + 감정조각 */}
+                    {/* 몽글이 캐릭터 + 쓰다듬기 오버레이 + 감정조각 */}
                     <div
                         className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 transition-transform duration-500 group"
                         data-gtm="mainroom-character"
