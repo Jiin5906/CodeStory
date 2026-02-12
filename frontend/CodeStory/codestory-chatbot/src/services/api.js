@@ -229,11 +229,13 @@ export const coinApi = {
 // Mongle Talk API (능동적 대화)
 export const mongleApi = {
     getGreeting: async (userId) => {
-        const response = await api.get(`/mongle/greeting?userId=${userId}`);
+        const clientHour = new Date().getHours();
+        const response = await api.get(`/mongle/greeting?userId=${userId}&clientHour=${clientHour}`);
         return response.data;
     },
     getAliveQuestion: async (userId) => {
-        const response = await api.get(`/mongle/alive-question?userId=${userId}`);
+        const clientHour = new Date().getHours();
+        const response = await api.get(`/mongle/alive-question?userId=${userId}&clientHour=${clientHour}`);
         return response.data;
     },
 };

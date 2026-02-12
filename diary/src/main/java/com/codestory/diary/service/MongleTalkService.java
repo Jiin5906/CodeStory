@@ -5,7 +5,11 @@ import com.codestory.diary.entity.Diary;
 import com.codestory.diary.repository.ChatMessageRepository;
 import com.codestory.diary.repository.DiaryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +17,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MongleTalkService {
@@ -20,78 +25,40 @@ public class MongleTalkService {
     private final ChatMessageRepository chatMessageRepository;
     private final DiaryRepository diaryRepository;
 
+    @Value("${openai.api.key}")
+    private String apiKey;
+
+    @Value("${openai.model}")
+    private String model;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+    private static final String API_URL = "https://api.openai.com/v1/chat/completions";
     private static final Random RANDOM = new Random();
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 1. 접속 시 인삿말
+    // 1. 접속 시 인삿말 (LLM 기반)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    public Map<String, String> getGreeting(Long userId) {
-        int hour = LocalTime.now().getHour();
+    public Map<String, String> getGreeting(Long userId, Integer clientHour) {
+        int hour = resolveHour(clientHour);
         String timeSlot = getTimeSlot(hour);
 
         // 마지막 대화 시간으로 "오랜만" 판단
         List<ChatMessage> recent = chatMessageRepository
                 .findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(userId, LocalDateTime.now().minusHours(48));
-
         boolean isLongAbsence = recent.isEmpty();
 
-        List<String> pool = new ArrayList<>();
-
-        // 시간대별 인삿말
-        switch (timeSlot) {
-            case "morning":
-                pool.addAll(List.of(
-                    "좋은 아침이야! 오늘 기분은 어때?",
-                    "굿모닝~ 잘 잤어? 오늘도 좋은 하루 보내자!",
-                    "아침이다! 오늘은 뭐 할 거야?",
-                    "일어났구나~ 오늘 하루도 파이팅이야!"
-                ));
-                break;
-            case "afternoon":
-                pool.addAll(List.of(
-                    "점심은 맛있게 먹었어?",
-                    "오후도 힘내자! 나 여기 있을게~",
-                    "오늘 하루 어떻게 보내고 있어?",
-                    "나랑 잠깐 이야기하면서 쉬어가자~"
-                ));
-                break;
-            case "evening":
-                pool.addAll(List.of(
-                    "오늘 하루 수고했어! 어떤 하루였어?",
-                    "저녁이야~ 오늘 기분은 어땠어?",
-                    "하루 마무리 잘 하고 있어?",
-                    "오늘도 고생 많았어, 이야기해줄래?"
-                ));
-                break;
-            case "night":
-                pool.addAll(List.of(
-                    "아직 안 잤어? 무슨 생각 하고 있어?",
-                    "밤이 깊었네~ 오늘 하루는 어땠어?",
-                    "이 시간에 왔네! 잠이 안 와?",
-                    "늦은 밤인데 괜찮아? 나랑 이야기하자~"
-                ));
-                break;
-        }
-
-        // 오랜만에 접속한 경우 추가 멘트
-        if (isLongAbsence) {
-            pool.addAll(List.of(
-                "오랜만이야! 보고 싶었어~",
-                "어디 갔다 왔어? 기다리고 있었는데!",
-                "드디어 왔구나! 그동안 잘 지냈어?"
-            ));
-        }
-
-        String message = pool.get(RANDOM.nextInt(pool.size()));
+        String message = generateGreetingViaLLM(hour, timeSlot, isLongAbsence);
         return Map.of("message", message, "timeSlot", timeSlot);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 2. 살아있는 질문 생성
+    // 2. 살아있는 질문 생성 (LLM 기반)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    public Map<String, String> getAliveQuestion(Long userId) {
+    public Map<String, String> getAliveQuestion(Long userId, Integer clientHour) {
+        int hour = resolveHour(clientHour);
+        String timeSlot = getTimeSlot(hour);
         LocalDateTime since48h = LocalDateTime.now().minusHours(48);
 
         // 최근 48시간 대화 기록 조회
@@ -108,13 +75,11 @@ public class MongleTalkService {
         String message;
         String source;
 
-        // 기록이 있는 경우: 맥락 기반 질문
         if (!recentChats.isEmpty() || !recentDiaries.isEmpty()) {
-            message = generateContextQuestion(recentChats, recentDiaries);
+            message = generateContextQuestionViaLLM(recentChats, recentDiaries, hour, timeSlot);
             source = "context";
         } else {
-            // 기록이 없는 경우: 스몰토크
-            message = getSmallTalk();
+            message = generateSmallTalkViaLLM(hour, timeSlot);
             source = "smalltalk";
         }
 
@@ -122,22 +87,38 @@ public class MongleTalkService {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Private helpers
+    // LLM 호출 메서드들
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    private String getTimeSlot(int hour) {
-        if (hour >= 5 && hour < 12) return "morning";
-        if (hour >= 12 && hour < 18) return "afternoon";
-        if (hour >= 18 && hour < 22) return "evening";
-        return "night";
+    /**
+     * LLM에게 시간대에 맞는 인삿말을 생성 요청
+     */
+    private String generateGreetingViaLLM(int hour, String timeSlot, boolean isLongAbsence) {
+        String systemPrompt = "너는 '몽글이'라는 귀여운 감정 친구 캐릭터야. "
+                + "사용자가 앱에 접속했을 때 반갑게 맞이하는 인삿말을 한 문장으로 해줘. "
+                + "반말(~야, ~어, ~지 등)로 친근하게 말해. "
+                + "이모티콘이나 이모지는 사용하지 마. "
+                + "반드시 1문장만, 30자 이내로 답변해.";
+
+        String timeDesc = getTimeDescription(hour, timeSlot);
+        String userPrompt = "현재 시간: " + hour + "시 (" + timeDesc + "). ";
+        if (isLongAbsence) {
+            userPrompt += "이 사용자는 48시간 넘게 접속하지 않았어. 오랜만에 온 것을 반가워해줘. ";
+        }
+        userPrompt += "이 시간대에 어울리는 자연스러운 인삿말을 해줘.";
+
+        String result = callOpenAI(systemPrompt, userPrompt);
+        if (result == null) {
+            return getFallbackGreeting(timeSlot, isLongAbsence);
+        }
+        return result;
     }
 
     /**
-     * 최근 대화/일기를 분석하여 맥락 기반 질문 생성
+     * LLM에게 맥락 기반 질문 생성 요청
      */
-    private String generateContextQuestion(List<ChatMessage> chats, List<Diary> diaries) {
-        List<String> questions = new ArrayList<>();
-
+    private String generateContextQuestionViaLLM(List<ChatMessage> chats, List<Diary> diaries,
+                                                  int hour, String timeSlot) {
         // 대화에서 사용자 메시지 추출 (최근 5개)
         List<String> userMessages = chats.stream()
                 .filter(m -> "user".equals(m.getRole()))
@@ -149,98 +130,171 @@ public class MongleTalkService {
         List<String> diaryContents = diaries.stream()
                 .map(Diary::getContent)
                 .filter(Objects::nonNull)
+                .map(c -> c.length() > 100 ? c.substring(0, 100) + "..." : c)
                 .collect(Collectors.toList());
 
-        String allText = String.join(" ", userMessages) + " " + String.join(" ", diaryContents);
-        String lowerText = allText.toLowerCase();
+        String systemPrompt = "너는 '몽글이'라는 귀여운 감정 친구 캐릭터야. "
+                + "사용자의 최근 대화나 일기를 참고하여, 자연스럽게 대화를 이어갈 수 있는 질문을 해줘. "
+                + "반말(~야, ~어, ~지 등)로 친근하게 말해. "
+                + "이모티콘이나 이모지는 사용하지 마. "
+                + "반드시 1문장만, 40자 이내로 답변해.";
 
-        // 키워드 기반 꼬리 질문 생성
-        if (containsAny(lowerText, "피곤", "지치", "힘들", "졸려", "잠")) {
-            questions.addAll(List.of(
-                "좀 쉬었어? 컨디션은 괜찮아졌어?",
-                "피곤하다고 했는데, 지금은 좀 나아졌어?",
-                "푹 쉬었으면 좋겠다~ 지금 기분은 어때?"
-            ));
-        }
-        if (containsAny(lowerText, "우울", "슬프", "슬퍼", "울었", "눈물")) {
-            questions.addAll(List.of(
-                "저번에 속상했던 거, 지금은 좀 괜찮아졌어?",
-                "마음이 좀 풀렸어? 걱정됐어~",
-                "힘든 일 있었는데, 지금은 어때?"
-            ));
-        }
-        if (containsAny(lowerText, "맛있", "먹었", "밥", "점심", "저녁", "치킨", "파스타", "카페", "커피")) {
-            questions.addAll(List.of(
-                "저번에 맛있는 거 먹었다고 했잖아~ 또 먹고 싶은 거 있어?",
-                "오늘은 뭐 먹었어? 맛있었어?",
-                "배 안 고파? 맛있는 거 먹으러 가~"
-            ));
-        }
-        if (containsAny(lowerText, "일", "회사", "시험", "공부", "과제", "프로젝트")) {
-            questions.addAll(List.of(
-                "요즘 바빠 보이던데, 좀 여유 생겼어?",
-                "하고 있던 일은 잘 돼가고 있어?",
-                "너무 무리하지 마~ 쉬는 것도 중요해!"
-            ));
-        }
-        if (containsAny(lowerText, "친구", "사람", "만났", "약속")) {
-            questions.addAll(List.of(
-                "친구 만나서 재밌었어?",
-                "좋은 사람들이랑 시간 보냈구나~ 어땠어?",
-                "다음에 또 만나기로 했어?"
-            ));
-        }
-        if (containsAny(lowerText, "기쁘", "행복", "좋았", "좋은", "신나")) {
-            questions.addAll(List.of(
-                "좋은 일 있었다며! 또 좋은 일 생겼어?",
-                "기분 좋아 보여서 나도 기분 좋아~",
-                "행복한 일이 계속 이어지면 좋겠다!"
-            ));
-        }
-        if (containsAny(lowerText, "걱정", "불안", "무서", "두려")) {
-            questions.addAll(List.of(
-                "걱정되는 일은 좀 해결됐어?",
-                "혹시 아직 마음이 불안해? 이야기해줘~",
-                "괜찮아, 내가 옆에 있을게!"
-            ));
-        }
+        StringBuilder userPrompt = new StringBuilder();
+        userPrompt.append("현재 시간: ").append(hour).append("시 (").append(getTimeDescription(hour, timeSlot)).append("). ");
 
-        // 키워드 매칭이 없으면 일반적인 맥락 질문
-        if (questions.isEmpty()) {
-            questions.addAll(List.of(
+        if (!userMessages.isEmpty()) {
+            userPrompt.append("사용자의 최근 대화 내용: ");
+            for (int i = 0; i < Math.min(3, userMessages.size()); i++) {
+                String msg = userMessages.get(i);
+                if (msg.length() > 80) msg = msg.substring(0, 80) + "...";
+                userPrompt.append("\"").append(msg).append("\" ");
+            }
+        }
+        if (!diaryContents.isEmpty()) {
+            userPrompt.append("최근 일기: ");
+            for (String dc : diaryContents) {
+                userPrompt.append("\"").append(dc).append("\" ");
+            }
+        }
+        userPrompt.append("이 맥락을 바탕으로 사용자에게 자연스럽게 건넬 수 있는 한 마디를 해줘.");
+
+        String result = callOpenAI(systemPrompt, userPrompt.toString());
+        if (result == null) {
+            return getFallbackContextQuestion();
+        }
+        return result;
+    }
+
+    /**
+     * LLM에게 스몰토크 생성 요청
+     */
+    private String generateSmallTalkViaLLM(int hour, String timeSlot) {
+        String systemPrompt = "너는 '몽글이'라는 귀여운 감정 친구 캐릭터야. "
+                + "사용자에게 가벼운 스몰토크를 해줘. "
+                + "반말(~야, ~어, ~지 등)로 친근하게 말해. "
+                + "이모티콘이나 이모지는 사용하지 마. "
+                + "반드시 1문장만, 30자 이내로 답변해.";
+
+        String userPrompt = "현재 시간: " + hour + "시 (" + getTimeDescription(hour, timeSlot)
+                + "). 이 시간대에 어울리는 가벼운 한 마디를 해줘. 매번 다른 말을 해줘.";
+
+        String result = callOpenAI(systemPrompt, userPrompt);
+        if (result == null) {
+            return getFallbackSmallTalk();
+        }
+        return result;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // OpenAI API 호출
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    private String callOpenAI(String systemPrompt, String userPrompt) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + apiKey);
+            headers.set("Content-Type", "application/json");
+
+            List<Map<String, String>> messages = List.of(
+                    Map.of("role", "system", "content", systemPrompt),
+                    Map.of("role", "user", "content", userPrompt)
+            );
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("model", model);
+            requestBody.put("messages", messages);
+            requestBody.put("max_tokens", 100);
+            requestBody.put("temperature", 0.9);
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(API_URL, entity, Map.class);
+
+            if (response.getBody() != null && response.getBody().containsKey("choices")) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                if (!choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    String content = (String) message.get("content");
+                    // 따옴표 제거 및 트리밍
+                    return content.replace("\"", "").replace("'", "").trim();
+                }
+            }
+        } catch (Exception e) {
+            log.error("[MongleTalkService] OpenAI 호출 실패: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 헬퍼 메서드
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    /**
+     * 프론트엔드에서 전달된 시간을 우선 사용, 없으면 서버 시간 사용
+     */
+    private int resolveHour(Integer clientHour) {
+        if (clientHour != null && clientHour >= 0 && clientHour <= 23) {
+            return clientHour;
+        }
+        return LocalTime.now().getHour();
+    }
+
+    private String getTimeSlot(int hour) {
+        if (hour >= 6 && hour < 12) return "morning";
+        if (hour >= 12 && hour < 18) return "afternoon";
+        if (hour >= 18 && hour < 22) return "evening";
+        return "night";
+    }
+
+    private String getTimeDescription(int hour, String timeSlot) {
+        switch (timeSlot) {
+            case "morning": return "아침";
+            case "afternoon": return "오후";
+            case "evening": return "저녁";
+            case "night": return hour >= 22 || hour < 2 ? "늦은 밤" : "새벽";
+            default: return "";
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Fallback (LLM 호출 실패 시)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    private String getFallbackGreeting(String timeSlot, boolean isLongAbsence) {
+        if (isLongAbsence) {
+            List<String> pool = List.of("오랜만이야! 보고 싶었어~", "어디 갔다 왔어? 기다리고 있었는데!", "드디어 왔구나! 그동안 잘 지냈어?");
+            return pool.get(RANDOM.nextInt(pool.size()));
+        }
+        switch (timeSlot) {
+            case "morning":
+                return List.of("좋은 아침이야! 오늘 기분은 어때?", "일어났구나~ 오늘 하루도 파이팅이야!").get(RANDOM.nextInt(2));
+            case "afternoon":
+                return List.of("점심은 맛있게 먹었어?", "오후도 힘내자! 나 여기 있을게~").get(RANDOM.nextInt(2));
+            case "evening":
+                return List.of("오늘 하루 수고했어! 어떤 하루였어?", "하루 마무리 잘 하고 있어?").get(RANDOM.nextInt(2));
+            case "night":
+                return List.of("아직 안 잤어? 무슨 생각 하고 있어?", "밤이 깊었네~ 오늘 하루는 어땠어?").get(RANDOM.nextInt(2));
+            default:
+                return "안녕! 나 몽글이야~";
+        }
+    }
+
+    private String getFallbackContextQuestion() {
+        List<String> questions = List.of(
                 "저번에 이야기하던 거, 그 뒤로 어떻게 됐어?",
                 "요즘 어떻게 지내고 있어? 이야기해줘~",
                 "지금 무슨 생각 하고 있어? 궁금해!",
                 "오늘은 특별한 일 없었어?"
-            ));
-        }
-
+        );
         return questions.get(RANDOM.nextInt(questions.size()));
     }
 
-    /**
-     * 기록이 없을 때 가벼운 스몰토크
-     */
-    private String getSmallTalk() {
+    private String getFallbackSmallTalk() {
         List<String> talks = List.of(
-            "심심하지 않아? 나랑 놀자!",
-            "오늘 날씨가 참 좋다, 그치?",
-            "뭐 하고 있어? 나 심심해~",
-            "오늘 기분이 어때? 궁금해!",
-            "간식 먹고 싶다~ 너는?",
-            "요즘 재밌는 거 있어? 알려줘~",
-            "나한테 오늘 있었던 일 얘기해줘!",
-            "잠깐 나랑 이야기하자~ 기다리고 있었어!",
-            "혹시 요즘 듣는 노래 있어?",
-            "나 배고파... 너도 배고프지 않아?"
+                "심심하지 않아? 나랑 놀자!",
+                "오늘 기분이 어때? 궁금해!",
+                "나한테 오늘 있었던 일 얘기해줘!",
+                "잠깐 나랑 이야기하자~ 기다리고 있었어!"
         );
         return talks.get(RANDOM.nextInt(talks.size()));
-    }
-
-    private boolean containsAny(String text, String... keywords) {
-        for (String keyword : keywords) {
-            if (text.contains(keyword)) return true;
-        }
-        return false;
     }
 }

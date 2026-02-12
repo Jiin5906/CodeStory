@@ -261,13 +261,15 @@ public class ApiController {
     // --- 몽글이 능동적 대화 API ---
 
     @GetMapping("/mongle/greeting")
-    public ResponseEntity<?> getMongleGreeting(@RequestParam Long userId) {
-        return ResponseEntity.ok(mongleTalkService.getGreeting(userId));
+    public ResponseEntity<?> getMongleGreeting(@RequestParam Long userId,
+                                                @RequestParam(required = false) Integer clientHour) {
+        return ResponseEntity.ok(mongleTalkService.getGreeting(userId, clientHour));
     }
 
     @GetMapping("/mongle/alive-question")
-    public ResponseEntity<?> getMongleAliveQuestion(@RequestParam Long userId) {
-        return ResponseEntity.ok(mongleTalkService.getAliveQuestion(userId));
+    public ResponseEntity<?> getMongleAliveQuestion(@RequestParam Long userId,
+                                                     @RequestParam(required = false) Integer clientHour) {
+        return ResponseEntity.ok(mongleTalkService.getAliveQuestion(userId, clientHour));
     }
 
     // --- 피드백 API ---

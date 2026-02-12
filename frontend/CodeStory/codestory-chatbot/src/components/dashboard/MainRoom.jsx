@@ -138,8 +138,8 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
                 {/* 호버 글로우 */}
                 <div className="absolute inset-[-50%] bg-gradient-to-t from-white/0 to-white/60 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-                {/* Lottie 캐릭터 — 컨테이너보다 크게 렌더링, 중앙 정렬 */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" style={{ overflow: 'visible' }}>
+                {/* Lottie 캐릭터 — 컨테이너보다 크게 렌더링, 중앙 정렬 (translate-y-[55%]로 방석 위 착석) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" style={{ overflow: 'visible' }}>
                     <Lottie
                         animationData={currentAnimation}
                         loop={true}
@@ -150,7 +150,7 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
                 </div>
 
                 {/* 쓰다듬기 오버레이 — 캐릭터 전체 영역 커버 */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" style={{ overflow: 'visible' }}>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" style={{ overflow: 'visible' }}>
                     <RubbingOverlay userId={user?.id} onShowFullAnimation={handleShowFullAnimation} />
                 </div>
 

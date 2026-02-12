@@ -492,8 +492,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                         </div>
                     </div>
 
-                    {/* 펫 (MainRoom) */}
-                    <div className="-mb-6 z-30 pointer-events-auto" style={{ overflow: 'visible' }}>
+                    {/* 펫 (MainRoom) — 방석 위에 정확히 앉도록 translate-y 조정 */}
+                    <div className="-mb-2 z-30 pointer-events-auto" style={{ overflow: 'visible' }}>
                         <div className="flex items-center justify-center" style={{ overflow: 'visible' }}>
                             <MainRoom
                                 latestLog={latestLog}
