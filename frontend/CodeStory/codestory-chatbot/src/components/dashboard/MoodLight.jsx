@@ -33,24 +33,24 @@ const MoodLight = () => {
             >
                 {/* 받침대 (하단 - 원형 베이스) */}
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-3 rounded-full"
-                    style={{ background: `linear-gradient(to bottom, ${standColor}, #1A1A1A)` }}
                     style={{
+                        background: `linear-gradient(to bottom, ${standColor}, #1A1A1A)`,
                         boxShadow: '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)'
                     }}
                 ></div>
 
                 {/* 스탠드 (긴 검은색 기둥) */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1.5 h-32 rounded-full"
-                    style={{ background: `linear-gradient(to right, ${standColor}, ${standColor}DD, ${standColor})` }}
                     style={{
+                        background: `linear-gradient(to right, ${standColor}, ${standColor}DD, ${standColor})`,
                         boxShadow: 'inset 1px 0 2px rgba(255,255,255,0.15), inset -1px 0 2px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.2)'
                     }}
                 ></div>
 
                 {/* 상단 연결부 */}
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full"
-                    style={{ background: `linear-gradient(to bottom, ${standColor}DD, ${standColor})` }}
                     style={{
+                        background: `linear-gradient(to bottom, ${standColor}DD, ${standColor})`,
                         boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.2)'
                     }}
                 ></div>
