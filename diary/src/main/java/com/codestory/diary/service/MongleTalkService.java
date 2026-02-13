@@ -115,7 +115,7 @@ public class MongleTalkService {
     }
 
     /**
-     * LLM에게 맥락 기반 질문 생성 요청
+     * LLM에게 맥락 기반 질문 생성 요청 (일기 감정 점수 반영)
      */
     private String generateContextQuestionViaLLM(List<ChatMessage> chats, List<Diary> diaries,
                                                   int hour, String timeSlot) {
@@ -126,6 +126,19 @@ public class MongleTalkService {
                 .map(ChatMessage::getContent)
                 .collect(Collectors.toList());
 
+        // 가장 최근 일기의 감정 점수 계산
+        String toneGuide = "";
+        if (!diaries.isEmpty()) {
+            Diary latest = diaries.get(0);
+            int sentimentScore = Math.max(0, Math.min(100,
+                    (latest.getMood() + latest.getFun()) / 2 - latest.getTension() / 3));
+            if (sentimentScore <= 30) {
+                toneGuide = "사용자가 최근 우울한 상태야. 차분하고 위로하는 톤으로 말해줘. ";
+            } else if (sentimentScore >= 71) {
+                toneGuide = "사용자가 최근 기분이 좋은 상태야. 밝고 신나는 톤으로 말해줘. ";
+            }
+        }
+
         // 일기 내용 추출
         List<String> diaryContents = diaries.stream()
                 .map(Diary::getContent)
@@ -134,7 +147,10 @@ public class MongleTalkService {
                 .collect(Collectors.toList());
 
         String systemPrompt = "너는 '몽글이'라는 귀여운 감정 친구 캐릭터야. "
-                + "사용자의 최근 대화나 일기를 참고하여, 자연스럽게 대화를 이어갈 수 있는 질문을 해줘. "
+                + "사용자의 최근 일기 내용을 최우선으로 참고하고, 대화도 참고하여 자연스럽게 대화를 이어갈 수 있는 질문을 해줘. "
+                + "일기에 나온 내용을 아는 척하면서 물어봐줘. "
+                + "단, '일기', '기록', '데이터' 같은 시스템 표현은 절대 쓰지 마. 마치 옆에서 지켜본 것처럼 자연스럽게 말해. "
+                + toneGuide
                 + "반말(~야, ~어, ~지 등)로 친근하게 말해. "
                 + "이모티콘이나 이모지는 사용하지 마. "
                 + "반드시 1문장만, 40자 이내로 답변해.";
@@ -142,18 +158,19 @@ public class MongleTalkService {
         StringBuilder userPrompt = new StringBuilder();
         userPrompt.append("현재 시간: ").append(hour).append("시 (").append(getTimeDescription(hour, timeSlot)).append("). ");
 
+        // 일기를 먼저 (1순위)
+        if (!diaryContents.isEmpty()) {
+            userPrompt.append("[최우선] 사용자의 최근 일기: ");
+            for (String dc : diaryContents) {
+                userPrompt.append("\"").append(dc).append("\" ");
+            }
+        }
         if (!userMessages.isEmpty()) {
-            userPrompt.append("사용자의 최근 대화 내용: ");
+            userPrompt.append("[참고] 사용자의 최근 대화: ");
             for (int i = 0; i < Math.min(3, userMessages.size()); i++) {
                 String msg = userMessages.get(i);
                 if (msg.length() > 80) msg = msg.substring(0, 80) + "...";
                 userPrompt.append("\"").append(msg).append("\" ");
-            }
-        }
-        if (!diaryContents.isEmpty()) {
-            userPrompt.append("최근 일기: ");
-            for (String dc : diaryContents) {
-                userPrompt.append("\"").append(dc).append("\" ");
             }
         }
         userPrompt.append("이 맥락을 바탕으로 사용자에게 자연스럽게 건넬 수 있는 한 마디를 해줘.");
