@@ -205,7 +205,6 @@ const StoreView = ({ isOpen, onClose }) => {
                                 : 'bg-transparent text-gray-600 hover:bg-white/50'
                         }`}
                         data-gtm="store-tab-furniture"
-                        style={{ display: 'none' }}
                     >
                         🪑 가구
                     </button>

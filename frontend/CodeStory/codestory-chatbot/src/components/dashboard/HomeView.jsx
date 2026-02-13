@@ -34,6 +34,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const coldTimerRef = useRef(null);
     const aliveTimerRef = useRef(null);
     const bubbleTimerRef = useRef(null);
+    const isSleepingRef = useRef(isSleeping);
 
     // 랜덤 대화 주기 (3~5분)
     const ALIVE_MIN_MS = 180000; // 3분
@@ -42,8 +43,11 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast, isSleeping, sleepToast, showSleepToast } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
 
-    // 장착된 테마 (equippedItems 변경 시 자동 재계산)
+    // 장착된 테마 및 가구 (equippedItems 변경 시 자동 재계산)
     const equippedTheme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
+    const equippedShelf = useMemo(() => getEquippedItem('shelf'), [equippedItems, getEquippedItem]);
+    const equippedPot = useMemo(() => getEquippedItem('pot'), [equippedItems, getEquippedItem]);
+    const equippedCushion = useMemo(() => getEquippedItem('cushion'), [equippedItems, getEquippedItem]);
 
     const today = startOfDay(new Date());
     const currentHour = new Date().getHours();
@@ -133,6 +137,11 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
         };
     }, []);
 
+    // isSleepingRef 동기화
+    useEffect(() => {
+        isSleepingRef.current = isSleeping;
+    }, [isSleeping]);
+
     // ━━━ 몽글이 능동적 대화 시스템 (랜덤 3~5분) ━━━
 
     // 랜덤 대화 타이머 (setTimeout 재귀)
@@ -143,8 +152,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
         const randomDelay = ALIVE_MIN_MS + Math.random() * (ALIVE_MAX_MS - ALIVE_MIN_MS);
 
         aliveTimerRef.current = setTimeout(async () => {
-            // 수면 중이면 말 걸지 않고 다음 타이머만 재설정
-            if (isSleeping) {
+            // 수면 중이면 말 걸지 않고 다음 타이머만 재설정 (ref로 최신 값 참조)
+            if (isSleepingRef.current) {
                 scheduleNextAlive();
                 return;
             }
@@ -428,7 +437,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
                 >
                     {/* 상단 선반 */}
-                    <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md mb-8" style={{
+                    <div className="relative w-28 h-2.5 rounded-md mb-8" style={{
+                        backgroundColor: equippedShelf?.color || '#D7B896',
                         boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
                     }}>
                         {/* 선반 위 소품들 */}
@@ -452,7 +462,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     </div>
 
                     {/* 하단 선반 */}
-                    <div className="relative w-28 h-2.5 bg-[#D7B896] rounded-md" style={{
+                    <div className="relative w-28 h-2.5 rounded-md" style={{
+                        backgroundColor: equippedShelf?.color || '#D7B896',
                         boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
                     }}>
                         {/* 선반 위 소품들 */}
@@ -538,8 +549,11 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     >
                         <div className="relative w-52 h-28">
                             {/* 방석 본체 (타원형) */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#E8C5FF] via-[#D4A5F5] to-[#C490E4] rounded-[50%]"
+                            <div className="absolute inset-0 rounded-[50%]"
                                 style={{
+                                    background: equippedCushion
+                                        ? `linear-gradient(to bottom right, ${equippedCushion.color}, ${equippedCushion.colorDark})`
+                                        : 'linear-gradient(to bottom right, #E8C5FF, #D4A5F5, #C490E4)',
                                     filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
                                     boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
                                 }}
@@ -589,35 +603,50 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                 >
                     <div className="relative w-24 h-44">
                         {/* 화분 */}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 bg-gradient-to-b from-[#FF9980] to-[#FF7A5A] rounded-b-3xl" style={{
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 rounded-b-3xl" style={{
+                            background: `linear-gradient(to bottom, ${equippedPot?.potColor || '#FF9980'}, ${equippedPot?.potColor ? equippedPot.potColor + 'CC' : '#FF7A5A'})`,
                             clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
                             boxShadow: '0 6px 12px rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.3)'
                         }}></div>
 
                         {/* 중앙 큰 잎 */}
-                        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 bg-gradient-to-t from-[#66BB6A] to-[#81C784] rounded-full"></div>
+                        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 rounded-full" style={{
+                            background: `linear-gradient(to top, ${equippedPot?.plantColor || '#66BB6A'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`
+                        }}></div>
 
                         {/* 좌측 잎들 (크기 2배) */}
-                        <div className="absolute bottom-16 left-0 w-11 h-18 bg-gradient-to-br from-[#81C784] to-[#66BB6A] rounded-full rotate-[-35deg]" style={{
+                        <div className="absolute bottom-16 left-0 w-11 h-18 rounded-full rotate-[-35deg]" style={{
+                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'}, ${equippedPot?.plantColor || '#66BB6A'})`,
                             boxShadow: 'inset -3px 3px 6px rgba(0,0,0,0.12)'
                         }}></div>
-                        <div className="absolute bottom-22 left-[-2px] w-9 h-15 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-25deg]"></div>
+                        <div className="absolute bottom-22 left-[-2px] w-9 h-15 rounded-full rotate-[-25deg]" style={{
+                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`
+                        }}></div>
 
                         {/* 우측 잎들 (크기 2배) */}
-                        <div className="absolute bottom-16 right-0 w-11 h-18 bg-gradient-to-bl from-[#81C784] to-[#66BB6A] rounded-full rotate-[35deg]" style={{
+                        <div className="absolute bottom-16 right-0 w-11 h-18 rounded-full rotate-[35deg]" style={{
+                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'}, ${equippedPot?.plantColor || '#66BB6A'})`,
                             boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.12)'
                         }}></div>
-                        <div className="absolute bottom-22 right-[-2px] w-9 h-15 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[25deg]"></div>
+                        <div className="absolute bottom-22 right-[-2px] w-9 h-15 rounded-full rotate-[25deg]" style={{
+                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`
+                        }}></div>
 
                         {/* 상단 작은 잎들 (크기 2배) */}
-                        <div className="absolute bottom-28 left-3 w-8 h-12 bg-gradient-to-br from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[-15deg]"></div>
-                        <div className="absolute bottom-28 right-3 w-8 h-12 bg-gradient-to-bl from-[#C8E6C9] to-[#A5D6A7] rounded-full rotate-[15deg]"></div>
+                        <div className="absolute bottom-28 left-3 w-8 h-12 rounded-full rotate-[-15deg]" style={{
+                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + '77' : '#C8E6C9'}, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'})`
+                        }}></div>
+                        <div className="absolute bottom-28 right-3 w-8 h-12 rounded-full rotate-[15deg]" style={{
+                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + '77' : '#C8E6C9'}, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'})`
+                        }}></div>
 
                         {/* 추가 잎들로 더 풍성하게 */}
-                        <div className="absolute bottom-20 left-1 w-7 h-10 bg-gradient-to-br from-[#A5D6A7] to-[#81C784] rounded-full rotate-[-40deg]" style={{
+                        <div className="absolute bottom-20 left-1 w-7 h-10 rounded-full rotate-[-40deg]" style={{
+                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`,
                             opacity: 0.9
                         }}></div>
-                        <div className="absolute bottom-20 right-1 w-7 h-10 bg-gradient-to-bl from-[#A5D6A7] to-[#81C784] rounded-full rotate-[40deg]" style={{
+                        <div className="absolute bottom-20 right-1 w-7 h-10 rounded-full rotate-[40deg]" style={{
+                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`,
                             opacity: 0.9
                         }}></div>
                     </div>

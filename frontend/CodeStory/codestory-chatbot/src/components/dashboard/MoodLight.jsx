@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePet } from '../../context/PetContext';
+import { useStore } from '../../context/StoreContext';
 
 /**
  * MoodLight — 무드등 컴포넌트 (좌측 하단 배치)
@@ -10,6 +11,13 @@ import { usePet } from '../../context/PetContext';
  */
 const MoodLight = () => {
     const { moodLightOn, toggleMoodLight } = usePet();
+    const { equippedItems, getEquippedItem } = useStore();
+    const equippedLight = useMemo(() => getEquippedItem('light'), [equippedItems, getEquippedItem]);
+
+    // 무드등 색상 (장착된 아이템 or 기본값)
+    const shadeColor = equippedLight?.shadeColor || '#FFF8DC';
+    const shadeColorDark = equippedLight?.shadeColorDark || '#FFE4B5';
+    const standColor = equippedLight?.standColor || '#2C2C2C';
 
     return (
         <div
@@ -24,21 +32,24 @@ const MoodLight = () => {
                 style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.25))' }}
             >
                 {/* 받침대 (하단 - 원형 베이스) */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-3 bg-gradient-to-b from-[#2C2C2C] to-[#1A1A1A] rounded-full"
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-3 rounded-full"
+                    style={{ background: `linear-gradient(to bottom, ${standColor}, #1A1A1A)` }}
                     style={{
                         boxShadow: '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)'
                     }}
                 ></div>
 
                 {/* 스탠드 (긴 검은색 기둥) */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1.5 h-32 bg-gradient-to-r from-[#2C2C2C] via-[#3A3A3A] to-[#2C2C2C] rounded-full"
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1.5 h-32 rounded-full"
+                    style={{ background: `linear-gradient(to right, ${standColor}, ${standColor}DD, ${standColor})` }}
                     style={{
                         boxShadow: 'inset 1px 0 2px rgba(255,255,255,0.15), inset -1px 0 2px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.2)'
                     }}
                 ></div>
 
                 {/* 상단 연결부 */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 bg-gradient-to-b from-[#3A3A3A] to-[#2C2C2C] rounded-full"
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full"
+                    style={{ background: `linear-gradient(to bottom, ${standColor}DD, ${standColor})` }}
                     style={{
                         boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.2)'
                     }}
@@ -51,14 +62,13 @@ const MoodLight = () => {
                     }}
                 >
                     {/* 메인 갓 바디 */}
-                    <div className={`absolute inset-0 transition-all duration-700 ${
-                        moodLightOn
-                            ? 'bg-gradient-to-b from-[#FFF8DC] via-[#FFEFD5] to-[#FFE4B5]'
-                            : 'bg-gradient-to-b from-[#E8E8E8] via-[#D8D8D8] to-[#C8C8C8]'
-                    }`}
+                    <div className="absolute inset-0 transition-all duration-700"
                         style={{
+                            background: moodLightOn
+                                ? `linear-gradient(to bottom, ${shadeColor}, ${shadeColor}EE, ${shadeColorDark})`
+                                : 'linear-gradient(to bottom, #E8E8E8, #D8D8D8, #C8C8C8)',
                             boxShadow: moodLightOn
-                                ? 'inset 0 -3px 10px rgba(210,180,140,0.4), inset 0 3px 8px rgba(255,255,255,0.6), 0 0 30px rgba(255,248,220,0.6), 0 0 60px rgba(255,228,181,0.4)'
+                                ? `inset 0 -3px 10px rgba(210,180,140,0.4), inset 0 3px 8px rgba(255,255,255,0.6), 0 0 30px ${shadeColor}99, 0 0 60px ${shadeColorDark}66`
                                 : 'inset 0 -3px 8px rgba(0,0,0,0.2), inset 0 3px 6px rgba(255,255,255,0.3)',
                             opacity: moodLightOn ? 1 : 0.7,
                             clipPath: 'polygon(20% 0%, 80% 0%, 95% 35%, 100% 100%, 0% 100%, 5% 35%)'

@@ -17,6 +17,7 @@ import java.util.Random;
 public class PetService {
 
     private final PetStatusRepository petStatusRepository;
+    private final CoinService coinService;
     private static final Random random = new Random();
 
     // 신규 사용자이면 자동 생성, 기존이면 조회
@@ -34,6 +35,12 @@ public class PetService {
     // DTO 변환 반환
     @Transactional(readOnly = true)
     public PetStatusDto getPetStatusDto(Long userId) {
+        return getPetStatusDto(userId, null);
+    }
+
+    // DTO 변환 반환 (레벨업 보상 포함)
+    @Transactional(readOnly = true)
+    public PetStatusDto getPetStatusDto(Long userId, PetStatusDto.LevelUpReward levelUpReward) {
         PetStatus pet = getOrCreatePetStatus(userId);
 
         return PetStatusDto.builder()
@@ -47,6 +54,19 @@ public class PetService {
                 .affectionGauge(pet.getAffectionGauge())
                 .energyGauge(pet.getEnergyGauge())
                 .lastUpdate(pet.getLastUpdate())
+                .levelUpReward(levelUpReward)
+                .build();
+    }
+
+    // 레벨업 보상 처리 헬퍼
+    private PetStatusDto.LevelUpReward handleLevelUpReward(Long userId, int levelUps, int newLevel) {
+        if (levelUps <= 0) return null;
+
+        var rewardResult = coinService.giveLevelUpReward(userId, newLevel);
+        return PetStatusDto.LevelUpReward.builder()
+                .amount((long) rewardResult.get("amount"))
+                .newLevel(newLevel)
+                .totalCoins((long) rewardResult.get("coins"))
                 .build();
     }
 
@@ -61,15 +81,15 @@ public class PetService {
         PetStatus pet = getOrCreatePetStatus(userId);
 
         long expReward = 30 + random.nextInt(21); // 30~50
-        pet.addExp(expReward);
+        int levelUps = pet.addExp(expReward);
         pet.resetAffection();
 
-        // 명시적으로 저장 (낙관적 락으로 충돌 방지, 실패 시 재시도)
         petStatusRepository.save(pet);
 
         System.out.println("🐾 [PetService] 쓰다듬기 완료 - EXP+" + expReward + " - User: " + userId);
 
-        return getPetStatusDto(userId);
+        PetStatusDto.LevelUpReward reward = handleLevelUpReward(userId, levelUps, pet.getLevel());
+        return getPetStatusDto(userId, reward);
     }
 
     // 감정 조각 수집: EXP+10, Sunlight+5
@@ -82,15 +102,15 @@ public class PetService {
     public PetStatusDto collectEmotionShard(Long userId) {
         PetStatus pet = getOrCreatePetStatus(userId);
 
-        pet.addExp(10);
+        int levelUps = pet.addExp(10);
         pet.addSunlight(5);
 
-        // 명시적으로 저장 (낙관적 락으로 충돌 방지, 실패 시 재시도)
         petStatusRepository.save(pet);
 
         System.out.println("💎 [PetService] 감정 조각 수집 - EXP+10, Sunlight+5 - User: " + userId);
 
-        return getPetStatusDto(userId);
+        PetStatusDto.LevelUpReward reward = handleLevelUpReward(userId, levelUps, pet.getLevel());
+        return getPetStatusDto(userId, reward);
     }
 
     // 채팅 시 30% 확률로 EXP 부여
@@ -103,12 +123,16 @@ public class PetService {
     public void onChatInteraction(Long userId) {
         if (random.nextInt(100) < 30) {
             PetStatus pet = getOrCreatePetStatus(userId);
-            pet.addExp(10);
+            int levelUps = pet.addExp(10);
 
-            // 명시적으로 저장 (낙관적 락으로 충돌 방지, 실패 시 재시도)
             petStatusRepository.save(pet);
 
             System.out.println("🎲 [PetService] 채팅 확률 EXP+10 - User: " + userId);
+
+            // 채팅에서도 레벨업 보상 지급 (결과는 사용하지 않지만 코인은 지급됨)
+            if (levelUps > 0) {
+                coinService.giveLevelUpReward(userId, pet.getLevel());
+            }
         }
     }
 

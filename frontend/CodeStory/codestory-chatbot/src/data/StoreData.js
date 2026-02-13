@@ -91,14 +91,14 @@ export const THEMES = [
     }
 ];
 
-// ─── 가구: 벽 선반 (Wall Shelf) ───
+// ─── 가구: 벽 선반 (Wall Shelf) ─── (Beta: 0원)
 export const SHELVES = [
     {
         id: 'shelf_wood',
         name: '나무 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 80,
+        price: 0,
         emoji: '📦',
         color: '#D7B896',
         colorLight: '#E8CBA8',
@@ -109,7 +109,7 @@ export const SHELVES = [
         name: '화이트 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 80,
+        price: 0,
         emoji: '🗄️',
         color: '#FFFFFF',
         colorLight: '#F8F8F8',
@@ -120,7 +120,7 @@ export const SHELVES = [
         name: '파스텔 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 100,
+        price: 0,
         emoji: '💝',
         color: '#FFB6C1',
         colorLight: '#FFC8D3',
@@ -131,7 +131,7 @@ export const SHELVES = [
         name: '민트 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 100,
+        price: 0,
         emoji: '🍃',
         color: '#98FF98',
         colorLight: '#B0FFB0',
@@ -142,7 +142,7 @@ export const SHELVES = [
         name: '라벤더 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 150,
+        price: 0,
         emoji: '💜',
         color: '#E6E6FA',
         colorLight: '#F0F0FF',
@@ -150,14 +150,14 @@ export const SHELVES = [
     }
 ];
 
-// ─── 가구: 무드등 (Mood Light) ───
+// ─── 가구: 무드등 (Mood Light) ─── (Beta: 0원)
 export const LIGHTS = [
     {
         id: 'light_warm',
         name: '웜 무드등',
         type: 'light',
         category: 'furniture',
-        price: 100,
+        price: 0,
         emoji: '💡',
         shadeColor: '#FFF8DC',
         shadeColorDark: '#FFE4B5',
@@ -169,7 +169,7 @@ export const LIGHTS = [
         name: '핑크 무드등',
         type: 'light',
         category: 'furniture',
-        price: 100,
+        price: 0,
         emoji: '💖',
         shadeColor: '#FFB6C1',
         shadeColorDark: '#FF69B4',
@@ -181,7 +181,7 @@ export const LIGHTS = [
         name: '민트 무드등',
         type: 'light',
         category: 'furniture',
-        price: 120,
+        price: 0,
         emoji: '🌿',
         shadeColor: '#98FF98',
         shadeColorDark: '#7FFF7F',
@@ -193,7 +193,7 @@ export const LIGHTS = [
         name: '블루 무드등',
         type: 'light',
         category: 'furniture',
-        price: 120,
+        price: 0,
         emoji: '💙',
         shadeColor: '#ADD8E6',
         shadeColorDark: '#87CEEB',
@@ -205,7 +205,7 @@ export const LIGHTS = [
         name: '레인보우 무드등',
         type: 'light',
         category: 'furniture',
-        price: 180,
+        price: 0,
         emoji: '🌈',
         shadeColor: '#FFD700',
         shadeColorDark: '#FFA500',
@@ -214,14 +214,14 @@ export const LIGHTS = [
     }
 ];
 
-// ─── 가구: 거대한 화분 (Giant Pot) ───
+// ─── 가구: 거대한 화분 (Giant Pot) ─── (Beta: 0원)
 export const POTS = [
     {
         id: 'pot_cactus',
         name: '선인장 화분',
         type: 'pot',
         category: 'furniture',
-        price: 90,
+        price: 0,
         emoji: '🌵',
         potColor: '#D2691E',
         plantColor: '#228B22',
@@ -232,7 +232,7 @@ export const POTS = [
         name: '몬스테라 화분',
         type: 'pot',
         category: 'furniture',
-        price: 110,
+        price: 0,
         emoji: '🌿',
         potColor: '#8B4513',
         plantColor: '#2E8B57',
@@ -243,7 +243,7 @@ export const POTS = [
         name: '꽃 화분',
         type: 'pot',
         category: 'furniture',
-        price: 100,
+        price: 0,
         emoji: '🌺',
         potColor: '#FF69B4',
         plantColor: '#FF1493',
@@ -254,7 +254,7 @@ export const POTS = [
         name: '라벤더 화분',
         type: 'pot',
         category: 'furniture',
-        price: 130,
+        price: 0,
         emoji: '💜',
         potColor: '#DDA0DD',
         plantColor: '#9370DB',
@@ -265,7 +265,7 @@ export const POTS = [
         name: '장미 화분',
         type: 'pot',
         category: 'furniture',
-        price: 150,
+        price: 0,
         emoji: '🌹',
         potColor: '#8B0000',
         plantColor: '#DC143C',
@@ -273,14 +273,14 @@ export const POTS = [
     }
 ];
 
-// ─── 가구: 바닥 방석 (Floor Cushion) ───
+// ─── 가구: 바닥 방석 (Floor Cushion) ─── (Beta: 0원)
 export const CUSHIONS = [
     {
         id: 'cushion_pink',
         name: '핑크 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 70,
+        price: 0,
         emoji: '💗',
         color: '#FFC0CB',
         colorDark: '#FFB6C1',
@@ -291,7 +291,7 @@ export const CUSHIONS = [
         name: '블루 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 70,
+        price: 0,
         emoji: '💙',
         color: '#87CEEB',
         colorDark: '#6495ED',
@@ -302,7 +302,7 @@ export const CUSHIONS = [
         name: '퍼플 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 80,
+        price: 0,
         emoji: '💜',
         color: '#DA70D6',
         colorDark: '#BA55D3',
@@ -313,7 +313,7 @@ export const CUSHIONS = [
         name: '옐로우 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 100,
+        price: 0,
         emoji: '💛',
         color: '#FFD700',
         colorDark: '#FFA500',
@@ -324,7 +324,7 @@ export const CUSHIONS = [
         name: '민트 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 120,
+        price: 0,
         emoji: '💚',
         color: '#98FF98',
         colorDark: '#7FFF7F',

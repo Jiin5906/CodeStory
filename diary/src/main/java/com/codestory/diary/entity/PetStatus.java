@@ -64,11 +64,13 @@ public class PetStatus {
         return (long) (100 * Math.pow(level, 1.5));
     }
 
-    // EXP 추가 후 레벨업 체크
-    public void addExp(long amount) {
+    // EXP 추가 후 레벨업 체크 (반환값: 레벨업 횟수)
+    public int addExp(long amount) {
         this.exp += amount;
+        int oldLevel = this.level;
         checkAndLevelUp();
         updateEvolutionStage();
+        return this.level - oldLevel;
     }
 
     public void addSunlight(long amount) {

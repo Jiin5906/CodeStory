@@ -29,8 +29,8 @@ const AUTO_SAVE_INTERVAL_MS = 30000; // 30초
 const FORCE_SLEEP_THRESHOLD = 10; // 수면 게이지 10% 이하
 const INACTIVITY_TIME_MS = 300000; // 5분 동안 입력 없으면
 
-// 자동 수면 (비활동 30분)
-const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 120000 : 1800000; // 2분 or 30분
+// 자동 수면 (비활동 5시간)
+const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 300000 : 18000000; // 5분 or 5시간
 
 // 쓰다듬기 Lock 유지 시간
 const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
@@ -76,10 +76,15 @@ export const PetProvider = ({ children }) => {
     const [sleepGauge, setSleepGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.SLEEP, 100));
     const [hungerGauge, setHungerGauge] = useState(() => loadGaugeFromStorage(STORAGE_KEYS.HUNGER, 50));
 
-    // 수면 시스템 상태
+    // 수면 시스템 상태 (새로고침 시 비활동 시간 기반으로 수면 여부 판단)
     const [isSleeping, setIsSleeping] = useState(() => {
         const stored = localStorage.getItem(STORAGE_KEYS.IS_SLEEPING);
-        return stored === 'true';
+        if (stored !== 'true') return false;
+        // 마지막 상호작용 시간 확인: 임계값 초과 시에만 수면 유지
+        const lastTime = localStorage.getItem(STORAGE_KEYS.LAST_INTERACTION);
+        if (!lastTime) return false;
+        const elapsed = Date.now() - parseInt(lastTime);
+        return elapsed >= AUTO_SLEEP_INACTIVITY_MS;
     });
     const [moodLightOn, setMoodLightOn] = useState(() => {
         const stored = localStorage.getItem(STORAGE_KEYS.MOOD_LIGHT_ON);
@@ -259,12 +264,18 @@ export const PetProvider = ({ children }) => {
 
             // CRITICAL: affectionGauge는 서버 응답으로 덮어쓰지 않고 100% 유지
             if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
+
+            // 레벨업 보상 토스트
+            if (data.levelUpReward) {
+                showCoinToast(data.levelUpReward.amount);
+                setCoins(data.levelUpReward.totalCoins);
+            }
         } catch (e) {
             console.error('[AffectionComplete] API 호출 실패:', e);
         } finally {
             setIsApiLoading(false);
         }
-    }, [isApiLoading]);
+    }, [isApiLoading, showCoinToast]);
 
     // ─── 감정 조각 수집 (Bug A 수정: handleAction 래퍼 제거) ───
     const handleCollectShard = useCallback(async (userId, shardId) => {
@@ -278,10 +289,16 @@ export const PetProvider = ({ children }) => {
             if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
             // 감정 조각 수집 코인 보상
             triggerShardReward();
+
+            // 레벨업 보상 토스트
+            if (data.levelUpReward) {
+                showCoinToast(data.levelUpReward.amount);
+                setCoins(data.levelUpReward.totalCoins);
+            }
         } catch (e) {
             console.error('[handleCollectShard] API 호출 실패:', e);
         }
-    }, [triggerShardReward]);
+    }, [triggerShardReward, showCoinToast]);
 
     // ─── 감정 조각 생성 ───
     const spawnEmotionShard = useCallback((emotion) => {

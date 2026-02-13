@@ -23,4 +23,17 @@ public class PetStatusDto {
     private double affectionGauge;
     private double energyGauge;
     private java.time.LocalDateTime lastUpdate;
+
+    // 레벨업 보상 정보 (레벨업 발생 시에만 값 세팅)
+    private LevelUpReward levelUpReward;
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LevelUpReward {
+        private long amount;
+        private int newLevel;
+        private long totalCoins;
+    }
 }

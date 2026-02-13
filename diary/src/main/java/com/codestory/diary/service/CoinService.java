@@ -119,6 +119,20 @@ public class CoinService {
         return Map.of("userId", userId, "coins", member.getCoins(), "rewarded", true, "amount", DIARY_REWARD);
     }
 
+    // 레벨업 보상: 100 + (level - 1) * 10
+    @Transactional
+    public Map<String, Object> giveLevelUpReward(Long userId, int newLevel) {
+        long reward = 100L + ((long)(newLevel - 1) * 10);
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        member.addCoins(reward);
+        memberRepository.save(member);
+
+        System.out.println("🎉 [CoinService] 레벨업 보상 +" + reward + "원 (Lv." + newLevel + ") - User: " + userId);
+
+        return Map.of("userId", userId, "coins", member.getCoins(), "rewarded", true, "amount", reward, "level", newLevel);
+    }
+
     // 코인 사용 (상점 구매 등)
     @Transactional
     @Retryable(
