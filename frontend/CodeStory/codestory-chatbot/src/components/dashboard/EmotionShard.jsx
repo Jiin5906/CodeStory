@@ -16,11 +16,16 @@ function ShardIcon({ emotion, size }) {
 }
 
 export default function EmotionShard({ shard, userId }) {
-    const { handleCollectShard, feedEmotion } = usePet();
+    const { handleCollectShard, feedEmotion, isSleeping, showSleepToast } = usePet();
     const [isCollecting, setIsCollecting] = useState(false);
 
     const handleClick = () => {
         if (isCollecting) return;
+        // 수면 중 차단
+        if (isSleeping) {
+            showSleepToast();
+            return;
+        }
         setIsCollecting(true);
         feedEmotion(shard.emotion, 25);
         handleCollectShard(userId, shard.id);

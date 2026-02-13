@@ -38,7 +38,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     // 능동적 대화 타이머 간격 (개발: 10초, 배포: 10분)
     const ALIVE_INTERVAL_MS = 600000; // 10분 (배포용)
 
-    const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast } = usePet();
+    const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast, isSleeping, sleepToast, showSleepToast } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
 
     // 장착된 테마 (equippedItems 변경 시 자동 재계산)
@@ -176,8 +176,15 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
 
-    // 채팅 및 AI 응답 핸들러
+    // 채팅 및 AI 응답 핸들러 (수면 중 차단)
     const handleWrite = async (content) => {
+        // 수면 중: API 미호출, 말풍선에 수면 메시지 표시
+        if (isSleeping) {
+            setAiResponse('새근새근 자는 중...');
+            showSleepToast();
+            return;
+        }
+
         // 사용자 인터랙션 시 능동적 대화 타이머 리셋
         resetAliveTimer();
 
@@ -646,6 +653,15 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                 <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[200] animate-bounce">
                     <div className="rounded-full bg-amber-400 text-white px-5 py-2 shadow-lg text-sm font-bold">
                         {coinToast}
+                    </div>
+                </div>
+            )}
+
+            {/* 수면 토스트 (2단계) */}
+            {sleepToast && (
+                <div className="absolute top-36 left-1/2 -translate-x-1/2 z-[200] animate-bounce">
+                    <div className="rounded-full bg-indigo-500 text-white px-5 py-2 shadow-lg text-sm font-bold">
+                        {sleepToast}
                     </div>
                 </div>
             )}

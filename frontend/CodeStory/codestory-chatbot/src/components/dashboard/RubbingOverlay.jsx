@@ -4,13 +4,17 @@ import { motion } from 'framer-motion';
 import { usePet } from '../../context/PetContext';
 
 export default function RubbingOverlay({ userId, onShowFullAnimation }) {
+    // eslint-disable-next-line no-unused-vars
     const {
         isRubbing,
         setIsRubbing,
         setAffectionGauge,
         isAffectionLocked,
         setIsAffectionLocked,
-        handleAffectionComplete
+        handleAffectionComplete,
+        isSleeping,
+        showSleepToast,
+        isTouchOnCooldown
     } = usePet();
     const lastMoveTimeRef = useRef(0);
     const hasReachedMaxRef = useRef(false); // 100% 도달 여부 추적
@@ -20,6 +24,17 @@ export default function RubbingOverlay({ userId, onShowFullAnimation }) {
     const GAUGE_INCREMENT = 2; // 드래그 시 2%씩 증가
 
     const handleMove = useCallback(() => {
+        // 수면 중 차단
+        if (isSleeping) {
+            showSleepToast();
+            return;
+        }
+
+        // 쿨타임 중 차단
+        if (isTouchOnCooldown()) {
+            return;
+        }
+
         // Lock 중이면 포화 애니메이션 트리거
         if (isAffectionLocked) {
             if (onShowFullAnimation) {
@@ -43,12 +58,11 @@ export default function RubbingOverlay({ userId, onShowFullAnimation }) {
                 hasReachedMaxRef.current = true;
                 setIsAffectionLocked(true);
                 handleAffectionComplete(userId);
-                console.log('💕 [RubbingOverlay] 게이지 100% 도달 → EXP 지급 (1회만)');
             }
 
             return next;
         });
-    }, [userId, isAffectionLocked, setAffectionGauge, setIsAffectionLocked, handleAffectionComplete, onShowFullAnimation]);
+    }, [userId, isAffectionLocked, setAffectionGauge, setIsAffectionLocked, handleAffectionComplete, onShowFullAnimation, isSleeping, showSleepToast, isTouchOnCooldown]);
 
     const startRubbing = useCallback(() => {
         setIsRubbing(true);

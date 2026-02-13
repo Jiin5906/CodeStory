@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Lottie from 'lottie-react';
 import mongleIDLE from '../../assets/mongleIDLE.json';
 import mongleThinking from '../../assets/mongleThinking.json';
@@ -10,8 +10,11 @@ import mongleRubbing from '../../assets/mongleRubbing.json';
 import mongleCold from '../../assets/mongleCold.json';
 import mongleWarm from '../../assets/mongleWarm.json';
 import mongleSLEEPING from '../../assets/mongleSLEEPING.json';
+// mongleTired는 mongleAwake로 대체됨
+// eslint-disable-next-line no-unused-vars
 import mongleTired from '../../assets/mongleTired.json';
 import mongleFull from '../../assets/mongleFull.json';
+import mongleAwake from '../../assets/mongleAwake.json';
 import { usePet } from '../../context/PetContext';
 import RubbingOverlay from './RubbingOverlay';
 import EmotionShard from './EmotionShard';
@@ -21,6 +24,8 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
     const [currentAnimation, setCurrentAnimation] = useState(mongleIDLE);
     const [justWokeUp, setJustWokeUp] = useState(false);
     const [showFullAnimation, setShowFullAnimation] = useState(false);
+    const prevSleepingRef = useRef(true);
+    // eslint-disable-next-line no-unused-vars
     const { isRubbing, emotionShards, spawnEmotionShard, isSleeping, moodLightOn, sleepGauge } = usePet();
 
     // 포화 애니메이션 트리거 핸들러
@@ -29,14 +34,16 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
         setTimeout(() => setShowFullAnimation(false), 2000);
     };
 
-    // 기상 시 Tired 애니메이션 관리
+    // 기상 감지: isSleeping이 true→false로 전환될 때
     useEffect(() => {
-        if (!isSleeping && !moodLightOn && sleepGauge < 70) {
+        if (prevSleepingRef.current && !isSleeping) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setJustWokeUp(true);
             const timer = setTimeout(() => setJustWokeUp(false), 3000);
             return () => clearTimeout(timer);
         }
-    }, [isSleeping, moodLightOn, sleepGauge]);
+        prevSleepingRef.current = isSleeping;
+    }, [isSleeping]);
 
     // 0. 애니메이션 전환 로직 (확장됨)
     useEffect(() => {
@@ -45,9 +52,9 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
             setCurrentAnimation(mongleSLEEPING);
             return;
         }
-        // 2. 방금 깬 상태 (수면 게이지 70% 미만): Tired 애니메이션
+        // 2. 방금 깬 상태: Awake 애니메이션 (3초 후 IDLE)
         if (justWokeUp) {
-            setCurrentAnimation(mongleTired);
+            setCurrentAnimation(mongleAwake);
             return;
         }
         // 3. 포화 상태 (쓰다듬기 게이지 100%): mongleFull

@@ -7,14 +7,14 @@ const PetContext = createContext();
 const LOCK_THRESHOLD = 100;   // 100%에 도달하면 Lock
 const UNLOCK_THRESHOLD = 30;  // 30% 이하이면 Unlock
 
-// 게이지 감소 속도 설정
+// 게이지 감소 속도 설정 (4단계 밸런싱: 5분→10분 / 2시간→4시간)
 const IS_DEV_MODE = true; // 배포 시 false로 변경
-const TOTAL_DECAY_TIME_MS = IS_DEV_MODE ? 300000 : 7200000; // 5분 or 2시간
+const TOTAL_DECAY_TIME_MS = IS_DEV_MODE ? 600000 : 14400000; // 10분 or 4시간
 const DECAY_INTERVAL_MS = 10000; // 10초마다 체크
 const DECAY_AMOUNT = (100 / (TOTAL_DECAY_TIME_MS / DECAY_INTERVAL_MS));
 
-// 수면 게이지 설정
-const AWAKE_TIME_MS = IS_DEV_MODE ? 600000 : 61200000; // 10분 or 17시간 (깨어있을 때)
+// 수면 게이지 설정 (4단계 밸런싱: 10분→15분 / 17시간→20시간)
+const AWAKE_TIME_MS = IS_DEV_MODE ? 900000 : 72000000; // 15분 or 20시간 (깨어있을 때)
 const SLEEP_TIME_MS = IS_DEV_MODE ? 300000 : 25200000; // 5분 or 7시간 (잘 때)
 const SLEEP_DECAY_AMOUNT = (100 / (AWAKE_TIME_MS / DECAY_INTERVAL_MS));
 const SLEEP_RECOVERY_AMOUNT = (100 / (SLEEP_TIME_MS / DECAY_INTERVAL_MS));
@@ -29,8 +29,16 @@ const AUTO_SAVE_INTERVAL_MS = 30000; // 30초
 const FORCE_SLEEP_THRESHOLD = 10; // 수면 게이지 10% 이하
 const INACTIVITY_TIME_MS = 300000; // 5분 동안 입력 없으면
 
+// 자동 수면 (비활동 30분)
+const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 120000 : 1800000; // 2분 or 30분
+
 // 쓰다듬기 Lock 유지 시간
 const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
+
+// ─── 쿨타임 상수 (4단계) ───
+const FEED_COOLDOWN_MS = IS_DEV_MODE ? 60000 : 900000;   // 1분 or 15분
+const TOUCH_COOLDOWN_MS = IS_DEV_MODE ? 60000 : 900000;  // 1분 or 15분
+const WAKE_COOLDOWN_MS = IS_DEV_MODE ? 120000 : 1800000; // 2분 or 30분
 
 // localStorage 키
 const STORAGE_KEYS = {
@@ -43,6 +51,9 @@ const STORAGE_KEYS = {
     LAST_INTERACTION: 'pet_last_interaction_time',
     EMOTION_SHARDS: 'pet_emotion_shards',
     AFFECTION_LOCK_UNTIL: 'pet_affection_lock_until',
+    FEED_COOLDOWN_UNTIL: 'pet_feed_cooldown_until',
+    TOUCH_COOLDOWN_UNTIL: 'pet_touch_cooldown_until',
+    WAKE_COOLDOWN_UNTIL: 'pet_wake_cooldown_until',
 };
 
 // localStorage 유틸리티
@@ -52,6 +63,15 @@ const loadGaugeFromStorage = (key, defaultValue = 50) => {
         return stored !== null ? parseFloat(stored) : defaultValue;
     } catch {
         return defaultValue;
+    }
+};
+
+const loadTimestampFromStorage = (key) => {
+    try {
+        const stored = localStorage.getItem(key);
+        return stored ? parseInt(stored) : 0;
+    } catch {
+        return 0;
     }
 };
 
@@ -99,13 +119,22 @@ export const PetProvider = ({ children }) => {
     const [coins, setCoins] = useState(0);
     const [coinToast, setCoinToast] = useState(null);
 
-    // ✅ 동시성 제어 플래그
+    // ━━━ 수면 토스트 (2단계) ━━━
+    const [sleepToast, setSleepToast] = useState(null);
+
+    // ━━━ 쿨타임 상태 (4단계) ━━━
+    const [feedCooldownUntil, setFeedCooldownUntil] = useState(() => loadTimestampFromStorage(STORAGE_KEYS.FEED_COOLDOWN_UNTIL));
+    const [touchCooldownUntil, setTouchCooldownUntil] = useState(() => loadTimestampFromStorage(STORAGE_KEYS.TOUCH_COOLDOWN_UNTIL));
+    const [wakeCooldownUntil, setWakeCooldownUntil] = useState(() => loadTimestampFromStorage(STORAGE_KEYS.WAKE_COOLDOWN_UNTIL));
+
+    // 동시성 제어 플래그
     const [isApiLoading, setIsApiLoading] = useState(false);
 
     // Refs
     const decayTimerRef = useRef(null);
     const autoSaveTimerRef = useRef(null);
     const inactivityTimerRef = useRef(null);
+    const autoSleepTimerRef = useRef(null);
     const gaugesRef = useRef({ affectionGauge, energyGauge, sleepGauge, hungerGauge });
     const prevGaugesRef = useRef({ affectionGauge: 0, hungerGauge: 0, sleepGauge: 0 });
 
@@ -120,6 +149,40 @@ export const PetProvider = ({ children }) => {
         return currentLocked;
     }, []);
 
+    // ─── 수면 토스트 표시 (2단계) ───
+    const showSleepToast = useCallback((message) => {
+        setSleepToast(message || '몽글이가 자고 있어요. 램프를 켜서 깨워주세요.');
+        setTimeout(() => setSleepToast(null), 3000);
+    }, []);
+
+    // ─── 쿨타임 헬퍼 (4단계) ───
+    const isFeedOnCooldown = useCallback(() => {
+        return feedCooldownUntil > Date.now();
+    }, [feedCooldownUntil]);
+
+    const isTouchOnCooldown = useCallback(() => {
+        return touchCooldownUntil > Date.now();
+    }, [touchCooldownUntil]);
+
+    const isWakeOnCooldown = useCallback(() => {
+        return wakeCooldownUntil > Date.now();
+    }, [wakeCooldownUntil]);
+
+    const startFeedCooldown = useCallback(() => {
+        const until = Date.now() + FEED_COOLDOWN_MS;
+        setFeedCooldownUntil(until);
+    }, []);
+
+    const startTouchCooldown = useCallback(() => {
+        const until = Date.now() + TOUCH_COOLDOWN_MS;
+        setTouchCooldownUntil(until);
+    }, []);
+
+    const startWakeCooldown = useCallback(() => {
+        const until = Date.now() + WAKE_COOLDOWN_MS;
+        setWakeCooldownUntil(until);
+    }, []);
+
     // ─── 서버에서 PetStatus 조회 및 로컬 state 동기화 ───
     const fetchPetStatus = useCallback(async (userId) => {
         if (!userId) return;
@@ -128,12 +191,12 @@ export const PetProvider = ({ children }) => {
             if (data) {
                 setPetStatus(data);
 
-                // ✅ CRITICAL: Lock이 유효한 경우 affectionGauge는 서버 값으로 덮어쓰지 않음
+                // CRITICAL: Lock이 유효한 경우 affectionGauge는 서버 값으로 덮어쓰지 않음
                 const storedLockUntil = localStorage.getItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL);
                 const isLockActive = storedLockUntil && parseInt(storedLockUntil) > Date.now();
 
                 if (isLockActive) {
-                    console.log('💕 [fetchPetStatus] Lock 활성 상태 - affectionGauge 서버 동기화 건너뜀');
+                    console.log('[fetchPetStatus] Lock 활성 상태 - affectionGauge 서버 동기화 건너뜀');
                 } else {
                     if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
                 }
@@ -224,51 +287,27 @@ export const PetProvider = ({ children }) => {
         }
     }, [showCoinToast]);
 
-    // ─── 공통 액션 핸들러 (동시성 제어 + 서버 동기화) ───
-    const handleAction = useCallback(async (apiCall) => {
-        // ✅ 중복 호출 방지
-        if (isApiLoading) {
-            console.log('⚠️ [handleAction] 이미 API 호출 중이므로 무시');
+    // ─── 쓰다듬기 완료 (쿨타임 적용) ───
+    const handleAffectionComplete = useCallback(async (userId) => {
+        // 쿨타임 체크
+        if (touchCooldownUntil > Date.now()) {
+            console.log('[AffectionComplete] 쿨타임 중 - 무시');
             return;
         }
 
-        setIsApiLoading(true);
-        try {
-            const data = await apiCall();
-            setPetStatus(data);
-
-            // ✅ 서버 응답으로 로컬 게이지 동기화
-            if (data.affectionGauge !== undefined) setAffectionGauge(data.affectionGauge);
-            if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
-        } catch (e) {
-            console.error('❌ [handleAction] API 호출 실패:', e);
-
-            // ✅ 409 Conflict 발생 시 즉시 서버 데이터로 동기화
-            if (e.response?.status === 409) {
-                console.log('🚨 [handleAction] 409 Conflict 감지! 서버 데이터로 즉시 동기화');
-                const user = JSON.parse(localStorage.getItem('diaryUser'));
-                if (user?.id) {
-                    await fetchPetStatus(user.id);
-                }
-            }
-        } finally {
-            setIsApiLoading(false);
-        }
-    }, [isApiLoading, fetchPetStatus]);
-
-    // ─── 쓰다듬기 완료 ───
-    const handleAffectionComplete = useCallback(async (userId) => {
         // Lock 시간 설정
         const lockUntil = Date.now() + AFFECTION_LOCK_DURATION_MS;
         setAffectionLockUntil(lockUntil);
-        console.log(`💕 [AffectionLock] Lock 설정됨 (${AFFECTION_LOCK_DURATION_MS / 1000}초 동안)`);
 
         // 게이지를 100%로 설정
         setAffectionGauge(100);
 
+        // 쿨타임 시작
+        startTouchCooldown();
+
         // 서버 API 호출 (동시성 제어)
         if (isApiLoading) {
-            console.log('⚠️ [AffectionComplete] 이미 API 호출 중이므로 무시');
+            console.log('[AffectionComplete] 이미 API 호출 중이므로 무시');
             return;
         }
 
@@ -277,28 +316,31 @@ export const PetProvider = ({ children }) => {
             const data = await petApi.affectionComplete(userId);
             setPetStatus(data);
 
-            // ✅ CRITICAL: affectionGauge는 서버 응답으로 덮어쓰지 않고 100% 유지
-            // 다른 게이지들만 동기화
+            // CRITICAL: affectionGauge는 서버 응답으로 덮어쓰지 않고 100% 유지
             if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
-
-            console.log('💕 [AffectionComplete] 완료 - 게이지 100% 유지');
         } catch (e) {
-            console.error('❌ [AffectionComplete] API 호출 실패:', e);
+            console.error('[AffectionComplete] API 호출 실패:', e);
         } finally {
             setIsApiLoading(false);
         }
-    }, [isApiLoading]);
+    }, [isApiLoading, touchCooldownUntil, startTouchCooldown]);
 
-    // ─── 감정 조각 수집 ───
-    const handleCollectShard = useCallback((userId, shardId) => {
-        handleAction(async () => {
+    // ─── 감정 조각 수집 (Bug A 수정: handleAction 래퍼 제거) ───
+    const handleCollectShard = useCallback(async (userId, shardId) => {
+        // Bug A 수정: handleAction을 사용하지 않고 직접 API 호출
+        // affectionGauge와 hungerGauge는 로컬에서 관리하므로 서버 응답으로 덮어쓰지 않음
+        try {
             const data = await petApi.collectShard(userId);
             setEmotionShards(prev => prev.filter(s => s.id !== shardId));
+            setPetStatus(data);
+            // energyGauge만 서버와 동기화
+            if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
             // 감정 조각 수집 코인 보상
             triggerShardReward();
-            return data;
-        });
-    }, [handleAction, triggerShardReward]);
+        } catch (e) {
+            console.error('[handleCollectShard] API 호출 실패:', e);
+        }
+    }, [triggerShardReward]);
 
     // ─── 감정 조각 생성 ───
     const spawnEmotionShard = useCallback((emotion) => {
@@ -315,32 +357,50 @@ export const PetProvider = ({ children }) => {
         }, 10000);
     }, []);
 
-    // ─── 무드등 토글 ───
+    // ─── 무드등 토글 (기상 쿨타임 적용) ───
     const toggleMoodLight = useCallback(() => {
         setMoodLightOn(prev => {
             const newValue = !prev;
             if (newValue) {
+                // 기상 쿨타임 체크
+                if (wakeCooldownUntil > Date.now()) {
+                    console.log('[MoodLight] 기상 쿨타임 중 - 무시');
+                    return prev; // 변경하지 않음
+                }
                 // 무드등 켜기 (기상)
                 setIsSleeping(false);
-                console.log('💡 [MoodLight] 무드등 켜짐 - 몽글이 기상');
+                startWakeCooldown();
+                console.log('[MoodLight] 무드등 켜짐 - 몽글이 기상');
             } else {
                 // 무드등 끄기 (수면)
                 setIsSleeping(true);
-                console.log('💡 [MoodLight] 무드등 꺼짐 - 몽글이 수면');
+                console.log('[MoodLight] 무드등 꺼짐 - 몽글이 수면');
             }
             return newValue;
         });
         setLastInteractionTime(Date.now());
-    }, []);
+    }, [wakeCooldownUntil, startWakeCooldown]);
 
-    // ─── 배고픔 게이지 증가 (식사) ───
+    // ─── 배고픔 게이지 증가 (식사) + 수면/쿨타임 체크 ───
     const feedEmotion = useCallback((emotionType, amount = 25) => {
+        // 수면 중 차단
+        if (isSleeping) {
+            showSleepToast();
+            return;
+        }
+        // 쿨타임 체크
+        if (feedCooldownUntil > Date.now()) {
+            console.log('[feedEmotion] 쿨타임 중 - 무시');
+            return;
+        }
+
         setHungerGauge(prev => {
             const next = Math.min(100, prev + amount);
             return next;
         });
+        startFeedCooldown();
         setLastInteractionTime(Date.now());
-    }, []);
+    }, [isSleeping, feedCooldownUntil, showSleepToast, startFeedCooldown]);
 
     // ─── 사용자 상호작용 (마지막 시간 업데이트) ───
     const updateInteraction = useCallback(() => {
@@ -376,6 +436,13 @@ export const PetProvider = ({ children }) => {
         }
     }, [affectionLockUntil]);
 
+    // ─── 쿨타임 localStorage 동기화 ───
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEYS.FEED_COOLDOWN_UNTIL, feedCooldownUntil);
+        localStorage.setItem(STORAGE_KEYS.TOUCH_COOLDOWN_UNTIL, touchCooldownUntil);
+        localStorage.setItem(STORAGE_KEYS.WAKE_COOLDOWN_UNTIL, wakeCooldownUntil);
+    }, [feedCooldownUntil, touchCooldownUntil, wakeCooldownUntil]);
+
     // ─── 감정 조각 localStorage 동기화 ───
     useEffect(() => {
         localStorage.setItem(STORAGE_KEYS.EMOTION_SHARDS, JSON.stringify(emotionShards));
@@ -391,7 +458,7 @@ export const PetProvider = ({ children }) => {
         const checkLockExpiry = () => {
             const now = Date.now();
             if (now >= affectionLockUntil) {
-                console.log('💕 [AffectionLock] Lock 해제됨 (시간 경과)');
+                console.log('[AffectionLock] Lock 해제됨 (시간 경과)');
                 setIsAffectionLocked(false);
                 setAffectionLockUntil(null);
             } else {
@@ -399,10 +466,7 @@ export const PetProvider = ({ children }) => {
             }
         };
 
-        // 즉시 체크
         checkLockExpiry();
-
-        // 1초마다 체크
         const interval = setInterval(checkLockExpiry, 1000);
         return () => clearInterval(interval);
     }, [affectionLockUntil]);
@@ -436,9 +500,7 @@ export const PetProvider = ({ children }) => {
         decayTimerRef.current = setInterval(() => {
             // 기존 게이지들 (깨어 있을 때만 감소)
             if (!isSleeping) {
-                // ✅ 쓰다듬기 게이지: Lock 상태가 아닐 때만 감소
                 setAffectionGauge(prev => {
-                    // Lock 상태면 감소하지 않음
                     if (isAffectionLocked) return prev;
                     const next = Math.max(0, prev - DECAY_AMOUNT);
                     setIsAffectionLocked(locked => checkLock(next, locked));
@@ -446,7 +508,6 @@ export const PetProvider = ({ children }) => {
                 });
 
                 setEnergyGauge(prev => {
-                    // Lock 상태면 감소하지 않음
                     if (isEnergyLocked) return prev;
                     const next = Math.max(0, prev - DECAY_AMOUNT);
                     setIsEnergyLocked(locked => checkLock(next, locked));
@@ -474,10 +535,9 @@ export const PetProvider = ({ children }) => {
         };
     }, [checkLock, isSleeping, isAffectionLocked, isEnergyLocked]);
 
-    // ─── 강제 수면 체크 (비활동 시) ───
+    // ─── 강제 수면 체크 (수면게이지 10% 이하 + 비활동 5분) ───
     useEffect(() => {
-        if (isSleeping || moodLightOn) {
-            // 자는 중이거나 무드등이 켜져있으면 타이머 초기화
+        if (isSleeping) {
             if (inactivityTimerRef.current) {
                 clearTimeout(inactivityTimerRef.current);
                 inactivityTimerRef.current = null;
@@ -485,11 +545,10 @@ export const PetProvider = ({ children }) => {
             return;
         }
 
-        // 수면 게이지가 10% 이하이고 5분간 입력 없으면 강제 수면
         const checkForceSleep = () => {
             const timeSinceLastInteraction = Date.now() - lastInteractionTime;
             if (sleepGauge <= FORCE_SLEEP_THRESHOLD && timeSinceLastInteraction >= INACTIVITY_TIME_MS) {
-                console.log('😴 [ForceSleep] 강제 수면 진입');
+                console.log('[ForceSleep] 강제 수면 진입 (수면게이지 10% 이하)');
                 setMoodLightOn(false);
                 setIsSleeping(true);
             }
@@ -502,22 +561,45 @@ export const PetProvider = ({ children }) => {
                 clearTimeout(inactivityTimerRef.current);
             }
         };
-    }, [isSleeping, moodLightOn, sleepGauge, lastInteractionTime]);
+    }, [isSleeping, sleepGauge, lastInteractionTime]);
+
+    // ─── 자동 수면 (30분 비활동) ── 2단계 ───
+    useEffect(() => {
+        if (isSleeping) {
+            if (autoSleepTimerRef.current) {
+                clearTimeout(autoSleepTimerRef.current);
+                autoSleepTimerRef.current = null;
+            }
+            return;
+        }
+
+        const checkAutoSleep = () => {
+            const timeSinceLastInteraction = Date.now() - lastInteractionTime;
+            if (timeSinceLastInteraction >= AUTO_SLEEP_INACTIVITY_MS) {
+                console.log('[AutoSleep] 자동 수면 진입 (비활동 30분)');
+                setMoodLightOn(false);
+                setIsSleeping(true);
+            }
+        };
+
+        autoSleepTimerRef.current = setTimeout(checkAutoSleep, AUTO_SLEEP_INACTIVITY_MS);
+
+        return () => {
+            if (autoSleepTimerRef.current) {
+                clearTimeout(autoSleepTimerRef.current);
+            }
+        };
+    }, [isSleeping, lastInteractionTime]);
 
     // ─── 주기적 자동 저장 (30초마다) ───
     useEffect(() => {
         autoSaveTimerRef.current = setInterval(async () => {
-            // ✅ 사용자 액션 중이면 저장 건너뛰기
-            if (isApiLoading) {
-                console.log('💾 [AutoSave] API 호출 중이므로 건너뜀');
-                return;
-            }
+            if (isApiLoading) return;
 
             const user = JSON.parse(localStorage.getItem('diaryUser'));
             if (!user?.id) return;
 
             try {
-                // ✅ gaugesRef로 최신 값 읽기
                 const currentGauges = gaugesRef.current;
                 await petApi.saveGauges(user.id, {
                     affectionGauge: currentGauges.affectionGauge,
@@ -526,10 +608,8 @@ export const PetProvider = ({ children }) => {
                     hungerGauge: currentGauges.hungerGauge,
                     lastUpdate: new Date().toISOString()
                 });
-                console.log('💾 [AutoSave] 주기적 저장 완료');
             } catch (e) {
-                // ✅ 자동 저장 실패는 무시 (중요하지 않음)
-                console.warn('⚠️ [AutoSave] 저장 실패 (무시됨):', e.message);
+                console.warn('[AutoSave] 저장 실패 (무시됨):', e.message);
             }
         }, AUTO_SAVE_INTERVAL_MS);
 
@@ -574,7 +654,17 @@ export const PetProvider = ({ children }) => {
             spendCoins,
             triggerGaugeReward,
             triggerShardReward,
-            triggerDiaryReward
+            triggerDiaryReward,
+            // 2단계: 수면 토스트
+            sleepToast,
+            showSleepToast,
+            // 4단계: 쿨타임
+            feedCooldownUntil,
+            touchCooldownUntil,
+            wakeCooldownUntil,
+            isFeedOnCooldown,
+            isTouchOnCooldown,
+            isWakeOnCooldown,
         }}>
             {children}
         </PetContext.Provider>

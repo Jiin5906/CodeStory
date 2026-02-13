@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaHandSparkles, FaUtensils, FaMoon } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 
@@ -6,28 +6,39 @@ import { usePet } from '../../context/PetContext';
  * BottomControlBar — 다마고치 스타일 하단 컨트롤 바
  *
  * 3개의 정사각형 아이콘 버튼으로 게이지를 시각화합니다.
- * - 텍스트 제거, 아이콘만 표시
+ * - 퍼센트 수치 상시 표시
  * - 버튼 내부 배경색이 게이지 역할 (하단에서 위로 채워짐)
- * - 색상 로직:
- *   - Warning (<20%): Red + 흔들림
- *   - Normal (>=20%): Blue (몽글이 테마색)
- *   - Full (100%): Green + 반짝임
+ * - 쿨타임 카운트다운 오버레이
  */
 
-const ControlButton = ({ icon, value, locked, onClick, gtmKey }) => {
+const ControlButton = ({ icon, value, locked, onClick, gtmKey, cooldownUntil = 0 }) => {
     const clampedValue = Math.min(100, Math.max(0, value));
+    const [cooldownRemain, setCooldownRemain] = useState(() => {
+        if (!cooldownUntil || cooldownUntil <= Date.now()) return 0;
+        return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+    });
+
+    // 쿨타임 카운트다운
+    useEffect(() => {
+        if (!cooldownUntil || cooldownUntil <= Date.now()) return;
+        const interval = setInterval(() => {
+            const remain = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+            setCooldownRemain(remain);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [cooldownUntil]);
 
     // 색상 로직
     const getColor = () => {
         if (clampedValue >= 100) return 'bg-green-400';
         if (clampedValue < 20) return 'bg-red-400';
-        return 'bg-blue-400'; // 몽글이 테마색
+        return 'bg-blue-400';
     };
 
     // 애니메이션 로직
     const getAnimation = () => {
-        if (clampedValue >= 100) return 'animate-pulse'; // 반짝임
-        if (clampedValue < 20) return 'animate-shake'; // 흔들림
+        if (clampedValue >= 100) return 'animate-pulse';
+        if (clampedValue < 20) return 'animate-shake';
         return '';
     };
 
@@ -48,10 +59,26 @@ const ControlButton = ({ icon, value, locked, onClick, gtmKey }) => {
                 {icon}
             </div>
 
+            {/* 퍼센트 상시 표시 */}
+            <div className="absolute bottom-1 left-0 right-0 z-20 text-center">
+                <span className="text-[10px] font-bold text-white drop-shadow-md">
+                    {Math.round(clampedValue)}%
+                </span>
+            </div>
+
             {/* Lock 배지 */}
             {locked && (
                 <div className="absolute top-1 right-1 text-[8px] font-bold text-white bg-amber-500 px-1.5 py-0.5 rounded-full z-20">
                     Full
+                </div>
+            )}
+
+            {/* 쿨타임 오버레이 */}
+            {cooldownRemain > 0 && (
+                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 backdrop-blur-sm rounded-2xl">
+                    <span className="text-white font-bold text-sm drop-shadow-md">
+                        {cooldownRemain}s
+                    </span>
                 </div>
             )}
         </button>
@@ -64,6 +91,8 @@ const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
         hungerGauge,
         sleepGauge,
         isAffectionLocked,
+        touchCooldownUntil,
+        feedCooldownUntil,
     } = usePet();
 
     return (
@@ -78,8 +107,9 @@ const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
                     icon={<FaHandSparkles />}
                     value={affectionGauge}
                     locked={isAffectionLocked}
-                    onClick={() => {}} // 비활성 (드래그 인터랙션)
+                    onClick={() => {}}
                     gtmKey="control-button-affection"
+                    cooldownUntil={touchCooldownUntil}
                 />
 
                 {/* 식사 버튼 */}
@@ -89,6 +119,7 @@ const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
                     locked={hungerGauge >= 100}
                     onClick={onFeedClick}
                     gtmKey="control-button-hunger"
+                    cooldownUntil={feedCooldownUntil}
                 />
 
                 {/* 수면 버튼 */}

@@ -23,11 +23,24 @@ const SNAP_POINTS = {
     HALF: 120        // 채팅 + 버튼 (화면의 ~30% 이내)
 };
 
-// 액션 버튼 컴포넌트
-const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor }) => {
-    const [showPercent, setShowPercent] = useState(false);
-
+// 액션 버튼 컴포넌트 (퍼센트 상시 표시 + 쿨타임 오버레이)
+// eslint-disable-next-line no-unused-vars
+const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor, cooldownUntil = 0 }) => {
     const gaugeHeight = Math.min(100, Math.max(0, value));
+    const [cooldownRemain, setCooldownRemain] = useState(() => {
+        if (!cooldownUntil || cooldownUntil <= Date.now()) return 0;
+        return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+    });
+
+    // 쿨타임 카운트다운
+    useEffect(() => {
+        if (!cooldownUntil || cooldownUntil <= Date.now()) return;
+        const interval = setInterval(() => {
+            const remain = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+            setCooldownRemain(remain);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [cooldownUntil]);
 
     const getIconColor = () => {
         if (isHome) return 'text-white';
@@ -43,14 +56,6 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor,
 
     const handleClick = (e) => {
         e.stopPropagation();
-
-        if (!isHome && value < 100) {
-            setShowPercent(true);
-            setTimeout(() => {
-                setShowPercent(false);
-            }, 1500);
-        }
-
         onClick?.();
     };
 
@@ -82,11 +87,20 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor,
                 />
             </div>
 
-            {/* 퍼센트 오버레이 (클릭 시 또는 활성 상태) */}
-            {showPercent && !isHome && (
-                <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/30 backdrop-blur-sm rounded-xl">
-                    <span className="text-white font-bold text-sm drop-shadow-md">
+            {/* 퍼센트 상시 표시 */}
+            {!isHome && (
+                <div className="absolute bottom-0.5 left-0 right-0 z-20 text-center">
+                    <span className="text-[10px] font-bold text-white drop-shadow-md">
                         {Math.round(value)}%
+                    </span>
+                </div>
+            )}
+
+            {/* 쿨타임 오버레이 */}
+            {cooldownRemain > 0 && !isHome && (
+                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 backdrop-blur-sm rounded-xl">
+                    <span className="text-white font-bold text-xs drop-shadow-md">
+                        {cooldownRemain}s
                     </span>
                 </div>
             )}
@@ -106,7 +120,7 @@ const BottomSheet = ({
     const [input, setInput] = useState('');
 
     const sheetRef = useRef(null);
-    const { affectionGauge, hungerGauge, sleepGauge } = usePet();
+    const { affectionGauge, hungerGauge, sleepGauge, feedCooldownUntil, touchCooldownUntil, isSleeping, showSleepToast, feedEmotion } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
     const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
 
@@ -317,18 +331,25 @@ const BottomSheet = ({
                         <ActionButton
                             icon={FaHandSparkles}
                             value={affectionGauge}
-                            onClick={() => { }}
+                            onClick={() => {
+                                if (isSleeping) { showSleepToast(); return; }
+                            }}
                             accentColor={accentColor}
                             primaryColor={primaryColor}
                             buttonColor={buttonColor}
+                            cooldownUntil={touchCooldownUntil}
                         />
                         <ActionButton
                             icon={FaUtensils}
                             value={hungerGauge}
-                            onClick={() => { }}
+                            onClick={() => {
+                                if (isSleeping) { showSleepToast(); return; }
+                                feedEmotion('hunger', 25);
+                            }}
                             accentColor={accentColor}
                             primaryColor={primaryColor}
                             buttonColor={buttonColor}
+                            cooldownUntil={feedCooldownUntil}
                         />
                         <ActionButton
                             icon={FaMoon}
