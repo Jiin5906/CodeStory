@@ -33,95 +33,101 @@ const ItemPreview = ({ item }) => {
         );
     }
 
-    // 무드등 미리보기 (designType별 분기)
+    // 무드등 미리보기 (designType별 SVG)
     if (item.type === 'light') {
         const dt = item.designType || 'classic';
+        const sc = item.shadeColor;
+        const sd = item.shadeColorDark;
+        const st = item.standColor;
 
-        // 튤립 램프
+        // 튤립 램프 — 꽃봉오리 + 줄기
         if (dt === 'tulip') {
             return (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-0.5">
-                    <div className="w-9 h-10" style={{
-                        borderRadius: '45% 45% 35% 35% / 60% 60% 40% 40%',
-                        background: `linear-gradient(135deg, ${item.shadeColor}, ${item.shadeColorDark}CC, ${item.shadeColor})`,
-                        boxShadow: `0 0 12px ${item.shadeColor}88`
-                    }} />
-                    <div className="w-4 h-2 rounded-b-full" style={{ background: item.standColor }} />
-                    <div className="w-1 h-5 rounded-full" style={{ background: item.standColor }} />
-                    <div className="w-6 h-1.5 rounded-full" style={{ background: `linear-gradient(to bottom, ${item.standColor}, ${item.standColor}CC)` }} />
+                <div className="w-full h-full flex items-center justify-center">
+                    <svg viewBox="0 0 50 80" width="50" height="80">
+                        <path d="M25,42 Q8,28 12,10 Q16,0 25,6" fill={sc} stroke={sd} strokeWidth="0.5" />
+                        <path d="M25,42 Q42,28 38,10 Q34,0 25,6" fill={sc} stroke={sd} strokeWidth="0.5" />
+                        <path d="M19,40 Q18,16 25,2 Q32,16 31,40 Z" fill={sd} opacity="0.7" />
+                        <path d="M21,42 Q25,46 29,42 L27,45 Q25,48 23,45 Z" fill={st} />
+                        <path d="M25,45 Q24,60 25,72" fill="none" stroke={st} strokeWidth="2.5" strokeLinecap="round" />
+                        <path d="M25,58 Q32,52 36,55 Q32,60 25,58" fill={st} opacity="0.6" />
+                        <ellipse cx="25" cy="74" rx="8" ry="3" fill="#8B6914" />
+                    </svg>
                 </div>
             );
         }
 
-        // 버섯 램프
+        // 버섯 램프 — 넓은 갓 + 흰 도트
         if (dt === 'mushroom') {
             return (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-0.5">
-                    <div className="w-14 h-8" style={{
-                        borderRadius: '50% 50% 15% 15% / 70% 70% 30% 30%',
-                        background: `linear-gradient(180deg, ${item.shadeColor}, ${item.shadeColorDark})`,
-                        boxShadow: `0 0 12px ${item.shadeColor}88, inset 0 3px 6px rgba(255,255,255,0.4)`
-                    }} />
-                    <div className="w-3 h-5 rounded-full" style={{ background: `linear-gradient(to right, ${item.standColor}DD, ${item.standColor}, ${item.standColor}DD)` }} />
-                    <div className="w-8 h-1.5 rounded-full" style={{ background: `linear-gradient(to bottom, ${item.standColor}, ${item.standColor}CC)` }} />
+                <div className="w-full h-full flex items-center justify-center">
+                    <svg viewBox="0 0 60 70" width="60" height="70">
+                        <path d="M3,38 Q3,6 30,3 Q57,6 57,38 Z" fill={sc} stroke={sd} strokeWidth="0.5" />
+                        <path d="M6,35 Q30,45 54,35 L57,38 Q30,50 3,38 Z" fill="#FFFEF5" opacity="0.4" />
+                        <circle cx="17" cy="16" r="3.5" fill="white" opacity="0.4" />
+                        <circle cx="30" cy="10" r="4" fill="white" opacity="0.35" />
+                        <circle cx="43" cy="15" r="3" fill="white" opacity="0.4" />
+                        <circle cx="24" cy="27" r="2.5" fill="white" opacity="0.3" />
+                        <circle cx="40" cy="28" r="3" fill="white" opacity="0.25" />
+                        <path d="M22,38 Q20,52 22,62 L38,62 Q40,52 38,38 Z" fill={st} />
+                        <ellipse cx="30" cy="64" rx="16" ry="4" fill={st} opacity="0.7" />
+                    </svg>
                 </div>
             );
         }
 
-        // 달/구름 램프
+        // 달/구름 램프 — 초승달 + 별
         if (dt === 'moon') {
             return (
-                <div className="w-full h-full flex items-center justify-center relative">
-                    <div className="w-12 h-12 rounded-full" style={{
-                        background: `radial-gradient(circle at 35% 35%, ${item.shadeColor}, ${item.shadeColorDark})`,
-                        boxShadow: `0 0 15px ${item.shadeColor}AA, 0 0 30px ${item.shadeColorDark}44`
-                    }}>
-                        <div className="absolute top-2.5 right-3 w-9 h-9 rounded-full" style={{
-                            background: 'radial-gradient(circle, rgba(0,0,20,0.25), rgba(0,0,20,0.1))',
-                            filter: 'blur(1px)'
-                        }} />
-                    </div>
-                    <div className="absolute top-2 right-3 w-1 h-1 rounded-full bg-yellow-200 animate-pulse" style={{ animationDuration: '2s' }} />
-                    <div className="absolute bottom-3 left-4 w-0.5 h-0.5 rounded-full bg-purple-200 animate-pulse" style={{ animationDuration: '3s' }} />
+                <div className="w-full h-full flex items-center justify-center">
+                    <svg viewBox="0 0 60 70" width="60" height="70">
+                        <circle cx="28" cy="28" r="18" fill={sc} />
+                        <circle cx="36" cy="22" r="15" fill="#F0F0F0" opacity="0.6" />
+                        <circle cx="20" cy="26" r="2" fill={sd} opacity="0.2" />
+                        <circle cx="24" cy="36" r="1.5" fill={sd} opacity="0.15" />
+                        <g transform="translate(50,10)">
+                            <line x1="0" y1="-3" x2="0" y2="3" stroke="#FFFACD" strokeWidth="1.2" strokeLinecap="round" />
+                            <line x1="-3" y1="0" x2="3" y2="0" stroke="#FFFACD" strokeWidth="1.2" strokeLinecap="round" />
+                        </g>
+                        <circle cx="8" cy="12" r="1" fill="#E8E0FF" opacity="0.6" />
+                        <circle cx="52" cy="40" r="0.8" fill="#FFFACD" opacity="0.5" />
+                        <ellipse cx="22" cy="56" rx="8" ry="4" fill="white" opacity="0.4" />
+                        <ellipse cx="32" cy="54" rx="10" ry="5" fill="white" opacity="0.4" />
+                        <ellipse cx="42" cy="56" rx="8" ry="4" fill="white" opacity="0.4" />
+                    </svg>
                 </div>
             );
         }
 
-        // 라바/네온 램프
+        // 라바 램프 — 유리병 + 기포
         if (dt === 'lava') {
             return (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-0">
-                    <div className="w-4 h-2 rounded-t-md" style={{ background: item.standColor }} />
-                    <div className="w-7 h-12 overflow-hidden relative" style={{
-                        borderRadius: '30% 30% 20% 20% / 8% 8% 5% 5%',
-                        background: `linear-gradient(180deg, ${item.standColor}33, transparent 20%, transparent 80%, ${item.standColor}33)`,
-                        border: `1px solid ${item.shadeColor}44`,
-                        boxShadow: `0 0 10px ${item.shadeColor}55`
-                    }}>
-                        <div className="absolute w-3.5 h-4 rounded-full" style={{
-                            background: `radial-gradient(circle at 40% 30%, ${item.shadeColor}, ${item.shadeColorDark})`,
-                            top: '20%', left: '20%', filter: 'blur(1px)'
-                        }} />
-                        <div className="absolute w-2.5 h-3 rounded-full" style={{
-                            background: `radial-gradient(circle, ${item.shadeColorDark}, ${item.shadeColor})`,
-                            bottom: '15%', right: '15%', filter: 'blur(1px)'
-                        }} />
-                    </div>
-                    <div className="w-8 h-2 rounded-b-md" style={{ background: `linear-gradient(to bottom, ${item.standColor}, #0D0033)` }} />
+                <div className="w-full h-full flex items-center justify-center">
+                    <svg viewBox="0 0 40 80" width="40" height="80">
+                        <rect x="12" y="2" width="16" height="8" rx="2" fill={st} />
+                        <path d="M14,10 Q13,10 12,14 L9,62 Q9,72 20,72 Q31,72 31,62 L28,14 Q27,10 26,10 Z"
+                            fill="rgba(255,255,255,0.08)" stroke={`${sc}66`} strokeWidth="0.8" />
+                        <ellipse cx="17" cy="30" rx="5" ry="8" fill={sc} opacity="0.8" />
+                        <ellipse cx="24" cy="52" rx="4" ry="6" fill={sd} opacity="0.75" />
+                        <ellipse cx="20" cy="42" rx="3" ry="4" fill={sc} opacity="0.6" />
+                        <ellipse cx="20" cy="66" rx="8" ry="3" fill={sd} opacity="0.4" />
+                        <line x1="13" y1="15" x2="11" y2="60" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+                        <rect x="8" y="70" width="24" height="8" rx="2" fill={st} />
+                    </svg>
                 </div>
             );
         }
 
-        // 기본 (classic) 램프
+        // 기본 (classic) 램프 — 사다리꼴 갓 + 스탠드
         return (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <div className="w-10 h-10 rounded-t-lg" style={{
-                    background: `linear-gradient(to bottom, ${item.shadeColor}, ${item.shadeColorDark})`,
-                    boxShadow: `0 0 15px ${item.shadeColor}, inset 0 2px 4px rgba(255,255,255,0.3)`,
-                    clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
-                }} />
-                <div className="w-1 h-8 rounded-full" style={{ background: `linear-gradient(to right, #3A3A3A, ${item.standColor}, #3A3A3A)` }} />
-                <div className="w-8 h-2 rounded-full" style={{ background: `linear-gradient(to bottom, ${item.standColor}, #1A1A1A)` }} />
+            <div className="w-full h-full flex items-center justify-center">
+                <svg viewBox="0 0 50 80" width="50" height="80">
+                    <polygon points="12,3 38,3 44,30 6,30" fill={sc} stroke={sd} strokeWidth="0.5" />
+                    <circle cx="25" cy="18" r="4" fill="#FFFDE7" opacity="0.7" />
+                    <circle cx="25" cy="32" r="2" fill={st} />
+                    <rect x="23.5" y="33" width="3" height="35" rx="1.5" fill={st} />
+                    <ellipse cx="25" cy="72" rx="14" ry="4" fill={st} />
+                </svg>
             </div>
         );
     }

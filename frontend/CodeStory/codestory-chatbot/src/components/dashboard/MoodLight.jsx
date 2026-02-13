@@ -5,12 +5,12 @@ import { useStore } from '../../context/StoreContext';
 /**
  * MoodLight — 무드등 컴포넌트 (좌측 하단 배치)
  *
- * designType별 완전히 다른 CSS/SVG 디자인:
- * - classic: 기본 스탠드 램프 (클래식 갓 형태)
- * - tulip: 꽃봉오리 모양 튤립 램프
- * - mushroom: 반구형 버섯 램프
- * - moon: 공중에 떠있는 초승달/구름 램프
- * - lava: 네온/라바 램프 (색상 변화 애니메이션)
+ * designType별 SVG 기반 완전히 다른 형태:
+ * - classic: 클래식 스탠드 램프 (사다리꼴 갓)
+ * - tulip: 튤립 꽃봉오리 (꽃잎 3장)
+ * - mushroom: 둥근 버섯 (반구형 갓 + 도트)
+ * - moon: 초승달 + 별 (둥둥 떠다니는 모션)
+ * - lava: 라바 램프 (유리병 + 움직이는 기포)
  */
 const MoodLight = () => {
     const { moodLightOn, toggleMoodLight } = usePet();
@@ -23,18 +23,14 @@ const MoodLight = () => {
     const standColor = equippedLight?.standColor || '#2C2C2C';
 
     const renderLamp = () => {
+        const props = { on: moodLightOn, shadeColor, shadeColorDark, standColor };
         switch (designType) {
-            case 'tulip':
-                return <TulipLamp on={moodLightOn} shadeColor={shadeColor} shadeColorDark={shadeColorDark} standColor={standColor} />;
-            case 'mushroom':
-                return <MushroomLamp on={moodLightOn} shadeColor={shadeColor} shadeColorDark={shadeColorDark} standColor={standColor} />;
-            case 'moon':
-                return <MoonLamp on={moodLightOn} shadeColor={shadeColor} shadeColorDark={shadeColorDark} />;
-            case 'lava':
-                return <LavaLamp on={moodLightOn} shadeColor={shadeColor} shadeColorDark={shadeColorDark} standColor={standColor} />;
+            case 'tulip': return <TulipLamp {...props} />;
+            case 'mushroom': return <MushroomLamp {...props} />;
+            case 'moon': return <MoonLamp {...props} />;
+            case 'lava': return <LavaLamp {...props} />;
             case 'classic':
-            default:
-                return <ClassicLamp on={moodLightOn} shadeColor={shadeColor} shadeColorDark={shadeColorDark} standColor={standColor} />;
+            default: return <ClassicLamp {...props} />;
         }
     };
 
@@ -45,9 +41,8 @@ const MoodLight = () => {
         >
             <button
                 onClick={toggleMoodLight}
-                className="relative cursor-pointer transition-all duration-500 active:scale-98 group"
+                className="relative cursor-pointer transition-all duration-500 active:scale-95 group"
                 data-gtm="mood-light-button"
-                style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.25))' }}
             >
                 {renderLamp()}
             </button>
@@ -56,419 +51,263 @@ const MoodLight = () => {
 };
 
 /* ════════════════════════════════════════════════
-   A. 기본 무드등 (Classic Lamp) — 클래식 스탠드 형태
+   A. 기본 무드등 (Classic) — 사다리꼴 갓 스탠드
    ════════════════════════════════════════════════ */
 const ClassicLamp = ({ on, shadeColor, shadeColorDark, standColor }) => (
-    <div className="relative w-16 h-40">
-        {/* 받침대 */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-3 rounded-full"
-            style={{
-                background: `linear-gradient(to bottom, ${standColor}, #1A1A1A)`,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)'
-            }}
-        />
-        {/* 스탠드 기둥 */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1.5 h-32 rounded-full"
-            style={{
-                background: `linear-gradient(to right, ${standColor}, ${standColor}DD, ${standColor})`,
-                boxShadow: 'inset 1px 0 2px rgba(255,255,255,0.15), inset -1px 0 2px rgba(0,0,0,0.3)'
-            }}
-        />
-        {/* 상단 연결부 */}
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full"
-            style={{ background: `linear-gradient(to bottom, ${standColor}DD, ${standColor})` }}
-        />
-        {/* 갓 */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-14 transition-all duration-700"
-            style={{
-                clipPath: 'polygon(20% 0%, 80% 0%, 95% 35%, 100% 100%, 0% 100%, 5% 35%)',
-                background: on
-                    ? `linear-gradient(to bottom, ${shadeColor}, ${shadeColorDark})`
-                    : 'linear-gradient(to bottom, #E8E8E8, #C8C8C8)',
-                boxShadow: on
-                    ? `inset 0 -3px 10px rgba(210,180,140,0.4), 0 0 30px ${shadeColor}99, 0 0 60px ${shadeColorDark}66`
-                    : 'inset 0 -3px 8px rgba(0,0,0,0.2)',
-                opacity: on ? 1 : 0.7
-            }}
-        >
-            {/* 주름 효과 */}
-            <div className="absolute inset-0 overflow-hidden" style={{ clipPath: 'polygon(20% 0%, 80% 0%, 95% 35%, 100% 100%, 0% 100%, 5% 35%)' }}>
-                {[15, 25, 35, 45, 55, 65, 75, 85].map(p => (
-                    <div key={p} className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-black/10 to-transparent" style={{ left: `${p}%` }} />
-                ))}
-            </div>
-            {/* 내부 빛 반사 */}
-            <div className={`absolute top-4 left-1/2 -translate-x-1/2 w-10 h-6 rounded-full blur-sm transition-opacity duration-700 ${on ? 'opacity-60' : 'opacity-15'}`}
-                style={{
-                    background: on
-                        ? 'radial-gradient(ellipse, rgba(255,255,255,0.9), rgba(255,248,220,0.5) 50%, transparent 80%)'
-                        : 'radial-gradient(ellipse, rgba(255,255,255,0.4), transparent 70%)'
-                }}
-            />
-        </div>
-        {/* 전구 코어 */}
-        <div className={`absolute top-2 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full transition-all duration-700 ${on ? 'opacity-95' : 'opacity-35'}`}
-            style={{
-                background: on
-                    ? 'radial-gradient(circle, white, #FFFACD, transparent)'
-                    : 'radial-gradient(circle, #C0C0C0, #A0A0A0, transparent)',
-                boxShadow: on ? '0 0 25px rgba(255,250,205,0.9), 0 0 50px rgba(255,248,220,0.5)' : 'none',
-                filter: on ? 'blur(3px)' : 'blur(1px)'
-            }}
-        />
-        {/* 빛 확산 (ON) */}
-        {on && (
-            <>
-                <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-40 h-40 bg-yellow-200 rounded-full blur-3xl opacity-30 -z-10 animate-pulse pointer-events-none" style={{ animationDuration: '3s' }} />
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-yellow-100 rounded-full blur-2xl opacity-40 -z-10 pointer-events-none" />
-                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 h-12 rounded-full blur-2xl opacity-25 -z-10 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse, ${shadeColor}66, transparent 70%)` }}
-                />
-            </>
-        )}
+    <div className="relative w-16 h-40" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>
+        <svg viewBox="0 0 64 160" width="64" height="160" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="classicShade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={on ? shadeColor : '#E0E0E0'} />
+                    <stop offset="100%" stopColor={on ? shadeColorDark : '#B0B0B0'} />
+                </linearGradient>
+                <linearGradient id="classicStand" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={standColor} />
+                    <stop offset="50%" stopColor={standColor} stopOpacity="0.85" />
+                    <stop offset="100%" stopColor={standColor} />
+                </linearGradient>
+                {on && <radialGradient id="classicGlow">
+                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.7" />
+                    <stop offset="100%" stopColor={shadeColor} stopOpacity="0" />
+                </radialGradient>}
+            </defs>
+            {/* 빛 확산 */}
+            {on && <ellipse cx="32" cy="30" rx="50" ry="50" fill="url(#classicGlow)" opacity="0.4" />}
+            {/* 갓 (사다리꼴) */}
+            <polygon points="16,4 48,4 56,48 8,48" fill="url(#classicShade)" stroke={on ? shadeColorDark : '#999'} strokeWidth="0.5" opacity={on ? 1 : 0.6} />
+            {/* 갓 주름선 */}
+            {[20, 26, 32, 38, 44].map(x => (
+                <line key={x} x1={x} y1="6" x2={x + (x > 32 ? 2 : -2)} y2="46" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5" />
+            ))}
+            {/* 전구 */}
+            <circle cx="32" cy="28" r="6" fill={on ? '#FFFDE7' : '#CCC'} opacity={on ? 0.9 : 0.4} />
+            {on && <circle cx="32" cy="28" r="10" fill="#FFFDE7" opacity="0.3" />}
+            {/* 연결부 */}
+            <circle cx="32" cy="50" r="3" fill={standColor} />
+            {/* 기둥 */}
+            <rect x="30" y="52" width="4" height="90" rx="2" fill="url(#classicStand)" />
+            {/* 받침대 */}
+            <ellipse cx="32" cy="148" rx="20" ry="5" fill={standColor} />
+            <ellipse cx="32" cy="146" rx="18" ry="4" fill={standColor} opacity="0.7" />
+        </svg>
     </div>
 );
 
 /* ════════════════════════════════════════════════
-   B. 튤립 램프 (Tulip Lamp) — 꽃봉오리 형태
+   B. 튤립 램프 (Tulip) — 꽃봉오리 + 줄기
    ════════════════════════════════════════════════ */
 const TulipLamp = ({ on, shadeColor, shadeColorDark, standColor }) => (
-    <div className="relative w-16 h-40">
-        {/* 받침대 - 작은 잎사귀 */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-3 rounded-full"
-            style={{
-                background: `linear-gradient(to bottom, ${standColor}CC, ${standColor})`,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-            }}
-        />
-        {/* 줄기 - 곡선이 있는 녹색 스탠드 */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1.5 rounded-full"
-            style={{
-                height: '110px',
-                background: `linear-gradient(to right, ${standColor}CC, ${standColor}, ${standColor}CC)`,
-                boxShadow: 'inset 1px 0 2px rgba(255,255,255,0.2)',
-                transform: 'translateX(-50%) rotate(2deg)'
-            }}
-        />
-        {/* 작은 잎 (줄기 중간) */}
-        <div className="absolute bottom-14 left-1/2"
-            style={{
-                width: '10px', height: '6px',
-                background: standColor,
-                borderRadius: '50% 50% 50% 0',
-                transform: 'translateX(2px) rotate(-30deg)',
-                opacity: 0.8
-            }}
-        />
-        {/* 꽃봉오리 (상단) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-16 transition-all duration-700"
-            style={{
-                borderRadius: '45% 45% 35% 35% / 60% 60% 40% 40%',
-                background: on
-                    ? `linear-gradient(135deg, ${shadeColor}, ${shadeColorDark}CC, ${shadeColor})`
-                    : 'linear-gradient(135deg, #E8E8E8, #D0D0D0, #C8C8C8)',
-                boxShadow: on
-                    ? `0 0 25px ${shadeColor}88, 0 0 50px ${shadeColorDark}44, inset 0 -4px 8px rgba(255,255,255,0.3)`
-                    : 'inset 0 -3px 8px rgba(0,0,0,0.15)',
-                opacity: on ? 1 : 0.7
-            }}
-        >
-            {/* 꽃잎 라인 */}
-            <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 'inherit' }}>
-                <div className="absolute left-[30%] top-[10%] bottom-[20%] w-px" style={{ background: on ? `${shadeColorDark}44` : 'rgba(0,0,0,0.08)' }} />
-                <div className="absolute left-[50%] top-[5%] bottom-[15%] w-px" style={{ background: on ? `${shadeColorDark}44` : 'rgba(0,0,0,0.08)' }} />
-                <div className="absolute left-[70%] top-[10%] bottom-[20%] w-px" style={{ background: on ? `${shadeColorDark}44` : 'rgba(0,0,0,0.08)' }} />
-            </div>
-            {/* 내부 발광 */}
-            {on && (
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full blur-md opacity-70"
-                    style={{ background: `radial-gradient(circle, white, ${shadeColor}88, transparent)` }}
-                />
-            )}
-        </div>
-        {/* 꽃받침 */}
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 w-6 h-3"
-            style={{
-                background: standColor,
-                borderRadius: '0 0 50% 50%',
-                opacity: 0.9
-            }}
-        />
-        {/* 빛 확산 (ON) */}
-        {on && (
-            <>
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-36 h-36 rounded-full blur-3xl opacity-25 -z-10 animate-pulse pointer-events-none"
-                    style={{ background: shadeColor, animationDuration: '3s' }}
-                />
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-24 h-10 rounded-full blur-2xl opacity-20 -z-10 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse, ${shadeColor}55, transparent 70%)` }}
-                />
-            </>
-        )}
+    <div className="relative w-16 h-40" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>
+        <svg viewBox="0 0 64 160" width="64" height="160" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="tulipGlow">
+                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.6" />
+                    <stop offset="100%" stopColor={shadeColor} stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="tulipPetal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={on ? shadeColor : '#E0E0E0'} />
+                    <stop offset="100%" stopColor={on ? shadeColorDark : '#B0B0B0'} />
+                </linearGradient>
+            </defs>
+            {/* 빛 확산 */}
+            {on && <ellipse cx="32" cy="25" rx="45" ry="45" fill="url(#tulipGlow)" opacity="0.35" />}
+            {/* 왼쪽 꽃잎 */}
+            <path d="M32,52 Q10,35 14,12 Q20,0 32,8" fill="url(#tulipPetal)" opacity={on ? 1 : 0.5} stroke={on ? shadeColorDark : '#AAA'} strokeWidth="0.5" />
+            {/* 오른쪽 꽃잎 */}
+            <path d="M32,52 Q54,35 50,12 Q44,0 32,8" fill="url(#tulipPetal)" opacity={on ? 1 : 0.5} stroke={on ? shadeColorDark : '#AAA'} strokeWidth="0.5" />
+            {/* 가운데 꽃잎 */}
+            <path d="M24,50 Q22,20 32,2 Q42,20 40,50 Z" fill={on ? shadeColor : '#D8D8D8'} opacity={on ? 0.9 : 0.5} stroke={on ? shadeColorDark : '#AAA'} strokeWidth="0.5" />
+            {/* 전구 (꽃 안쪽) */}
+            {on && <ellipse cx="32" cy="30" rx="5" ry="7" fill="#FFFDE7" opacity="0.6" />}
+            {/* 꽃받침 */}
+            <path d="M26,52 Q32,58 38,52 L36,56 Q32,60 28,56 Z" fill={standColor} />
+            {/* 줄기 */}
+            <path d="M32,56 Q30,100 32,142" fill="none" stroke={standColor} strokeWidth="3" strokeLinecap="round" />
+            {/* 잎사귀 1 */}
+            <path d="M32,90 Q42,80 48,85 Q42,92 32,90" fill={standColor} opacity="0.7" />
+            {/* 잎사귀 2 */}
+            <path d="M32,110 Q22,102 16,106 Q22,112 32,110" fill={standColor} opacity="0.6" />
+            {/* 받침대 (작은 화분) */}
+            <path d="M22,142 L24,155 L40,155 L42,142 Z" fill="#8B6914" rx="2" />
+            <ellipse cx="32" cy="142" rx="11" ry="3" fill="#A07828" />
+        </svg>
     </div>
 );
 
 /* ════════════════════════════════════════════════
-   C. 버섯 램프 (Mushroom Lamp) — 반구형 둥근 갓
+   C. 버섯 램프 (Mushroom) — 넓은 반구 갓 + 통통한 기둥
    ════════════════════════════════════════════════ */
 const MushroomLamp = ({ on, shadeColor, shadeColorDark, standColor }) => (
-    <div className="relative w-20 h-36">
-        {/* 받침대 */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-3 rounded-full"
-            style={{
-                background: `linear-gradient(to bottom, ${standColor}, ${standColor}CC)`,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-            }}
-        />
-        {/* 굵고 짧은 기둥 */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4 rounded-full"
-            style={{
-                height: '60px',
-                background: `linear-gradient(to right, ${standColor}DD, ${standColor}, ${standColor}DD)`,
-                boxShadow: 'inset 1px 0 3px rgba(255,255,255,0.2), inset -1px 0 3px rgba(0,0,0,0.15)'
-            }}
-        />
-        {/* 반구형 갓 (버섯 모양) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-16 transition-all duration-700"
-            style={{
-                borderRadius: '50% 50% 15% 15% / 70% 70% 30% 30%',
-                background: on
-                    ? `linear-gradient(180deg, ${shadeColor} 0%, ${shadeColor}EE 50%, ${shadeColorDark} 100%)`
-                    : 'linear-gradient(180deg, #E8E8E8 0%, #D8D8D8 50%, #C8C8C8 100%)',
-                boxShadow: on
-                    ? `0 0 30px ${shadeColor}88, 0 0 60px ${shadeColorDark}44, inset 0 4px 10px rgba(255,255,255,0.5)`
-                    : 'inset 0 -3px 8px rgba(0,0,0,0.15)',
-                opacity: on ? 1 : 0.7
-            }}
-        >
-            {/* 갓 윗부분 하이라이트 */}
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-12 h-6 rounded-full opacity-40"
-                style={{
-                    background: on
-                        ? 'radial-gradient(ellipse, rgba(255,255,255,0.8), transparent 70%)'
-                        : 'radial-gradient(ellipse, rgba(255,255,255,0.3), transparent 70%)'
-                }}
-            />
-            {/* 점 무늬 (버섯 스타일) */}
-            {on && (
-                <>
-                    <div className="absolute top-3 left-3 w-2 h-2 rounded-full opacity-30" style={{ background: 'white' }} />
-                    <div className="absolute top-5 left-7 w-1.5 h-1.5 rounded-full opacity-25" style={{ background: 'white' }} />
-                    <div className="absolute top-2 right-4 w-2.5 h-2.5 rounded-full opacity-20" style={{ background: 'white' }} />
-                    <div className="absolute top-6 right-3 w-1.5 h-1.5 rounded-full opacity-25" style={{ background: 'white' }} />
-                </>
-            )}
-            {/* 갓 안쪽 크림색 하단 */}
-            <div className="absolute bottom-0 left-0 right-0 h-4 rounded-b-lg"
-                style={{
-                    background: on
-                        ? `linear-gradient(to bottom, transparent, ${standColor}44)`
-                        : 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.08))'
-                }}
-            />
-        </div>
-        {/* 빛 확산 (ON) */}
-        {on && (
-            <>
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full blur-3xl opacity-25 -z-10 animate-pulse pointer-events-none"
-                    style={{ background: shadeColor, animationDuration: '3.5s' }}
-                />
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-20 h-16 rounded-full blur-2xl opacity-30 -z-10 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse, ${shadeColor}55, transparent 70%)` }}
-                />
-            </>
-        )}
+    <div className="relative w-20 h-36" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>
+        <svg viewBox="0 0 80 144" width="80" height="144" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="mushGlow">
+                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.5" />
+                    <stop offset="100%" stopColor={shadeColor} stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="mushCap" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={on ? shadeColor : '#E0E0E0'} />
+                    <stop offset="70%" stopColor={on ? shadeColorDark : '#B8B8B8'} />
+                    <stop offset="100%" stopColor={on ? shadeColorDark : '#A0A0A0'} />
+                </linearGradient>
+            </defs>
+            {/* 빛 확산 */}
+            {on && <ellipse cx="40" cy="35" rx="55" ry="50" fill="url(#mushGlow)" opacity="0.35" />}
+            {/* 버섯 갓 (넓은 반구) */}
+            <path d="M4,55 Q4,8 40,4 Q76,8 76,55 Z" fill="url(#mushCap)" opacity={on ? 1 : 0.55} stroke={on ? shadeColorDark : '#999'} strokeWidth="0.5" />
+            {/* 갓 하단 크림색 라인 */}
+            <path d="M8,50 Q40,62 72,50 L76,55 Q40,68 4,55 Z" fill={on ? '#FFFEF5' : '#D0D0D0'} opacity="0.5" />
+            {/* 흰 도트 (버섯 무늬) */}
+            <circle cx="22" cy="22" r="4" fill="white" opacity={on ? 0.45 : 0.2} />
+            <circle cx="40" cy="14" r="5" fill="white" opacity={on ? 0.4 : 0.15} />
+            <circle cx="56" cy="20" r="3.5" fill="white" opacity={on ? 0.45 : 0.2} />
+            <circle cx="30" cy="36" r="3" fill="white" opacity={on ? 0.35 : 0.15} />
+            <circle cx="52" cy="38" r="4" fill="white" opacity={on ? 0.3 : 0.12} />
+            <circle cx="16" cy="40" r="2.5" fill="white" opacity={on ? 0.3 : 0.12} />
+            {/* 갓 안쪽 빛 */}
+            {on && <ellipse cx="40" cy="55" rx="18" ry="6" fill="#FFFDE7" opacity="0.4" />}
+            {/* 기둥 (통통) */}
+            <path d="M30,55 Q28,80 30,115 L50,115 Q52,80 50,55 Z" fill={standColor} opacity={on ? 1 : 0.6} />
+            {/* 기둥 하이라이트 */}
+            <path d="M34,58 Q33,80 34,112" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
+            {/* 받침대 */}
+            <ellipse cx="40" cy="118" rx="22" ry="6" fill={standColor} opacity="0.8" />
+            <ellipse cx="40" cy="116" rx="20" ry="5" fill={standColor} opacity="0.6" />
+        </svg>
     </div>
 );
 
 /* ════════════════════════════════════════════════
-   D. 달/구름 램프 (Moon Lamp) — 공중 부유 초승달
+   D. 달/구름 램프 (Moon) — 초승달 + 별 + 구름
    ════════════════════════════════════════════════ */
 const MoonLamp = ({ on, shadeColor, shadeColorDark }) => (
-    <div className="relative w-20 h-36">
-        {/* 투명 스탠드 (낚싯줄 느낌) */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-2 rounded-full"
-            style={{ background: 'linear-gradient(to bottom, rgba(200,200,200,0.4), rgba(150,150,150,0.3))' }}
-        />
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-px h-16"
-            style={{ background: 'linear-gradient(to bottom, transparent, rgba(180,180,180,0.3))' }}
-        />
-        {/* 초승달 본체 */}
-        <div
-            className="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-16 transition-all duration-700"
-            style={{
-                borderRadius: '50%',
-                background: on
-                    ? `radial-gradient(circle at 35% 35%, ${shadeColor}, ${shadeColorDark})`
-                    : 'radial-gradient(circle at 35% 35%, #E0E0E0, #B0B0B0)',
-                boxShadow: on
-                    ? `0 0 30px ${shadeColor}AA, 0 0 60px ${shadeColorDark}55, 0 0 100px ${shadeColor}33`
-                    : '0 2px 8px rgba(0,0,0,0.15)',
-                opacity: on ? 1 : 0.6,
-                animation: on ? 'moonFloat 4s ease-in-out infinite' : 'none'
-            }}
-        >
-            {/* 초승달 그림자 (원 안에 원을 겹쳐서 초승달 표현) */}
-            <div className="absolute top-1 right-1 w-12 h-12 rounded-full"
-                style={{
-                    background: on
-                        ? `radial-gradient(circle, rgba(0,0,20,0.3), rgba(0,0,20,0.15))`
-                        : 'radial-gradient(circle, rgba(0,0,0,0.2), rgba(0,0,0,0.1))',
-                    filter: 'blur(1px)'
-                }}
-            />
-            {/* 달 표면 텍스처 */}
-            {on && (
-                <>
-                    <div className="absolute top-4 left-2 w-2 h-2 rounded-full opacity-20" style={{ background: shadeColorDark }} />
-                    <div className="absolute top-8 left-4 w-1.5 h-1.5 rounded-full opacity-15" style={{ background: shadeColorDark }} />
-                    <div className="absolute top-6 left-1 w-1 h-1 rounded-full opacity-20" style={{ background: shadeColorDark }} />
-                </>
-            )}
-        </div>
-        {/* 작은 별들 (ON일 때) */}
-        {on && (
-            <>
-                <div className="absolute top-0 right-1 w-1 h-1 rounded-full animate-pulse" style={{ background: '#FFFACD', animationDuration: '2s' }} />
-                <div className="absolute top-6 right-0 w-0.5 h-0.5 rounded-full animate-pulse" style={{ background: '#E8E0FF', animationDuration: '2.5s' }} />
-                <div className="absolute top-1 left-2 w-0.5 h-0.5 rounded-full animate-pulse" style={{ background: '#FFFACD', animationDuration: '3s' }} />
-                <div className="absolute top-12 right-2 w-1 h-1 rounded-full animate-pulse" style={{ background: '#E8E0FF', animationDuration: '1.8s' }} />
-            </>
-        )}
-        {/* 구름 (하단) */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-end"
-            style={{
-                opacity: on ? 0.5 : 0.25,
-                animation: on ? 'moonFloat 5s ease-in-out infinite 1s' : 'none'
-            }}
-        >
-            <div className="w-5 h-3 rounded-full" style={{ background: on ? 'white' : '#D0D0D0' }} />
-            <div className="w-8 h-5 rounded-full -ml-2 -mb-0.5" style={{ background: on ? 'white' : '#D0D0D0' }} />
-            <div className="w-5 h-3 rounded-full -ml-2" style={{ background: on ? 'white' : '#D0D0D0' }} />
-        </div>
-        {/* 빛 확산 (ON) */}
-        {on && (
-            <>
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-44 h-44 rounded-full blur-3xl opacity-20 -z-10 pointer-events-none"
-                    style={{ background: `radial-gradient(circle, ${shadeColor}88, ${shadeColorDark}44, transparent)` }}
-                />
-            </>
-        )}
-        {/* CSS Animation */}
+    <div className="relative w-20 h-36" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.25))' }}>
+        <svg viewBox="0 0 80 144" width="80" height="144" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="moonGlow">
+                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.6" />
+                    <stop offset="100%" stopColor={shadeColor} stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="moonFill" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor={on ? shadeColor : '#D0D0D0'} />
+                    <stop offset="100%" stopColor={on ? shadeColorDark : '#A0A0A0'} />
+                </linearGradient>
+            </defs>
+            {/* 빛 확산 */}
+            {on && <circle cx="40" cy="40" r="50" fill="url(#moonGlow)" opacity="0.3" />}
+            {/* 초승달 */}
+            <g style={on ? { animation: 'moonBob 4s ease-in-out infinite' } : {}}>
+                {/* 달 원 */}
+                <circle cx="38" cy="38" r="24" fill="url(#moonFill)" opacity={on ? 1 : 0.5} />
+                {/* 그림자 원 (초승달 만들기) */}
+                <circle cx="48" cy="32" r="20" fill={on ? '#1A1A3E' : '#888'} opacity={on ? 0.6 : 0.35} />
+                {/* 달 크레이터 */}
+                {on && <>
+                    <circle cx="28" cy="35" r="3" fill={shadeColorDark} opacity="0.2" />
+                    <circle cx="34" cy="48" r="2" fill={shadeColorDark} opacity="0.15" />
+                    <circle cx="24" cy="44" r="1.5" fill={shadeColorDark} opacity="0.2" />
+                </>}
+            </g>
+            {/* 별 (크로스 형태) */}
+            {on && <>
+                <g transform="translate(65,14)" opacity="0.8" style={{ animation: 'starTwinkle 2s ease-in-out infinite' }}>
+                    <line x1="0" y1="-4" x2="0" y2="4" stroke="#FFFACD" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1="-4" y1="0" x2="4" y2="0" stroke="#FFFACD" strokeWidth="1.5" strokeLinecap="round" />
+                </g>
+                <g transform="translate(10,16)" opacity="0.5" style={{ animation: 'starTwinkle 3s ease-in-out infinite 1s' }}>
+                    <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#E8E0FF" strokeWidth="1" strokeLinecap="round" />
+                    <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#E8E0FF" strokeWidth="1" strokeLinecap="round" />
+                </g>
+                <circle cx="70" cy="50" r="1" fill="#FFFACD" opacity="0.6" style={{ animation: 'starTwinkle 2.5s ease-in-out infinite 0.5s' }} />
+                <circle cx="6" cy="55" r="0.8" fill="#E8E0FF" opacity="0.5" style={{ animation: 'starTwinkle 3.5s ease-in-out infinite 1.5s' }} />
+            </>}
+            {/* 구름 */}
+            <g style={on ? { animation: 'cloudDrift 6s ease-in-out infinite 1s' } : {}} opacity={on ? 0.6 : 0.25}>
+                <ellipse cx="28" cy="78" rx="10" ry="6" fill={on ? 'white' : '#CCC'} />
+                <ellipse cx="40" cy="75" rx="14" ry="8" fill={on ? 'white' : '#CCC'} />
+                <ellipse cx="52" cy="78" rx="10" ry="6" fill={on ? 'white' : '#CCC'} />
+            </g>
+            {/* 투명한 실 */}
+            <line x1="40" y1="86" x2="40" y2="125" stroke="rgba(180,180,180,0.3)" strokeWidth="0.8" strokeDasharray="2,2" />
+            {/* 작은 받침대 */}
+            <ellipse cx="40" cy="128" rx="12" ry="4" fill="rgba(180,180,180,0.35)" />
+        </svg>
         <style>{`
-            @keyframes moonFloat {
-                0%, 100% { transform: translateX(-50%) translateY(0); }
-                50% { transform: translateX(-50%) translateY(-6px); }
-            }
+            @keyframes moonBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+            @keyframes starTwinkle { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.2)} }
+            @keyframes cloudDrift { 0%,100%{transform:translateX(0)} 50%{transform:translateX(4px)} }
         `}</style>
     </div>
 );
 
 /* ════════════════════════════════════════════════
-   E. 라바/네온 램프 (Lava Lamp) — 유선형 물방울 병
+   E. 라바 램프 (Lava) — 유리병 + 떠다니는 기포
    ════════════════════════════════════════════════ */
 const LavaLamp = ({ on, shadeColor, shadeColorDark, standColor }) => (
-    <div className="relative w-16 h-40">
-        {/* 받침대 (메탈릭) */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-4 rounded-lg"
-            style={{
-                background: `linear-gradient(to bottom, ${standColor}CC, ${standColor}, #0D0033)`,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.15)'
-            }}
-        />
-        {/* 하단 캡 */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-12 h-3 rounded-t-lg"
-            style={{
-                background: `linear-gradient(to bottom, ${standColor}, ${standColor}CC)`,
-                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.1)'
-            }}
-        />
-        {/* 유리병 본체 (유선형) */}
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 w-10 overflow-hidden transition-all duration-700"
-            style={{
-                height: '100px',
-                borderRadius: '30% 30% 20% 20% / 10% 10% 5% 5%',
-                background: on
-                    ? `linear-gradient(180deg, ${standColor}44 0%, transparent 20%, transparent 80%, ${standColor}44 100%)`
-                    : 'linear-gradient(180deg, rgba(100,100,100,0.3) 0%, rgba(80,80,80,0.1) 50%, rgba(100,100,100,0.3) 100%)',
-                border: on ? `1px solid ${shadeColor}44` : '1px solid rgba(150,150,150,0.3)',
-                boxShadow: on
-                    ? `0 0 20px ${shadeColor}66, 0 0 40px ${shadeColorDark}33, inset 0 0 15px ${shadeColor}22`
-                    : 'inset 0 0 8px rgba(0,0,0,0.1)',
-                opacity: on ? 1 : 0.6
-            }}
-        >
-            {/* 라바 기포들 (ON 시 움직이는 애니메이션) */}
-            {on && (
-                <>
-                    <div className="absolute w-5 h-7 rounded-full"
-                        style={{
-                            background: `radial-gradient(circle at 40% 30%, ${shadeColor}, ${shadeColorDark})`,
-                            filter: 'blur(1px)',
-                            animation: 'lavaBubble1 4s ease-in-out infinite',
-                            left: '25%'
-                        }}
-                    />
-                    <div className="absolute w-4 h-5 rounded-full"
-                        style={{
-                            background: `radial-gradient(circle at 40% 30%, ${shadeColorDark}, ${shadeColor})`,
-                            filter: 'blur(1px)',
-                            animation: 'lavaBubble2 5s ease-in-out infinite 1s',
-                            right: '20%'
-                        }}
-                    />
-                    <div className="absolute w-3 h-4 rounded-full"
-                        style={{
-                            background: `radial-gradient(circle, ${shadeColor}CC, ${shadeColorDark}AA)`,
-                            filter: 'blur(1px)',
-                            animation: 'lavaBubble3 3.5s ease-in-out infinite 0.5s',
-                            left: '35%'
-                        }}
-                    />
-                </>
-            )}
-            {/* 유리 반사 */}
-            <div className="absolute top-0 left-1 w-1 h-full bg-gradient-to-b from-white/20 via-white/10 to-transparent rounded-full" />
-        </div>
-        {/* 상단 캡 (병 목) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-4 rounded-t-lg"
-            style={{
-                background: `linear-gradient(to bottom, ${standColor}, ${standColor}CC)`,
-                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.15)'
-            }}
-        />
-        {/* 빛 확산 (ON) */}
-        {on && (
-            <>
-                <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full blur-3xl opacity-30 -z-10 pointer-events-none"
-                    style={{
-                        background: `radial-gradient(circle, ${shadeColor}88, ${shadeColorDark}44, transparent)`,
-                        animation: 'lavaGlow 3s ease-in-out infinite'
-                    }}
-                />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-44 rounded-full blur-2xl opacity-15 -z-10 pointer-events-none"
-                    style={{ background: `linear-gradient(180deg, ${shadeColor}44, ${shadeColorDark}44)` }}
-                />
-            </>
-        )}
-        {/* CSS Animations */}
+    <div className="relative w-14 h-40" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.35))' }}>
+        <svg viewBox="0 0 56 160" width="56" height="160" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="lavaGlow">
+                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.5" />
+                    <stop offset="100%" stopColor={shadeColor} stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="lavaCap" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={standColor} />
+                    <stop offset="100%" stopColor="#0D0020" />
+                </linearGradient>
+                <radialGradient id="lavaBlob1" cx="0.4" cy="0.3">
+                    <stop offset="0%" stopColor={shadeColor} />
+                    <stop offset="100%" stopColor={shadeColorDark} />
+                </radialGradient>
+                <radialGradient id="lavaBlob2" cx="0.4" cy="0.3">
+                    <stop offset="0%" stopColor={shadeColorDark} />
+                    <stop offset="100%" stopColor={shadeColor} />
+                </radialGradient>
+                <clipPath id="bottleClip">
+                    <path d="M20,16 Q18,16 16,22 L12,120 Q12,134 28,134 Q44,134 44,120 L40,22 Q38,16 36,16 Z" />
+                </clipPath>
+            </defs>
+            {/* 빛 확산 */}
+            {on && <ellipse cx="28" cy="75" rx="40" ry="60" fill="url(#lavaGlow)" opacity="0.3" />}
+            {/* 상단 캡 (메탈릭) */}
+            <rect x="16" y="4" width="24" height="14" rx="3" fill="url(#lavaCap)" />
+            <rect x="18" y="6" width="20" height="2" rx="1" fill="rgba(255,255,255,0.1)" />
+            {/* 유리병 외형 */}
+            <path d="M20,16 Q18,16 16,22 L12,120 Q12,134 28,134 Q44,134 44,120 L40,22 Q38,16 36,16 Z"
+                fill={on ? 'rgba(255,255,255,0.06)' : 'rgba(150,150,150,0.1)'}
+                stroke={on ? `${shadeColor}66` : 'rgba(150,150,150,0.3)'}
+                strokeWidth="1"
+            />
+            {/* 유리병 내부 — 기포들 (clipped) */}
+            <g clipPath="url(#bottleClip)">
+                {on ? <>
+                    {/* 기포 1 — 크고 둥근 */}
+                    <ellipse cx="24" cy="50" rx="8" ry="12" fill="url(#lavaBlob1)" opacity="0.85" style={{ animation: 'lavaUp 4.5s ease-in-out infinite' }} />
+                    {/* 기포 2 — 중간 */}
+                    <ellipse cx="34" cy="100" rx="6" ry="9" fill="url(#lavaBlob2)" opacity="0.8" style={{ animation: 'lavaDown 5s ease-in-out infinite 1s' }} />
+                    {/* 기포 3 — 작은 */}
+                    <ellipse cx="28" cy="75" rx="4" ry="6" fill="url(#lavaBlob1)" opacity="0.7" style={{ animation: 'lavaUp2 3.5s ease-in-out infinite 0.5s' }} />
+                    {/* 바닥 웅덩이 */}
+                    <ellipse cx="28" cy="128" rx="12" ry="5" fill={shadeColorDark} opacity="0.5" />
+                </> : <>
+                    {/* OFF 상태: 정적 기포 */}
+                    <ellipse cx="24" cy="110" rx="7" ry="8" fill="#999" opacity="0.2" />
+                    <ellipse cx="34" cy="95" rx="5" ry="6" fill="#888" opacity="0.15" />
+                    <ellipse cx="28" cy="125" rx="10" ry="4" fill="#999" opacity="0.15" />
+                </>}
+                {/* 유리 반사선 */}
+                <line x1="17" y1="24" x2="15" y2="118" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+            </g>
+            {/* 하단 캡 (메탈릭) */}
+            <rect x="10" y="132" width="36" height="14" rx="3" fill="url(#lavaCap)" />
+            <rect x="12" y="134" width="32" height="2" rx="1" fill="rgba(255,255,255,0.08)" />
+            {/* 하단 네온 발광 라인 */}
+            {on && <rect x="12" y="131" width="32" height="1.5" rx="0.75" fill={shadeColor} opacity="0.4" />}
+        </svg>
         <style>{`
-            @keyframes lavaBubble1 {
-                0%, 100% { top: 60%; transform: scale(1); }
-                50% { top: 15%; transform: scale(0.85); }
-            }
-            @keyframes lavaBubble2 {
-                0%, 100% { top: 20%; transform: scale(0.9); }
-                50% { top: 65%; transform: scale(1.1); }
-            }
-            @keyframes lavaBubble3 {
-                0%, 100% { top: 45%; transform: scale(1); }
-                50% { top: 10%; transform: scale(0.8); }
-            }
-            @keyframes lavaGlow {
-                0%, 100% { opacity: 0.3; }
-                50% { opacity: 0.5; }
-            }
+            @keyframes lavaUp { 0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(-40px) scaleY(0.85)} }
+            @keyframes lavaDown { 0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(25px) scaleY(1.1)} }
+            @keyframes lavaUp2 { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(0.8)} }
         `}</style>
     </div>
 );
