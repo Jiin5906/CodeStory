@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { FaHandSparkles, FaUtensils, FaMoon } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 
@@ -11,22 +11,8 @@ import { usePet } from '../../context/PetContext';
  * - 쿨타임 카운트다운 오버레이
  */
 
-const ControlButton = ({ icon, value, locked, onClick, gtmKey, cooldownUntil = 0 }) => {
+const ControlButton = ({ icon, value, locked, onClick, gtmKey }) => {
     const clampedValue = Math.min(100, Math.max(0, value));
-    const [cooldownRemain, setCooldownRemain] = useState(() => {
-        if (!cooldownUntil || cooldownUntil <= Date.now()) return 0;
-        return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
-    });
-
-    // 쿨타임 카운트다운
-    useEffect(() => {
-        if (!cooldownUntil || cooldownUntil <= Date.now()) return;
-        const interval = setInterval(() => {
-            const remain = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
-            setCooldownRemain(remain);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [cooldownUntil]);
 
     // 색상 로직
     const getColor = () => {
@@ -73,14 +59,6 @@ const ControlButton = ({ icon, value, locked, onClick, gtmKey, cooldownUntil = 0
                 </div>
             )}
 
-            {/* 쿨타임 오버레이 */}
-            {cooldownRemain > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 backdrop-blur-sm rounded-2xl">
-                    <span className="text-white font-bold text-sm drop-shadow-md">
-                        {cooldownRemain}s
-                    </span>
-                </div>
-            )}
         </button>
     );
 };
@@ -91,8 +69,6 @@ const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
         hungerGauge,
         sleepGauge,
         isAffectionLocked,
-        touchCooldownUntil,
-        feedCooldownUntil,
     } = usePet();
 
     return (
@@ -109,7 +85,6 @@ const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
                     locked={isAffectionLocked}
                     onClick={() => {}}
                     gtmKey="control-button-affection"
-                    cooldownUntil={touchCooldownUntil}
                 />
 
                 {/* 식사 버튼 */}
@@ -119,7 +94,6 @@ const BottomControlBar = ({ onSleepClick, onFeedClick }) => {
                     locked={hungerGauge >= 100}
                     onClick={onFeedClick}
                     gtmKey="control-button-hunger"
-                    cooldownUntil={feedCooldownUntil}
                 />
 
                 {/* 수면 버튼 */}

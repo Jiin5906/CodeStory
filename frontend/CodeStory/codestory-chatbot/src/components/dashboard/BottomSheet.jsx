@@ -23,24 +23,10 @@ const SNAP_POINTS = {
     HALF: 120        // 채팅 + 버튼 (화면의 ~30% 이내)
 };
 
-// 액션 버튼 컴포넌트 (퍼센트 상시 표시 + 쿨타임 오버레이)
+// 액션 버튼 컴포넌트 (퍼센트 상시 표시)
 // eslint-disable-next-line no-unused-vars
-const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor, cooldownUntil = 0 }) => {
+const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor }) => {
     const gaugeHeight = Math.min(100, Math.max(0, value));
-    const [cooldownRemain, setCooldownRemain] = useState(() => {
-        if (!cooldownUntil || cooldownUntil <= Date.now()) return 0;
-        return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
-    });
-
-    // 쿨타임 카운트다운
-    useEffect(() => {
-        if (!cooldownUntil || cooldownUntil <= Date.now()) return;
-        const interval = setInterval(() => {
-            const remain = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
-            setCooldownRemain(remain);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [cooldownUntil]);
 
     const getIconColor = () => {
         if (isHome) return 'text-white';
@@ -96,14 +82,6 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor,
                 </div>
             )}
 
-            {/* 쿨타임 오버레이 */}
-            {cooldownRemain > 0 && !isHome && (
-                <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 backdrop-blur-sm rounded-xl">
-                    <span className="text-white font-bold text-xs drop-shadow-md">
-                        {cooldownRemain}s
-                    </span>
-                </div>
-            )}
         </button>
     );
 };
@@ -120,7 +98,7 @@ const BottomSheet = ({
     const [input, setInput] = useState('');
 
     const sheetRef = useRef(null);
-    const { affectionGauge, hungerGauge, sleepGauge, feedCooldownUntil, touchCooldownUntil, isSleeping, showSleepToast, feedEmotion } = usePet();
+    const { affectionGauge, hungerGauge, sleepGauge, isSleeping, showSleepToast, feedEmotion } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
     const theme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
 
@@ -337,7 +315,6 @@ const BottomSheet = ({
                             accentColor={accentColor}
                             primaryColor={primaryColor}
                             buttonColor={buttonColor}
-                            cooldownUntil={touchCooldownUntil}
                         />
                         <ActionButton
                             icon={FaUtensils}
@@ -349,7 +326,6 @@ const BottomSheet = ({
                             accentColor={accentColor}
                             primaryColor={primaryColor}
                             buttonColor={buttonColor}
-                            cooldownUntil={feedCooldownUntil}
                         />
                         <ActionButton
                             icon={FaMoon}

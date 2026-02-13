@@ -35,8 +35,9 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const aliveTimerRef = useRef(null);
     const bubbleTimerRef = useRef(null);
 
-    // 능동적 대화 타이머 간격 (개발: 10초, 배포: 10분)
-    const ALIVE_INTERVAL_MS = 600000; // 10분 (배포용)
+    // 랜덤 대화 주기 (3~5분)
+    const ALIVE_MIN_MS = 180000; // 3분
+    const ALIVE_MAX_MS = 300000; // 5분
 
     const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast, isSleeping, sleepToast, showSleepToast } = usePet();
     const { equippedItems, getEquippedItem } = useStore();
@@ -127,19 +128,27 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     useEffect(() => {
         return () => {
             if (coldTimerRef.current) clearTimeout(coldTimerRef.current);
-            if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
+            if (aliveTimerRef.current) clearTimeout(aliveTimerRef.current);
             if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
         };
     }, []);
 
-    // ━━━ 몽글이 능동적 대화 시스템 ━━━
+    // ━━━ 몽글이 능동적 대화 시스템 (랜덤 3~5분) ━━━
 
-    // 능동적 대화 타이머 리셋 함수
-    const resetAliveTimer = () => {
-        if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
+    // 랜덤 대화 타이머 (setTimeout 재귀)
+    const scheduleNextAlive = () => {
+        if (aliveTimerRef.current) clearTimeout(aliveTimerRef.current);
         if (!user?.id) return;
 
-        aliveTimerRef.current = setInterval(async () => {
+        const randomDelay = ALIVE_MIN_MS + Math.random() * (ALIVE_MAX_MS - ALIVE_MIN_MS);
+
+        aliveTimerRef.current = setTimeout(async () => {
+            // 수면 중이면 말 걸지 않고 다음 타이머만 재설정
+            if (isSleeping) {
+                scheduleNextAlive();
+                return;
+            }
+
             try {
                 const data = await mongleApi.getAliveQuestion(user.id);
                 if (data?.message) {
@@ -149,29 +158,37 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
             } catch (e) {
                 console.error('[HomeView] alive-question 실패:', e);
             }
-        }, ALIVE_INTERVAL_MS);
+
+            // 다음 랜덤 타이머 설정
+            scheduleNextAlive();
+        }, randomDelay);
     };
 
-    // 초기 진입: 인삿말 API 호출 + 타이머 시작
+    // 초기 진입: 인삿말 API 호출 (수면 중이면 차단) + 랜덤 타이머 시작
     useEffect(() => {
         if (!user?.id) return;
 
-        const fetchGreeting = async () => {
-            try {
-                const data = await mongleApi.getGreeting(user.id);
-                if (data?.message) {
-                    setAiResponse(data.message);
+        // 수면 중이면 인삿말 차단, "ZZZ..." 표시
+        if (isSleeping) {
+            setAiResponse('ZZZ...');
+        } else {
+            const fetchGreeting = async () => {
+                try {
+                    const data = await mongleApi.getGreeting(user.id);
+                    if (data?.message) {
+                        setAiResponse(data.message);
+                    }
+                } catch (e) {
+                    console.error('[HomeView] greeting 실패:', e);
                 }
-            } catch (e) {
-                console.error('[HomeView] greeting 실패:', e);
-            }
-        };
+            };
+            fetchGreeting();
+        }
 
-        fetchGreeting();
-        resetAliveTimer();
+        scheduleNextAlive();
 
         return () => {
-            if (aliveTimerRef.current) clearInterval(aliveTimerRef.current);
+            if (aliveTimerRef.current) clearTimeout(aliveTimerRef.current);
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
@@ -180,13 +197,13 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const handleWrite = async (content) => {
         // 수면 중: API 미호출, 말풍선에 수면 메시지 표시
         if (isSleeping) {
-            setAiResponse('새근새근 자는 중...');
+            setAiResponse('ZZZ...');
             showSleepToast();
             return;
         }
 
         // 사용자 인터랙션 시 능동적 대화 타이머 리셋
-        resetAliveTimer();
+        scheduleNextAlive();
 
         setLatestLog(content);
         setIsAiThinking(true);

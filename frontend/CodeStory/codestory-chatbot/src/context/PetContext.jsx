@@ -35,11 +35,6 @@ const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 120000 : 1800000; // 2분 or 30�
 // 쓰다듬기 Lock 유지 시간
 const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
 
-// ─── 쿨타임 상수 (4단계) ───
-const FEED_COOLDOWN_MS = IS_DEV_MODE ? 60000 : 900000;   // 1분 or 15분
-const TOUCH_COOLDOWN_MS = IS_DEV_MODE ? 60000 : 900000;  // 1분 or 15분
-const WAKE_COOLDOWN_MS = IS_DEV_MODE ? 120000 : 1800000; // 2분 or 30분
-
 // localStorage 키
 const STORAGE_KEYS = {
     AFFECTION: 'pet_affection_gauge',
@@ -51,9 +46,6 @@ const STORAGE_KEYS = {
     LAST_INTERACTION: 'pet_last_interaction_time',
     EMOTION_SHARDS: 'pet_emotion_shards',
     AFFECTION_LOCK_UNTIL: 'pet_affection_lock_until',
-    FEED_COOLDOWN_UNTIL: 'pet_feed_cooldown_until',
-    TOUCH_COOLDOWN_UNTIL: 'pet_touch_cooldown_until',
-    WAKE_COOLDOWN_UNTIL: 'pet_wake_cooldown_until',
 };
 
 // localStorage 유틸리티
@@ -63,15 +55,6 @@ const loadGaugeFromStorage = (key, defaultValue = 50) => {
         return stored !== null ? parseFloat(stored) : defaultValue;
     } catch {
         return defaultValue;
-    }
-};
-
-const loadTimestampFromStorage = (key) => {
-    try {
-        const stored = localStorage.getItem(key);
-        return stored ? parseInt(stored) : 0;
-    } catch {
-        return 0;
     }
 };
 
@@ -122,11 +105,6 @@ export const PetProvider = ({ children }) => {
     // ━━━ 수면 토스트 (2단계) ━━━
     const [sleepToast, setSleepToast] = useState(null);
 
-    // ━━━ 쿨타임 상태 (4단계) ━━━
-    const [feedCooldownUntil, setFeedCooldownUntil] = useState(() => loadTimestampFromStorage(STORAGE_KEYS.FEED_COOLDOWN_UNTIL));
-    const [touchCooldownUntil, setTouchCooldownUntil] = useState(() => loadTimestampFromStorage(STORAGE_KEYS.TOUCH_COOLDOWN_UNTIL));
-    const [wakeCooldownUntil, setWakeCooldownUntil] = useState(() => loadTimestampFromStorage(STORAGE_KEYS.WAKE_COOLDOWN_UNTIL));
-
     // 동시성 제어 플래그
     const [isApiLoading, setIsApiLoading] = useState(false);
 
@@ -153,34 +131,6 @@ export const PetProvider = ({ children }) => {
     const showSleepToast = useCallback((message) => {
         setSleepToast(message || '몽글이가 자고 있어요. 램프를 켜서 깨워주세요.');
         setTimeout(() => setSleepToast(null), 3000);
-    }, []);
-
-    // ─── 쿨타임 헬퍼 (4단계) ───
-    const isFeedOnCooldown = useCallback(() => {
-        return feedCooldownUntil > Date.now();
-    }, [feedCooldownUntil]);
-
-    const isTouchOnCooldown = useCallback(() => {
-        return touchCooldownUntil > Date.now();
-    }, [touchCooldownUntil]);
-
-    const isWakeOnCooldown = useCallback(() => {
-        return wakeCooldownUntil > Date.now();
-    }, [wakeCooldownUntil]);
-
-    const startFeedCooldown = useCallback(() => {
-        const until = Date.now() + FEED_COOLDOWN_MS;
-        setFeedCooldownUntil(until);
-    }, []);
-
-    const startTouchCooldown = useCallback(() => {
-        const until = Date.now() + TOUCH_COOLDOWN_MS;
-        setTouchCooldownUntil(until);
-    }, []);
-
-    const startWakeCooldown = useCallback(() => {
-        const until = Date.now() + WAKE_COOLDOWN_MS;
-        setWakeCooldownUntil(until);
     }, []);
 
     // ─── 서버에서 PetStatus 조회 및 로컬 state 동기화 ───
@@ -287,23 +237,14 @@ export const PetProvider = ({ children }) => {
         }
     }, [showCoinToast]);
 
-    // ─── 쓰다듬기 완료 (쿨타임 적용) ───
+    // ─── 쓰다듬기 완료 ───
     const handleAffectionComplete = useCallback(async (userId) => {
-        // 쿨타임 체크
-        if (touchCooldownUntil > Date.now()) {
-            console.log('[AffectionComplete] 쿨타임 중 - 무시');
-            return;
-        }
-
         // Lock 시간 설정
         const lockUntil = Date.now() + AFFECTION_LOCK_DURATION_MS;
         setAffectionLockUntil(lockUntil);
 
         // 게이지를 100%로 설정
         setAffectionGauge(100);
-
-        // 쿨타임 시작
-        startTouchCooldown();
 
         // 서버 API 호출 (동시성 제어)
         if (isApiLoading) {
@@ -323,7 +264,7 @@ export const PetProvider = ({ children }) => {
         } finally {
             setIsApiLoading(false);
         }
-    }, [isApiLoading, touchCooldownUntil, startTouchCooldown]);
+    }, [isApiLoading]);
 
     // ─── 감정 조각 수집 (Bug A 수정: handleAction 래퍼 제거) ───
     const handleCollectShard = useCallback(async (userId, shardId) => {
@@ -357,19 +298,13 @@ export const PetProvider = ({ children }) => {
         }, 10000);
     }, []);
 
-    // ─── 무드등 토글 (기상 쿨타임 적용) ───
+    // ─── 무드등 토글 ───
     const toggleMoodLight = useCallback(() => {
         setMoodLightOn(prev => {
             const newValue = !prev;
             if (newValue) {
-                // 기상 쿨타임 체크
-                if (wakeCooldownUntil > Date.now()) {
-                    console.log('[MoodLight] 기상 쿨타임 중 - 무시');
-                    return prev; // 변경하지 않음
-                }
                 // 무드등 켜기 (기상)
                 setIsSleeping(false);
-                startWakeCooldown();
                 console.log('[MoodLight] 무드등 켜짐 - 몽글이 기상');
             } else {
                 // 무드등 끄기 (수면)
@@ -379,18 +314,13 @@ export const PetProvider = ({ children }) => {
             return newValue;
         });
         setLastInteractionTime(Date.now());
-    }, [wakeCooldownUntil, startWakeCooldown]);
+    }, []);
 
-    // ─── 배고픔 게이지 증가 (식사) + 수면/쿨타임 체크 ───
+    // ─── 배고픔 게이지 증가 (식사) + 수면 체크 ───
     const feedEmotion = useCallback((emotionType, amount = 25) => {
         // 수면 중 차단
         if (isSleeping) {
             showSleepToast();
-            return;
-        }
-        // 쿨타임 체크
-        if (feedCooldownUntil > Date.now()) {
-            console.log('[feedEmotion] 쿨타임 중 - 무시');
             return;
         }
 
@@ -398,9 +328,8 @@ export const PetProvider = ({ children }) => {
             const next = Math.min(100, prev + amount);
             return next;
         });
-        startFeedCooldown();
         setLastInteractionTime(Date.now());
-    }, [isSleeping, feedCooldownUntil, showSleepToast, startFeedCooldown]);
+    }, [isSleeping, showSleepToast]);
 
     // ─── 사용자 상호작용 (마지막 시간 업데이트) ───
     const updateInteraction = useCallback(() => {
@@ -435,13 +364,6 @@ export const PetProvider = ({ children }) => {
             localStorage.removeItem(STORAGE_KEYS.AFFECTION_LOCK_UNTIL);
         }
     }, [affectionLockUntil]);
-
-    // ─── 쿨타임 localStorage 동기화 ───
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.FEED_COOLDOWN_UNTIL, feedCooldownUntil);
-        localStorage.setItem(STORAGE_KEYS.TOUCH_COOLDOWN_UNTIL, touchCooldownUntil);
-        localStorage.setItem(STORAGE_KEYS.WAKE_COOLDOWN_UNTIL, wakeCooldownUntil);
-    }, [feedCooldownUntil, touchCooldownUntil, wakeCooldownUntil]);
 
     // ─── 감정 조각 localStorage 동기화 ───
     useEffect(() => {
@@ -655,16 +577,9 @@ export const PetProvider = ({ children }) => {
             triggerGaugeReward,
             triggerShardReward,
             triggerDiaryReward,
-            // 2단계: 수면 토스트
+            // 수면 토스트
             sleepToast,
             showSleepToast,
-            // 4단계: 쿨타임
-            feedCooldownUntil,
-            touchCooldownUntil,
-            wakeCooldownUntil,
-            isFeedOnCooldown,
-            isTouchOnCooldown,
-            isWakeOnCooldown,
         }}>
             {children}
         </PetContext.Provider>

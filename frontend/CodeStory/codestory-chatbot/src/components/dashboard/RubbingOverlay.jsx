@@ -4,17 +4,14 @@ import { motion } from 'framer-motion';
 import { usePet } from '../../context/PetContext';
 
 export default function RubbingOverlay({ userId, onShowFullAnimation }) {
-    // eslint-disable-next-line no-unused-vars
     const {
-        isRubbing,
         setIsRubbing,
         setAffectionGauge,
         isAffectionLocked,
         setIsAffectionLocked,
         handleAffectionComplete,
         isSleeping,
-        showSleepToast,
-        isTouchOnCooldown
+        showSleepToast
     } = usePet();
     const lastMoveTimeRef = useRef(0);
     const hasReachedMaxRef = useRef(false); // 100% 도달 여부 추적
@@ -27,11 +24,6 @@ export default function RubbingOverlay({ userId, onShowFullAnimation }) {
         // 수면 중 차단
         if (isSleeping) {
             showSleepToast();
-            return;
-        }
-
-        // 쿨타임 중 차단
-        if (isTouchOnCooldown()) {
             return;
         }
 
@@ -62,7 +54,7 @@ export default function RubbingOverlay({ userId, onShowFullAnimation }) {
 
             return next;
         });
-    }, [userId, isAffectionLocked, setAffectionGauge, setIsAffectionLocked, handleAffectionComplete, onShowFullAnimation, isSleeping, showSleepToast, isTouchOnCooldown]);
+    }, [userId, isAffectionLocked, setAffectionGauge, setIsAffectionLocked, handleAffectionComplete, onShowFullAnimation, isSleeping, showSleepToast]);
 
     const startRubbing = useCallback(() => {
         setIsRubbing(true);
