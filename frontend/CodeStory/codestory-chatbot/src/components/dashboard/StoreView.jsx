@@ -33,33 +33,95 @@ const ItemPreview = ({ item }) => {
         );
     }
 
-    // 무드등 미리보기
+    // 무드등 미리보기 (designType별 분기)
     if (item.type === 'light') {
+        const dt = item.designType || 'classic';
+
+        // 튤립 램프
+        if (dt === 'tulip') {
+            return (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-0.5">
+                    <div className="w-9 h-10" style={{
+                        borderRadius: '45% 45% 35% 35% / 60% 60% 40% 40%',
+                        background: `linear-gradient(135deg, ${item.shadeColor}, ${item.shadeColorDark}CC, ${item.shadeColor})`,
+                        boxShadow: `0 0 12px ${item.shadeColor}88`
+                    }} />
+                    <div className="w-4 h-2 rounded-b-full" style={{ background: item.standColor }} />
+                    <div className="w-1 h-5 rounded-full" style={{ background: item.standColor }} />
+                    <div className="w-6 h-1.5 rounded-full" style={{ background: `linear-gradient(to bottom, ${item.standColor}, ${item.standColor}CC)` }} />
+                </div>
+            );
+        }
+
+        // 버섯 램프
+        if (dt === 'mushroom') {
+            return (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-0.5">
+                    <div className="w-14 h-8" style={{
+                        borderRadius: '50% 50% 15% 15% / 70% 70% 30% 30%',
+                        background: `linear-gradient(180deg, ${item.shadeColor}, ${item.shadeColorDark})`,
+                        boxShadow: `0 0 12px ${item.shadeColor}88, inset 0 3px 6px rgba(255,255,255,0.4)`
+                    }} />
+                    <div className="w-3 h-5 rounded-full" style={{ background: `linear-gradient(to right, ${item.standColor}DD, ${item.standColor}, ${item.standColor}DD)` }} />
+                    <div className="w-8 h-1.5 rounded-full" style={{ background: `linear-gradient(to bottom, ${item.standColor}, ${item.standColor}CC)` }} />
+                </div>
+            );
+        }
+
+        // 달/구름 램프
+        if (dt === 'moon') {
+            return (
+                <div className="w-full h-full flex items-center justify-center relative">
+                    <div className="w-12 h-12 rounded-full" style={{
+                        background: `radial-gradient(circle at 35% 35%, ${item.shadeColor}, ${item.shadeColorDark})`,
+                        boxShadow: `0 0 15px ${item.shadeColor}AA, 0 0 30px ${item.shadeColorDark}44`
+                    }}>
+                        <div className="absolute top-2.5 right-3 w-9 h-9 rounded-full" style={{
+                            background: 'radial-gradient(circle, rgba(0,0,20,0.25), rgba(0,0,20,0.1))',
+                            filter: 'blur(1px)'
+                        }} />
+                    </div>
+                    <div className="absolute top-2 right-3 w-1 h-1 rounded-full bg-yellow-200 animate-pulse" style={{ animationDuration: '2s' }} />
+                    <div className="absolute bottom-3 left-4 w-0.5 h-0.5 rounded-full bg-purple-200 animate-pulse" style={{ animationDuration: '3s' }} />
+                </div>
+            );
+        }
+
+        // 라바/네온 램프
+        if (dt === 'lava') {
+            return (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-0">
+                    <div className="w-4 h-2 rounded-t-md" style={{ background: item.standColor }} />
+                    <div className="w-7 h-12 overflow-hidden relative" style={{
+                        borderRadius: '30% 30% 20% 20% / 8% 8% 5% 5%',
+                        background: `linear-gradient(180deg, ${item.standColor}33, transparent 20%, transparent 80%, ${item.standColor}33)`,
+                        border: `1px solid ${item.shadeColor}44`,
+                        boxShadow: `0 0 10px ${item.shadeColor}55`
+                    }}>
+                        <div className="absolute w-3.5 h-4 rounded-full" style={{
+                            background: `radial-gradient(circle at 40% 30%, ${item.shadeColor}, ${item.shadeColorDark})`,
+                            top: '20%', left: '20%', filter: 'blur(1px)'
+                        }} />
+                        <div className="absolute w-2.5 h-3 rounded-full" style={{
+                            background: `radial-gradient(circle, ${item.shadeColorDark}, ${item.shadeColor})`,
+                            bottom: '15%', right: '15%', filter: 'blur(1px)'
+                        }} />
+                    </div>
+                    <div className="w-8 h-2 rounded-b-md" style={{ background: `linear-gradient(to bottom, ${item.standColor}, #0D0033)` }} />
+                </div>
+            );
+        }
+
+        // 기본 (classic) 램프
         return (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                {/* 전구 갓 */}
-                <div
-                    className="w-10 h-10 rounded-t-lg"
-                    style={{
-                        background: `linear-gradient(to bottom, ${item.shadeColor}, ${item.shadeColorDark})`,
-                        boxShadow: `0 0 15px ${item.shadeColor}, inset 0 2px 4px rgba(255,255,255,0.3)`,
-                        clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
-                    }}
-                ></div>
-                {/* 스탠드 */}
-                <div
-                    className="w-1 h-8 rounded-full"
-                    style={{
-                        background: `linear-gradient(to right, #3A3A3A, ${item.standColor}, #3A3A3A)`
-                    }}
-                ></div>
-                {/* 받침대 */}
-                <div
-                    className="w-8 h-2 rounded-full"
-                    style={{
-                        background: `linear-gradient(to bottom, ${item.standColor}, #1A1A1A)`
-                    }}
-                ></div>
+                <div className="w-10 h-10 rounded-t-lg" style={{
+                    background: `linear-gradient(to bottom, ${item.shadeColor}, ${item.shadeColorDark})`,
+                    boxShadow: `0 0 15px ${item.shadeColor}, inset 0 2px 4px rgba(255,255,255,0.3)`,
+                    clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
+                }} />
+                <div className="w-1 h-8 rounded-full" style={{ background: `linear-gradient(to right, #3A3A3A, ${item.standColor}, #3A3A3A)` }} />
+                <div className="w-8 h-2 rounded-full" style={{ background: `linear-gradient(to bottom, ${item.standColor}, #1A1A1A)` }} />
             </div>
         );
     }

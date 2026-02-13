@@ -29,8 +29,8 @@ const AUTO_SAVE_INTERVAL_MS = 30000; // 30초
 const FORCE_SLEEP_THRESHOLD = 10; // 수면 게이지 10% 이하
 const INACTIVITY_TIME_MS = 300000; // 5분 동안 입력 없으면
 
-// 자동 수면 (비활동 5시간)
-const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 300000 : 18000000; // 5분 or 5시간
+// 자동 수면 (비활동 3시간)
+const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 300000 : 10800000; // 5분 or 3시간
 
 // 쓰다듬기 Lock 유지 시간
 const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
