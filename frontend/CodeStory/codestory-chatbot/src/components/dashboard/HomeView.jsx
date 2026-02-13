@@ -34,13 +34,13 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const coldTimerRef = useRef(null);
     const aliveTimerRef = useRef(null);
     const bubbleTimerRef = useRef(null);
-    const isSleepingRef = useRef(isSleeping);
 
     // 랜덤 대화 주기 (3~5분)
     const ALIVE_MIN_MS = 180000; // 3분
     const ALIVE_MAX_MS = 300000; // 5분
 
     const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast, isSleeping, sleepToast, showSleepToast } = usePet();
+    const isSleepingRef = useRef(isSleeping);
     const { equippedItems, getEquippedItem } = useStore();
 
     // 장착된 테마 및 가구 (equippedItems 변경 시 자동 재계산)
