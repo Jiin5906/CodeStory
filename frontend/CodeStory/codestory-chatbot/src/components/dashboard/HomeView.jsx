@@ -45,7 +45,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const { petStatus, spawnEmotionShard, moodLightOn, affectionGauge, coins, coinToast, isSleeping, sleepToast, showSleepToast, showLevelUpModal, levelUpInfo, triggerLevelUpModal, closeLevelUpModal } = usePet();
     const isSleepingRef = useRef(isSleeping);
     const { equippedItems, getEquippedItem } = useStore();
-    const { isTourActive, currentStep, startMainTour, startConditionalTour, advanceTour } = useTour();
+    const { isTourActive, currentStep, startMainTour, startConditionalTour, advanceTour, resetTours } = useTour();
 
     // 장착된 테마 및 가구 (equippedItems 변경 시 자동 재계산)
     const equippedTheme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
@@ -1462,6 +1462,14 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     data-gtm="test-levelup-btn"
                 >
                     <MongleIcon name="testTube" size={14} className="mr-1" /> 레벨업 테스트
+                </button>
+                <button
+                    className="px-3 py-2 rounded-xl text-xs font-bold text-white shadow-lg active:scale-95 transition-transform"
+                    style={{ background: 'linear-gradient(135deg, #F97316, #EA580C)' }}
+                    onClick={() => { resetTours(); setTimeout(startMainTour, 100); }}
+                    data-gtm="test-tour-btn"
+                >
+                    <MongleIcon name="testTube" size={14} className="mr-1" /> 투어 테스트
                 </button>
             </div>
         </div>
