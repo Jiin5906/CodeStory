@@ -23,10 +23,12 @@ import MonthlyReport from './components/stats/MonthlyReport';
 import Settings from './components/layout/Settings';
 import SharedFeed from './components/feed/SharedFeed';
 import ShopPage from './components/shop/ShopPage';
+import OnboardingFlow from './components/onboarding/OnboardingFlow';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { PetProvider, usePet } from './context/PetContext';
 import { DiaryProvider } from './context/DiaryContext';
 import { StoreProvider } from './context/StoreContext';
+import { TourProvider } from './context/TourContext';
 
 function AppContent() {
     const { currentTheme } = useTheme();
@@ -121,7 +123,12 @@ function AppContent() {
         localStorage.setItem('diaryUser', JSON.stringify(userInfo));
         fetchDiaries(userInfo.id);
         fetchPetStatus(userInfo.id);
-        navigate('/dashboard');
+        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+        if (!hasSeenOnboarding) {
+            navigate('/onboarding');
+        } else {
+            navigate('/dashboard');
+        }
     };
 
     const handleLogout = () => {
@@ -172,6 +179,10 @@ function AppContent() {
             <Routes>
                 <Route path="/login" element={<Login onLogin={(e, p) => authApi.login(e,p).then(handleLoginSuccess)} onSignup={(e,p,n) => authApi.signup(e,p,n).then(handleLoginSuccess)} onGuestLogin={() => handleLoginSuccess({id:0, nickname:'게스트'})} />} />
                 
+                <Route path="/onboarding" element={
+                    <OnboardingFlow onComplete={() => navigate('/dashboard')} />
+                } />
+
                 <Route path="/editor" element={
                     <div className="animate-fade-in" style={{position:'fixed', inset:0, zIndex:100, background:'var(--bg-color)', display:'flex', justifyContent:'center', alignItems:'center'}} data-gtm="view-full-editor">
                         <div style={{width:'90%', maxWidth:'1100px', height:'85vh', background:'var(--card-bg)', borderRadius:'24px', overflow:'hidden', border:'1px solid var(--border-color)'}}>
@@ -257,9 +268,11 @@ function App() {
             <PetProvider>
                 <StoreProvider>
                     <DiaryProvider>
-                        <Router>
-                            <AppContent />
-                        </Router>
+                        <TourProvider>
+                            <Router>
+                                <AppContent />
+                            </Router>
+                        </TourProvider>
                     </DiaryProvider>
                 </StoreProvider>
             </PetProvider>

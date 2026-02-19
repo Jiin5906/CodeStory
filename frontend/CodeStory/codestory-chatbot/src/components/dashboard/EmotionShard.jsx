@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { usePet } from '../../context/PetContext';
+import { useTour } from '../../context/TourContext';
 import { useState, useMemo } from 'react';
 import { HeartShard, StarShard, DropShard, FireShard } from './EmotionShardSVG';
 import { getShardGlow, getEmotionBase } from './emotionShardUtils';
@@ -17,6 +18,7 @@ function ShardIcon({ emotion, size }) {
 
 export default function EmotionShard({ shard, userId }) {
     const { handleCollectShard, feedEmotion, isSleeping, showSleepToast } = usePet();
+    const { isTourActive, currentStep, advanceTour } = useTour();
     const [isCollecting, setIsCollecting] = useState(false);
 
     const handleClick = () => {
@@ -29,6 +31,11 @@ export default function EmotionShard({ shard, userId }) {
         setIsCollecting(true);
         feedEmotion(shard.emotion, 25);
         handleCollectShard(userId, shard.id);
+
+        // 투어: shard 단계 완료
+        if (isTourActive && currentStep?.id === 'shard') {
+            setTimeout(advanceTour, 300);
+        }
     };
 
     const emotion = shard.emotion || 'neutral';

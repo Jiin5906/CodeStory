@@ -7,9 +7,12 @@ import CircularProgressNew from './CircularProgressNew';
 import MoodLight from './MoodLight';
 import MainMenu from './MainMenu';
 import StoreView from './StoreView';
+import LevelUpModal from '../common/LevelUpModal';
 import { chatApi, mongleApi } from '../../services/api';
 import { usePet } from '../../context/PetContext';
 import { useStore } from '../../context/StoreContext';
+import MongleIcon from '../common/MongleIcons';
+import { useTour } from '../../context/TourContext';
 
 /**
  * HomeView — 홈/대화 페이지
@@ -39,9 +42,10 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const ALIVE_MIN_MS = 180000; // 3분
     const ALIVE_MAX_MS = 300000; // 5분
 
-    const { petStatus, spawnEmotionShard, moodLightOn, coins, coinToast, isSleeping, sleepToast, showSleepToast } = usePet();
+    const { petStatus, spawnEmotionShard, moodLightOn, affectionGauge, coins, coinToast, isSleeping, sleepToast, showSleepToast, showLevelUpModal, levelUpInfo, triggerLevelUpModal, closeLevelUpModal } = usePet();
     const isSleepingRef = useRef(isSleeping);
     const { equippedItems, getEquippedItem } = useStore();
+    const { isTourActive, currentStep, startMainTour, startConditionalTour, advanceTour } = useTour();
 
     // 장착된 테마 및 가구 (equippedItems 변경 시 자동 재계산)
     const equippedTheme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
@@ -142,6 +146,68 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
         isSleepingRef.current = isSleeping;
     }, [isSleeping]);
 
+    // ━━━ 투어 트리거 로직 ━━━
+
+    // 메인 투어: 온보딩 완료 후 홈 첫 진입 시 시작
+    useEffect(() => {
+        if (!user?.id) return;
+        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+        if (hasSeenOnboarding) {
+            // 300ms 딜레이: 컴포넌트 렌더 + 레이아웃 안정 후 시작
+            const t = setTimeout(startMainTour, 800);
+            return () => clearTimeout(t);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
+
+    // 조건부 투어: 쓰다듬기 게이지 20% 미만일 때 (1회만)
+    const affectionWarnedRef = useRef(false);
+    useEffect(() => {
+        if (!user?.id || isTourActive) return;
+        if (!affectionWarnedRef.current && affectionGauge < 20 && affectionGauge > 0) {
+            affectionWarnedRef.current = true;
+            startConditionalTour('affection');
+        }
+    }, [affectionGauge, user?.id, isTourActive, startConditionalTour]);
+
+    // 조건부 투어: 몽글이가 잠들었을 때 (1회만)
+    const lampTourTriggeredRef = useRef(false);
+    useEffect(() => {
+        if (!user?.id || isTourActive) return;
+        if (!lampTourTriggeredRef.current && isSleeping) {
+            lampTourTriggeredRef.current = true;
+            const t = setTimeout(() => startConditionalTour('lamp'), 1000);
+            return () => clearTimeout(t);
+        }
+    }, [isSleeping, user?.id, isTourActive, startConditionalTour]);
+
+    // 조건부 투어: 레벨업 모달 닫힌 후 상점 안내
+    const prevShowLevelUpRef = useRef(false);
+    useEffect(() => {
+        if (prevShowLevelUpRef.current && !showLevelUpModal) {
+            // 레벨업 모달이 방금 닫혔으면 상점 투어 시작
+            const t = setTimeout(() => startConditionalTour('levelup'), 400);
+            return () => clearTimeout(t);
+        }
+        prevShowLevelUpRef.current = showLevelUpModal;
+    }, [showLevelUpModal, startConditionalTour]);
+
+    // 투어: affection-pet 단계 - 쓰다듬기 완료 감지
+    useEffect(() => {
+        if (isTourActive && currentStep?.id === 'affection-pet' && affectionGauge >= 90) {
+            advanceTour();
+        }
+    }, [affectionGauge, isTourActive, currentStep, advanceTour]);
+
+    // 투어: lamp-wake 단계 - 램프 켜기 감지
+    const prevMoodLightRef = useRef(moodLightOn);
+    useEffect(() => {
+        if (isTourActive && currentStep?.id === 'lamp-wake' && moodLightOn && !prevMoodLightRef.current) {
+            setTimeout(advanceTour, 300);
+        }
+        prevMoodLightRef.current = moodLightOn;
+    }, [moodLightOn, isTourActive, currentStep, advanceTour]);
+
     // ━━━ 몽글이 능동적 대화 시스템 (랜덤 3~5분) ━━━
 
     // 랜덤 대화 타이머 (setTimeout 재귀)
@@ -231,6 +297,11 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                 }
             }
 
+            // 투어: chat 단계 완료 (채팅 전송 성공 시 다음 단계로)
+            if (isTourActive && currentStep?.id === 'chat') {
+                setTimeout(advanceTour, 500);
+            }
+
             if (onWriteClick) {
                 onWriteClick();
             }
@@ -306,14 +377,14 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                 {isNightTime && (
                                     <>
                                         {/* 🌙 달 */}
-                                        <div className="absolute top-[15%] right-[20%] text-4xl animate-pulse" style={{ animationDuration: '3s' }}>
-                                            🌙
+                                        <div className="absolute top-[15%] right-[20%] animate-pulse" style={{ animationDuration: '3s' }}>
+                                            <MongleIcon name="moon" size={36} />
                                         </div>
-                                        {/* ✨ 별들 */}
-                                        <div className="absolute top-[20%] left-[15%] text-xl animate-pulse" style={{ animationDuration: '2s' }}>⭐</div>
-                                        <div className="absolute top-[10%] left-[30%] text-sm animate-pulse" style={{ animationDuration: '2.5s' }}>✨</div>
-                                        <div className="absolute top-[25%] right-[35%] text-base animate-pulse" style={{ animationDuration: '3s' }}>⭐</div>
-                                        <div className="absolute top-[35%] left-[25%] text-xs animate-pulse" style={{ animationDuration: '2.2s' }}>✨</div>
+                                        {/* 별들 */}
+                                        <div className="absolute top-[20%] left-[15%] animate-pulse" style={{ animationDuration: '2s' }}><MongleIcon name="star" size={22} /></div>
+                                        <div className="absolute top-[10%] left-[30%] animate-pulse" style={{ animationDuration: '2.5s' }}><MongleIcon name="sparkle" size={14} /></div>
+                                        <div className="absolute top-[25%] right-[35%] animate-pulse" style={{ animationDuration: '3s' }}><MongleIcon name="star" size={18} /></div>
+                                        <div className="absolute top-[35%] left-[25%] animate-pulse" style={{ animationDuration: '2.2s' }}><MongleIcon name="sparkle" size={12} /></div>
                                     </>
                                 )}
                             </div>
@@ -428,7 +499,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     </div>
                 </div>
 
-                {/* 📚 좌측 선반 2단 (다마고치 스타일) - 교체 가능한 장식 */}
+                {/* 📚 좌측 선반 2단 - 교체 가능한 장식 (shelfType별 고유 소품) */}
                 <div
                     className="absolute top-[28%] left-[8%] z-20 pointer-events-none"
                     data-decoration-type="shelf"
@@ -436,60 +507,251 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     data-gtm="decoration-wall-shelf"
                     style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
                 >
-                    {/* 상단 선반 */}
-                    <div className="relative w-28 h-2.5 rounded-md mb-8" style={{
-                        backgroundColor: equippedShelf?.color || '#D7B896',
-                        boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
-                    }}>
-                        {/* 선반 위 소품들 */}
-                        <div className="absolute -top-10 left-2 flex gap-2 items-end">
-                            {/* 📚 책 */}
-                            <div className="w-4 h-10 bg-gradient-to-br from-[#FF8FA3] to-[#FF6B8A] rounded-sm" style={{
-                                boxShadow: '2px 0 0 rgba(0,0,0,0.1)'
-                            }}></div>
-                            <div className="w-3 h-8 bg-gradient-to-br from-[#FFB5C2] to-[#FF9FB1] rounded-sm mt-2" style={{
-                                boxShadow: '2px 0 0 rgba(0,0,0,0.1)'
-                            }}></div>
+                    {(() => {
+                        const shelfId = equippedShelf?.id;
+                        const sc = equippedShelf?.color || '#D7B896';
+                        const shelfStyle = {
+                            backgroundColor: sc,
+                            boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
+                        };
 
-                            {/* 📷 카메라 */}
-                            <div className="relative w-7 h-6 bg-gradient-to-br from-[#FF9FB1] to-[#FF8FA3] rounded-md" style={{
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
-                            }}>
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white/80 rounded-full"></div>
-                                <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-white/60 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
+                        // ── 화이트 선반 (모던 & 스터디) ──
+                        if (shelfId === 'shelf_white') {
+                            return (
+                                <>
+                                    {/* 상단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md mb-8" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-2 z-10 flex gap-2 items-end">
+                                            {/* 디지털 시계 */}
+                                            <div className="relative w-10 h-7 bg-[#1F2937] rounded-md" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                                                <div className="absolute inset-0 flex items-center justify-center text-[8px] font-mono text-green-400 font-bold">12:30</div>
+                                            </div>
+                                            {/* 쌓인 모노톤 책 3권 (눕힘) */}
+                                            <div className="relative">
+                                                <div className="w-10 h-2 bg-[#374151] rounded-sm"></div>
+                                                <div className="w-9 h-2 bg-[#6B7280] rounded-sm -mt-0.5 ml-0.5"></div>
+                                                <div className="w-10 h-2 bg-[#4B5563] rounded-sm -mt-0.5"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* 하단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-3 z-10 flex gap-3 items-end">
+                                            {/* 연필꽂이 */}
+                                            <div className="relative w-7 h-8">
+                                                <div className="absolute bottom-0 w-7 h-6 bg-[#9CA3AF] rounded-md"></div>
+                                                <div className="absolute bottom-5 left-1 w-0.5 h-5 bg-[#F59E0B] rounded-full rotate-[-5deg]"></div>
+                                                <div className="absolute bottom-5 left-3 w-0.5 h-6 bg-[#3B82F6] rounded-full"></div>
+                                                <div className="absolute bottom-5 left-5 w-0.5 h-5 bg-[#10B981] rounded-full rotate-[5deg]"></div>
+                                            </div>
+                                            {/* 미니 노트 */}
+                                            <div className="w-6 h-8 bg-white rounded-sm border border-gray-200" style={{ boxShadow: '1px 1px 0 rgba(0,0,0,0.05)' }}>
+                                                <div className="mt-1.5 mx-1 space-y-0.5">
+                                                    <div className="h-px bg-gray-200"></div>
+                                                    <div className="h-px bg-gray-200"></div>
+                                                    <div className="h-px bg-gray-200"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        }
 
-                    {/* 하단 선반 */}
-                    <div className="relative w-28 h-2.5 rounded-md" style={{
-                        backgroundColor: equippedShelf?.color || '#D7B896',
-                        boxShadow: '0 2px 0 rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)'
-                    }}>
-                        {/* 선반 위 소품들 */}
-                        <div className="absolute -top-12 left-2 flex gap-3 items-end">
-                            {/* 🌵 선인장 화분 */}
-                            <div className="relative w-8 h-12">
-                                {/* 화분 */}
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-5 bg-gradient-to-b from-[#FF9980] to-[#FF8060] rounded-b-md" style={{
-                                    clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'
-                                }}></div>
-                                {/* 선인장 몸통 */}
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4 h-7 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-lg"></div>
-                                {/* 선인장 팔 */}
-                                <div className="absolute bottom-5 left-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
-                                <div className="absolute bottom-5 right-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
-                            </div>
+                        // ── 파스텔 선반 (러블리 & 키치) ──
+                        if (shelfId === 'shelf_pastel') {
+                            return (
+                                <>
+                                    {/* 상단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md mb-8" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-2 z-10 flex gap-2 items-end">
+                                            {/* 곰인형 */}
+                                            <div className="relative w-10 h-11">
+                                                {/* 귀 */}
+                                                <div className="absolute top-0 left-1 w-3 h-3 bg-[#D2A06D] rounded-full"></div>
+                                                <div className="absolute top-0 right-1 w-3 h-3 bg-[#D2A06D] rounded-full"></div>
+                                                <div className="absolute top-0.5 left-1.5 w-2 h-2 bg-[#C4915A] rounded-full"></div>
+                                                <div className="absolute top-0.5 right-1.5 w-2 h-2 bg-[#C4915A] rounded-full"></div>
+                                                {/* 머리 */}
+                                                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-8 h-8 bg-[#D2A06D] rounded-full"></div>
+                                                {/* 눈 */}
+                                                <div className="absolute top-5 left-2.5 w-1 h-1 bg-[#1F1F1F] rounded-full"></div>
+                                                <div className="absolute top-5 right-2.5 w-1 h-1 bg-[#1F1F1F] rounded-full"></div>
+                                                {/* 코 */}
+                                                <div className="absolute top-6.5 left-1/2 -translate-x-1/2 w-2 h-1.5 bg-[#B07D4F] rounded-full"></div>
+                                            </div>
+                                            {/* 하트 거울 */}
+                                            <svg viewBox="0 0 20 22" width="16" height="18">
+                                                <path d="M10,6 Q10,2 13,2 Q16,2 16,6 Q16,2 19,2 Q22,2 22,6 Q22,12 16,16 Q10,12 10,6 Z" fill="#FFB6C1" transform="translate(-6,-1) scale(0.85)" />
+                                                <path d="M10,6 Q10,3 12.5,3 Q15,3 15,6 Q15,3 17.5,3 Q20,3 20,6 Q20,11 15,14 Q10,11 10,6 Z" fill="#E0F0FF" opacity="0.5" transform="translate(-5,-0.5) scale(0.8)" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    {/* 하단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-3 z-10 flex gap-3 items-end">
+                                            {/* 향수병 */}
+                                            <div className="relative w-8 h-10">
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-7 bg-gradient-to-b from-[#E9D5FF]/60 to-[#E9D5FF]/40 rounded-full border border-[#C084FC]/50"></div>
+                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-2 h-2.5 bg-[#C084FC] rounded-sm"></div>
+                                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-5 h-px bg-[#F472B6]"></div>
+                                            </div>
+                                            {/* 리본 */}
+                                            <div className="relative w-6 h-5">
+                                                <div className="absolute top-1 left-0 w-3 h-2 bg-[#F9A8D4] rounded-full rotate-[-20deg]"></div>
+                                                <div className="absolute top-1 right-0 w-3 h-2 bg-[#F9A8D4] rounded-full rotate-[20deg]"></div>
+                                                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#EC4899] rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        }
 
-                            {/* 📦 박스 */}
-                            <div className="relative w-6 h-7 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-sm" style={{
-                                boxShadow: '2px 2px 0 rgba(0,0,0,0.1)'
-                            }}>
-                                <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/30"></div>
-                                <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/30"></div>
-                            </div>
-                        </div>
-                    </div>
+                        // ── 민트 선반 (가드닝 & 네이처) ──
+                        if (shelfId === 'shelf_mint') {
+                            return (
+                                <>
+                                    {/* 상단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md mb-8" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-2 z-10 flex gap-2 items-end">
+                                            {/* 물뿌리개 */}
+                                            <div className="relative w-11 h-8">
+                                                <div className="absolute bottom-0 w-8 h-6 bg-[#67E8F9] rounded-lg"></div>
+                                                <div className="absolute bottom-4 right-0 w-5 h-1.5 bg-[#67E8F9] rounded-full rotate-[-30deg]"></div>
+                                                <div className="absolute bottom-5 left-0 w-2 h-3 bg-[#22D3EE] rounded-md"></div>
+                                            </div>
+                                            {/* 토기 화분 2개 */}
+                                            <div className="relative w-5 h-7">
+                                                <div className="absolute bottom-0 w-5 h-4 bg-[#C2956B] rounded-b-md" style={{ clipPath: 'polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)' }}></div>
+                                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-3 h-4 bg-[#4ADE80] rounded-full"></div>
+                                            </div>
+                                            <div className="relative w-4 h-6">
+                                                <div className="absolute bottom-0 w-4 h-3.5 bg-[#B8865A] rounded-b-md" style={{ clipPath: 'polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)' }}></div>
+                                                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 w-2.5 h-3.5 bg-[#22C55E] rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        {/* 덩굴 잎 (선반 아래로 늘어짐) */}
+                                        <div className="absolute top-2 -left-1">
+                                            <svg viewBox="0 0 20 30" width="16" height="24">
+                                                <path d="M10,0 Q4,8 8,14 Q4,18 8,24" fill="none" stroke="#4ADE80" strokeWidth="1.5" />
+                                                <circle cx="6" cy="8" r="2.5" fill="#4ADE80" opacity="0.7" />
+                                                <circle cx="10" cy="14" r="2" fill="#22C55E" opacity="0.7" />
+                                                <circle cx="6" cy="20" r="2.5" fill="#4ADE80" opacity="0.6" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    {/* 하단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-2 z-10 flex gap-2 items-end">
+                                            {/* 미니 가드닝 삽 */}
+                                            <div className="relative w-3 h-9">
+                                                <div className="absolute bottom-0 w-1 h-6 bg-[#A16207] rounded-full mx-auto left-1/2 -translate-x-1/2"></div>
+                                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#9CA3AF] rounded-b-full"></div>
+                                            </div>
+                                            {/* 큰 잎 달린 화분 */}
+                                            <div className="relative w-8 h-10">
+                                                <div className="absolute bottom-0 w-7 h-4 bg-[#C2956B] rounded-b-lg mx-auto left-0.5" style={{ clipPath: 'polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)' }}></div>
+                                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-2 h-5 bg-[#16A34A] rounded-full"></div>
+                                                <div className="absolute bottom-5 left-0 w-4 h-3 bg-[#4ADE80] rounded-full rotate-[-30deg]"></div>
+                                                <div className="absolute bottom-5 right-0 w-4 h-3 bg-[#4ADE80] rounded-full rotate-[30deg]"></div>
+                                            </div>
+                                            {/* 씨앗 봉투 */}
+                                            <div className="w-5 h-7 bg-[#FDE68A] rounded-sm" style={{ boxShadow: '1px 1px 0 rgba(0,0,0,0.05)' }}>
+                                                <div className="mt-1 mx-0.5 w-4 h-2 bg-[#F59E0B]/30 rounded-sm"></div>
+                                            </div>
+                                        </div>
+                                        {/* 덩굴 잎 (하단 선반 아래로) */}
+                                        <div className="absolute top-2 right-0">
+                                            <svg viewBox="0 0 16 20" width="12" height="16">
+                                                <path d="M6,0 Q12,6 8,12 Q12,16 8,20" fill="none" stroke="#4ADE80" strokeWidth="1.2" />
+                                                <circle cx="10" cy="6" r="2" fill="#22C55E" opacity="0.6" />
+                                                <circle cx="7" cy="13" r="2" fill="#4ADE80" opacity="0.5" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        }
+
+                        // ── 라벤더 선반 (미스틱 & 힐링) ──
+                        if (shelfId === 'shelf_lavender') {
+                            return (
+                                <>
+                                    {/* 상단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md mb-8" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-2 z-10 flex gap-2 items-end">
+                                            {/* 수정구슬 */}
+                                            <div className="relative w-10 h-11">
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-2 bg-[#7C3AED]/70 rounded-md"></div>
+                                                <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full" style={{
+                                                    background: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.6), rgba(196,181,253,0.4), rgba(139,92,246,0.3))',
+                                                    boxShadow: '0 0 8px rgba(139,92,246,0.3)'
+                                                }}></div>
+                                                <div className="absolute bottom-5 left-3 w-2 h-2 bg-white/50 rounded-full"></div>
+                                            </div>
+                                            {/* 캔들 */}
+                                            <div className="relative w-5 h-11">
+                                                <div className="absolute bottom-0 w-5 h-7 bg-[#FDE68A] rounded-md"></div>
+                                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-1 h-2 bg-[#FFFBEB] rounded-sm"></div>
+                                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-2.5 h-3 bg-[#FB923C] rounded-full animate-pulse" style={{ filter: 'blur(0.5px)' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* 하단 선반 */}
+                                    <div className="relative w-28 h-2.5 rounded-md" style={shelfStyle}>
+                                        <div className="absolute bottom-full left-3 z-10 flex gap-3 items-end">
+                                            {/* 타로 카드 */}
+                                            <div className="relative w-6 h-9 bg-[#581C87] rounded-sm" style={{ transform: 'rotate(5deg)', boxShadow: '2px 2px 4px rgba(0,0,0,0.15)' }}>
+                                                <div className="absolute inset-0.5 rounded-sm border border-[#A855F7]/40"></div>
+                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-[#E9D5FF]/40"></div>
+                                                <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#E9D5FF]/50" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }}></div>
+                                            </div>
+                                            {/* 미니 보라 병 */}
+                                            <div className="relative w-4 h-8">
+                                                <div className="absolute bottom-0 w-4 h-6 bg-[#C084FC]/40 rounded-md border border-[#A855F7]/30"></div>
+                                                <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#7C3AED]/60 rounded-sm"></div>
+                                            </div>
+                                            {/* 작은 별 장식 */}
+                                            <div className="opacity-70"><MongleIcon name="sparkle" size={18} /></div>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        }
+
+                        // ── 기본 선반 (원목 - 책 + 카메라 + 선인장 + 박스) ──
+                        return (
+                            <>
+                                {/* 상단 선반 */}
+                                <div className="relative w-28 h-2.5 rounded-md mb-8" style={shelfStyle}>
+                                    <div className="absolute bottom-full left-2 z-10 flex gap-2 items-end">
+                                        <div className="w-4 h-10 bg-gradient-to-br from-[#FF8FA3] to-[#FF6B8A] rounded-sm" style={{ boxShadow: '2px 0 0 rgba(0,0,0,0.1)' }}></div>
+                                        <div className="w-3 h-8 bg-gradient-to-br from-[#FFB5C2] to-[#FF9FB1] rounded-sm mt-2" style={{ boxShadow: '2px 0 0 rgba(0,0,0,0.1)' }}></div>
+                                        <div className="relative w-7 h-6 bg-gradient-to-br from-[#FF9FB1] to-[#FF8FA3] rounded-md" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white/80 rounded-full"></div>
+                                            <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-white/60 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* 하단 선반 */}
+                                <div className="relative w-28 h-2.5 rounded-md" style={shelfStyle}>
+                                    <div className="absolute bottom-full left-2 z-10 flex gap-3 items-end">
+                                        <div className="relative w-8 h-12">
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-5 bg-gradient-to-b from-[#FF9980] to-[#FF8060] rounded-b-md" style={{ clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)' }}></div>
+                                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4 h-7 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-lg"></div>
+                                            <div className="absolute bottom-5 left-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                            <div className="absolute bottom-5 right-0 w-2 h-3 bg-gradient-to-br from-[#7CB342] to-[#558B2F] rounded-full"></div>
+                                        </div>
+                                        <div className="relative w-6 h-7 bg-gradient-to-br from-[#D4A5F5] to-[#B87FE0] rounded-sm" style={{ boxShadow: '2px 2px 0 rgba(0,0,0,0.1)' }}>
+                                            <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/30"></div>
+                                            <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/30"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
 
                 {/* 💜 펫 + 방석 통합 컨테이너 (반응형 동기화) */}
@@ -528,7 +790,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     </div>
 
                     {/* 펫 (MainRoom) — 방석 위에 정확히 앉도록 translate-y 조정 */}
-                    <div className="-mb-2 z-30 pointer-events-auto" style={{ overflow: 'visible' }}>
+                    <div className="-mb-2 z-30 pointer-events-auto" style={{ overflow: 'visible' }} data-gtm="mongle-character">
                         <div className="flex items-center justify-center" style={{ overflow: 'visible' }}>
                             <MainRoom
                                 latestLog={latestLog}
@@ -541,59 +803,226 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                         </div>
                     </div>
 
-                    {/* 방석 */}
+                    {/* 방석 (cushionType별 고유 디자인) */}
                     <div
                         data-decoration-type="rug"
                         data-decoration-id="premium-cushion-01"
                         data-gtm="decoration-premium-cushion"
                     >
-                        <div className="relative w-52 h-28">
-                            {/* 방석 본체 (타원형) */}
-                            <div className="absolute inset-0 rounded-[50%]"
-                                style={{
-                                    background: equippedCushion
-                                        ? `linear-gradient(to bottom right, ${equippedCushion.color}, ${equippedCushion.colorDark})`
-                                        : 'linear-gradient(to bottom right, #E8C5FF, #D4A5F5, #C490E4)',
-                                    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
-                                    boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
-                                }}
-                            ></div>
+                        {(() => {
+                            const cId = equippedCushion?.id;
+                            const cc = equippedCushion?.color || '#E8C5FF';
+                            const cd = equippedCushion?.colorDark || '#D4A5F5';
 
-                            {/* 방석 중앙 패턴 (십자형 스티치) */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16">
-                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
-                                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/40 rounded-full -translate-x-1/2"></div>
-                            </div>
+                            // ── 구름 방석: 거대하고 푹신한 뭉게구름 ──
+                            if (cId === 'cushion_blue') {
+                                return (
+                                    <div className="relative w-56 h-32">
+                                        {/* 바닥 그림자 */}
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-52 h-5 bg-black/20 rounded-[50%] blur-xl"></div>
+                                        {/* 구름 베이스 (가장 넓은 층) */}
+                                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-56 h-16 rounded-[50%]" style={{ background: `linear-gradient(180deg, #E8F4FD, ${cd})`, filter: 'drop-shadow(0 8px 20px rgba(100,149,237,0.35))' }}></div>
+                                        {/* 구름 중간층 */}
+                                        <div className="absolute bottom-5 left-[4%] w-20 h-18 rounded-full" style={{ background: `linear-gradient(180deg, #F0F8FF, ${cc})` }}></div>
+                                        <div className="absolute bottom-5 right-[4%] w-20 h-18 rounded-full" style={{ background: `linear-gradient(180deg, #F0F8FF, ${cc})` }}></div>
+                                        <div className="absolute bottom-7 left-[16%] w-24 h-20 rounded-full" style={{ background: `linear-gradient(180deg, white, ${cc})` }}></div>
+                                        <div className="absolute bottom-7 right-[16%] w-22 h-18 rounded-full" style={{ background: `linear-gradient(180deg, white, ${cc})` }}></div>
+                                        {/* 구름 상단 봉우리 */}
+                                        <div className="absolute bottom-12 left-[26%] w-28 h-22 rounded-full" style={{ background: `linear-gradient(180deg, white, ${cc}CC)` }}></div>
+                                        <div className="absolute bottom-10 left-[10%] w-16 h-14 rounded-full" style={{ background: `linear-gradient(180deg, #F8FCFF, ${cc}DD)` }}></div>
+                                        <div className="absolute bottom-10 right-[10%] w-16 h-14 rounded-full" style={{ background: `linear-gradient(180deg, #F8FCFF, ${cc}DD)` }}></div>
+                                        {/* 솜사탕 질감 하이라이트 */}
+                                        <div className="absolute bottom-16 left-[30%] w-20 h-8 bg-white/50 rounded-[50%] blur-md"></div>
+                                        <div className="absolute bottom-14 left-[14%] w-10 h-5 bg-white/35 rounded-[50%] blur-sm"></div>
+                                        <div className="absolute bottom-14 right-[14%] w-10 h-5 bg-white/35 rounded-[50%] blur-sm"></div>
+                                        {/* 은은한 파란빛 광택 */}
+                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-44 h-8 bg-sky-200/20 rounded-[50%] blur-sm"></div>
+                                    </div>
+                                );
+                            }
 
-                            {/* 방석 테두리 스티치 (점선) */}
-                            <div className="absolute inset-3 rounded-[50%] border-2 border-dashed border-white/35"></div>
+                            // ── 벨벳 방석: 황실의 고급 방석 ──
+                            if (cId === 'cushion_purple') {
+                                return (
+                                    <div className="relative w-56 h-32">
+                                        {/* 바닥 그림자 */}
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-52 h-5 bg-black/30 rounded-[50%] blur-xl"></div>
+                                        {/* 두꺼운 금테 (외곽) */}
+                                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-54 h-28 rounded-[50%]" style={{
+                                            background: 'linear-gradient(135deg, #FFD700, #DAA520, #B8860B, #DAA520, #FFD700)',
+                                            filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))'
+                                        }}></div>
+                                        {/* 금테 광택 */}
+                                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-52 h-8 bg-yellow-200/30 rounded-[50%] blur-sm"></div>
+                                        {/* 벨벳 본체 (넓은 타원) */}
+                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-50 h-26 rounded-[50%]" style={{
+                                            background: 'radial-gradient(ellipse at 40% 35%, #9C27B0, #7B1FA2, #4A148C)',
+                                            boxShadow: 'inset 0 -8px 16px rgba(0,0,0,0.35), inset 0 6px 12px rgba(255,255,255,0.2)'
+                                        }}></div>
+                                        {/* 터프팅 방사형 주름 (8방향) */}
+                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-50 h-26 rounded-[50%] overflow-hidden">
+                                            <div className="absolute top-1/2 left-0 right-0 h-px bg-white/15 -translate-y-1/2"></div>
+                                            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/15 -translate-x-1/2"></div>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full" style={{ borderTop: '1px solid rgba(255,255,255,0.12)', transform: 'rotate(45deg)' }}></div>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full" style={{ borderTop: '1px solid rgba(255,255,255,0.12)', transform: 'rotate(-45deg)' }}></div>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', transform: 'rotate(22.5deg)' }}></div>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', transform: 'rotate(-22.5deg)' }}></div>
+                                        </div>
+                                        {/* 중앙 금색 단추 (크게) */}
+                                        <div className="absolute bottom-[42%] left-1/2 -translate-x-1/2 w-7 h-7 rounded-full" style={{
+                                            background: 'linear-gradient(135deg, #FFD700, #B8860B)',
+                                            boxShadow: '0 3px 6px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.5), 0 0 8px rgba(218,165,32,0.4)'
+                                        }}></div>
+                                        <div className="absolute bottom-[44%] left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white/35"></div>
+                                        {/* 벨벳 광택 하이라이트 */}
+                                        <div className="absolute bottom-16 left-[24%] w-20 h-6 bg-purple-300/25 rounded-[50%] blur-md"></div>
+                                        <div className="absolute bottom-18 left-[36%] w-14 h-4 bg-white/20 rounded-[50%] blur-sm"></div>
+                                    </div>
+                                );
+                            }
 
-                            {/* 방석 모서리 장식 */}
-                            <div className="absolute top-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
-                            <div className="absolute top-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
-                            <div className="absolute bottom-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
-                            <div className="absolute bottom-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                            // ── 꽃 모양 방석: 둥글고 풍성한 꽃잎 쿠션 ──
+                            if (cId === 'cushion_yellow') {
+                                return (
+                                    <div className="relative w-52 h-28">
+                                        {/* 바닥 글로우 그림자 */}
+                                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-5 rounded-[50%] blur-xl" style={{ background: 'rgba(255,215,0,0.35)' }}></div>
+                                        {/* 꽃잎 6장 (넓고 납작한 타원, 바닥에 펼쳐진 형태) */}
+                                        {/* 꽃잎 1 - 상단좌 */}
+                                        <div className="absolute top-[-2px] left-[8%] w-20 h-16 rounded-full" style={{
+                                            background: 'linear-gradient(135deg, #FFE082, #FFD54F, #FFC107)',
+                                            boxShadow: 'inset 0 -3px 6px rgba(255,152,0,0.25), inset 0 2px 4px rgba(255,255,255,0.5)',
+                                            transform: 'rotate(-25deg)'
+                                        }}></div>
+                                        {/* 꽃잎 2 - 상단우 */}
+                                        <div className="absolute top-[-2px] right-[8%] w-20 h-16 rounded-full" style={{
+                                            background: 'linear-gradient(225deg, #FFE082, #FFD54F, #FFC107)',
+                                            boxShadow: 'inset 0 -3px 6px rgba(255,152,0,0.25), inset 0 2px 4px rgba(255,255,255,0.5)',
+                                            transform: 'rotate(25deg)'
+                                        }}></div>
+                                        {/* 꽃잎 3 - 좌측 */}
+                                        <div className="absolute top-[22%] left-[-4%] w-22 h-14 rounded-full" style={{
+                                            background: 'linear-gradient(180deg, #FFECB3, #FFD54F)',
+                                            boxShadow: 'inset 0 -3px 6px rgba(255,152,0,0.2), inset 0 2px 4px rgba(255,255,255,0.45)',
+                                            transform: 'rotate(-10deg)'
+                                        }}></div>
+                                        {/* 꽃잎 4 - 우측 */}
+                                        <div className="absolute top-[22%] right-[-4%] w-22 h-14 rounded-full" style={{
+                                            background: 'linear-gradient(180deg, #FFECB3, #FFD54F)',
+                                            boxShadow: 'inset 0 -3px 6px rgba(255,152,0,0.2), inset 0 2px 4px rgba(255,255,255,0.45)',
+                                            transform: 'rotate(10deg)'
+                                        }}></div>
+                                        {/* 꽃잎 5 - 하단좌 */}
+                                        <div className="absolute bottom-[-2px] left-[10%] w-20 h-14 rounded-full" style={{
+                                            background: 'linear-gradient(45deg, #FFC107, #FFB300)',
+                                            boxShadow: 'inset 0 -3px 6px rgba(255,111,0,0.2), inset 0 2px 4px rgba(255,255,255,0.35)',
+                                            transform: 'rotate(15deg)'
+                                        }}></div>
+                                        {/* 꽃잎 6 - 하단우 */}
+                                        <div className="absolute bottom-[-2px] right-[10%] w-20 h-14 rounded-full" style={{
+                                            background: 'linear-gradient(315deg, #FFC107, #FFB300)',
+                                            boxShadow: 'inset 0 -3px 6px rgba(255,111,0,0.2), inset 0 2px 4px rgba(255,255,255,0.35)',
+                                            transform: 'rotate(-15deg)'
+                                        }}></div>
+                                        {/* 중앙 꽃술 (넓은 타원) */}
+                                        <div className="absolute inset-0 m-auto w-24 h-16 rounded-[50%]" style={{
+                                            background: 'radial-gradient(ellipse at 40% 35%, #FFF8E1, #FFCA28, #FF9800)',
+                                            boxShadow: 'inset 0 -6px 12px rgba(230,126,34,0.35), inset 0 4px 10px rgba(255,255,255,0.6), 0 4px 16px rgba(255,193,7,0.3)'
+                                        }}></div>
+                                        {/* 꽃술 질감 디테일 */}
+                                        <div className="absolute inset-0 m-auto w-24 h-16 rounded-[50%] overflow-hidden">
+                                            <div className="absolute top-[25%] left-[20%] w-2 h-2 bg-white/50 rounded-full"></div>
+                                            <div className="absolute top-[30%] left-[55%] w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+                                            <div className="absolute top-[50%] left-[35%] w-1.5 h-1.5 bg-white/35 rounded-full"></div>
+                                            <div className="absolute top-[45%] left-[65%] w-1 h-1 bg-white/30 rounded-full"></div>
+                                        </div>
+                                        {/* 광택 하이라이트 */}
+                                        <div className="absolute inset-0 m-auto w-18 h-6 rounded-[50%] bg-white/35 blur-sm" style={{ marginTop: '20px' }}></div>
+                                        {/* 스티치 링 */}
+                                        <div className="absolute inset-0 m-auto w-16 h-10 rounded-[50%] border-2 border-dashed border-amber-600/25"></div>
+                                    </div>
+                                );
+                            }
 
-                            {/* 방석 질감 */}
-                            <div className="absolute inset-0 overflow-hidden rounded-[50%]">
-                                <div className="absolute left-[15%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
-                                <div className="absolute left-[30%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                                <div className="absolute left-[45%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
-                                <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                                <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
-                                <div className="absolute left-[85%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                            </div>
+                            // ── 나뭇잎 방석: 대형 몬스테라 매트 ──
+                            if (cId === 'cushion_mint') {
+                                return (
+                                    <div className="relative w-56 h-32 flex items-end justify-center">
+                                        {/* 바닥 그림자 */}
+                                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-52 h-5 bg-black/15 rounded-[50%] blur-xl"></div>
+                                        <svg viewBox="0 0 220 130" width="220" height="130" className="relative">
+                                            <defs>
+                                                <filter id="leafShadow">
+                                                    <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="rgba(0,0,0,0.2)" />
+                                                </filter>
+                                            </defs>
+                                            {/* 잎 본체 (하트형 연잎) */}
+                                            <path d="M110,12 Q160,12 190,50 Q210,80 180,105 Q150,125 110,118 Q70,125 40,105 Q10,80 30,50 Q60,12 110,12 Z"
+                                                fill={cc} filter="url(#leafShadow)" />
+                                            {/* 잎 내부 층 (그라데이션 효과) */}
+                                            <path d="M110,18 Q155,18 182,52 Q200,78 174,100 Q148,118 110,112 Q72,118 46,100 Q20,78 38,52 Q65,18 110,18 Z"
+                                                fill={cd} opacity="0.4" />
+                                            {/* 중앙 잎맥 (두껍고 진한) */}
+                                            <path d="M110,16 L110,118" stroke="#2E7D32" strokeWidth="3" opacity="0.35" strokeLinecap="round" />
+                                            {/* 1차 잎맥 (좌우 대칭, 곡선) */}
+                                            <path d="M110,35 Q80,30 45,50" fill="none" stroke="#2E7D32" strokeWidth="2" opacity="0.25" strokeLinecap="round" />
+                                            <path d="M110,35 Q140,30 175,50" fill="none" stroke="#2E7D32" strokeWidth="2" opacity="0.25" strokeLinecap="round" />
+                                            <path d="M110,55 Q75,48 38,70" fill="none" stroke="#2E7D32" strokeWidth="1.8" opacity="0.22" strokeLinecap="round" />
+                                            <path d="M110,55 Q145,48 182,70" fill="none" stroke="#2E7D32" strokeWidth="1.8" opacity="0.22" strokeLinecap="round" />
+                                            <path d="M110,75 Q78,70 48,90" fill="none" stroke="#2E7D32" strokeWidth="1.5" opacity="0.18" strokeLinecap="round" />
+                                            <path d="M110,75 Q142,70 172,90" fill="none" stroke="#2E7D32" strokeWidth="1.5" opacity="0.18" strokeLinecap="round" />
+                                            <path d="M110,92 Q85,88 58,102" fill="none" stroke="#2E7D32" strokeWidth="1.2" opacity="0.15" strokeLinecap="round" />
+                                            <path d="M110,92 Q135,88 162,102" fill="none" stroke="#2E7D32" strokeWidth="1.2" opacity="0.15" strokeLinecap="round" />
+                                            {/* 광택 하이라이트 */}
+                                            <ellipse cx="90" cy="45" rx="35" ry="16" fill="white" opacity="0.2" transform="rotate(-8 90 45)" />
+                                            <ellipse cx="80" cy="38" rx="18" ry="8" fill="white" opacity="0.15" transform="rotate(-10 80 38)" />
+                                            {/* 잎 끝 물방울 디테일 */}
+                                            <ellipse cx="110" cy="14" rx="3" ry="4" fill="#4ADE80" opacity="0.5" />
+                                            {/* 줄기 */}
+                                            <path d="M110,118 Q108,125 112,130" fill="none" stroke="#4ADE80" strokeWidth="4" strokeLinecap="round" />
+                                        </svg>
+                                    </div>
+                                );
+                            }
 
-                            {/* 방석 하이라이트 */}
-                            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-8 bg-white/45 rounded-[50%] blur-md"></div>
-
-                            {/* 방석 그림자 */}
-                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/25 rounded-[50%] blur-lg"></div>
-                        </div>
+                            // ── 기본 방석 (둥근 사각형) + 기본값 ──
+                            return (
+                                <div className="relative w-52 h-28">
+                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/25 rounded-[50%] blur-lg"></div>
+                                    {/* 본체 */}
+                                    <div className="absolute inset-0 rounded-[50%]" style={{
+                                        background: `linear-gradient(to bottom right, ${cc}, ${cd})`,
+                                        filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+                                        boxShadow: 'inset 0 -8px 16px rgba(139,92,246,0.4), inset 0 6px 12px rgba(255,255,255,0.5)'
+                                    }}></div>
+                                    {/* 스티치 */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-16">
+                                        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 rounded-full -translate-y-1/2"></div>
+                                        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/40 rounded-full -translate-x-1/2"></div>
+                                    </div>
+                                    <div className="absolute inset-3 rounded-[50%] border-2 border-dashed border-white/35"></div>
+                                    {/* 모서리 장식 */}
+                                    <div className="absolute top-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                    <div className="absolute top-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                    <div className="absolute bottom-3 left-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                    <div className="absolute bottom-3 right-5 w-2.5 h-2.5 bg-white/50 rounded-full"></div>
+                                    {/* 질감 */}
+                                    <div className="absolute inset-0 overflow-hidden rounded-[50%]">
+                                        <div className="absolute left-[15%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                        <div className="absolute left-[30%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                        <div className="absolute left-[45%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                        <div className="absolute left-[60%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+                                        <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-white/25 to-transparent"></div>
+                                    </div>
+                                    {/* 하이라이트 */}
+                                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-36 h-8 bg-white/45 rounded-[50%] blur-md"></div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
 
-                {/* 🪴 우측 하단 대형 화분 (크기 증가) - 교체 가능한 장식 */}
+                {/* 🪴 우측 하단 대형 화분 - 교체 가능한 장식 (plantType별 고유 디자인) */}
                 <div
                     className="absolute bottom-[26%] right-[6%] z-20 pointer-events-none"
                     data-decoration-type="plant"
@@ -601,55 +1030,315 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                     data-gtm="decoration-large-plant"
                     style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}
                 >
-                    <div className="relative w-24 h-44">
-                        {/* 화분 */}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 rounded-b-3xl" style={{
-                            background: `linear-gradient(to bottom, ${equippedPot?.potColor || '#FF9980'}, ${equippedPot?.potColor ? equippedPot.potColor + 'CC' : '#FF7A5A'})`,
-                            clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
-                            boxShadow: '0 6px 12px rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.3)'
-                        }}></div>
+                    {(() => {
+                        const potId = equippedPot?.id;
+                        const pc = equippedPot?.potColor || '#FF9980';
+                        const pl = equippedPot?.plantColor || '#66BB6A';
 
-                        {/* 중앙 큰 잎 */}
-                        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 rounded-full" style={{
-                            background: `linear-gradient(to top, ${equippedPot?.plantColor || '#66BB6A'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`
-                        }}></div>
+                        // ── 선인장 화분: 오동통한 군락 ──
+                        if (potId === 'pot_cactus') {
+                            return (
+                                <svg viewBox="0 0 96 176" width="96" height="176">
+                                    {/* 화분 본체 (사다리꼴) */}
+                                    <polygon points="22,122 74,122 80,164 16,164" fill={pc} />
+                                    <polygon points="22,122 74,122 80,164 16,164" fill="rgba(255,255,255,0.15)" />
+                                    {/* 화분 테두리 */}
+                                    <rect x="18" y="118" width="60" height="7" rx="2" fill={pc} />
+                                    <rect x="18" y="118" width="60" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+                                    {/* 흙 (화분 안쪽 상단) */}
+                                    <ellipse cx="48" cy="124" rx="27" ry="5" fill="#5D4037" opacity="0.6" />
+                                    {/* 왼쪽 작은 선인장 1 */}
+                                    <ellipse cx="22" cy="100" rx="9" ry="24" fill="#2E7D32" />
+                                    <ellipse cx="22" cy="100" rx="6" ry="20" fill="#43A047" opacity="0.5" />
+                                    <circle cx="20" cy="88" r="1" fill="#A5D6A7" />
+                                    <circle cx="25" cy="96" r="1" fill="#A5D6A7" />
+                                    <circle cx="19" cy="106" r="1" fill="#A5D6A7" />
+                                    {/* 왼쪽 작은 선인장 2 (둥글) */}
+                                    <ellipse cx="32" cy="108" rx="8" ry="14" fill="#388E3C" />
+                                    <ellipse cx="32" cy="108" rx="5.5" ry="11" fill="#43A047" opacity="0.4" />
+                                    <circle cx="30" cy="100" r="1" fill="#A5D6A7" />
+                                    <circle cx="35" cy="106" r="1" fill="#A5D6A7" />
+                                    {/* 메인 뚱뚱한 선인장 (중앙) */}
+                                    <ellipse cx="48" cy="76" rx="18" ry="48" fill="#2E7D32" />
+                                    <ellipse cx="48" cy="76" rx="13" ry="44" fill="#388E3C" opacity="0.5" />
+                                    {/* 메인 세로 줄무늬 */}
+                                    <line x1="48" y1="30" x2="48" y2="120" stroke="#1B5E20" strokeWidth="0.7" opacity="0.3" />
+                                    <line x1="41" y1="34" x2="41" y2="118" stroke="#1B5E20" strokeWidth="0.5" opacity="0.2" />
+                                    <line x1="55" y1="34" x2="55" y2="118" stroke="#1B5E20" strokeWidth="0.5" opacity="0.2" />
+                                    {/* 메인 왼쪽 팔 */}
+                                    <ellipse cx="26" cy="62" rx="10" ry="26" fill="#2E7D32" transform="rotate(-15 26 62)" />
+                                    <ellipse cx="26" cy="62" rx="7" ry="22" fill="#388E3C" opacity="0.4" transform="rotate(-15 26 62)" />
+                                    {/* 메인 오른쪽 팔 */}
+                                    <ellipse cx="68" cy="70" rx="10" ry="22" fill="#2E7D32" transform="rotate(12 68 70)" />
+                                    <ellipse cx="68" cy="70" rx="7" ry="18" fill="#388E3C" opacity="0.4" transform="rotate(12 68 70)" />
+                                    {/* 오른쪽 작은 선인장 */}
+                                    <ellipse cx="70" cy="104" rx="8" ry="18" fill="#388E3C" />
+                                    <ellipse cx="70" cy="104" rx="5.5" ry="14" fill="#43A047" opacity="0.4" />
+                                    <circle cx="68" cy="94" r="1" fill="#A5D6A7" />
+                                    <circle cx="73" cy="102" r="1" fill="#A5D6A7" />
+                                    {/* 가시 점 (메인) */}
+                                    <circle cx="42" cy="44" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="54" cy="52" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="46" cy="66" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="52" cy="38" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="40" cy="82" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="56" cy="90" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="44" cy="96" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="50" cy="106" r="1.3" fill="#A5D6A7" />
+                                    <circle cx="24" cy="52" r="1" fill="#A5D6A7" />
+                                    <circle cx="28" cy="70" r="1" fill="#A5D6A7" />
+                                    <circle cx="66" cy="60" r="1" fill="#A5D6A7" />
+                                    <circle cx="70" cy="78" r="1" fill="#A5D6A7" />
+                                    {/* 꼭대기 큰 꽃 */}
+                                    {[0, 60, 120, 180, 240, 300].map(a => (
+                                        <ellipse key={a} cx="48" cy="28" rx="3.5" ry="7" fill="#F48FB1"
+                                            transform={`rotate(${a} 48 28)`} />
+                                    ))}
+                                    <circle cx="48" cy="28" r="4" fill="#FCE4EC" />
+                                    <circle cx="48" cy="28" r="2" fill="#F06292" />
+                                    {/* 왼쪽 선인장 작은 꽃 */}
+                                    <circle cx="22" cy="74" r="3.5" fill="#FFE082" />
+                                    <circle cx="22" cy="74" r="1.8" fill="#FFD54F" />
+                                </svg>
+                            );
+                        }
 
-                        {/* 좌측 잎들 (크기 2배) */}
-                        <div className="absolute bottom-16 left-0 w-11 h-18 rounded-full rotate-[-35deg]" style={{
-                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'}, ${equippedPot?.plantColor || '#66BB6A'})`,
-                            boxShadow: 'inset -3px 3px 6px rgba(0,0,0,0.12)'
-                        }}></div>
-                        <div className="absolute bottom-22 left-[-2px] w-9 h-15 rounded-full rotate-[-25deg]" style={{
-                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`
-                        }}></div>
+                        // ── 꽃 화분: 화사한 꽃밭 ──
+                        if (potId === 'pot_flower') {
+                            return (
+                                <svg viewBox="0 0 96 176" width="96" height="176">
+                                    {/* 화분 본체 (사다리꼴) */}
+                                    <polygon points="22,126 74,126 80,166 16,166" fill={pc} />
+                                    <polygon points="22,126 74,126 80,166 16,166" fill="rgba(255,255,255,0.15)" />
+                                    {/* 화분 테두리 */}
+                                    <rect x="18" y="122" width="60" height="7" rx="2" fill={pc} />
+                                    <rect x="18" y="122" width="60" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+                                    {/* 흙 (화분 안쪽 상단) */}
+                                    <ellipse cx="48" cy="128" rx="25" ry="4" fill="#5D4037" opacity="0.5" />
+                                    {/* 바닥 잎사귀 덮개 (흙 위) */}
+                                    <ellipse cx="48" cy="122" rx="34" ry="10" fill="#43A047" />
+                                    <ellipse cx="36" cy="118" rx="14" ry="7" fill="#66BB6A" transform="rotate(-10 36 118)" />
+                                    <ellipse cx="60" cy="118" rx="14" ry="7" fill="#66BB6A" transform="rotate(10 60 118)" />
+                                    <ellipse cx="48" cy="116" rx="12" ry="6" fill="#4CAF50" />
+                                    <ellipse cx="28" cy="120" rx="10" ry="5" fill="#388E3C" transform="rotate(-20 28 120)" />
+                                    <ellipse cx="68" cy="120" rx="10" ry="5" fill="#388E3C" transform="rotate(20 68 120)" />
+                                    {/* 줄기 4개 (부채꼴) */}
+                                    <line x1="36" y1="122" x2="22" y2="48" stroke="#4CAF50" strokeWidth="3.5" strokeLinecap="round" />
+                                    <line x1="44" y1="120" x2="38" y2="32" stroke="#43A047" strokeWidth="3.5" strokeLinecap="round" />
+                                    <line x1="52" y1="120" x2="58" y2="36" stroke="#43A047" strokeWidth="3.5" strokeLinecap="round" />
+                                    <line x1="60" y1="122" x2="74" y2="52" stroke="#4CAF50" strokeWidth="3.5" strokeLinecap="round" />
+                                    {/* 줄기 잎사귀들 */}
+                                    <ellipse cx="30" cy="88" rx="8" ry="4" fill="#66BB6A" transform="rotate(-40 30 88)" />
+                                    <ellipse cx="52" cy="80" rx="7" ry="3.5" fill="#66BB6A" transform="rotate(25 52 80)" />
+                                    <ellipse cx="66" cy="90" rx="7" ry="3.5" fill="#66BB6A" transform="rotate(35 66 90)" />
+                                    <ellipse cx="40" cy="70" rx="7" ry="3.5" fill="#4CAF50" transform="rotate(-30 40 70)" />
+                                    {/* 꽃 1 (왼쪽 큰 꽃 - 핑크) */}
+                                    {[0, 60, 120, 180, 240, 300].map(a => (
+                                        <ellipse key={`f1-${a}`} cx="22" cy="40" rx="5" ry="10" fill="#F8BBD0"
+                                            transform={`rotate(${a} 22 40)`} />
+                                    ))}
+                                    <circle cx="22" cy="40" r="5.5" fill="#FFD54F" />
+                                    <circle cx="22" cy="40" r="3" fill="#FFCA28" />
+                                    {/* 꽃 2 (중앙 왼쪽 큰 꽃 - 흰) */}
+                                    {[0, 45, 90, 135, 180, 225, 270, 315].map(a => (
+                                        <ellipse key={`f2-${a}`} cx="38" cy="24" rx="5.5" ry="11" fill="white" stroke="#E0E0E0" strokeWidth="0.3"
+                                            transform={`rotate(${a} 38 24)`} />
+                                    ))}
+                                    <circle cx="38" cy="24" r="6" fill="#FFD54F" />
+                                    <circle cx="38" cy="24" r="3.5" fill="#FFCA28" />
+                                    {/* 꽃 3 (중앙 오른쪽 - 라벤더) */}
+                                    {[0, 72, 144, 216, 288].map(a => (
+                                        <ellipse key={`f3-${a}`} cx="58" cy="28" rx="5" ry="10" fill="#CE93D8"
+                                            transform={`rotate(${a} 58 28)`} />
+                                    ))}
+                                    <circle cx="58" cy="28" r="5" fill="#FFD54F" />
+                                    <circle cx="58" cy="28" r="3" fill="#FFC107" />
+                                    {/* 꽃 4 (오른쪽 - 핑크) */}
+                                    {[0, 60, 120, 180, 240, 300].map(a => (
+                                        <ellipse key={`f4-${a}`} cx="74" cy="44" rx="4.5" ry="9" fill="#F48FB1"
+                                            transform={`rotate(${a} 74 44)`} />
+                                    ))}
+                                    <circle cx="74" cy="44" r="4.5" fill="#FFE082" />
+                                    <circle cx="74" cy="44" r="2.5" fill="#FFD54F" />
+                                    {/* 꽃봉오리 (줄기 사이) */}
+                                    <ellipse cx="30" cy="64" rx="3" ry="4.5" fill="#F8BBD0" />
+                                    <ellipse cx="64" cy="68" rx="3" ry="4.5" fill="#CE93D8" />
+                                </svg>
+                            );
+                        }
 
-                        {/* 우측 잎들 (크기 2배) */}
-                        <div className="absolute bottom-16 right-0 w-11 h-18 rounded-full rotate-[35deg]" style={{
-                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'}, ${equippedPot?.plantColor || '#66BB6A'})`,
-                            boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.12)'
-                        }}></div>
-                        <div className="absolute bottom-22 right-[-2px] w-9 h-15 rounded-full rotate-[25deg]" style={{
-                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`
-                        }}></div>
+                        // ── 라벤더 화분: 풍성한 부시 ──
+                        if (potId === 'pot_lavender') {
+                            return (
+                                <svg viewBox="0 0 96 176" width="96" height="176">
+                                    {/* 화분 본체 (사다리꼴) */}
+                                    <polygon points="22,130 74,130 80,168 16,168" fill={pc} />
+                                    <polygon points="22,130 74,130 80,168 16,168" fill="rgba(255,255,255,0.15)" />
+                                    {/* 화분 테두리 */}
+                                    <rect x="18" y="126" width="60" height="7" rx="2" fill={pc} />
+                                    <rect x="18" y="126" width="60" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+                                    {/* 흙 (화분 안쪽 상단) */}
+                                    <ellipse cx="48" cy="132" rx="25" ry="4" fill="#5D4037" opacity="0.5" />
+                                    {/* 하단 녹색 덤불 (둥글고 풍성) */}
+                                    <ellipse cx="48" cy="112" rx="36" ry="22" fill="#558B2F" />
+                                    <ellipse cx="36" cy="108" rx="22" ry="16" fill="#689F38" />
+                                    <ellipse cx="62" cy="108" rx="22" ry="16" fill="#558B2F" opacity="0.9" />
+                                    <ellipse cx="48" cy="100" rx="28" ry="14" fill="#7CB342" opacity="0.7" />
+                                    <ellipse cx="26" cy="114" rx="14" ry="10" fill="#689F38" opacity="0.6" />
+                                    <ellipse cx="70" cy="114" rx="14" ry="10" fill="#689F38" opacity="0.6" />
+                                    <ellipse cx="48" cy="118" rx="30" ry="12" fill="#558B2F" opacity="0.5" />
+                                    {/* 줄기 7개 (부채꼴, 빽빽하게) */}
+                                    {[
+                                        { x1: 38, y1: 108, x2: 14, y2: 34 },
+                                        { x1: 42, y1: 106, x2: 24, y2: 20 },
+                                        { x1: 44, y1: 104, x2: 34, y2: 10 },
+                                        { x1: 48, y1: 102, x2: 48, y2: 4 },
+                                        { x1: 52, y1: 104, x2: 62, y2: 10 },
+                                        { x1: 54, y1: 106, x2: 72, y2: 20 },
+                                        { x1: 58, y1: 108, x2: 82, y2: 34 },
+                                    ].map((l, i) => (
+                                        <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="#7CB342" strokeWidth="2.5" strokeLinecap="round" />
+                                    ))}
+                                    {/* 라벤더 꽃 알갱이 (7줄기) */}
+                                    {[
+                                        { cx: 14, startY: 34 },
+                                        { cx: 24, startY: 20 },
+                                        { cx: 34, startY: 10 },
+                                        { cx: 48, startY: 4 },
+                                        { cx: 62, startY: 10 },
+                                        { cx: 72, startY: 20 },
+                                        { cx: 82, startY: 34 },
+                                    ].map((stem, si) => (
+                                        <g key={si}>
+                                            {[0, 5, 10, 15, 20, 25].map((dy, di) => (
+                                                <ellipse key={di} cx={stem.cx} cy={stem.startY + dy}
+                                                    rx={4 - di * 0.35} ry={3.5}
+                                                    fill={['#6A1B9A', '#7B1FA2', '#8E24AA', '#AB47BC', '#CE93D8', '#E1BEE7'][di]}
+                                                    opacity={1 - di * 0.1} />
+                                            ))}
+                                        </g>
+                                    ))}
+                                    {/* 덤불 잎 디테일 */}
+                                    <ellipse cx="30" cy="96" rx="8" ry="3.5" fill="#8BC34A" transform="rotate(-30 30 96)" opacity="0.5" />
+                                    <ellipse cx="66" cy="96" rx="8" ry="3.5" fill="#8BC34A" transform="rotate(30 66 96)" opacity="0.5" />
+                                    <ellipse cx="48" cy="92" rx="6" ry="3" fill="#9CCC65" opacity="0.4" />
+                                </svg>
+                            );
+                        }
 
-                        {/* 상단 작은 잎들 (크기 2배) */}
-                        <div className="absolute bottom-28 left-3 w-8 h-12 rounded-full rotate-[-15deg]" style={{
-                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + '77' : '#C8E6C9'}, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'})`
-                        }}></div>
-                        <div className="absolute bottom-28 right-3 w-8 h-12 rounded-full rotate-[15deg]" style={{
-                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + '77' : '#C8E6C9'}, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'})`
-                        }}></div>
+                        // ── 장미 화분: 탐스러운 장미 덤불 ──
+                        if (potId === 'pot_rose') {
+                            return (
+                                <svg viewBox="0 0 96 176" width="96" height="176">
+                                    {/* 화분 본체 (사다리꼴) */}
+                                    <polygon points="22,122 74,122 80,164 16,164" fill={pc} />
+                                    <polygon points="22,122 74,122 80,164 16,164" fill="rgba(255,255,255,0.15)" />
+                                    {/* 화분 테두리 */}
+                                    <rect x="18" y="118" width="60" height="7" rx="2" fill={pc} />
+                                    <rect x="18" y="118" width="60" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+                                    {/* 흙 (화분 안쪽 상단) */}
+                                    <ellipse cx="48" cy="124" rx="25" ry="4" fill="#5D4037" opacity="0.5" />
+                                    {/* 무성한 잎사귀 덤불 (둥근 반구) */}
+                                    <ellipse cx="48" cy="96" rx="40" ry="30" fill="#1B5E20" />
+                                    <ellipse cx="32" cy="82" rx="26" ry="22" fill="#2E7D32" />
+                                    <ellipse cx="66" cy="84" rx="24" ry="20" fill="#1B5E20" opacity="0.9" />
+                                    <ellipse cx="48" cy="68" rx="30" ry="20" fill="#388E3C" opacity="0.85" />
+                                    <ellipse cx="22" cy="96" rx="18" ry="16" fill="#2E7D32" opacity="0.7" />
+                                    <ellipse cx="74" cy="96" rx="16" ry="14" fill="#2E7D32" opacity="0.7" />
+                                    <ellipse cx="48" cy="56" rx="22" ry="14" fill="#43A047" opacity="0.7" />
+                                    {/* 하단 잎사귀 (화분 연결부) */}
+                                    <ellipse cx="48" cy="108" rx="36" ry="18" fill="#1B5E20" opacity="0.6" />
+                                    <ellipse cx="30" cy="112" rx="16" ry="10" fill="#2E7D32" opacity="0.5" />
+                                    <ellipse cx="66" cy="112" rx="16" ry="10" fill="#2E7D32" opacity="0.5" />
+                                    {/* 잎사귀 하이라이트 */}
+                                    <ellipse cx="38" cy="72" rx="8" ry="4" fill="#4CAF50" opacity="0.4" transform="rotate(-20 38 72)" />
+                                    <ellipse cx="60" cy="76" rx="7" ry="3.5" fill="#4CAF50" opacity="0.4" transform="rotate(15 60 76)" />
+                                    <ellipse cx="48" cy="90" rx="6" ry="3" fill="#4CAF50" opacity="0.3" />
+                                    {/* 장미 꽃 1 (왼쪽 - 큰) */}
+                                    <circle cx="28" cy="68" r="11" fill="#C62828" />
+                                    <circle cx="28" cy="68" r="8.5" fill="#E53935" />
+                                    <circle cx="28" cy="68" r="6" fill="#EF5350" opacity="0.8" />
+                                    <path d="M28,63 Q33,68 28,73 Q23,68 28,63" fill="#B71C1C" opacity="0.7" />
+                                    <circle cx="28" cy="68" r="3" fill="#C62828" opacity="0.6" />
+                                    <ellipse cx="28" cy="68" rx="1.5" ry="2" fill="#B71C1C" opacity="0.4" />
+                                    {/* 장미 꽃 2 (중앙 상단 - 가장 큼) */}
+                                    <circle cx="48" cy="48" r="13" fill="#C62828" />
+                                    <circle cx="48" cy="48" r="10" fill="#D32F2F" />
+                                    <circle cx="48" cy="48" r="7.5" fill="#E53935" opacity="0.85" />
+                                    <path d="M48,42 Q54,48 48,54 Q42,48 48,42" fill="#B71C1C" opacity="0.7" />
+                                    <circle cx="48" cy="48" r="4" fill="#C62828" opacity="0.6" />
+                                    <ellipse cx="48" cy="48" rx="2" ry="2.5" fill="#9C2020" opacity="0.5" />
+                                    {/* 장미 꽃 3 (오른쪽 - 중간) */}
+                                    <circle cx="68" cy="72" r="10" fill="#D32F2F" />
+                                    <circle cx="68" cy="72" r="7.5" fill="#E53935" />
+                                    <circle cx="68" cy="72" r="5" fill="#EF5350" opacity="0.8" />
+                                    <path d="M68,67 Q73,72 68,77 Q63,72 68,67" fill="#B71C1C" opacity="0.7" />
+                                    <circle cx="68" cy="72" r="2.5" fill="#C62828" opacity="0.6" />
+                                    {/* 장미 꽃 4 (중앙 하단 - 작은) */}
+                                    <circle cx="42" cy="88" r="7.5" fill="#E53935" opacity="0.95" />
+                                    <circle cx="42" cy="88" r="5" fill="#EF5350" opacity="0.8" />
+                                    <path d="M42,84 Q46,88 42,92 Q38,88 42,84" fill="#C62828" opacity="0.6" />
+                                    <circle cx="42" cy="88" r="2" fill="#B71C1C" opacity="0.5" />
+                                    {/* 장미 꽃 5 (오른쪽 하단 - 작은) */}
+                                    <circle cx="60" cy="92" r="6.5" fill="#D32F2F" opacity="0.9" />
+                                    <circle cx="60" cy="92" r="4" fill="#EF5350" opacity="0.7" />
+                                    <path d="M60,89 Q63,92 60,95 Q57,92 60,89" fill="#B71C1C" opacity="0.5" />
+                                    {/* 꽃봉오리 (작은) */}
+                                    <ellipse cx="18" cy="82" rx="3.5" ry="5" fill="#E53935" opacity="0.7" />
+                                    <ellipse cx="78" cy="86" rx="3" ry="4.5" fill="#D32F2F" opacity="0.7" />
+                                    <ellipse cx="48" cy="38" rx="3" ry="4" fill="#EF5350" opacity="0.6" />
+                                </svg>
+                            );
+                        }
 
-                        {/* 추가 잎들로 더 풍성하게 */}
-                        <div className="absolute bottom-20 left-1 w-7 h-10 rounded-full rotate-[-40deg]" style={{
-                            background: `linear-gradient(to bottom right, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`,
-                            opacity: 0.9
-                        }}></div>
-                        <div className="absolute bottom-20 right-1 w-7 h-10 rounded-full rotate-[40deg]" style={{
-                            background: `linear-gradient(to bottom left, ${equippedPot?.plantColor ? equippedPot.plantColor + '99' : '#A5D6A7'}, ${equippedPot?.plantColor ? equippedPot.plantColor + 'CC' : '#81C784'})`,
-                            opacity: 0.9
-                        }}></div>
-                    </div>
+                        // ── 기본 화분 (몬스테라/넓은 잎) ── (기본값 포함)
+                        return (
+                            <div className="relative w-24 h-44">
+                                {/* 화분 */}
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-16 rounded-b-3xl" style={{
+                                    background: `linear-gradient(to bottom, ${pc}, ${pc}CC)`,
+                                    clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
+                                    boxShadow: '0 6px 12px rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.3)'
+                                }}></div>
+                                {/* 중앙 큰 잎 */}
+                                <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-6 h-26 rounded-full" style={{
+                                    background: `linear-gradient(to top, ${pl}, ${pl}CC)`
+                                }}></div>
+                                {/* 좌측 잎들 */}
+                                <div className="absolute bottom-16 left-0 w-11 h-18 rounded-full rotate-[-35deg]" style={{
+                                    background: `linear-gradient(to bottom right, ${pl}CC, ${pl})`,
+                                    boxShadow: 'inset -3px 3px 6px rgba(0,0,0,0.12)'
+                                }}></div>
+                                <div className="absolute bottom-22 left-[-2px] w-9 h-15 rounded-full rotate-[-25deg]" style={{
+                                    background: `linear-gradient(to bottom right, ${pl}99, ${pl}CC)`
+                                }}></div>
+                                {/* 우측 잎들 */}
+                                <div className="absolute bottom-16 right-0 w-11 h-18 rounded-full rotate-[35deg]" style={{
+                                    background: `linear-gradient(to bottom left, ${pl}CC, ${pl})`,
+                                    boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.12)'
+                                }}></div>
+                                <div className="absolute bottom-22 right-[-2px] w-9 h-15 rounded-full rotate-[25deg]" style={{
+                                    background: `linear-gradient(to bottom left, ${pl}99, ${pl}CC)`
+                                }}></div>
+                                {/* 상단 작은 잎들 */}
+                                <div className="absolute bottom-28 left-3 w-8 h-12 rounded-full rotate-[-15deg]" style={{
+                                    background: `linear-gradient(to bottom right, ${pl}77, ${pl}99)`
+                                }}></div>
+                                <div className="absolute bottom-28 right-3 w-8 h-12 rounded-full rotate-[15deg]" style={{
+                                    background: `linear-gradient(to bottom left, ${pl}77, ${pl}99)`
+                                }}></div>
+                                {/* 추가 잎들 */}
+                                <div className="absolute bottom-20 left-1 w-7 h-10 rounded-full rotate-[-40deg]" style={{
+                                    background: `linear-gradient(to bottom right, ${pl}99, ${pl}CC)`,
+                                    opacity: 0.9
+                                }}></div>
+                                <div className="absolute bottom-20 right-1 w-7 h-10 rounded-full rotate-[40deg]" style={{
+                                    background: `linear-gradient(to bottom left, ${pl}99, ${pl}CC)`,
+                                    opacity: 0.9
+                                }}></div>
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* 💡 무드등 */}
@@ -672,8 +1361,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                         borderColor: `${equippedTheme?.decorationColors?.primary || '#FFD4DC'}40`
                     }}
                 >
-                    <span className="text-xs font-bold text-amber-500">
-                        💰 {coins}원
+                    <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
+                        <MongleIcon name="coin" size={16} /> {coins}
                     </span>
                 </div>
 
@@ -697,8 +1386,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
             {/* 코인 획득 토스트 */}
             {coinToast && (
                 <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[200] animate-bounce">
-                    <div className="rounded-full bg-amber-400 text-white px-5 py-2 shadow-lg text-sm font-bold">
-                        {coinToast}
+                    <div className="rounded-full bg-amber-400 text-white px-5 py-2 shadow-lg text-sm font-bold flex items-center gap-1.5">
+                        <MongleIcon name="coin" size={18} /> {coinToast}
                     </div>
                 </div>
             )}
@@ -742,6 +1431,39 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                 isOpen={isStoreViewOpen}
                 onClose={() => setIsStoreViewOpen(false)}
             />
+
+            {/* 🎉 레벨업 축하 모달 */}
+            <LevelUpModal
+                isOpen={showLevelUpModal}
+                onClose={closeLevelUpModal}
+                prevLevel={levelUpInfo.prevLevel}
+                newLevel={levelUpInfo.newLevel}
+                rewardCoins={levelUpInfo.rewardCoins}
+            />
+
+            {/* 🧪 임시 테스트 버튼 - 배포 전 삭제 (좌측 상단 고정 - 상점/설정 UI 비가림) */}
+            <div className="fixed top-2 left-2 z-[500] flex flex-col gap-2">
+                <button
+                    className="px-3 py-2 rounded-xl text-xs font-bold text-white shadow-lg active:scale-95 transition-transform"
+                    style={{ background: 'linear-gradient(135deg, #58CC02, #46a302)' }}
+                    onClick={() => navigate('/onboarding')}
+                    data-gtm="test-onboarding-btn"
+                >
+                    <MongleIcon name="testTube" size={14} className="mr-1" /> 온보딩 테스트
+                </button>
+                <button
+                    className="px-3 py-2 rounded-xl text-xs font-bold text-white shadow-lg active:scale-95 transition-transform"
+                    style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
+                    onClick={() => triggerLevelUpModal(
+                        petStatus?.level || 5,
+                        (petStatus?.level || 5) + 1,
+                        150
+                    )}
+                    data-gtm="test-levelup-btn"
+                >
+                    <MongleIcon name="testTube" size={14} className="mr-1" /> 레벨업 테스트
+                </button>
+            </div>
         </div>
     );
 };

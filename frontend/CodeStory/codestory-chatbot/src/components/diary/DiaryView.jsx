@@ -5,6 +5,7 @@ import { FaPlus, FaTrash, FaBookOpen, FaFaceSmile, FaFaceMeh, FaFaceFrown, FaFac
 import { useDiary } from '../../context/DiaryContext';
 import { usePet } from '../../context/PetContext';
 import { useStore } from '../../context/StoreContext';
+import { useTour } from '../../context/TourContext';
 import DiaryWriteModal from './DiaryWriteModal';
 
 /**
@@ -15,6 +16,7 @@ import DiaryWriteModal from './DiaryWriteModal';
 const DiaryView = () => {
     const { diaries, addDiary, deleteDiary, loading } = useDiary();
     const { triggerDiaryReward } = usePet();
+    const { isTourActive, currentStep, advanceTour } = useTour();
     const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
 
     const { equippedItems, getEquippedItem } = useStore();
@@ -31,6 +33,11 @@ const DiaryView = () => {
 
         // 코인 보상
         triggerDiaryReward();
+
+        // 투어: diary-write 단계 완료
+        if (isTourActive && currentStep?.id === 'diary-write') {
+            setTimeout(advanceTour, 400);
+        }
 
         // GTM 이벤트
         if (window.dataLayer) {

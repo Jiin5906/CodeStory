@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import BottomTabBar from '../dashboard/BottomTabBar';
-import { useStore } from '../../context/StoreContext';
+import { useTour } from '../../context/TourContext';
+import AppTour from '../tour/AppTour';
 
 /**
  * MobileLayout — 모바일 전용 레이아웃
@@ -11,6 +12,7 @@ import { useStore } from '../../context/StoreContext';
 const MobileLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { isTourActive, currentStep, advanceTour } = useTour();
 
     // 현재 활성 탭 결정
     const getActiveTab = () => {
@@ -28,7 +30,6 @@ const MobileLayout = () => {
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
 
-        // 라우트 매핑
         const routeMap = {
             home: '/dashboard',
             diary: '/diary',
@@ -37,6 +38,11 @@ const MobileLayout = () => {
         };
 
         navigate(routeMap[tabId]);
+
+        // 투어: diary-tab 단계에서 일기 탭 클릭 감지
+        if (isTourActive && currentStep?.id === 'diary-tab' && tabId === 'diary') {
+            setTimeout(advanceTour, 300); // 라우트 전환 후 진행
+        }
     };
 
     return (
@@ -51,6 +57,9 @@ const MobileLayout = () => {
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
             />
+
+            {/* 앱 투어 오버레이 */}
+            <AppTour />
         </div>
     );
 };
