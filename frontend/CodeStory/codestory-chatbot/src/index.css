@@ -57,6 +57,36 @@ button{
   cursor: pointer;
 }
 
+/* ── 로그인 페이지 전용 애니메이션 ── */
+@keyframes mongle-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+.mongle-float {
+  animation: mongle-float 3.2s ease-in-out infinite;
+}
+
+@keyframes login-fade-slide-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.login-fade-slide-in {
+  animation: login-fade-slide-in 0.22s ease-out forwards;
+}
+
+@keyframes bubble-rise {
+  0%   { transform: translateY(110vh) scale(0.6); opacity: 0; }
+  15%  { opacity: 0.55; }
+  85%  { opacity: 0.3; }
+  100% { transform: translateY(-15vh) scale(1.1); opacity: 0; }
+}
+.login-bg-bubble {
+  animation: bubble-rise linear infinite;
+  border-radius: 50%;
+  position: absolute;
+  pointer-events: none;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -142,3 +172,29 @@ button{
 .font-cute {
   font-family: 'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
 }
+
+/* 🌿 상점 화분 애니메이션 */
+@keyframes pot-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50%       { transform: rotate(2deg); }
+}
+
+@keyframes pot-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50%       { transform: scaleY(0.97); }
+}
+
+.animate-pot-sway {
+  transform-origin: bottom center;
+  transform-box: fill-box;
+  animation: pot-sway 3s ease-in-out infinite;
+}
+
+.animate-pot-breathe {
+  transform-origin: bottom center;
+  transform-box: fill-box;
+  animation: pot-breathe 4s ease-in-out infinite;
+}
+
+.pot-anim-delay-1 { animation-delay: -1s; }
+.pot-anim-delay-2 { animation-delay: -2s; }
