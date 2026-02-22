@@ -1049,9 +1049,6 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                             <stop offset="100%" stopColor="rgba(0,0,0,0.12)" />
                                         </linearGradient>
                                     </defs>
-                                    {/* 화분 본체 — Q bezier */}
-                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill={pc} />
-                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill="url(#hv-cact-3d)" />
                                     {/* 부드러운 흙 — 모래색 계열 */}
                                     <ellipse cx="48" cy="122" rx="32" ry="6" fill="#D4B888" />
                                     <ellipse cx="48" cy="122" rx="25" ry="4" fill="#C8A87A" opacity="0.8" />
@@ -1095,6 +1092,9 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                     <circle cx="48" cy="28" r="2.5" fill="#FF8F00" />
                                     <circle cx="22" cy="74" r="3.5" fill="#FFE082" />
                                     <circle cx="22" cy="74" r="1.8" fill="#FFD54F" />
+                                    {/* ④ 화분 본체 — Q bezier (식물 밑동을 덮어 심긴 효과) */}
+                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill={pc} />
+                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill="url(#hv-cact-3d)" />
                                     {/* 잎 칼라 — 화분·식물 일체형 연결 */}
                                     <ellipse cx="48" cy="124" rx="30" ry="8" fill="#C8D8B8" opacity="0.8" />
                                     <ellipse cx="34" cy="126" rx="10" ry="4" fill="#BCCCA8" transform="rotate(-15 34 126)" />
@@ -1119,9 +1119,6 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                             <stop offset="100%" stopColor="rgba(0,0,0,0.12)" />
                                         </linearGradient>
                                     </defs>
-                                    {/* 화분 본체 — 넓은 볼형 */}
-                                    <path d="M12,126 Q6,126 5,145 Q4,162 10,168 Q48,174 86,168 Q92,162 91,145 Q90,126 84,126 Q48,122 12,126Z" fill={pc} />
-                                    <path d="M12,126 Q6,126 5,145 Q4,162 10,168 Q48,174 86,168 Q92,162 91,145 Q90,126 84,126 Q48,122 12,126Z" fill="url(#hv-flow-3d)" />
                                     {/* 부드러운 흙 — 로즈 빛 흙 */}
                                     <ellipse cx="48" cy="126" rx="36" ry="7" fill="#E8C4D0" />
                                     <ellipse cx="48" cy="126" rx="29" ry="4.5" fill="#DEB8C4" opacity="0.8" />
@@ -1181,6 +1178,9 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                     {/* 꽃봉오리 */}
                                     <ellipse cx="30" cy="64" rx="3" ry="4.5" fill="#FADCE4" />
                                     <ellipse cx="64" cy="68" rx="3" ry="4.5" fill="#E0C8F8" />
+                                    {/* ④ 화분 본체 — 넓은 볼형 (식물 밑동을 덮어 심긴 효과) */}
+                                    <path d="M12,126 Q6,126 5,145 Q4,162 10,168 Q48,174 86,168 Q92,162 91,145 Q90,126 84,126 Q48,122 12,126Z" fill={pc} />
+                                    <path d="M12,126 Q6,126 5,145 Q4,162 10,168 Q48,174 86,168 Q92,162 91,145 Q90,126 84,126 Q48,122 12,126Z" fill="url(#hv-flow-3d)" />
                                     {/* 잎 칼라 — 화분·식물 일체형 연결 */}
                                     <ellipse cx="48" cy="128" rx="34" ry="8" fill="#B8D4A8" opacity="0.8" />
                                     <ellipse cx="32" cy="130" rx="12" ry="4.5" fill="#AECCA0" transform="rotate(-15 32 130)" />
@@ -1216,9 +1216,6 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                             <stop offset="100%" stopColor="rgba(0,0,0,0.12)" />
                                         </linearGradient>
                                     </defs>
-                                    {/* 화분 본체 — 키 큰 항아리 */}
-                                    <path d="M18,130 Q12,130 11,148 Q10,164 16,170 Q48,174 80,170 Q86,164 85,148 Q84,130 78,130 Q48,126 18,130Z" fill={pc} />
-                                    <path d="M18,130 Q12,130 11,148 Q10,164 16,170 Q48,174 80,170 Q86,164 85,148 Q84,130 78,130 Q48,126 18,130Z" fill="url(#hv-lav-3d)" />
                                     {/* 부드러운 흙 — 라벤더 색상 계열 */}
                                     <ellipse cx="48" cy="130" rx="30" ry="6" fill="#C8C0E4" />
                                     <ellipse cx="48" cy="130" rx="23" ry="4" fill="#BCB4DC" opacity="0.8" />
@@ -1247,6 +1244,9 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                     {/* 덤불 잎 디테일 */}
                                     <ellipse cx="30" cy="96" rx="8" ry="3.5" fill="#B4D8A0" transform="rotate(-30 30 96)" opacity="0.5" />
                                     <ellipse cx="66" cy="96" rx="8" ry="3.5" fill="#B4D8A0" transform="rotate(30 66 96)" opacity="0.5" />
+                                    {/* ④ 화분 본체 — 키 큰 항아리 (식물 밑동을 덮어 심긴 효과) */}
+                                    <path d="M18,130 Q12,130 11,148 Q10,164 16,170 Q48,174 80,170 Q86,164 85,148 Q84,130 78,130 Q48,126 18,130Z" fill={pc} />
+                                    <path d="M18,130 Q12,130 11,148 Q10,164 16,170 Q48,174 80,170 Q86,164 85,148 Q84,130 78,130 Q48,126 18,130Z" fill="url(#hv-lav-3d)" />
                                     {/* 잎 칼라 — 화분·식물 일체형 연결 */}
                                     <ellipse cx="48" cy="132" rx="28" ry="7" fill="#B8CCA8" opacity="0.8" />
                                     <ellipse cx="36" cy="134" rx="9" ry="3.5" fill="#ACCCA0" transform="rotate(-15 36 134)" />
@@ -1271,11 +1271,6 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                             <stop offset="100%" stopColor="rgba(0,0,0,0.12)" />
                                         </linearGradient>
                                     </defs>
-                                    {/* 화분 본체 — 클래식 가든 포트 */}
-                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill={pc} />
-                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill="url(#hv-rose-3d)" />
-                                    {/* 화분 칼라 */}
-                                    <path d="M14,122 Q48,128 82,122 Q80,118 48,118 Q16,118 14,122Z" fill={pc} opacity="0.7" />
                                     {/* 부드러운 흙 — 로즈 색상 계열 */}
                                     <ellipse cx="48" cy="122" rx="32" ry="6" fill="#DCC4C0" />
                                     <ellipse cx="48" cy="122" rx="25" ry="4" fill="#D0B8B4" opacity="0.8" />
@@ -1323,6 +1318,11 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                     <ellipse cx="18" cy="82" rx="3.5" ry="5" fill="#FAE8EC" opacity="0.7" />
                                     <ellipse cx="78" cy="86" rx="3" ry="4.5" fill="#FADCE4" opacity="0.7" />
                                     <ellipse cx="48" cy="38" rx="3" ry="4.5" fill="#F8D0D8" opacity="0.6" />
+                                    {/* ④ 화분 본체 — 클래식 가든 포트 (식물 밑동을 덮어 심긴 효과) */}
+                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill={pc} />
+                                    <path d="M16,122 Q10,122 9,140 Q8,158 14,166 Q48,170 82,166 Q88,158 87,140 Q86,122 80,122 Q48,118 16,122Z" fill="url(#hv-rose-3d)" />
+                                    {/* 화분 칼라 */}
+                                    <path d="M14,122 Q48,128 82,122 Q80,118 48,118 Q16,118 14,122Z" fill={pc} opacity="0.7" />
                                     {/* 잎 칼라 — 화분·식물 일체형 연결 */}
                                     <ellipse cx="48" cy="124" rx="30" ry="8" fill="#B4CCAA" opacity="0.85" />
                                     <ellipse cx="32" cy="126" rx="10" ry="4" fill="#A8C4A0" transform="rotate(-18 32 126)" />
@@ -1356,9 +1356,6 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                         <ellipse cx="78" cy="40" rx="6" ry="4" fill="black" transform="rotate(25 78 40)" />
                                     </mask>
                                 </defs>
-                                {/* 화분 본체 — 볼록 세라믹 */}
-                                <path d="M16,130 Q8,130 7,148 Q6,164 12,170 Q48,176 84,170 Q90,164 89,148 Q88,130 80,130 Q48,126 16,130Z" fill={pc} />
-                                <path d="M16,130 Q8,130 7,148 Q6,164 12,170 Q48,176 84,170 Q90,164 89,148 Q88,130 80,130 Q48,126 16,130Z" fill="url(#hv-mon-3d)" />
                                 {/* 부드러운 흙 — 민트 색상 계열 */}
                                 <ellipse cx="48" cy="130" rx="32" ry="6.5" fill="#C4A888" />
                                 <ellipse cx="48" cy="130" rx="25" ry="4.5" fill="#B89870" opacity="0.8" />
@@ -1383,6 +1380,9 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                 {/* 중앙 새순 */}
                                 <path d="M45,126 C38,96 42,62 48,30 C54,62 58,96 51,126Z" fill={pl} />
                                 <path d="M48,126 C46,96 46,62 48,30" fill="none" stroke="#88B880" strokeWidth="1.5" opacity="0.5" />
+                                {/* ④ 화분 본체 — 볼록 세라믹 (식물 밑동을 덮어 심긴 효과) */}
+                                <path d="M16,130 Q8,130 7,148 Q6,164 12,170 Q48,176 84,170 Q90,164 89,148 Q88,130 80,130 Q48,126 16,130Z" fill={pc} />
+                                <path d="M16,130 Q8,130 7,148 Q6,164 12,170 Q48,176 84,170 Q90,164 89,148 Q88,130 80,130 Q48,126 16,130Z" fill="url(#hv-mon-3d)" />
                                 {/* 잎 칼라 — 화분·식물 일체형 연결 */}
                                 <ellipse cx="48" cy="132" rx="30" ry="8" fill="#B4D8C8" opacity="0.8" />
                                 <ellipse cx="34" cy="134" rx="10" ry="4" fill="#A8CCBC" transform="rotate(-15 34 134)" />
