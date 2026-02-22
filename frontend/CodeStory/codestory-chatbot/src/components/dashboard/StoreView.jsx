@@ -279,7 +279,7 @@ const ItemPreview = ({ item }) => {
         );
     }
 
-    // 화분 미리보기 (고품질 플랜테리어 SVG — 5종 차별화 디자인)
+    // 화분 미리보기 (고품질 플랜테리어 SVG — 4레이어: ①뒷타원 ②흙 ③식물 ④화분앞면)
     if (item.type === 'pot') {
         const potId = item.id;
 
@@ -305,10 +305,6 @@ const ItemPreview = ({ item }) => {
                                 <stop offset="100%" stopColor="#3E6C28" />
                             </linearGradient>
                         </defs>
-                        {/* ─ 화분 몸체: 테라코타 원통 하단 테이퍼 ─ */}
-                        <path d="M10,48 L40,48 L37,66 Q25,69 13,66 Z" fill="url(#cp-pot)" />
-                        <path d="M12,50 Q25,53 38,50 L36,65 Q25,67 14,65 Z" fill="rgba(255,255,255,0.07)" />
-                        <path d="M12,56 Q25,59 38,56" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
                         {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
                         <ellipse cx="25" cy="45" rx="15" ry="3.5" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
@@ -348,6 +344,10 @@ const ItemPreview = ({ item }) => {
                             <circle cx="25" cy="13" r="2.5" fill="#FFE8B0" />
                             <circle cx="25" cy="13" r="1.1" fill="#FFCC60" />
                         </g>
+                        {/* ─ 화분 몸체: 테라코타 원통 하단 테이퍼 (식물 밑동을 덮어 심어진 효과) ─ */}
+                        <path d="M10,48 L40,48 L37,66 Q25,69 13,66 Z" fill="url(#cp-pot)" />
+                        <path d="M12,50 Q25,53 38,50 L36,65 Q25,67 14,65 Z" fill="rgba(255,255,255,0.07)" />
+                        <path d="M12,56 Q25,59 38,56" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
                         {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
                         <path d="M10,45 A15,4 0 0 1 40,45 Z" fill="#C85040" />
                         <path d="M12,45 A13,3.2 0 0 1 38,45 Z" fill="#D46050" opacity="0.7" />
@@ -387,11 +387,6 @@ const ItemPreview = ({ item }) => {
                                 <ellipse cx="29.5" cy="11" rx="2.6" ry="2" fill="black" transform="rotate(14 29.5 11)" />
                             </mask>
                         </defs>
-                        {/* ─ 화분 몸체 (볼록 볼형 세라믹) ─ */}
-                        <path d="M11,50 Q5,52 5,60 Q5,67 11,68 Q25,70 39,68 Q45,67 45,60 Q45,52 39,50 Q25,48 11,50 Z" fill="url(#mp-pot)" />
-                        <path d="M13,52 Q25,55 37,52 Q37,64 25,66 Q13,64 13,52 Z" fill="rgba(255,255,255,0.1)" />
-                        {/* 도자기 질감 띠 */}
-                        <path d="M10,57 Q25,60 40,57" fill="none" stroke="rgba(180,170,160,0.25)" strokeWidth="0.7" />
                         {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
                         <ellipse cx="25" cy="47.5" rx="13.5" ry="3" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
@@ -416,6 +411,11 @@ const ItemPreview = ({ item }) => {
                             <path d="M23,30 C18,18 20,8 25,3 C30,8 32,18 27,30 Z" fill="#2E7A40" mask="url(#mp-mC)" />
                             <path d="M25,30 C24,18 24,8 25,3" fill="none" stroke="rgba(20,60,30,0.45)" strokeWidth="0.9" />
                         </g>
+                        {/* ─ 화분 몸체 (볼록 볼형 세라믹) — 식물 밑동을 덮어 심어진 효과 ─ */}
+                        <path d="M11,50 Q5,52 5,60 Q5,67 11,68 Q25,70 39,68 Q45,67 45,60 Q45,52 39,50 Q25,48 11,50 Z" fill="url(#mp-pot)" />
+                        <path d="M13,52 Q25,55 37,52 Q37,64 25,66 Q13,64 13,52 Z" fill="rgba(255,255,255,0.1)" />
+                        {/* 도자기 질감 띠 */}
+                        <path d="M10,57 Q25,60 40,57" fill="none" stroke="rgba(180,170,160,0.25)" strokeWidth="0.7" />
                         {/* ─ 잎 칼라 ─ */}
                         <ellipse cx="25" cy="51" rx="12" ry="3.2" fill="#A4C89C" opacity="0.75" />
                         {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
@@ -438,10 +438,6 @@ const ItemPreview = ({ item }) => {
                                 <stop offset="100%" stopColor="#C87890" />
                             </linearGradient>
                         </defs>
-                        {/* ─ 화분 몸체 (넓은 볼형) ─ */}
-                        <path d="M7,54 Q4,55 4,62 Q4,68 7,69 Q25,71 43,69 Q46,68 46,62 Q46,55 43,54 Q25,52 7,54 Z" fill="url(#fp-pot)" />
-                        <path d="M9,56 Q25,59 41,56 Q40,67 25,68.5 Q10,67 9,56 Z" fill="rgba(255,255,255,0.1)" />
-                        <path d="M8,61 Q25,64 42,61" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
                         {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
                         <ellipse cx="25" cy="51" rx="17.5" ry="3.5" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
@@ -491,6 +487,10 @@ const ItemPreview = ({ item }) => {
                             <circle cx="37" cy="22" r="2.8" fill="#FFE888" />
                             <circle cx="37" cy="22" r="1.3" fill="#FFD050" />
                         </g>
+                        {/* ─ 화분 몸체 (넓은 볼형) — 식물 밑동을 덮어 심어진 효과 ─ */}
+                        <path d="M7,54 Q4,55 4,62 Q4,68 7,69 Q25,71 43,69 Q46,68 46,62 Q46,55 43,54 Q25,52 7,54 Z" fill="url(#fp-pot)" />
+                        <path d="M9,56 Q25,59 41,56 Q40,67 25,68.5 Q10,67 9,56 Z" fill="rgba(255,255,255,0.1)" />
+                        <path d="M8,61 Q25,64 42,61" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
                         {/* ─ 잎 칼라 ─ */}
                         <ellipse cx="25" cy="55" rx="16" ry="4" fill="#90C880" opacity="0.8" />
                         <ellipse cx="15" cy="56.5" rx="6" ry="2.2" fill="#88C078" transform="rotate(-18 15 56.5)" />
@@ -525,12 +525,6 @@ const ItemPreview = ({ item }) => {
                                 <stop offset="100%" stopColor="#B8B4A0" />
                             </linearGradient>
                         </defs>
-                        {/* ─ 화분 몸체 (크림 도자기 달걀형) ─ */}
-                        <path d="M13,50 Q9,50 8,57 Q7,64 10,67 Q25,70 40,67 Q43,64 42,57 Q41,50 37,50 Q25,48 13,50 Z" fill="url(#lp-pot)" />
-                        <path d="M15,52 Q25,55 35,52 Q34,66 25,67.5 Q16,66 15,52 Z" fill="rgba(255,255,255,0.1)" />
-                        {/* 도자기 장식 띠 */}
-                        <path d="M14,57 Q25,60 36,57" fill="none" stroke="rgba(180,170,140,0.35)" strokeWidth="0.7" />
-                        <path d="M13,62 Q25,65 37,62" fill="none" stroke="rgba(180,170,140,0.25)" strokeWidth="0.5" />
                         {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
                         <ellipse cx="25" cy="47.5" rx="12" ry="2.8" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
@@ -578,6 +572,12 @@ const ItemPreview = ({ item }) => {
                                 );
                             })}
                         </g>
+                        {/* ─ 화분 몸체 (크림 도자기 달걀형) — 식물 밑동을 덮어 심어진 효과 ─ */}
+                        <path d="M13,50 Q9,50 8,57 Q7,64 10,67 Q25,70 40,67 Q43,64 42,57 Q41,50 37,50 Q25,48 13,50 Z" fill="url(#lp-pot)" />
+                        <path d="M15,52 Q25,55 35,52 Q34,66 25,67.5 Q16,66 15,52 Z" fill="rgba(255,255,255,0.1)" />
+                        {/* 도자기 장식 띠 */}
+                        <path d="M14,57 Q25,60 36,57" fill="none" stroke="rgba(180,170,140,0.35)" strokeWidth="0.7" />
+                        <path d="M13,62 Q25,65 37,62" fill="none" stroke="rgba(180,170,140,0.25)" strokeWidth="0.5" />
                         {/* ─ 잎 칼라 ─ */}
                         <ellipse cx="25" cy="51" rx="11" ry="3.2" fill="#B0C898" opacity="0.75" />
                         <ellipse cx="18" cy="52.2" rx="4.5" ry="1.8" fill="#A8C090" transform="rotate(-15 18 52.2)" />
@@ -607,12 +607,6 @@ const ItemPreview = ({ item }) => {
                                 <stop offset="100%" stopColor="#986830" />
                             </linearGradient>
                         </defs>
-                        {/* ─ 화분 몸체 (모던 원통) ─ */}
-                        <rect x="10" y="50" width="30" height="18" rx="1" fill="url(#rp-pot)" />
-                        <rect x="12" y="52" width="26" height="14" fill="rgba(255,255,255,0.05)" />
-                        <path d="M11,56 Q25,58 39,56" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
-                        <path d="M11,62 Q25,64 39,62" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-                        <ellipse cx="25" cy="68" rx="15" ry="2" fill="#383030" />
                         {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
                         <ellipse cx="25" cy="48" rx="14.5" ry="2.8" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
@@ -651,6 +645,12 @@ const ItemPreview = ({ item }) => {
                             <path d="M37,30.5 Q39.5,31 39.5,32" fill="none" stroke="#FDE0E8" strokeWidth="0.8" opacity="0.5" />
                             <circle cx="36" cy="27" r="1.4" fill="rgba(255,255,255,0.28)" />
                         </g>
+                        {/* ─ 화분 몸체 (모던 원통) — 식물 밑동을 덮어 심어진 효과 ─ */}
+                        <rect x="10" y="50" width="30" height="18" rx="1" fill="url(#rp-pot)" />
+                        <rect x="12" y="52" width="26" height="14" fill="rgba(255,255,255,0.05)" />
+                        <path d="M11,56 Q25,58 39,56" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
+                        <path d="M11,62 Q25,64 39,62" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+                        <ellipse cx="25" cy="68" rx="15" ry="2" fill="#383030" />
                         {/* ─ 잎 칼라 ─ */}
                         <ellipse cx="25" cy="51" rx="14" ry="4" fill="#68A858" opacity="0.8" />
                         <ellipse cx="15" cy="52.5" rx="5.5" ry="2" fill="#60A050" transform="rotate(-18 15 52.5)" />
