@@ -53,207 +53,211 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const equippedPot = useMemo(() => getEquippedItem('pot'), [getEquippedItem]);
     const equippedCushion = useMemo(() => getEquippedItem('cushion'), [getEquippedItem]);
 
-    // 🪴 화분 렌더링 — 4레이어 샌드위치: ①뒷타원 ②흙 ③식물 ④화분앞면
+    // 🪴 화분 렌더링 — ToDoUpgrade.txt 기준 통합 SVG
     const renderPot = () => {
         if (!equippedPot) return null;
         const potId = equippedPot?.id;
-        const pc = equippedPot?.potColor || '#C87941';
-        const pl = equippedPot?.plantColor || '#4CAF50';
-        const svgStyle = { width: '13vw', height: '22vw', display: 'block', overflow: 'visible' };
+        const svgStyle = { width: '13vw', height: '17.4vw', display: 'block', overflow: 'visible' };
 
-        // 화분 종류별 ①뒷타원 색상
-        const backC = { pot_cactus:'#7A3020', pot_monstera:'#909090', pot_flower:'#9C5070', pot_lavender:'#80706A', pot_rose:'#6A4810' }[potId] || '#5A3010';
-
-        return (
+        if (potId === 'pot_cactus') return (
             <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
-                <svg viewBox="0 0 100 120" style={svgStyle}>
-                    <defs>
-                        <linearGradient id="md-pg" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="rgba(0,0,0,0.22)" />
-                            <stop offset="38%" stopColor="rgba(255,255,255,0.18)" />
-                            <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
-                        </linearGradient>
-                        {potId === 'pot_monstera' && (<>
-                            <mask id="md-mL"><rect width="100" height="120" fill="white"/><ellipse cx="22" cy="48" rx="5" ry="3.5" fill="black" transform="rotate(-28 22 48)"/><ellipse cx="16" cy="30" rx="4" ry="3" fill="black" transform="rotate(-22 16 30)"/></mask>
-                            <mask id="md-mR"><rect width="100" height="120" fill="white"/><ellipse cx="78" cy="48" rx="5" ry="3.5" fill="black" transform="rotate(28 78 48)"/><ellipse cx="84" cy="30" rx="4" ry="3" fill="black" transform="rotate(22 84 30)"/></mask>
-                        </>)}
-                    </defs>
-
-                    {/* ① 뒷타원 — 화분 입구 안쪽 깊이감 */}
-                    <ellipse cx="50" cy="84" rx="28" ry="7" fill={backC} />
-
-                    {/* ② 흙 */}
-                    <ellipse cx="50" cy="88" rx="26" ry="5.5" fill={potId==='pot_flower'?'#3D1A24':potId==='pot_lavender'?'#3A2840':'#3D2010'} />
-                    <ellipse cx="50" cy="87" rx="18" ry="3.5" fill="rgba(0,0,0,0.3)" />
-
-                    {/* ③ 식물 — 줄기 밑동은 y≥90에서 시작 */}
-                    <g className="animate-pot-breathe">
-                        {potId === 'pot_cactus' && (<>
-                            {/* 왼팔 */}
-                            <path d="M43,74 Q30,70 26,58 Q23,48 28,46 Q34,44 37,54 Q40,64 43,70Z" fill={pl} />
-                            <path d="M31,70 Q30,58 31,48" fill="none" stroke="rgba(40,80,20,0.4)" strokeWidth="0.8"/>
-                            {/* 오른팔 */}
-                            <path d="M57,66 Q70,62 74,50 Q77,40 72,38 Q66,36 63,46 Q60,56 57,60Z" fill={pl} />
-                            <path d="M69,62 Q70,50 69,40" fill="none" stroke="rgba(40,80,20,0.4)" strokeWidth="0.8"/>
-                            {/* 메인 몸통 */}
-                            <path d="M42,90 Q39,55 42,30 Q44,14 50,12 Q56,14 58,30 Q61,55 58,90Z" fill={pl} />
-                            {/* 세로 리브 */}
-                            <path d="M47,89 Q46,52 48,14" fill="none" stroke="rgba(40,80,20,0.4)" strokeWidth="1.2"/>
-                            <path d="M50,89 Q50,50 50,12" fill="none" stroke="rgba(40,80,20,0.3)" strokeWidth="1"/>
-                            <path d="M53,89 Q54,52 52,14" fill="none" stroke="rgba(40,80,20,0.4)" strokeWidth="1.2"/>
-                            <path d="M43,88 Q42,54 45,22" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3"/>
-                            {/* 가시 */}
-                            {[35,50,65,78].map(y=>(<g key={y}>
-                                <line x1="43" y1={y} x2="40" y2={y-2.5} stroke="rgba(255,255,255,0.85)" strokeWidth="0.8" strokeLinecap="round"/>
-                                <line x1="57" y1={y} x2="60" y2={y-2.5} stroke="rgba(255,255,255,0.85)" strokeWidth="0.8" strokeLinecap="round"/>
-                            </g>))}
-                            {/* 정수리 꽃 */}
-                            {[0,60,120,180,240,300].map(a=>(<ellipse key={a} cx="50" cy="12" rx="2.5" ry="6" fill="#F9B0CC" transform={`rotate(${a} 50 12)`}/>))}
-                            <circle cx="50" cy="12" r="3.5" fill="#FFE8B0"/><circle cx="50" cy="12" r="1.6" fill="#FFCC60"/>
-                        </>)}
-
-                        {potId === 'pot_monstera' && (<>
-                            <line x1="50" y1="92" x2="50" y2="52" stroke="#4A8040" strokeWidth="4" strokeLinecap="round"/>
-                            <path d="M50,76 Q38,72 30,54" fill="none" stroke="#4A8040" strokeWidth="2.5" strokeLinecap="round"/>
-                            <path d="M50,68 Q62,64 70,46" fill="none" stroke="#4A8040" strokeWidth="2.5" strokeLinecap="round"/>
-                            {/* 왼쪽 잎 (fenestration mask) */}
-                            <path d="M47,90 C26,82 6,58 8,30 C10,12 30,8 40,22 C44,32 44,68 47,90Z" fill={pl} mask="url(#md-mL)"/>
-                            <path d="M47,88 C30,68 14,44 16,20" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9"/>
-                            {/* 오른쪽 잎 (fenestration mask) */}
-                            <path d="M53,90 C74,80 94,54 92,26 C90,8 70,6 60,20 C56,30 56,68 53,90Z" fill={pl} mask="url(#md-mR)"/>
-                            <path d="M53,88 C70,66 86,40 84,16" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9"/>
-                            {/* 중앙 새순 */}
-                            <path d="M47,90 C42,64 46,38 50,14 C54,38 58,64 53,90Z" fill={pl} opacity="0.9"/>
-                            <path d="M50,90 C49,66 49,40 50,14" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9"/>
-                        </>)}
-
-                        {potId === 'pot_flower' && (<>
-                            {/* 잎 덤불 */}
-                            <ellipse cx="50" cy="72" rx="34" ry="16" fill="#6AAA58"/>
-                            <ellipse cx="35" cy="68" rx="17" ry="12" fill="#7EC468"/>
-                            <ellipse cx="65" cy="68" rx="17" ry="12" fill="#7EC468"/>
-                            <ellipse cx="50" cy="62" rx="22" ry="10" fill="#88CC70"/>
-                            {/* 줄기 3개 */}
-                            <path d="M36,92 Q29,68 25,35" fill="none" stroke="#5A9848" strokeWidth="2.8" strokeLinecap="round"/>
-                            <path d="M50,92 Q50,65 50,22" fill="none" stroke="#60A44E" strokeWidth="2.8" strokeLinecap="round"/>
-                            <path d="M64,92 Q71,68 75,35" fill="none" stroke="#5A9848" strokeWidth="2.8" strokeLinecap="round"/>
-                            {/* 꽃 1 왼쪽 */}
-                            {[0,72,144,216,288].map(a=>(<ellipse key={a} cx="25" cy="32" rx="4.5" ry="9" fill="#FDD0E0" transform={`rotate(${a} 25 32)`}/>))}
-                            <circle cx="25" cy="32" r="4.5" fill="#FFE888"/><circle cx="25" cy="32" r="2" fill="#FFD050"/>
-                            {/* 꽃 2 중앙 */}
-                            {[0,51,103,154,206,257,309].map(a=>(<ellipse key={a} cx="50" cy="18" rx="4" ry="8.5" fill="#E8D8F8" transform={`rotate(${a} 50 18)`}/>))}
-                            <circle cx="50" cy="18" r="5" fill="#FFE888"/><circle cx="50" cy="18" r="2.2" fill="#FFD050"/>
-                            {/* 꽃 3 오른쪽 */}
-                            {[0,72,144,216,288].map(a=>(<ellipse key={a} cx="75" cy="32" rx="4" ry="8" fill="#FFD8C0" transform={`rotate(${a} 75 32)`}/>))}
-                            <circle cx="75" cy="32" r="4" fill="#FFE888"/><circle cx="75" cy="32" r="1.8" fill="#FFD050"/>
-                        </>)}
-
-                        {potId === 'pot_lavender' && (<>
-                            {/* 잎사귀 */}
-                            <ellipse cx="22" cy="72" rx="7" ry="3" fill="#94C878" transform="rotate(-25 22 72)"/>
-                            <ellipse cx="78" cy="72" rx="7" ry="3" fill="#94C878" transform="rotate(25 78 72)"/>
-                            {/* 줄기 5개 + 쌍타원 클러스터 */}
-                            {[{sx:36,tx:25,ty:18},{sx:43,tx:38,ty:8},{sx:50,tx:50,ty:5},{sx:57,tx:62,ty:8},{sx:64,tx:75,ty:18}].map(({sx,tx,ty},i)=>(
-                                <g key={i}>
-                                    <path d={`M${sx},90 Q${tx+2},58 ${tx},${ty}`} fill="none" stroke="#8AB870" strokeWidth="1.8" strokeLinecap="round"/>
-                                    {[0,4,8,12,16,20].map(dy=>{
-                                        const lavC=['#D0A8F0','#C498E8','#B888E0','#AC78D8','#A068D0','#9858C8'][Math.min(Math.floor(dy/4),5)];
-                                        const rx=Math.max(2.8-dy*0.08,0.8), ry=Math.max(4.2-dy*0.12,1.2);
-                                        return (<g key={dy}>
-                                            <ellipse cx={tx-3} cy={ty+dy} rx={rx} ry={ry} fill={lavC} transform={`rotate(-12 ${tx-3} ${ty+dy})`}/>
-                                            <ellipse cx={tx+3} cy={ty+dy} rx={rx} ry={ry} fill={lavC} transform={`rotate(12 ${tx+3} ${ty+dy})`}/>
-                                        </g>);
-                                    })}
-                                    <ellipse cx={tx} cy={ty-3} rx="1.8" ry="3" fill="#C898E8"/>
-                                </g>
-                            ))}
-                        </>)}
-
-                        {potId === 'pot_rose' && (<>
-                            {/* 잎 덤불 */}
-                            <ellipse cx="50" cy="64" rx="38" ry="24" fill="#5A9848"/>
-                            <ellipse cx="34" cy="56" rx="22" ry="18" fill="#68A855"/>
-                            <ellipse cx="64" cy="58" rx="20" ry="16" fill="#5A9848" opacity="0.9"/>
-                            <ellipse cx="50" cy="46" rx="26" ry="16" fill="#74B860" opacity="0.85"/>
-                            {/* 장미 1 왼쪽 */}
-                            <circle cx="26" cy="48" r="13" fill="#D87080"/>
-                            <path d="M26,35 Q38,35 38,48 Q38,61 26,61 Q16,58 15,48 Q16,36 26,35Z" fill="#E89098"/>
-                            <path d="M26,39 Q36,40 36,48 Q35,58 26,57" fill="#F0AABA" opacity="0.9"/>
-                            <path d="M26,43 Q33,44 33,49 Q32,57 26,56" fill="#F8C8D4" opacity="0.8"/>
-                            <circle cx="25" cy="40" r="2" fill="rgba(255,255,255,0.28)"/>
-                            {/* 장미 2 중앙 */}
-                            <circle cx="50" cy="28" r="17" fill="#C86070"/>
-                            <path d="M50,11 Q67,11 67,28 Q67,45 50,45 Q35,41 34,28 Q35,14 50,11Z" fill="#D87888"/>
-                            <path d="M50,15 Q64,16 64,28 Q63,42 50,41" fill="#E898A8" opacity="0.9"/>
-                            <path d="M50,20 Q61,21 61,29 Q60,40 50,39" fill="#F4B0C0" opacity="0.85"/>
-                            <path d="M50,25 Q57,26 57,31 Q56,38 50,37" fill="#FDD0D8" opacity="0.75"/>
-                            <circle cx="49" cy="18" r="2.5" fill="rgba(255,255,255,0.28)"/>
-                            {/* 장미 3 오른쪽 */}
-                            <circle cx="72" cy="52" r="12" fill="#D87888"/>
-                            <path d="M72,40 Q84,40 84,52 Q84,65 72,65 Q62,62 61,52 Q62,41 72,40Z" fill="#E898A8"/>
-                            <path d="M72,44 Q82,45 82,52 Q81,63 72,62" fill="#F4B0C0" opacity="0.88"/>
-                            <circle cx="71" cy="44" r="1.8" fill="rgba(255,255,255,0.28)"/>
-                        </>)}
+                <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
+                    <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                    <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#CF6A38"/>
+                    <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#E07848" opacity="0.7"/>
+                    <g className="animate-pot-breathe" transform="translate(0, 8)">
+                        <ellipse cx="32" cy="65" rx="14" ry="22" fill="#43A047" transform="rotate(-20 32 65)"/>
+                        <ellipse cx="88" cy="60" rx="12" ry="18" fill="#43A047" transform="rotate(25 88 60)"/>
+                        <ellipse cx="60" cy="65" rx="22" ry="40" fill="#43A047"/>
+                        <ellipse cx="43" cy="68" rx="8" ry="10" fill="#43A047" transform="rotate(-20 43 68)"/>
+                        <ellipse cx="77" cy="64" rx="7" ry="9" fill="#43A047" transform="rotate(25 77 64)"/>
+                        <ellipse cx="55" cy="50" rx="7" ry="14" fill="#66BB6A" opacity="0.5"/>
+                        <ellipse cx="28" cy="60" rx="4" ry="8" fill="#66BB6A" opacity="0.4" transform="rotate(-20 28 60)"/>
+                        <ellipse cx="84" cy="56" rx="3.5" ry="7" fill="#66BB6A" opacity="0.4" transform="rotate(25 84 56)"/>
+                        <circle cx="60" cy="40" r="2" fill="white" opacity="0.6"/>
+                        <circle cx="50" cy="55" r="2" fill="white" opacity="0.6"/>
+                        <circle cx="70" cy="65" r="2" fill="white" opacity="0.6"/>
+                        <circle cx="60" cy="80" r="2" fill="white" opacity="0.6"/>
+                        <circle cx="30" cy="57" r="1.5" fill="white" opacity="0.5"/>
+                        <circle cx="85" cy="55" r="1.5" fill="white" opacity="0.5"/>
+                        <circle cx="55" cy="22" r="5" fill="#F06292"/>
+                        <circle cx="65" cy="22" r="5" fill="#F06292"/>
+                        <circle cx="60" cy="17" r="5" fill="#F06292"/>
+                        <circle cx="60" cy="25" r="8" fill="#E91E63"/>
+                        <circle cx="60" cy="25" r="3" fill="#FFF176"/>
                     </g>
-
-                    {/* ④ 화분 몸통 + 잎 칼라 + 앞면 립 — 식물 밑동을 덮어 심어진 효과 */}
-                    {potId === 'pot_cactus' && (<>
-                        <path d="M22,84 L26,115 Q50,120 74,115 L78,84 Q50,91 22,84Z" fill={pc}/>
-                        <path d="M22,84 L26,115 Q50,120 74,115 L78,84 Q50,91 22,84Z" fill="url(#md-pg)"/>
-                        <ellipse cx="50" cy="89" rx="25" ry="7" fill="#94C878" opacity="0.8"/>
-                        <path d="M22,84 A28,7 0 0 1 78,84 Z" fill={pc}/>
-                        <path d="M24,84 A26,5.5 0 0 1 76,84 Z" fill="url(#md-pg)"/>
-                        <path d="M26,84 A24,4 0 0 1 74,84 Z" fill="rgba(255,255,255,0.2)"/>
-                    </>)}
-                    {potId === 'pot_monstera' && (<>
-                        <path d="M18,84 Q10,84 8,102 Q6,116 14,119 Q50,124 86,119 Q94,116 92,102 Q90,84 82,84 Q50,80 18,84Z" fill={pc}/>
-                        <path d="M18,84 Q10,84 8,102 Q6,116 14,119 Q50,124 86,119 Q94,116 92,102 Q90,84 82,84 Q50,80 18,84Z" fill="url(#md-pg)"/>
-                        <ellipse cx="50" cy="89" rx="26" ry="7" fill="#A4C89C" opacity="0.75"/>
-                        <path d="M18,84 A32,7.5 0 0 1 82,84 Z" fill={pc}/>
-                        <path d="M20,84 A30,5.5 0 0 1 80,84 Z" fill="url(#md-pg)"/>
-                        <path d="M22,84 A28,3.8 0 0 1 78,84 Z" fill="rgba(255,255,255,0.22)"/>
-                    </>)}
-                    {potId === 'pot_flower' && (<>
-                        <path d="M14,84 Q6,84 4,102 Q2,116 10,120 Q50,126 90,120 Q98,116 96,102 Q94,84 86,84 Q50,79 14,84Z" fill={pc}/>
-                        <path d="M14,84 Q6,84 4,102 Q2,116 10,120 Q50,126 90,120 Q98,116 96,102 Q94,84 86,84 Q50,79 14,84Z" fill="url(#md-pg)"/>
-                        <ellipse cx="50" cy="90" rx="30" ry="8" fill="#90C880" opacity="0.8"/>
-                        <ellipse cx="34" cy="92" rx="12" ry="4.5" fill="#88C078" transform="rotate(-18 34 92)"/>
-                        <ellipse cx="66" cy="92" rx="12" ry="4.5" fill="#88C078" transform="rotate(18 66 92)"/>
-                        <path d="M14,84 A36,8 0 0 1 86,84 Z" fill={pc}/>
-                        <path d="M16,84 A34,6 0 0 1 84,84 Z" fill="url(#md-pg)"/>
-                        <path d="M18,84 A32,4.5 0 0 1 82,84 Z" fill="rgba(255,255,255,0.22)"/>
-                    </>)}
-                    {potId === 'pot_lavender' && (<>
-                        <path d="M20,84 Q14,84 12,101 Q11,115 17,118 Q50,122 83,118 Q89,115 88,101 Q86,84 80,84 Q50,80 20,84Z" fill={pc}/>
-                        <path d="M20,84 Q14,84 12,101 Q11,115 17,118 Q50,122 83,118 Q89,115 88,101 Q86,84 80,84 Q50,80 20,84Z" fill="url(#md-pg)"/>
-                        <ellipse cx="50" cy="89" rx="24" ry="6.5" fill="#B0C898" opacity="0.75"/>
-                        <ellipse cx="38" cy="91" rx="9" ry="3.5" fill="#A8C090" transform="rotate(-15 38 91)"/>
-                        <ellipse cx="62" cy="91" rx="9" ry="3.5" fill="#A8C090" transform="rotate(15 62 91)"/>
-                        <path d="M20,84 A30,7.5 0 0 1 80,84 Z" fill={pc}/>
-                        <path d="M22,84 A28,5.5 0 0 1 78,84 Z" fill="url(#md-pg)"/>
-                        <path d="M24,84 A26,3.8 0 0 1 76,84 Z" fill="rgba(255,255,255,0.22)"/>
-                    </>)}
-                    {potId === 'pot_rose' && (<>
-                        <rect x="18" y="84" width="64" height="32" rx="2" fill={pc}/>
-                        <rect x="18" y="84" width="64" height="32" rx="2" fill="url(#md-pg)"/>
-                        <ellipse cx="50" cy="116" rx="32" ry="2.5" fill="rgba(0,0,0,0.15)"/>
-                        <ellipse cx="50" cy="89" rx="28" ry="7.5" fill="#68A858" opacity="0.8"/>
-                        <ellipse cx="36" cy="91" rx="11" ry="4" fill="#60A050" transform="rotate(-18 36 91)"/>
-                        <ellipse cx="64" cy="91" rx="11" ry="4" fill="#60A050" transform="rotate(18 64 91)"/>
-                        <path d="M18,84 A32,7.5 0 0 1 82,84 Z" fill="#D4A840"/>
-                        <path d="M20,84 A30,6 0 0 1 80,84 Z" fill="#DDB860"/>
-                        <path d="M22,84 A28,4 0 0 1 78,84 Z" fill="rgba(255,255,255,0.2)"/>
-                    </>)}
-                    {/* fallback (pot_monstera 기본값) */}
-                    {!['pot_cactus','pot_monstera','pot_flower','pot_lavender','pot_rose'].includes(potId) && (<>
-                        <path d="M22,84 L26,115 Q50,120 74,115 L78,84 Q50,91 22,84Z" fill={pc}/>
-                        <path d="M22,84 L26,115 Q50,120 74,115 L78,84 Q50,91 22,84Z" fill="url(#md-pg)"/>
-                        <path d="M22,84 A28,7 0 0 1 78,84 Z" fill={pc}/>
-                        <path d="M24,84 A26,5 0 0 1 76,84 Z" fill="rgba(255,255,255,0.2)"/>
-                    </>)}
+                    <ellipse cx="60" cy="108" rx="27" ry="6" fill="#A04820"/>
+                    <ellipse cx="60" cy="106" rx="27" ry="6" fill="#B85530"/>
+                    <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                    <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
                 </svg>
             </div>
         );
+
+        if (potId === 'pot_monstera') return (
+            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+                <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
+                    <defs>
+                        <linearGradient id="md-leaf-dark" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#00897B"/>
+                            <stop offset="100%" stopColor="#004D40"/>
+                        </linearGradient>
+                        <linearGradient id="md-leaf-mid" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#26A69A"/>
+                            <stop offset="100%" stopColor="#00796B"/>
+                        </linearGradient>
+                        <linearGradient id="md-leaf-light" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#4DB6AC"/>
+                            <stop offset="100%" stopColor="#00897B"/>
+                        </linearGradient>
+                    </defs>
+                    <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                    <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#B8956A"/>
+                    <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#CDAA80" opacity="0.7"/>
+                    <g className="animate-pot-breathe" transform="translate(0, 8)">
+                        <path d="M 30 95 Q 60 30 90 95 Z" fill="url(#md-leaf-dark)"/>
+                        <ellipse cx="60" cy="40" rx="16" ry="34" fill="url(#md-leaf-dark)"/>
+                        <ellipse cx="35" cy="55" rx="14" ry="30" fill="url(#md-leaf-dark)" transform="rotate(-30 35 55)"/>
+                        <ellipse cx="85" cy="55" rx="14" ry="30" fill="url(#md-leaf-dark)" transform="rotate(30 85 55)"/>
+                        <ellipse cx="20" cy="75" rx="12" ry="24" fill="url(#md-leaf-dark)" transform="rotate(-55 20 75)"/>
+                        <ellipse cx="100" cy="75" rx="12" ry="24" fill="url(#md-leaf-dark)" transform="rotate(55 100 75)"/>
+                        <ellipse cx="45" cy="55" rx="16" ry="32" fill="url(#md-leaf-mid)" transform="rotate(-15 45 55)"/>
+                        <ellipse cx="75" cy="55" rx="16" ry="32" fill="url(#md-leaf-mid)" transform="rotate(15 75 55)"/>
+                        <ellipse cx="60" cy="65" rx="18" ry="34" fill="url(#md-leaf-light)"/>
+                        <ellipse cx="35" cy="80" rx="14" ry="24" fill="url(#md-leaf-light)" transform="rotate(-40 35 80)"/>
+                        <ellipse cx="85" cy="80" rx="14" ry="24" fill="url(#md-leaf-light)" transform="rotate(40 85 80)"/>
+                        <path d="M60,35 Q60,65 60,95" stroke="rgba(255,255,255,0.45)" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                        <path d="M45,30 Q50,65 55,95" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                        <path d="M75,30 Q70,65 65,95" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                    </g>
+                    <ellipse cx="60" cy="108" rx="27" ry="6" fill="#8D6340"/>
+                    <ellipse cx="60" cy="106" rx="27" ry="6" fill="#A07048"/>
+                    <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                    <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+                </svg>
+            </div>
+        );
+
+        if (potId === 'pot_flower') return (
+            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+                <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
+                    <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                    <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E8789A"/>
+                    <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#F29AB4" opacity="0.7"/>
+                    <g className="animate-pot-sway">
+                        <path d="M 50 88 Q 30 73 35 63 Q 45 78 50 88" fill="#7CB342"/>
+                        <path d="M 70 88 Q 90 73 85 63 Q 75 78 70 88" fill="#7CB342"/>
+                        <path d="M 60 112 Q 40 68 30 40" fill="none" stroke="#558B2F" strokeWidth="3" strokeLinecap="round"/>
+                        <path d="M 60 112 L 60 30" fill="none" stroke="#558B2F" strokeWidth="4" strokeLinecap="round"/>
+                        <path d="M 60 112 Q 80 68 90 45" fill="none" stroke="#558B2F" strokeWidth="3" strokeLinecap="round"/>
+                        <circle cx="30" cy="40" r="14" fill="#FFF176"/>
+                        <circle cx="23" cy="35" r="8" fill="#FFEE58"/>
+                        <circle cx="37" cy="35" r="8" fill="#FFEE58"/>
+                        <circle cx="30" cy="28" r="8" fill="#FFEE58"/>
+                        <circle cx="30" cy="38" r="6" fill="#FDD835"/>
+                        <circle cx="30" cy="38" r="3" fill="#F57F17"/>
+                        <circle cx="60" cy="30" r="16" fill="#F48FB1"/>
+                        <circle cx="51" cy="23" r="9" fill="#E91E63"/>
+                        <circle cx="69" cy="23" r="9" fill="#E91E63"/>
+                        <circle cx="60" cy="15" r="9" fill="#E91E63"/>
+                        <circle cx="60" cy="28" r="7" fill="#C2185B"/>
+                        <circle cx="60" cy="28" r="3.5" fill="#FFF176"/>
+                        <circle cx="90" cy="45" r="12" fill="#CE93D8"/>
+                        <circle cx="84" cy="39" r="7" fill="#AB47BC"/>
+                        <circle cx="96" cy="39" r="7" fill="#AB47BC"/>
+                        <circle cx="90" cy="33" r="7" fill="#AB47BC"/>
+                        <circle cx="90" cy="43" r="5" fill="#7B1FA2"/>
+                        <circle cx="90" cy="43" r="2.5" fill="#FFF176"/>
+                    </g>
+                    <ellipse cx="60" cy="108" rx="27" ry="6" fill="#AD1457"/>
+                    <ellipse cx="60" cy="106" rx="27" ry="6" fill="#C2185B"/>
+                    <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                    <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+                </svg>
+            </div>
+        );
+
+        if (potId === 'pot_lavender') return (
+            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+                <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
+                    <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                    <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#9C6DC8"/>
+                    <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#B490DC" opacity="0.7"/>
+                    <g className="animate-pot-sway">
+                        <path d="M 60 112 Q 30 73 25 30" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                        <path d="M 60 112 Q 45 68 40 20" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                        <path d="M 60 112 L 60 15" fill="none" stroke="#558B2F" strokeWidth="3" strokeLinecap="round"/>
+                        <path d="M 60 112 Q 75 68 80 20" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                        <path d="M 60 112 Q 90 73 95 30" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                        <circle cx="25" cy="45" r="5" fill="#CE93D8"/>
+                        <circle cx="22" cy="38" r="5" fill="#AB47BC"/>
+                        <circle cx="28" cy="34" r="4" fill="#8E24AA"/>
+                        <circle cx="25" cy="28" r="4" fill="#6A1B9A"/>
+                        <circle cx="40" cy="35" r="5" fill="#CE93D8"/>
+                        <circle cx="37" cy="28" r="5" fill="#AB47BC"/>
+                        <circle cx="43" cy="24" r="4" fill="#8E24AA"/>
+                        <circle cx="40" cy="18" r="4" fill="#6A1B9A"/>
+                        <circle cx="60" cy="30" r="5.5" fill="#CE93D8"/>
+                        <circle cx="56" cy="22" r="5.5" fill="#AB47BC"/>
+                        <circle cx="64" cy="18" r="4.5" fill="#8E24AA"/>
+                        <circle cx="60" cy="12" r="4.5" fill="#6A1B9A"/>
+                        <circle cx="80" cy="35" r="5" fill="#CE93D8"/>
+                        <circle cx="83" cy="28" r="5" fill="#AB47BC"/>
+                        <circle cx="77" cy="24" r="4" fill="#8E24AA"/>
+                        <circle cx="80" cy="18" r="4" fill="#6A1B9A"/>
+                        <circle cx="95" cy="45" r="5" fill="#CE93D8"/>
+                        <circle cx="98" cy="38" r="5" fill="#AB47BC"/>
+                        <circle cx="92" cy="34" r="4" fill="#8E24AA"/>
+                        <circle cx="95" cy="28" r="4" fill="#6A1B9A"/>
+                    </g>
+                    <ellipse cx="60" cy="108" rx="27" ry="6" fill="#4A148C"/>
+                    <ellipse cx="60" cy="106" rx="27" ry="6" fill="#6A1B9A"/>
+                    <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                    <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+                </svg>
+            </div>
+        );
+
+        if (potId === 'pot_rose') return (
+            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+                <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
+                    <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                    <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E9909A"/>
+                    <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#F4B0B8" opacity="0.7"/>
+                    <g className="animate-pot-breathe" transform="translate(0, 8)">
+                        <ellipse cx="60" cy="70" rx="42" ry="32" fill="#43A047"/>
+                        <ellipse cx="40" cy="75" rx="22" ry="16" fill="#2E7D32" transform="rotate(-25 40 75)"/>
+                        <ellipse cx="80" cy="75" rx="22" ry="16" fill="#2E7D32" transform="rotate(25 80 75)"/>
+                        <g transform="translate(35, 50)">
+                            <circle r="13" fill="#F48FB1"/>
+                            <circle r="10" fill="#E91E63"/>
+                            <circle r="7" fill="#C2185B"/>
+                            <path d="M -3 -1 C -1 -4, 3 -3, 4 0 C 5 4, 1 6, -2 5 C -6 3, -6 -2, -3 -5 C 2 -8, 7 -5, 6 1" fill="none" stroke="#FF80AB" strokeWidth="1.5" strokeLinecap="round"/>
+                        </g>
+                        <g transform="translate(60, 65)">
+                            <circle r="17" fill="#F48FB1"/>
+                            <circle r="13" fill="#E91E63"/>
+                            <circle r="9" fill="#C2185B"/>
+                            <circle r="5" fill="#AD1457"/>
+                            <circle r="2" fill="#FCE4EC"/>
+                            <path d="M -4 -2 C -2 -6, 4 -5, 6 -1 C 7 5, 1 8, -3 6 C -8 4, -8 -3, -4 -7 C 3 -11, 10 -7, 8 2 C 6 10, -5 10, -8 3" fill="none" stroke="#FF4081" strokeWidth="2" strokeLinecap="round"/>
+                        </g>
+                        <g transform="translate(85, 55)">
+                            <circle r="15" fill="#F48FB1"/>
+                            <circle r="11" fill="#E91E63"/>
+                            <circle r="8" fill="#C2185B"/>
+                            <path d="M -3 -1 C -1 -5, 4 -4, 5 0 C 6 5, 1 7, -3 5 C -7 3, -7 -3, -3 -6 C 2 -10, 8 -6, 7 0" fill="none" stroke="#FF80AB" strokeWidth="1.8" strokeLinecap="round"/>
+                        </g>
+                    </g>
+                    <ellipse cx="60" cy="108" rx="27" ry="6" fill="#880E4F"/>
+                    <ellipse cx="60" cy="106" rx="27" ry="6" fill="#AD1457"/>
+                    <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                    <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+                </svg>
+            </div>
+        );
+
+        return null;
     };
 
     const today = startOfDay(new Date());

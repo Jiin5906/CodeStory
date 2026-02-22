@@ -279,385 +279,218 @@ const ItemPreview = ({ item }) => {
         );
     }
 
-    // 화분 미리보기 (고품질 플랜테리어 SVG — 4레이어: ①뒷타원 ②흙 ③식물 ④화분앞면)
+    // 화분 미리보기 (ToDoUpgrade.txt 기준 통합 SVG)
     if (item.type === 'pot') {
         const potId = item.id;
 
-        // ── 선인장 화분 (테라코타 원통 + 리브 세로주름 + 팔 2개 + 핑크 꽃) ──
+        // ── 1. 피치 선인장 ──
         if (potId === 'pot_cactus') {
             return (
                 <div className="w-full h-full flex items-center justify-center">
-                    <svg viewBox="0 0 50 70" width="50" height="70">
-                        <defs>
-                            <linearGradient id="cp-pot" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#B84A32" />
-                                <stop offset="38%" stopColor="#E07050" />
-                                <stop offset="100%" stopColor="#A03828" />
-                            </linearGradient>
-                            <linearGradient id="cp-cac" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#4E8030" />
-                                <stop offset="42%" stopColor="#7CC048" />
-                                <stop offset="100%" stopColor="#407028" />
-                            </linearGradient>
-                            <linearGradient id="cp-arm" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#4A7830" />
-                                <stop offset="50%" stopColor="#72B040" />
-                                <stop offset="100%" stopColor="#3E6C28" />
-                            </linearGradient>
-                        </defs>
-                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
-                        <ellipse cx="25" cy="45" rx="15" ry="3.5" fill="#1A0804" />
-                        {/* ─ 흙 ─ */}
-                        <ellipse cx="25" cy="48" rx="15" ry="3.5" fill="#2E1B0E" />
-                        <ellipse cx="25" cy="47.2" rx="10" ry="2" fill="#4A2C12" />
-                        {/* ─ 선인장 식물 그룹 ─ */}
-                        <g className="animate-pot-breathe">
-                            {/* 왼쪽 팔 */}
-                            <path d="M20.5,38 Q11,35 10,27 Q9,19 14,19 Q19,19 20,26 Q20.5,32 20.5,38 Z" fill="url(#cp-arm)" />
-                            <path d="M15,34 Q14,26 15,20" fill="none" stroke="rgba(40,80,20,0.5)" strokeWidth="0.8" />
-                            <line x1="10.5" y1="25" x2="9" y2="24" stroke="rgba(255,255,255,0.8)" strokeWidth="0.6" strokeLinecap="round" />
-                            <line x1="10" y1="28.5" x2="8.5" y2="28" stroke="rgba(255,255,255,0.8)" strokeWidth="0.6" strokeLinecap="round" />
-                            {/* 오른쪽 팔 */}
-                            <path d="M29.5,32 Q38,28 39,20 Q40,13 35,13 Q30,13 29.5,20 Q29,26 29.5,32 Z" fill="url(#cp-arm)" />
-                            <path d="M34.5,28 Q35.5,21 34.5,14" fill="none" stroke="rgba(40,80,20,0.5)" strokeWidth="0.8" />
-                            <line x1="39.5" y1="17" x2="41" y2="16.5" stroke="rgba(255,255,255,0.8)" strokeWidth="0.6" strokeLinecap="round" />
-                            <line x1="39.5" y1="21" x2="41" y2="21" stroke="rgba(255,255,255,0.8)" strokeWidth="0.6" strokeLinecap="round" />
-                            {/* 메인 몸통 */}
-                            <path d="M18,48 Q17,22 25,13 Q33,22 32,48 Z" fill="url(#cp-cac)" />
-                            {/* 세로 리브 (선인장 특유의 주름) */}
-                            <path d="M21.5,47 Q21,23 25,14" fill="none" stroke="rgba(40,80,20,0.45)" strokeWidth="1.1" />
-                            <path d="M25,47 Q24.5,21 25,13" fill="none" stroke="rgba(40,80,20,0.35)" strokeWidth="1" />
-                            <path d="M28.5,47 Q29,23 25,14" fill="none" stroke="rgba(40,80,20,0.45)" strokeWidth="1.1" />
-                            {/* 하이라이트 세로선 */}
-                            <path d="M20,46 Q19,24 23.5,15" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="2.2" />
-                            {/* 가시 (짧고 흰 선들) */}
-                            {[24, 31, 38].map(y => (
-                                <g key={y}>
-                                    <line x1="18.5" y1={y} x2="16.5" y2={y - 1.2} stroke="rgba(255,255,255,0.85)" strokeWidth="0.65" strokeLinecap="round" />
-                                    <line x1="31.5" y1={y} x2="33.5" y2={y - 1.2} stroke="rgba(255,255,255,0.85)" strokeWidth="0.65" strokeLinecap="round" />
-                                </g>
-                            ))}
-                            {/* 정수리 꽃 (핑크 6장 꽃잎) */}
-                            {[0, 60, 120, 180, 240, 300].map(a => (
-                                <ellipse key={a} cx="25" cy="13" rx="2.2" ry="4.5" fill="#F9B0CC" transform={`rotate(${a} 25 13)`} />
-                            ))}
-                            <circle cx="25" cy="13" r="2.5" fill="#FFE8B0" />
-                            <circle cx="25" cy="13" r="1.1" fill="#FFCC60" />
+                    <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+                        <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                        <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#CF6A38"/>
+                        <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#E07848" opacity="0.7"/>
+                        <g className="animate-pot-breathe" transform="translate(0, 8)">
+                            <ellipse cx="32" cy="65" rx="14" ry="22" fill="#43A047" transform="rotate(-20 32 65)"/>
+                            <ellipse cx="88" cy="60" rx="12" ry="18" fill="#43A047" transform="rotate(25 88 60)"/>
+                            <ellipse cx="60" cy="65" rx="22" ry="40" fill="#43A047"/>
+                            <ellipse cx="43" cy="68" rx="8" ry="10" fill="#43A047" transform="rotate(-20 43 68)"/>
+                            <ellipse cx="77" cy="64" rx="7" ry="9" fill="#43A047" transform="rotate(25 77 64)"/>
+                            <ellipse cx="55" cy="50" rx="7" ry="14" fill="#66BB6A" opacity="0.5"/>
+                            <ellipse cx="28" cy="60" rx="4" ry="8" fill="#66BB6A" opacity="0.4" transform="rotate(-20 28 60)"/>
+                            <ellipse cx="84" cy="56" rx="3.5" ry="7" fill="#66BB6A" opacity="0.4" transform="rotate(25 84 56)"/>
+                            <circle cx="60" cy="40" r="2" fill="white" opacity="0.6"/>
+                            <circle cx="50" cy="55" r="2" fill="white" opacity="0.6"/>
+                            <circle cx="70" cy="65" r="2" fill="white" opacity="0.6"/>
+                            <circle cx="60" cy="80" r="2" fill="white" opacity="0.6"/>
+                            <circle cx="30" cy="57" r="1.5" fill="white" opacity="0.5"/>
+                            <circle cx="85" cy="55" r="1.5" fill="white" opacity="0.5"/>
+                            <circle cx="55" cy="22" r="5" fill="#F06292"/>
+                            <circle cx="65" cy="22" r="5" fill="#F06292"/>
+                            <circle cx="60" cy="17" r="5" fill="#F06292"/>
+                            <circle cx="60" cy="25" r="8" fill="#E91E63"/>
+                            <circle cx="60" cy="25" r="3" fill="#FFF176"/>
                         </g>
-                        {/* ─ 화분 몸체: 테라코타 원통 하단 테이퍼 (식물 밑동을 덮어 심어진 효과) ─ */}
-                        <path d="M10,48 L40,48 L37,66 Q25,69 13,66 Z" fill="url(#cp-pot)" />
-                        <path d="M12,50 Q25,53 38,50 L36,65 Q25,67 14,65 Z" fill="rgba(255,255,255,0.07)" />
-                        <path d="M12,56 Q25,59 38,56" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
-                        <path d="M10,45 A15,4 0 0 1 40,45 Z" fill="#C85040" />
-                        <path d="M12,45 A13,3.2 0 0 1 38,45 Z" fill="#D46050" opacity="0.7" />
-                        <path d="M13.5,45 A11.5,2.4 0 0 1 36.5,45 Z" fill="rgba(255,255,255,0.18)" />
+                        <ellipse cx="60" cy="108" rx="27" ry="6" fill="#A04820"/>
+                        <ellipse cx="60" cy="106" rx="27" ry="6" fill="#B85530"/>
+                        <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                        <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
                     </svg>
                 </div>
             );
         }
 
-        // ── 몬스테라 화분 (흰 볼록 세라믹 + 넓은 찢잎 fenestration + 잎맥) ──
+        // ── 2. 기본 화분 (몬스테라) ──
         if (potId === 'pot_monstera') {
             return (
                 <div className="w-full h-full flex items-center justify-center">
-                    <svg viewBox="0 0 50 70" width="50" height="70">
+                    <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
                         <defs>
-                            <linearGradient id="mp-pot" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#D4CCC4" />
-                                <stop offset="42%" stopColor="#F5F0EC" />
-                                <stop offset="100%" stopColor="#C4BCB4" />
+                            <linearGradient id="sv-leaf-dark" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="#00897B"/>
+                                <stop offset="100%" stopColor="#004D40"/>
                             </linearGradient>
-                            {/* 왼쪽 잎 구멍 마스크 */}
-                            <mask id="mp-mL">
-                                <rect width="50" height="70" fill="white" />
-                                <ellipse cx="9.5" cy="24" rx="3.8" ry="2.4" fill="black" transform="rotate(-28 9.5 24)" />
-                                <ellipse cx="7.5" cy="15" rx="3" ry="1.9" fill="black" transform="rotate(-22 7.5 15)" />
-                            </mask>
-                            {/* 오른쪽 잎 구멍 마스크 */}
-                            <mask id="mp-mR">
-                                <rect width="50" height="70" fill="white" />
-                                <ellipse cx="40.5" cy="24" rx="3.8" ry="2.4" fill="black" transform="rotate(28 40.5 24)" />
-                                <ellipse cx="42.5" cy="15" rx="3" ry="1.9" fill="black" transform="rotate(22 42.5 15)" />
-                            </mask>
-                            {/* 중앙 잎 구멍 마스크 */}
-                            <mask id="mp-mC">
-                                <rect width="50" height="70" fill="white" />
-                                <ellipse cx="20.5" cy="11" rx="2.6" ry="2" fill="black" transform="rotate(-14 20.5 11)" />
-                                <ellipse cx="29.5" cy="11" rx="2.6" ry="2" fill="black" transform="rotate(14 29.5 11)" />
-                            </mask>
+                            <linearGradient id="sv-leaf-mid" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="#26A69A"/>
+                                <stop offset="100%" stopColor="#00796B"/>
+                            </linearGradient>
+                            <linearGradient id="sv-leaf-light" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="#4DB6AC"/>
+                                <stop offset="100%" stopColor="#00897B"/>
+                            </linearGradient>
                         </defs>
-                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
-                        <ellipse cx="25" cy="47.5" rx="13.5" ry="3" fill="#1A0804" />
-                        {/* ─ 흙 ─ */}
-                        <ellipse cx="25" cy="50" rx="14" ry="3.2" fill="#2E1B0E" />
-                        <ellipse cx="25" cy="49.2" rx="10" ry="2" fill="#4A2C12" />
-                        {/* ─ 식물 그룹 ─ */}
-                        <g className="animate-pot-breathe">
-                            {/* 줄기들 */}
-                            <line x1="25" y1="51" x2="25" y2="30" stroke="#4A8040" strokeWidth="2.2" strokeLinecap="round" />
-                            <path d="M25,43 Q17,39 13,32" fill="none" stroke="#4A8040" strokeWidth="1.6" strokeLinecap="round" />
-                            <path d="M25,38 Q33,34 37,27" fill="none" stroke="#4A8040" strokeWidth="1.6" strokeLinecap="round" />
-                            {/* 왼쪽 큰 잎 (fenestration 구멍) */}
-                            <path d="M24,43 C14,39 4,28 5,16 C6,8 14,7 18,12 C21,17 20,30 24,43 Z" fill="#2E7A40" mask="url(#mp-mL)" />
-                            <path d="M24,42 C16,33 9,22 10,13" fill="none" stroke="rgba(20,60,30,0.5)" strokeWidth="0.9" />
-                            <path d="M14,38 Q10,30 10,20" fill="none" stroke="rgba(160,230,170,0.3)" strokeWidth="0.7" />
-                            <path d="M18,40 Q16,31 16,20" fill="none" stroke="rgba(160,230,170,0.25)" strokeWidth="0.6" />
-                            {/* 오른쪽 큰 잎 (fenestration 구멍) */}
-                            <path d="M26,38 C36,32 46,21 45,10 C44,4 36,4 32,9 C29,14 30,27 26,38 Z" fill="#369048" mask="url(#mp-mR)" />
-                            <path d="M26,37 C34,27 41,17 40,10" fill="none" stroke="rgba(20,60,30,0.5)" strokeWidth="0.9" />
-                            <path d="M36,34 Q40,26 40,16" fill="none" stroke="rgba(160,230,170,0.3)" strokeWidth="0.7" />
-                            {/* 중앙 위 잎 (fenestration 구멍) */}
-                            <path d="M23,30 C18,18 20,8 25,3 C30,8 32,18 27,30 Z" fill="#2E7A40" mask="url(#mp-mC)" />
-                            <path d="M25,30 C24,18 24,8 25,3" fill="none" stroke="rgba(20,60,30,0.45)" strokeWidth="0.9" />
+                        <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                        <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#B8956A"/>
+                        <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#CDAA80" opacity="0.7"/>
+                        <g className="animate-pot-breathe" transform="translate(0, 8)">
+                            <path d="M 30 95 Q 60 30 90 95 Z" fill="url(#sv-leaf-dark)"/>
+                            <ellipse cx="60" cy="40" rx="16" ry="34" fill="url(#sv-leaf-dark)"/>
+                            <ellipse cx="35" cy="55" rx="14" ry="30" fill="url(#sv-leaf-dark)" transform="rotate(-30 35 55)"/>
+                            <ellipse cx="85" cy="55" rx="14" ry="30" fill="url(#sv-leaf-dark)" transform="rotate(30 85 55)"/>
+                            <ellipse cx="20" cy="75" rx="12" ry="24" fill="url(#sv-leaf-dark)" transform="rotate(-55 20 75)"/>
+                            <ellipse cx="100" cy="75" rx="12" ry="24" fill="url(#sv-leaf-dark)" transform="rotate(55 100 75)"/>
+                            <ellipse cx="45" cy="55" rx="16" ry="32" fill="url(#sv-leaf-mid)" transform="rotate(-15 45 55)"/>
+                            <ellipse cx="75" cy="55" rx="16" ry="32" fill="url(#sv-leaf-mid)" transform="rotate(15 75 55)"/>
+                            <ellipse cx="60" cy="65" rx="18" ry="34" fill="url(#sv-leaf-light)"/>
+                            <ellipse cx="35" cy="80" rx="14" ry="24" fill="url(#sv-leaf-light)" transform="rotate(-40 35 80)"/>
+                            <ellipse cx="85" cy="80" rx="14" ry="24" fill="url(#sv-leaf-light)" transform="rotate(40 85 80)"/>
+                            <path d="M60,35 Q60,65 60,95" stroke="rgba(255,255,255,0.45)" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                            <path d="M45,30 Q50,65 55,95" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                            <path d="M75,30 Q70,65 65,95" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                         </g>
-                        {/* ─ 화분 몸체 (볼록 볼형 세라믹) — 식물 밑동을 덮어 심어진 효과 ─ */}
-                        <path d="M11,50 Q5,52 5,60 Q5,67 11,68 Q25,70 39,68 Q45,67 45,60 Q45,52 39,50 Q25,48 11,50 Z" fill="url(#mp-pot)" />
-                        <path d="M13,52 Q25,55 37,52 Q37,64 25,66 Q13,64 13,52 Z" fill="rgba(255,255,255,0.1)" />
-                        {/* 도자기 질감 띠 */}
-                        <path d="M10,57 Q25,60 40,57" fill="none" stroke="rgba(180,170,160,0.25)" strokeWidth="0.7" />
-                        {/* ─ 잎 칼라 ─ */}
-                        <ellipse cx="25" cy="51" rx="12" ry="3.2" fill="#A4C89C" opacity="0.75" />
-                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
-                        <path d="M11,47.5 A14,3.5 0 0 1 39,47.5 Z" fill="url(#mp-pot)" />
-                        <path d="M13,47.5 A12,2.8 0 0 1 37,47.5 Z" fill="rgba(255,255,255,0.25)" />
+                        <ellipse cx="60" cy="108" rx="27" ry="6" fill="#8D6340"/>
+                        <ellipse cx="60" cy="106" rx="27" ry="6" fill="#A07048"/>
+                        <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                        <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
                     </svg>
                 </div>
             );
         }
 
-        // ── 꽃 화분 (블러쉬 핑크 넓은 볼 + 잎덤불 + 데이지 3송이) ──
+        // ── 3. 스프링 데이지 (꽃화분) ──
         if (potId === 'pot_flower') {
             return (
                 <div className="w-full h-full flex items-center justify-center">
-                    <svg viewBox="0 0 50 70" width="50" height="70">
-                        <defs>
-                            <linearGradient id="fp-pot" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#D890A0" />
-                                <stop offset="42%" stopColor="#F8D0DC" />
-                                <stop offset="100%" stopColor="#C87890" />
-                            </linearGradient>
-                        </defs>
-                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
-                        <ellipse cx="25" cy="51" rx="17.5" ry="3.5" fill="#1A0804" />
-                        {/* ─ 흙 ─ */}
-                        <ellipse cx="25" cy="54" rx="18" ry="3.8" fill="#2E1B0E" />
-                        <ellipse cx="25" cy="53.2" rx="13" ry="2.2" fill="#4A2C12" />
-                        {/* ─ 식물 그룹 ─ */}
+                    <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+                        <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                        <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E8789A"/>
+                        <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#F29AB4" opacity="0.7"/>
                         <g className="animate-pot-sway">
-                            {/* 잎 덤불 베이스 */}
-                            <ellipse cx="25" cy="46" rx="18" ry="8" fill="#6AAA58" />
-                            <ellipse cx="15" cy="44" rx="9" ry="6" fill="#7EC468" />
-                            <ellipse cx="35" cy="44" rx="9" ry="6" fill="#7EC468" />
-                            <ellipse cx="25" cy="41" rx="12" ry="6" fill="#88CC70" />
-                            {/* 줄기 3개 (두꺼운 S자 곡선) */}
-                            <path d="M18,51 Q14,43 13,24" fill="none" stroke="#5A9848" strokeWidth="2.2" strokeLinecap="round" />
-                            <path d="M25,51 Q24,40 25,16" fill="none" stroke="#60A44E" strokeWidth="2.2" strokeLinecap="round" />
-                            <path d="M32,51 Q36,43 37,24" fill="none" stroke="#5A9848" strokeWidth="2.2" strokeLinecap="round" />
-                            {/* 잎사귀 쌍 (줄기 중간) */}
-                            <ellipse cx="10" cy="35" rx="4" ry="2" fill="#78C060" transform="rotate(-40 10 35)" />
-                            <ellipse cx="40" cy="37" rx="4" ry="2" fill="#78C060" transform="rotate(40 40 37)" />
-                            <ellipse cx="20" cy="28" rx="3.5" ry="1.8" fill="#78C060" transform="rotate(-30 20 28)" />
-                            <ellipse cx="30" cy="28" rx="3.5" ry="1.8" fill="#78C060" transform="rotate(30 30 28)" />
-                            {/* 꽃 1 왼쪽 (핑크 데이지 5장 외층+5장 내층) */}
-                            {[0, 72, 144, 216, 288].map(a => (
-                                <ellipse key={`f1o${a}`} cx="13" cy="22" rx="2.8" ry="5.5" fill="#FDD0E0" transform={`rotate(${a} 13 22)`} />
-                            ))}
-                            {[36, 108, 180, 252, 324].map(a => (
-                                <ellipse key={`f1i${a}`} cx="13" cy="22" rx="2.2" ry="4.5" fill="#FCB8D0" opacity="0.85" transform={`rotate(${a} 13 22)`} />
-                            ))}
-                            <circle cx="13" cy="22" r="3" fill="#FFE888" />
-                            <circle cx="13" cy="22" r="1.4" fill="#FFD050" />
-                            {/* 꽃 2 중앙 (라벤더 데이지 7장) */}
-                            {[0, 51.4, 102.8, 154.3, 205.7, 257.1, 308.6].map(a => (
-                                <ellipse key={`f2o${a}`} cx="25" cy="11" rx="2.6" ry="5.2" fill="#E8D8F8" transform={`rotate(${a} 25 11)`} />
-                            ))}
-                            {[25.7, 77.1, 128.6, 180, 231.4, 282.9, 334.3].map(a => (
-                                <ellipse key={`f2i${a}`} cx="25" cy="11" rx="2" ry="4" fill="#D4B8F0" opacity="0.82" transform={`rotate(${a} 25 11)`} />
-                            ))}
-                            <circle cx="25" cy="11" r="3.2" fill="#FFE888" />
-                            <circle cx="25" cy="11" r="1.5" fill="#FFD050" />
-                            {/* 꽃 3 오른쪽 (피치 데이지 5장) */}
-                            {[0, 72, 144, 216, 288].map(a => (
-                                <ellipse key={`f3o${a}`} cx="37" cy="22" rx="2.5" ry="5" fill="#FFD8C0" transform={`rotate(${a} 37 22)`} />
-                            ))}
-                            {[36, 108, 180, 252, 324].map(a => (
-                                <ellipse key={`f3i${a}`} cx="37" cy="22" rx="2" ry="4" fill="#FFBCA0" opacity="0.85" transform={`rotate(${a} 37 22)`} />
-                            ))}
-                            <circle cx="37" cy="22" r="2.8" fill="#FFE888" />
-                            <circle cx="37" cy="22" r="1.3" fill="#FFD050" />
+                            <path d="M 50 88 Q 30 73 35 63 Q 45 78 50 88" fill="#7CB342"/>
+                            <path d="M 70 88 Q 90 73 85 63 Q 75 78 70 88" fill="#7CB342"/>
+                            <path d="M 60 112 Q 40 68 30 40" fill="none" stroke="#558B2F" strokeWidth="3" strokeLinecap="round"/>
+                            <path d="M 60 112 L 60 30" fill="none" stroke="#558B2F" strokeWidth="4" strokeLinecap="round"/>
+                            <path d="M 60 112 Q 80 68 90 45" fill="none" stroke="#558B2F" strokeWidth="3" strokeLinecap="round"/>
+                            <circle cx="30" cy="40" r="14" fill="#FFF176"/>
+                            <circle cx="23" cy="35" r="8" fill="#FFEE58"/>
+                            <circle cx="37" cy="35" r="8" fill="#FFEE58"/>
+                            <circle cx="30" cy="28" r="8" fill="#FFEE58"/>
+                            <circle cx="30" cy="38" r="6" fill="#FDD835"/>
+                            <circle cx="30" cy="38" r="3" fill="#F57F17"/>
+                            <circle cx="60" cy="30" r="16" fill="#F48FB1"/>
+                            <circle cx="51" cy="23" r="9" fill="#E91E63"/>
+                            <circle cx="69" cy="23" r="9" fill="#E91E63"/>
+                            <circle cx="60" cy="15" r="9" fill="#E91E63"/>
+                            <circle cx="60" cy="28" r="7" fill="#C2185B"/>
+                            <circle cx="60" cy="28" r="3.5" fill="#FFF176"/>
+                            <circle cx="90" cy="45" r="12" fill="#CE93D8"/>
+                            <circle cx="84" cy="39" r="7" fill="#AB47BC"/>
+                            <circle cx="96" cy="39" r="7" fill="#AB47BC"/>
+                            <circle cx="90" cy="33" r="7" fill="#AB47BC"/>
+                            <circle cx="90" cy="43" r="5" fill="#7B1FA2"/>
+                            <circle cx="90" cy="43" r="2.5" fill="#FFF176"/>
                         </g>
-                        {/* ─ 화분 몸체 (넓은 볼형) — 식물 밑동을 덮어 심어진 효과 ─ */}
-                        <path d="M7,54 Q4,55 4,62 Q4,68 7,69 Q25,71 43,69 Q46,68 46,62 Q46,55 43,54 Q25,52 7,54 Z" fill="url(#fp-pot)" />
-                        <path d="M9,56 Q25,59 41,56 Q40,67 25,68.5 Q10,67 9,56 Z" fill="rgba(255,255,255,0.1)" />
-                        <path d="M8,61 Q25,64 42,61" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
-                        {/* ─ 잎 칼라 ─ */}
-                        <ellipse cx="25" cy="55" rx="16" ry="4" fill="#90C880" opacity="0.8" />
-                        <ellipse cx="15" cy="56.5" rx="6" ry="2.2" fill="#88C078" transform="rotate(-18 15 56.5)" />
-                        <ellipse cx="35" cy="56.5" rx="6" ry="2.2" fill="#88C078" transform="rotate(18 35 56.5)" />
-                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
-                        <path d="M7,51 A18,4.5 0 0 1 43,51 Z" fill="url(#fp-pot)" />
-                        <path d="M9,51 A16,3.5 0 0 1 41,51 Z" fill="rgba(255,255,255,0.22)" />
+                        <ellipse cx="60" cy="108" rx="27" ry="6" fill="#AD1457"/>
+                        <ellipse cx="60" cy="106" rx="27" ry="6" fill="#C2185B"/>
+                        <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                        <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
                     </svg>
                 </div>
             );
         }
 
-        // ── 라벤더 화분 (크림 도자기 달걀형 + 5줄기 × 6노드 쌍타원 클러스터) ──
+        // ── 4. 라일락 라벤더 ──
         if (potId === 'pot_lavender') {
-            const lavStems = [
-                { sx: 19, sy: 51, tx: 10, ty: 9 },
-                { sx: 21, sy: 50, tx: 17, ty: 4 },
-                { sx: 25, sy: 50, tx: 25, ty: 2 },
-                { sx: 29, sy: 50, tx: 33, ty: 4 },
-                { sx: 31, sy: 51, tx: 40, ty: 9 },
-            ];
-            const stemXs = [10, 17, 25, 33, 40];
-            const stemTops = [9, 4, 2, 4, 9];
-            const lavColors = ['#D0A8F0', '#C498E8', '#B888E0', '#AC78D8', '#A068D0'];
             return (
                 <div className="w-full h-full flex items-center justify-center">
-                    <svg viewBox="0 0 50 70" width="50" height="70">
-                        <defs>
-                            <linearGradient id="lp-pot" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#C8C4B0" />
-                                <stop offset="42%" stopColor="#F5F0E0" />
-                                <stop offset="100%" stopColor="#B8B4A0" />
-                            </linearGradient>
-                        </defs>
-                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
-                        <ellipse cx="25" cy="47.5" rx="12" ry="2.8" fill="#1A0804" />
-                        {/* ─ 흙 ─ */}
-                        <ellipse cx="25" cy="50" rx="12.5" ry="3" fill="#2E1B0E" />
-                        <ellipse cx="25" cy="49.3" rx="9" ry="1.8" fill="#4A2C12" />
-                        {/* ─ 식물 그룹 ─ */}
+                    <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+                        <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                        <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#9C6DC8"/>
+                        <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#B490DC" opacity="0.7"/>
                         <g className="animate-pot-sway">
-                            {/* 줄기 5개 (곡선 path) */}
-                            {lavStems.map((s, i) => (
-                                <path key={i} d={`M${s.sx},${s.sy} Q${s.tx + 2},${(s.sy + s.ty) / 2} ${s.tx},${s.ty}`}
-                                    fill="none" stroke="#8AB870" strokeWidth="1.4" strokeLinecap="round" />
-                            ))}
-                            {/* 잎사귀 쌍 (줄기 중간부) */}
-                            {[
-                                { cx: 13, cy: 35, r: -25 }, { cx: 37, cy: 35, r: 25 },
-                                { cx: 19, cy: 28, r: -20 }, { cx: 31, cy: 28, r: 20 },
-                            ].map((l, i) => (
-                                <ellipse key={i} cx={l.cx} cy={l.cy} rx="3.5" ry="1.8" fill="#94C878" transform={`rotate(${l.r} ${l.cx} ${l.cy})`} />
-                            ))}
-                            {/* 꽃송이 클러스터 (각 줄기 × 6노드 쌍타원) */}
-                            {stemXs.map((sx, si) => {
-                                const ty = stemTops[si];
-                                return (
-                                    <g key={si}>
-                                        {[0, 3.5, 7, 10.5, 14, 17.5].map((dy, di) => (
-                                            <g key={di}>
-                                                <ellipse
-                                                    cx={sx - 1.8} cy={ty + dy}
-                                                    rx={Math.max(2.2 - di * 0.22, 0.8)} ry={Math.max((2.2 - di * 0.22) * 1.5, 1.2)}
-                                                    fill={lavColors[Math.min(di, 4)]}
-                                                    transform={`rotate(-12 ${sx - 1.8} ${ty + dy})`}
-                                                />
-                                                <ellipse
-                                                    cx={sx + 1.8} cy={ty + dy}
-                                                    rx={Math.max(2.2 - di * 0.22, 0.8)} ry={Math.max((2.2 - di * 0.22) * 1.5, 1.2)}
-                                                    fill={lavColors[Math.min(di, 4)]}
-                                                    transform={`rotate(12 ${sx + 1.8} ${ty + dy})`}
-                                                />
-                                            </g>
-                                        ))}
-                                        {/* 꼭대기 꽃봉오리 */}
-                                        <ellipse cx={sx} cy={ty - 2} rx="1.5" ry="2.5" fill="#C898E8" />
-                                        <ellipse cx={sx} cy={ty - 4.5} rx="1" ry="1.5" fill="#D8A8F0" />
-                                    </g>
-                                );
-                            })}
+                            <path d="M 60 112 Q 30 73 25 30" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                            <path d="M 60 112 Q 45 68 40 20" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                            <path d="M 60 112 L 60 15" fill="none" stroke="#558B2F" strokeWidth="3" strokeLinecap="round"/>
+                            <path d="M 60 112 Q 75 68 80 20" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                            <path d="M 60 112 Q 90 73 95 30" fill="none" stroke="#558B2F" strokeWidth="2.5" strokeLinecap="round"/>
+                            <circle cx="25" cy="45" r="5" fill="#CE93D8"/>
+                            <circle cx="22" cy="38" r="5" fill="#AB47BC"/>
+                            <circle cx="28" cy="34" r="4" fill="#8E24AA"/>
+                            <circle cx="25" cy="28" r="4" fill="#6A1B9A"/>
+                            <circle cx="40" cy="35" r="5" fill="#CE93D8"/>
+                            <circle cx="37" cy="28" r="5" fill="#AB47BC"/>
+                            <circle cx="43" cy="24" r="4" fill="#8E24AA"/>
+                            <circle cx="40" cy="18" r="4" fill="#6A1B9A"/>
+                            <circle cx="60" cy="30" r="5.5" fill="#CE93D8"/>
+                            <circle cx="56" cy="22" r="5.5" fill="#AB47BC"/>
+                            <circle cx="64" cy="18" r="4.5" fill="#8E24AA"/>
+                            <circle cx="60" cy="12" r="4.5" fill="#6A1B9A"/>
+                            <circle cx="80" cy="35" r="5" fill="#CE93D8"/>
+                            <circle cx="83" cy="28" r="5" fill="#AB47BC"/>
+                            <circle cx="77" cy="24" r="4" fill="#8E24AA"/>
+                            <circle cx="80" cy="18" r="4" fill="#6A1B9A"/>
+                            <circle cx="95" cy="45" r="5" fill="#CE93D8"/>
+                            <circle cx="98" cy="38" r="5" fill="#AB47BC"/>
+                            <circle cx="92" cy="34" r="4" fill="#8E24AA"/>
+                            <circle cx="95" cy="28" r="4" fill="#6A1B9A"/>
                         </g>
-                        {/* ─ 화분 몸체 (크림 도자기 달걀형) — 식물 밑동을 덮어 심어진 효과 ─ */}
-                        <path d="M13,50 Q9,50 8,57 Q7,64 10,67 Q25,70 40,67 Q43,64 42,57 Q41,50 37,50 Q25,48 13,50 Z" fill="url(#lp-pot)" />
-                        <path d="M15,52 Q25,55 35,52 Q34,66 25,67.5 Q16,66 15,52 Z" fill="rgba(255,255,255,0.1)" />
-                        {/* 도자기 장식 띠 */}
-                        <path d="M14,57 Q25,60 36,57" fill="none" stroke="rgba(180,170,140,0.35)" strokeWidth="0.7" />
-                        <path d="M13,62 Q25,65 37,62" fill="none" stroke="rgba(180,170,140,0.25)" strokeWidth="0.5" />
-                        {/* ─ 잎 칼라 ─ */}
-                        <ellipse cx="25" cy="51" rx="11" ry="3.2" fill="#B0C898" opacity="0.75" />
-                        <ellipse cx="18" cy="52.2" rx="4.5" ry="1.8" fill="#A8C090" transform="rotate(-15 18 52.2)" />
-                        <ellipse cx="32" cy="52.2" rx="4.5" ry="1.8" fill="#A8C090" transform="rotate(15 32 52.2)" />
-                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
-                        <path d="M12.5,47.5 A12.5,3.2 0 0 1 37.5,47.5 Z" fill="url(#lp-pot)" />
-                        <path d="M14,47.5 A11,2.5 0 0 1 36,47.5 Z" fill="rgba(255,255,255,0.22)" />
+                        <ellipse cx="60" cy="108" rx="27" ry="6" fill="#4A148C"/>
+                        <ellipse cx="60" cy="106" rx="27" ry="6" fill="#6A1B9A"/>
+                        <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                        <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
                     </svg>
                 </div>
             );
         }
 
-        // ── 장미 화분 (다크 원통 + 골드 림 + 잎덤불 + 소용돌이 장미 3송이) ──
+        // ── 5. 로즈 골드 팟 ──
         if (potId === 'pot_rose') {
             return (
                 <div className="w-full h-full flex items-center justify-center">
-                    <svg viewBox="0 0 50 70" width="50" height="70">
-                        <defs>
-                            <linearGradient id="rp-pot" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#524848" />
-                                <stop offset="42%" stopColor="#746868" />
-                                <stop offset="100%" stopColor="#423838" />
-                            </linearGradient>
-                            <linearGradient id="rp-gold" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#A88040" />
-                                <stop offset="38%" stopColor="#DDB860" />
-                                <stop offset="100%" stopColor="#986830" />
-                            </linearGradient>
-                        </defs>
-                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
-                        <ellipse cx="25" cy="48" rx="14.5" ry="2.8" fill="#1A0804" />
-                        {/* ─ 흙 ─ */}
-                        <ellipse cx="25" cy="50" rx="15" ry="3.2" fill="#2E1B0E" />
-                        <ellipse cx="25" cy="49.2" rx="11" ry="2" fill="#4A2C12" />
-                        {/* ─ 식물 그룹 ─ */}
-                        <g className="animate-pot-breathe">
-                            {/* 잎 덤불 (여러 타원 겹침) */}
-                            <ellipse cx="25" cy="37" rx="19" ry="13" fill="#5A9848" />
-                            <ellipse cx="15" cy="33" rx="12" ry="10" fill="#68A855" />
-                            <ellipse cx="36" cy="33" rx="12" ry="10" fill="#5A9848" opacity="0.9" />
-                            <ellipse cx="25" cy="27" rx="14" ry="9" fill="#74B860" opacity="0.85" />
-                            <ellipse cx="9" cy="41" rx="7" ry="5" fill="#68A855" opacity="0.65" />
-                            <ellipse cx="41" cy="41" rx="7" ry="5" fill="#68A855" opacity="0.65" />
-                            {/* 장미 1 왼쪽 (5겹 소용돌이 arc) */}
-                            <circle cx="13" cy="29" r="7.5" fill="#D87080" />
-                            <path d="M13,21.5 Q21,21 21,29 Q21,37 13,37 Q5,34 5,29 Q5,21.5 13,21.5 Z" fill="#E89098" />
-                            <path d="M13,23.5 Q19.5,23.5 19.5,29 Q19.5,34.5 13,35" fill="#F0AABA" opacity="0.9" />
-                            <path d="M13,26 Q18,26.5 18,29.5 Q17.5,33.5 13,33" fill="#F8C8D4" opacity="0.82" />
-                            <path d="M13,28 Q16.5,28.5 16.5,30 Q16,32.5 13,32" fill="#FEDED8" opacity="0.72" />
-                            <path d="M13,29.5 Q15,30 15,31" fill="none" stroke="#FFCDD4" strokeWidth="0.8" opacity="0.5" />
-                            <circle cx="12" cy="24.5" r="1.5" fill="rgba(255,255,255,0.28)" />
-                            {/* 장미 2 중앙 (가장 크고 선명, 5겹) */}
-                            <circle cx="25" cy="18" r="9.5" fill="#C86070" />
-                            <path d="M25,8.5 Q35.5,8.5 35.5,18 Q35.5,27.5 25,27.5 Q15.5,24.5 15.5,18 Q16,11.5 25,8.5 Z" fill="#D87888" />
-                            <path d="M25,11 Q33.5,11.5 33.5,18 Q33,25 25,25" fill="#E898A8" opacity="0.9" />
-                            <path d="M25,14 Q31,14.5 31,18.5 Q30.5,23.5 25,23" fill="#F4B0C0" opacity="0.85" />
-                            <path d="M25,17 Q29,17.5 29,19 Q28.5,22 25,21.5" fill="#FDD0D8" opacity="0.75" />
-                            <path d="M25,19.5 Q27,20 27,21" fill="none" stroke="#FDE0E8" strokeWidth="0.9" opacity="0.5" />
-                            <circle cx="24" cy="13" r="2" fill="rgba(255,255,255,0.28)" />
-                            {/* 장미 3 오른쪽 (5겹) */}
-                            <circle cx="37" cy="30" r="7" fill="#D87888" />
-                            <path d="M37,23 Q44,23 44,30 Q44,37 37,37 Q30,34 29.5,30 Q30,23 37,23 Z" fill="#E898A8" />
-                            <path d="M37,25.5 Q42.5,25.5 42.5,30 Q42,35 37,34.5" fill="#F4B0C0" opacity="0.88" />
-                            <path d="M37,28 Q41,28.5 41,30.5 Q40.5,34 37,33.5" fill="#FDD0D8" opacity="0.75" />
-                            <path d="M37,30.5 Q39.5,31 39.5,32" fill="none" stroke="#FDE0E8" strokeWidth="0.8" opacity="0.5" />
-                            <circle cx="36" cy="27" r="1.4" fill="rgba(255,255,255,0.28)" />
+                    <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+                        <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+                        <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E9909A"/>
+                        <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#F4B0B8" opacity="0.7"/>
+                        <g className="animate-pot-breathe" transform="translate(0, 8)">
+                            <ellipse cx="60" cy="70" rx="42" ry="32" fill="#43A047"/>
+                            <ellipse cx="40" cy="75" rx="22" ry="16" fill="#2E7D32" transform="rotate(-25 40 75)"/>
+                            <ellipse cx="80" cy="75" rx="22" ry="16" fill="#2E7D32" transform="rotate(25 80 75)"/>
+                            <g transform="translate(35, 50)">
+                                <circle r="13" fill="#F48FB1"/>
+                                <circle r="10" fill="#E91E63"/>
+                                <circle r="7" fill="#C2185B"/>
+                                <path d="M -3 -1 C -1 -4, 3 -3, 4 0 C 5 4, 1 6, -2 5 C -6 3, -6 -2, -3 -5 C 2 -8, 7 -5, 6 1" fill="none" stroke="#FF80AB" strokeWidth="1.5" strokeLinecap="round"/>
+                            </g>
+                            <g transform="translate(60, 65)">
+                                <circle r="17" fill="#F48FB1"/>
+                                <circle r="13" fill="#E91E63"/>
+                                <circle r="9" fill="#C2185B"/>
+                                <circle r="5" fill="#AD1457"/>
+                                <circle r="2" fill="#FCE4EC"/>
+                                <path d="M -4 -2 C -2 -6, 4 -5, 6 -1 C 7 5, 1 8, -3 6 C -8 4, -8 -3, -4 -7 C 3 -11, 10 -7, 8 2 C 6 10, -5 10, -8 3" fill="none" stroke="#FF4081" strokeWidth="2" strokeLinecap="round"/>
+                            </g>
+                            <g transform="translate(85, 55)">
+                                <circle r="15" fill="#F48FB1"/>
+                                <circle r="11" fill="#E91E63"/>
+                                <circle r="8" fill="#C2185B"/>
+                                <path d="M -3 -1 C -1 -5, 4 -4, 5 0 C 6 5, 1 7, -3 5 C -7 3, -7 -3, -3 -6 C 2 -10, 8 -6, 7 0" fill="none" stroke="#FF80AB" strokeWidth="1.8" strokeLinecap="round"/>
+                            </g>
                         </g>
-                        {/* ─ 화분 몸체 (모던 원통) — 식물 밑동을 덮어 심어진 효과 ─ */}
-                        <rect x="10" y="50" width="30" height="18" rx="1" fill="url(#rp-pot)" />
-                        <rect x="12" y="52" width="26" height="14" fill="rgba(255,255,255,0.05)" />
-                        <path d="M11,56 Q25,58 39,56" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
-                        <path d="M11,62 Q25,64 39,62" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-                        <ellipse cx="25" cy="68" rx="15" ry="2" fill="#383030" />
-                        {/* ─ 잎 칼라 ─ */}
-                        <ellipse cx="25" cy="51" rx="14" ry="4" fill="#68A858" opacity="0.8" />
-                        <ellipse cx="15" cy="52.5" rx="5.5" ry="2" fill="#60A050" transform="rotate(-18 15 52.5)" />
-                        <ellipse cx="35" cy="52.5" rx="5.5" ry="2" fill="#60A050" transform="rotate(18 35 52.5)" />
-                        {/* ─ 골드 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
-                        <path d="M11,48 A14,3.5 0 0 1 39,48 Z" fill="url(#rp-gold)" />
-                        <path d="M12,48 A13,2.8 0 0 1 38,48 Z" fill="rgba(255,255,255,0.18)" />
+                        <ellipse cx="60" cy="108" rx="27" ry="6" fill="#880E4F"/>
+                        <ellipse cx="60" cy="106" rx="27" ry="6" fill="#AD1457"/>
+                        <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+                        <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
                     </svg>
                 </div>
             );
