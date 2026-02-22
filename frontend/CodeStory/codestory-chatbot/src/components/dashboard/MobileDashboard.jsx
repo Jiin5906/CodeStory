@@ -39,6 +39,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const coldTimerRef = useRef(null);
 
     const { petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn, coins, coinToast, showLevelUpModal, levelUpInfo, triggerLevelUpModal, closeLevelUpModal } = usePet();
+    // TODO: 로티 진화 구현 후 true로 변경 — 레벨/EXP UI 임시 숨김
+    const SHOW_LEVEL_UP_UI = false;
     const { equippedItems, getEquippedItem } = useStore();
 
     // 장착된 아이템 가져오기 (equippedItems 변경 시 자동 재계산)
@@ -607,15 +609,23 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     const svgProps = { viewBox:'0 0 96 176', style:{width:'13vw',height:'22vw',display:'block',overflow:'visible'} };
                                     const gradStop = (id) => (
                                         <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" stopColor="rgba(0,0,0,0.22)"/>
+                                            <stop offset="0%" stopColor="rgba(0,0,0,0.15)"/>
                                             <stop offset="40%" stopColor="rgba(255,255,255,0.18)"/>
-                                            <stop offset="100%" stopColor="rgba(0,0,0,0.18)"/>
+                                            <stop offset="100%" stopColor="rgba(0,0,0,0.12)"/>
                                         </linearGradient>
                                     );
-                                    const soil = (cy, rx=26) => (<>
-                                        <ellipse cx="48" cy={cy} rx={rx} ry="5" fill="#2E1B0E"/>
-                                        <ellipse cx="48" cy={cy} rx={rx-6} ry="3.5" fill="#4A2912"/>
+                                    const soil = (cy, rx=26, c1='#D4B888', c2='#C8A87A') => (<>
+                                        <ellipse cx="48" cy={cy} rx={rx} ry="5" fill={c1}/>
+                                        <ellipse cx="48" cy={cy} rx={rx-6} ry="3.5" fill={c2} opacity="0.8"/>
                                     </>);
+                                    const collar = (rimCy, rx=22, color='#C8D8B8', sideColor='#BCCCA8') => {
+                                        const cy = rimCy + 4;
+                                        return (<>
+                                            <ellipse cx="48" cy={cy} rx={rx} ry="7" fill={color} opacity="0.8"/>
+                                            <ellipse cx="34" cy={cy+2} rx={rx*0.45} ry="3.5" fill={sideColor} transform={`rotate(-15 34 ${cy+2})`}/>
+                                            <ellipse cx="62" cy={cy+2} rx={rx*0.45} ry="3.5" fill={sideColor} transform={`rotate(15 62 ${cy+2})`}/>
+                                        </>);
+                                    };
                                     const rim = (cy, rx=26, gradId) => (<>
                                         <ellipse cx="48" cy={cy} rx={rx} ry="5" fill={pc}/>
                                         <ellipse cx="48" cy={cy} rx={rx} ry="5" fill={`url(#${gradId})`}/>
@@ -641,10 +651,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                     ))}
                                                     {[0,60,120,180,240,300].map((a,i)=>{
                                                         const rad=a*Math.PI/180;
-                                                        return <ellipse key={i} cx={48+7*Math.cos(rad)} cy={28+4*Math.sin(rad)} rx="4" ry="2.5" fill="#FF6B9D" transform={`rotate(${a},${48+7*Math.cos(rad)},${28+4*Math.sin(rad)})`}/>;
+                                                        return <ellipse key={i} cx={48+7*Math.cos(rad)} cy={28+4*Math.sin(rad)} rx="4" ry="2.5" fill="#F9C8D8" transform={`rotate(${a},${48+7*Math.cos(rad)},${28+4*Math.sin(rad)})`}/>;
                                                     })}
                                                     <circle cx="48" cy="28" r="3" fill="#FFD700"/>
                                                 </g>
+                                                {collar(122)}
                                                 {rim(122, 26, 'md-cact-3d')}
                                             </svg>
                                         </div>
@@ -656,14 +667,14 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                 <defs>{gradStop('md-flow-3d')}</defs>
                                                 <path d="M16,126 Q8,126 7,146 Q6,164 12,170 Q48,175 84,170 Q90,164 89,146 Q88,126 80,126 Q48,121 16,126Z" fill={pc}/>
                                                 <path d="M16,126 Q8,126 7,146 Q6,164 12,170 Q48,175 84,170 Q90,164 89,146 Q88,126 80,126 Q48,121 16,126Z" fill="url(#md-flow-3d)"/>
-                                                {soil(126, 32)}
+                                                {soil(126, 32, '#E8C4D0', '#DEB8C4')}
                                                 <g className="animate-pot-breathe">
-                                                    <line x1="30" y1="126" x2="28" y2="72" stroke="#5D8A3C" strokeWidth="2.5"/>
-                                                    <line x1="48" y1="126" x2="48" y2="60" stroke="#5D8A3C" strokeWidth="2.5"/>
-                                                    <line x1="66" y1="126" x2="70" y2="76" stroke="#5D8A3C" strokeWidth="2.5"/>
-                                                    <ellipse cx="22" cy="96" rx="9" ry="4" fill="#6AB04C" transform="rotate(-40 22 96)"/>
-                                                    <ellipse cx="56" cy="88" rx="9" ry="4" fill="#6AB04C" transform="rotate(35 56 88)"/>
-                                                    {[{cx:28,cy:66,c1:'#FF6B9D',c2:'#FFB3D1'},{cx:48,cy:54,c1:'#FF8C42',c2:'#FFD0A1'},{cx:70,cy:70,c1:'#9B59B6',c2:'#D7BDE2'}].map(({cx,cy,c1,c2},fi)=>(
+                                                    <line x1="30" y1="126" x2="28" y2="72" stroke="#A8C890" strokeWidth="2.5"/>
+                                                    <line x1="48" y1="126" x2="48" y2="60" stroke="#A8C890" strokeWidth="2.5"/>
+                                                    <line x1="66" y1="126" x2="70" y2="76" stroke="#A8C890" strokeWidth="2.5"/>
+                                                    <ellipse cx="22" cy="96" rx="9" ry="4" fill="#AACFA0" transform="rotate(-40 22 96)"/>
+                                                    <ellipse cx="56" cy="88" rx="9" ry="4" fill="#AACFA0" transform="rotate(35 56 88)"/>
+                                                    {[{cx:28,cy:66,c1:'#F9C8D8',c2:'#FADCE4'},{cx:48,cy:54,c1:'#FADCE4',c2:'#FEF4F6'},{cx:70,cy:70,c1:'#E0C8F8',c2:'#EEE0FC'}].map(({cx,cy,c1,c2},fi)=>(
                                                         <g key={fi}>
                                                             {[0,51.4,102.9,154.3,205.7,257.1,308.6].map((a,i)=>{
                                                                 const r=a*Math.PI/180;
@@ -677,6 +688,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                         </g>
                                                     ))}
                                                 </g>
+                                                {collar(126, 28, '#B8D4A8', '#AECCA0')}
                                                 {rim(126, 32, 'md-flow-3d')}
                                             </svg>
                                         </div>
@@ -689,7 +701,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                             {sx:50,sy:118,tx:30,ty:-88},{sx:38,sy:118,tx:-14,ty:-92},
                                             {sx:40,sy:116,tx:8,ty:-94}
                                         ];
-                                        const lavColors=['#4A148C','#6A1B9A','#7B1FA2','#AB47BC','#CE93D8'];
+                                        const lavColors=['#E0C8F8','#D4B8F0','#C8A8E8','#BC98E0','#B090D8'];
                                         const lavRx=[4,3.6,3.4,3,2.6];
                                         return (
                                             <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
@@ -697,11 +709,11 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                     <defs>{gradStop('md-lav-3d')}</defs>
                                                     <path d="M22,130 Q14,130 13,148 Q12,164 18,170 Q48,174 78,170 Q84,164 83,148 Q82,130 74,130 Q48,126 22,130Z" fill={pc}/>
                                                     <path d="M22,130 Q14,130 13,148 Q12,164 18,170 Q48,174 78,170 Q84,164 83,148 Q82,130 74,130 Q48,126 22,130Z" fill="url(#md-lav-3d)"/>
-                                                    {soil(130)}
+                                                    {soil(130, 26, '#C8C0E4', '#BCB4DC')}
                                                     <g className="animate-pot-sway pot-anim-delay-1">
                                                         {lavStems.map(({sx,sy,tx,ty},si)=>(
                                                             <g key={si}>
-                                                                <path d={`M${sx},${sy} Q${sx+tx/2},${sy+ty/2} ${sx+tx},${sy+ty}`} fill="none" stroke="#5D8A3C" strokeWidth="1.4"/>
+                                                                <path d={`M${sx},${sy} Q${sx+tx/2},${sy+ty/2} ${sx+tx},${sy+ty}`} fill="none" stroke="#A8C890" strokeWidth="1.4"/>
                                                                 {[0,1,2,3,4].map(li=>{
                                                                     const fy=(sy+ty)+li*8;
                                                                     const fx=sx+tx*(0.8+li*0.04);
@@ -715,6 +727,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                             </g>
                                                         ))}
                                                     </g>
+                                                    {collar(130, 22, '#B8CCA8', '#ACCCA0')}
                                                     {rim(130, 26, 'md-lav-3d')}
                                                 </svg>
                                             </div>
@@ -728,24 +741,25 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                 <path d="M22,122 Q14,122 13,140 Q12,158 18,165 Q48,170 78,165 Q84,158 83,140 Q82,122 74,122 Q48,118 22,122Z" fill={pc}/>
                                                 <path d="M22,122 Q14,122 13,140 Q12,158 18,165 Q48,170 78,165 Q84,158 83,140 Q82,122 74,122 Q48,118 22,122Z" fill="url(#md-rose-3d)"/>
                                                 <path d="M18,122 Q48,128 78,122 Q76,118 48,116 Q20,118 18,122Z" fill={pc} opacity="0.7"/>
-                                                {soil(122)}
+                                                {soil(122, 26, '#DCC4C0', '#D0B8B4')}
                                                 <g className="animate-pot-breathe pot-anim-delay-2">
                                                     <ellipse cx="30" cy="100" rx="12" ry="8" fill={pl} transform="rotate(-20 30 100)"/>
                                                     <ellipse cx="66" cy="104" rx="11" ry="7" fill={pl} transform="rotate(20 66 104)"/>
                                                     <ellipse cx="48" cy="92" rx="10" ry="7" fill={pl} transform="rotate(5 48 92)"/>
                                                     {[0,1,2,3,4].map(i=>(
                                                         <path key={i} d={`M48,${62-i*3} Q${48+12+i*3},${62+i*4} ${48},${74-i*4} Q${48-12-i*3},${62+i*4} ${48},${62-i*3}Z`}
-                                                            fill="#E91E63" opacity={0.9-i*0.12} stroke="#C2185B" strokeWidth="0.3"/>
+                                                            fill="#F4C4CC" opacity={0.9-i*0.12} stroke="#F8D0D8" strokeWidth="0.3"/>
                                                     ))}
                                                     {[0,1,2,3].map(i=>(
                                                         <path key={i} d={`M28,${76-i*3} Q${28+10+i*2},${76+i*3} ${28},${86-i*3} Q${28-10-i*2},${76+i*3} ${28},${76-i*3}Z`}
-                                                            fill="#F06292" opacity={0.9-i*0.15}/>
+                                                            fill="#FADCE4" opacity={0.9-i*0.15}/>
                                                     ))}
                                                     {[0,1,2,3].map(i=>(
                                                         <path key={i} d={`M68,${80-i*3} Q${68+10+i*2},${80+i*3} ${68},${90-i*3} Q${68-10-i*2},${80+i*3} ${68},${80-i*3}Z`}
-                                                            fill="#AD1457" opacity={0.9-i*0.15}/>
+                                                            fill="#F8D0D8" opacity={0.9-i*0.15}/>
                                                     ))}
                                                 </g>
+                                                {collar(122, 24, '#B4CCAA', '#A8C4A0')}
                                                 {rim(122, 26, 'md-rose-3d')}
                                             </svg>
                                         </div>
@@ -770,7 +784,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                 </defs>
                                                 <path d="M22,130 Q14,130 13,148 Q12,164 18,170 Q48,174 78,170 Q84,164 83,148 Q82,130 74,130 Q48,126 22,130Z" fill={pc}/>
                                                 <path d="M22,130 Q14,130 13,148 Q12,164 18,170 Q48,174 78,170 Q84,164 83,148 Q82,130 74,130 Q48,126 22,130Z" fill="url(#md-mon-3d)"/>
-                                                {soil(130)}
+                                                {soil(130, 26, '#C4A888', '#B89870')}
                                                 <g className="animate-pot-breathe">
                                                     <path d="M44,130 C22,120 4,88 6,46 C8,18 28,12 38,28 C42,42 42,92 44,130Z" fill={pl} mask="url(#md-mon-L)"/>
                                                     <path d="M44,130 C22,120 4,88 6,46 C8,18 28,12 38,28 C42,42 42,92 44,130Z" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8"/>
@@ -778,6 +792,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                                     <path d="M52,130 C74,118 92,84 90,42 C88,14 68,10 58,26 C54,40 54,92 52,130Z" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8"/>
                                                     <path d="M45,130 C38,100 42,64 48,32 C54,64 58,100 51,130Z" fill={pl} opacity="0.85"/>
                                                 </g>
+                                                {collar(130, 24, '#B4D8C8', '#A8CCBC')}
                                                 {rim(130, 26, 'md-mon-3d')}
                                             </svg>
                                         </div>
@@ -893,7 +908,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                 </div>
                             )}
 
-                            {/* CircularProgressNew — 좌측 상단 레벨 HUD (safe-area 적용) */}
+                            {/* TODO: 로티 진화 구현 후 주석 해제 — 레벨 HUD (CircularProgressNew) */}
+                            {SHOW_LEVEL_UP_UI && (
                             <div
                                 className="pointer-events-auto"
                                 style={{ position: 'absolute', top: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-top)))', left: '1.5rem', zIndex: 50 }}
@@ -903,6 +919,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     percent={petStatus ? (petStatus.currentExp / petStatus.requiredExp) * 100 : 0}
                                 />
                             </div>
+                            )}
                         </>
                     )}
 
@@ -938,7 +955,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         onClose={() => setIsStoreViewOpen(false)}
                     />
 
-                    {/* 🎉 레벨업 축하 모달 */}
+                    {/* TODO: 로티 진화 구현 후 주석 해제 — 레벨업 축하 모달 */}
+                    {SHOW_LEVEL_UP_UI && (
                     <LevelUpModal
                         isOpen={showLevelUpModal}
                         onClose={closeLevelUpModal}
@@ -946,8 +964,10 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         newLevel={levelUpInfo.newLevel}
                         rewardCoins={levelUpInfo.rewardCoins}
                     />
+                    )}
 
-                    {/* 🧪 임시 테스트 버튼 - 배포 전 삭제 (좌측 상단 - 상점/설정 UI 비가림) */}
+                    {/* TODO: 로티 진화 구현 후 주석 해제 — 레벨업 테스트 버튼 */}
+                    {SHOW_LEVEL_UP_UI && (
                     <div className="fixed top-2 left-2 z-[500] flex flex-col gap-2">
                         <button
                             className="px-3 py-2 rounded-xl text-xs font-bold text-white shadow-lg active:scale-95 transition-transform"
@@ -962,6 +982,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                             <MongleIcon name="testTube" size={14} className="mr-1" /> 레벨업 테스트
                         </button>
                     </div>
+                    )}
 
                     {/* 하단 탭바 - 항상 표시 */}
                     <BottomTabBar

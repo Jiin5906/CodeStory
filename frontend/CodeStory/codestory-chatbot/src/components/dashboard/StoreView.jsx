@@ -309,6 +309,8 @@ const ItemPreview = ({ item }) => {
                         <path d="M10,48 L40,48 L37,66 Q25,69 13,66 Z" fill="url(#cp-pot)" />
                         <path d="M12,50 Q25,53 38,50 L36,65 Q25,67 14,65 Z" fill="rgba(255,255,255,0.07)" />
                         <path d="M12,56 Q25,59 38,56" fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
+                        <ellipse cx="25" cy="45" rx="15" ry="3.5" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
                         <ellipse cx="25" cy="48" rx="15" ry="3.5" fill="#2E1B0E" />
                         <ellipse cx="25" cy="47.2" rx="10" ry="2" fill="#4A2C12" />
@@ -346,10 +348,10 @@ const ItemPreview = ({ item }) => {
                             <circle cx="25" cy="13" r="2.5" fill="#FFE8B0" />
                             <circle cx="25" cy="13" r="1.1" fill="#FFCC60" />
                         </g>
-                        {/* ─ 화분 림 (위로 튀어나온 테두리) ─ */}
-                        <path d="M9,48 Q9,44 10.5,43.5 L39.5,43.5 Q41,44 41,48 Q41,50 25,51 Q9,50 9,48 Z" fill="#C85040" />
-                        <ellipse cx="25" cy="43.5" rx="15" ry="2.2" fill="#D46050" />
-                        <ellipse cx="25" cy="42.8" rx="12" ry="1.2" fill="rgba(255,255,255,0.2)" />
+                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
+                        <path d="M10,45 A15,4 0 0 1 40,45 Z" fill="#C85040" />
+                        <path d="M12,45 A13,3.2 0 0 1 38,45 Z" fill="#D46050" opacity="0.7" />
+                        <path d="M13.5,45 A11.5,2.4 0 0 1 36.5,45 Z" fill="rgba(255,255,255,0.18)" />
                     </svg>
                 </div>
             );
@@ -390,6 +392,8 @@ const ItemPreview = ({ item }) => {
                         <path d="M13,52 Q25,55 37,52 Q37,64 25,66 Q13,64 13,52 Z" fill="rgba(255,255,255,0.1)" />
                         {/* 도자기 질감 띠 */}
                         <path d="M10,57 Q25,60 40,57" fill="none" stroke="rgba(180,170,160,0.25)" strokeWidth="0.7" />
+                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
+                        <ellipse cx="25" cy="47.5" rx="13.5" ry="3" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
                         <ellipse cx="25" cy="50" rx="14" ry="3.2" fill="#2E1B0E" />
                         <ellipse cx="25" cy="49.2" rx="10" ry="2" fill="#4A2C12" />
@@ -414,9 +418,9 @@ const ItemPreview = ({ item }) => {
                         </g>
                         {/* ─ 잎 칼라 ─ */}
                         <ellipse cx="25" cy="51" rx="12" ry="3.2" fill="#A4C89C" opacity="0.75" />
-                        {/* ─ 화분 림 ─ */}
-                        <ellipse cx="25" cy="50" rx="14" ry="2.8" fill="url(#mp-pot)" />
-                        <ellipse cx="25" cy="49.2" rx="11" ry="1.6" fill="rgba(255,255,255,0.28)" />
+                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
+                        <path d="M11,47.5 A14,3.5 0 0 1 39,47.5 Z" fill="url(#mp-pot)" />
+                        <path d="M13,47.5 A12,2.8 0 0 1 37,47.5 Z" fill="rgba(255,255,255,0.25)" />
                     </svg>
                 </div>
             );
@@ -438,6 +442,8 @@ const ItemPreview = ({ item }) => {
                         <path d="M7,54 Q4,55 4,62 Q4,68 7,69 Q25,71 43,69 Q46,68 46,62 Q46,55 43,54 Q25,52 7,54 Z" fill="url(#fp-pot)" />
                         <path d="M9,56 Q25,59 41,56 Q40,67 25,68.5 Q10,67 9,56 Z" fill="rgba(255,255,255,0.1)" />
                         <path d="M8,61 Q25,64 42,61" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
+                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
+                        <ellipse cx="25" cy="51" rx="17.5" ry="3.5" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
                         <ellipse cx="25" cy="54" rx="18" ry="3.8" fill="#2E1B0E" />
                         <ellipse cx="25" cy="53.2" rx="13" ry="2.2" fill="#4A2C12" />
@@ -489,9 +495,9 @@ const ItemPreview = ({ item }) => {
                         <ellipse cx="25" cy="55" rx="16" ry="4" fill="#90C880" opacity="0.8" />
                         <ellipse cx="15" cy="56.5" rx="6" ry="2.2" fill="#88C078" transform="rotate(-18 15 56.5)" />
                         <ellipse cx="35" cy="56.5" rx="6" ry="2.2" fill="#88C078" transform="rotate(18 35 56.5)" />
-                        {/* ─ 화분 림 ─ */}
-                        <ellipse cx="25" cy="54" rx="18" ry="3.2" fill="url(#fp-pot)" />
-                        <ellipse cx="25" cy="53.2" rx="14.5" ry="1.8" fill="rgba(255,255,255,0.25)" />
+                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
+                        <path d="M7,51 A18,4.5 0 0 1 43,51 Z" fill="url(#fp-pot)" />
+                        <path d="M9,51 A16,3.5 0 0 1 41,51 Z" fill="rgba(255,255,255,0.22)" />
                     </svg>
                 </div>
             );
@@ -525,6 +531,8 @@ const ItemPreview = ({ item }) => {
                         {/* 도자기 장식 띠 */}
                         <path d="M14,57 Q25,60 36,57" fill="none" stroke="rgba(180,170,140,0.35)" strokeWidth="0.7" />
                         <path d="M13,62 Q25,65 37,62" fill="none" stroke="rgba(180,170,140,0.25)" strokeWidth="0.5" />
+                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
+                        <ellipse cx="25" cy="47.5" rx="12" ry="2.8" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
                         <ellipse cx="25" cy="50" rx="12.5" ry="3" fill="#2E1B0E" />
                         <ellipse cx="25" cy="49.3" rx="9" ry="1.8" fill="#4A2C12" />
@@ -574,9 +582,9 @@ const ItemPreview = ({ item }) => {
                         <ellipse cx="25" cy="51" rx="11" ry="3.2" fill="#B0C898" opacity="0.75" />
                         <ellipse cx="18" cy="52.2" rx="4.5" ry="1.8" fill="#A8C090" transform="rotate(-15 18 52.2)" />
                         <ellipse cx="32" cy="52.2" rx="4.5" ry="1.8" fill="#A8C090" transform="rotate(15 32 52.2)" />
-                        {/* ─ 화분 림 ─ */}
-                        <ellipse cx="25" cy="50" rx="12.5" ry="2.8" fill="url(#lp-pot)" />
-                        <ellipse cx="25" cy="49.2" rx="10" ry="1.5" fill="rgba(255,255,255,0.25)" />
+                        {/* ─ 화분 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
+                        <path d="M12.5,47.5 A12.5,3.2 0 0 1 37.5,47.5 Z" fill="url(#lp-pot)" />
+                        <path d="M14,47.5 A11,2.5 0 0 1 36,47.5 Z" fill="rgba(255,255,255,0.22)" />
                     </svg>
                 </div>
             );
@@ -605,9 +613,8 @@ const ItemPreview = ({ item }) => {
                         <path d="M11,56 Q25,58 39,56" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.7" />
                         <path d="M11,62 Q25,64 39,62" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
                         <ellipse cx="25" cy="68" rx="15" ry="2" fill="#383030" />
-                        {/* ─ 골드 림 ─ */}
-                        <rect x="9" y="47" width="32" height="5" rx="1.5" fill="url(#rp-gold)" />
-                        <rect x="10" y="47.5" width="30" height="2" rx="1" fill="rgba(255,255,255,0.2)" />
+                        {/* ─ 화분 입구 내부 (3D 깊이감) ─ */}
+                        <ellipse cx="25" cy="48" rx="14.5" ry="2.8" fill="#1A0804" />
                         {/* ─ 흙 ─ */}
                         <ellipse cx="25" cy="50" rx="15" ry="3.2" fill="#2E1B0E" />
                         <ellipse cx="25" cy="49.2" rx="11" ry="2" fill="#4A2C12" />
@@ -648,6 +655,9 @@ const ItemPreview = ({ item }) => {
                         <ellipse cx="25" cy="51" rx="14" ry="4" fill="#68A858" opacity="0.8" />
                         <ellipse cx="15" cy="52.5" rx="5.5" ry="2" fill="#60A050" transform="rotate(-18 15 52.5)" />
                         <ellipse cx="35" cy="52.5" rx="5.5" ry="2" fill="#60A050" transform="rotate(18 35 52.5)" />
+                        {/* ─ 골드 앞면 립 (하반부 호 — 식물이 화분 안에서 자라는 느낌) ─ */}
+                        <path d="M11,48 A14,3.5 0 0 1 39,48 Z" fill="url(#rp-gold)" />
+                        <path d="M12,48 A13,2.8 0 0 1 38,48 Z" fill="rgba(255,255,255,0.18)" />
                     </svg>
                 </div>
             );
