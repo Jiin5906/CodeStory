@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isAfter, startOfDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaChevronLeft, FaChevronRight, FaUserCircle } from 'react-icons/fa';
+import MongleIcon from '../common/MongleIcons';
 
 const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLogin }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -118,7 +119,7 @@ const RightPanel = ({ user, selectedDate, onDateSelect, diaries, onLogout, onLog
                     {/* 로그인 상태일 때만 불꽃 아이콘 표시 */}
                     {user && user.id !== 0 && (
                         <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md border border-orange-100">
-                            <span className="text-lg">🔥</span>
+                            <MongleIcon name="fire" size={18} />
                         </div>
                     )}
                 </div>

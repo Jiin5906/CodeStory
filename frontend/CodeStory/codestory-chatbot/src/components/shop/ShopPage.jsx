@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaShoppingBag } from 'react-icons/fa';
+import MongleIcon from '../common/MongleIcons';
 
 const ShopPage = () => {
     const navigate = useNavigate();
@@ -66,7 +67,7 @@ const ShopPage = () => {
                     >
                         곧 멋진 아이템들을 만나보실 수 있어요!
                         <br />
-                        조금만 기다려주세요 ✨
+                        조금만 기다려주세요 <MongleIcon name="sparkle" size={16} className="ml-1" />
                     </p>
 
                     <div className="flex flex-wrap gap-4 justify-center mt-10">
@@ -81,7 +82,7 @@ const ShopPage = () => {
                                 className="text-sm font-medium"
                                 style={{ color: 'var(--sub-text-color)' }}
                             >
-                                🎨 테마 꾸미기
+                                <span className="flex items-center gap-1"><MongleIcon name="palette" size={14} /> 테마 꾸미기</span>
                             </span>
                         </div>
                         <div
@@ -95,7 +96,7 @@ const ShopPage = () => {
                                 className="text-sm font-medium"
                                 style={{ color: 'var(--sub-text-color)' }}
                             >
-                                🐾 캐릭터 스킨
+                                <span className="flex items-center gap-1"><MongleIcon name="flower" size={14} /> 캐릭터 스킨</span>
                             </span>
                         </div>
                         <div
@@ -109,7 +110,7 @@ const ShopPage = () => {
                                 className="text-sm font-medium"
                                 style={{ color: 'var(--sub-text-color)' }}
                             >
-                                ✏️ 스티커팩
+                                <span className="flex items-center gap-1"><MongleIcon name="pencil" size={14} /> 스티커팩</span>
                             </span>
                         </div>
                     </div>

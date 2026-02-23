@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { FaHeart, FaStore, FaTimes } from 'react-icons/fa';
 import { useStore } from '../../context/StoreContext';
+import MongleIcon from '../common/MongleIcons';
 
 /**
  * MainMenu — 홈 버튼 클릭 시 열리는 메인 메뉴
@@ -40,7 +41,7 @@ const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                         <div className="relative flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold drop-shadow-md">🏠 메인 메뉴</h2>
+                                <h2 className="text-2xl font-bold drop-shadow-md flex items-center gap-2"><MongleIcon name="home" size={24} color="#ffffff" /> 메인 메뉴</h2>
                                 <p className="text-sm text-white/90 mt-1">원하는 메뉴를 선택하세요</p>
                             </div>
                             <button
@@ -133,7 +134,7 @@ const MainMenu = ({ isOpen, onClose, onEmotionShardsClick, onStoreClick }) => {
                     <div className="px-6 pb-6">
                         <div className="rounded-2xl p-4 text-center" style={{ background: `linear-gradient(to right, ${primaryColor}66, ${secondaryColor || primaryColor}66)` }}>
                             <p className="text-xs text-gray-600">
-                                💝 몽글이와 함께하는 감정 여행
+                                <span className="flex items-center justify-center gap-1"><MongleIcon name="heart" size={14} color="#FF69B4" /> 몽글이와 함께하는 감정 여행</span>
                             </p>
                         </div>
                     </div>

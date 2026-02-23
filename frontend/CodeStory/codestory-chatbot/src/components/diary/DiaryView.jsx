@@ -34,14 +34,22 @@ const DiaryView = () => {
         // 코인 보상
         triggerDiaryReward();
 
-        // 투어: diary-write 단계 완료
-        if (isTourActive && currentStep?.id === 'diary-write') {
+        // 투어: diary-save 단계 완료 (저장 시 report-tab으로 이동)
+        if (isTourActive && currentStep?.id === 'diary-save') {
             setTimeout(advanceTour, 400);
         }
 
         // GTM 이벤트
         if (window.dataLayer) {
             window.dataLayer.push({ event: 'diary_created', mood_score: diaryData.moodScore });
+        }
+    };
+
+    // 일기 작성 모달 열기 + 투어 diary-write 단계 완료
+    const handleOpenWriteModal = () => {
+        setIsWriteModalOpen(true);
+        if (isTourActive && currentStep?.id === 'diary-write') {
+            setTimeout(advanceTour, 300);
         }
     };
 
@@ -112,7 +120,7 @@ const DiaryView = () => {
                         </p>
                     </div>
                     <button
-                        onClick={() => setIsWriteModalOpen(true)}
+                        onClick={handleOpenWriteModal}
                         className="w-12 h-12 bg-white rounded-full shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center border-2"
                         style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                         data-gtm="diary-fab-write-btn"
@@ -141,7 +149,7 @@ const DiaryView = () => {
                             당신의 이야기가 몽글이를 더 똑똑하게 만들어요
                         </p>
                         <button
-                            onClick={() => setIsWriteModalOpen(true)}
+                            onClick={handleOpenWriteModal}
                             className="px-6 py-3 bg-white font-cute rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center gap-2 border-2"
                             style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                             data-gtm="diary-empty-write-btn"
@@ -229,7 +237,7 @@ const DiaryView = () => {
             {/* Floating Action Button (흰색 + 파스텔 테두리) */}
             {diaries.length > 0 && (
                 <button
-                    onClick={() => setIsWriteModalOpen(true)}
+                    onClick={handleOpenWriteModal}
                     className="fixed bottom-24 right-6 w-14 h-14 bg-white rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center text-2xl z-50 border-2"
                     style={{ color: accentColor, borderColor: `${primaryColor}66` }}
                     data-gtm="diary-fab-floating-btn"

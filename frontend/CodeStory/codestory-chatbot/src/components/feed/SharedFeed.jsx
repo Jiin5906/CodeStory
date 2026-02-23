@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { FaFire, FaComment, FaUser, FaHeart, FaClock } from 'react-icons/fa';
 import { diaryApi } from '../../services/api';
+import { SmartEmoji } from '../common/MongleIcons';
 import './SharedFeed.css';
 
 const SharedFeed = () => {
@@ -210,7 +211,7 @@ const FeedCard = ({ diary, index, getEmotionGradient, navigate }) => {
                         className="feed-card-emoji-bubble"
                         data-gtm="shared-feed-mood-badge"
                     >
-                        <span>{diary.emoji || '😊'}</span>
+                        <SmartEmoji value={diary.emoji || 'faceSmile'} size={20} />
                     </div>
 
                     <div className="feed-card-author-details">

@@ -6,21 +6,29 @@ const TOUR_STEPS = {
         {
             id: 'chat',
             selector: '[data-gtm="chat-input-area"]',
-            message: '몽글이에게 오늘 마음을 들려주세요 💬\n메시지를 전송해야 다음 단계로 넘어갈 수 있어요!',
+            message: '몽글이에게 오늘 마음을 들려주세요\n메시지를 전송해야 다음 단계로 넘어갈 수 있어요!',
             tooltipPosition: 'top',
             controlled: true,
         },
         {
             id: 'shard',
             selector: '[data-gtm^="emotion-shard-"]',
-            message: '감정 조각이 나왔어요! ✨\n클릭해서 주워보세요!',
+            message: '감정 조각이 나왔어요!\n클릭해서 주워보세요!',
             tooltipPosition: 'bottom',
             controlled: true,
             autoAdvanceMs: 8000,
+            blockWhenMissing: false,
+        },
+        {
+            id: 'bottomtab',
+            selector: '[data-gtm="bottomsheet-drag-handle"]',
+            message: '화면 하단 바를 위로 올려보세요! 👆\n몽글이의 상태를 확인할 수 있어요!',
+            tooltipPosition: 'top',
+            controlled: true,
         },
         {
             id: 'hunger',
-            selector: '[data-gtm="chat-input-area"]',
+            selector: '[data-gtm="action-btn-hunger"]',
             message: '감정 조각을 주우면 몽글이의 허기 수치가 올라가요! 🍽️\n몽글이를 잘 챙겨주세요!',
             tooltipPosition: 'top',
             controlled: false,
@@ -35,7 +43,28 @@ const TOUR_STEPS = {
         {
             id: 'diary-write',
             selector: '[data-gtm="diary-fab-write-btn"],[data-gtm="diary-empty-write-btn"]',
-            message: '일기를 써볼까요? ✏️\n버튼을 눌러 일기를 작성하고 저장해보세요!\n저장하면 다음 단계로 넘어가요.',
+            message: '일기를 써볼까요? ✏️\n버튼을 눌러 일기 작성 화면을 열어보세요!',
+            tooltipPosition: 'top',
+            controlled: true,
+        },
+        {
+            id: 'diary-score',
+            selector: '[data-gtm="diary-mood-section"]',
+            message: '오늘 하루의 마음 날씨 점수를 매겨주세요! 🌤️\n슬라이더로 오늘의 기분을 표현해 봐요!',
+            tooltipPosition: 'top',
+            controlled: false,
+        },
+        {
+            id: 'diary-content',
+            selector: '[data-gtm="diary-content-textarea"]',
+            message: '오늘 있었던 일을 자유롭게 적어주세요 ✍️\n몽글이가 열심히 읽을게요!',
+            tooltipPosition: 'top',
+            controlled: false,
+        },
+        {
+            id: 'diary-save',
+            selector: '[data-gtm="diary-save-btn"]',
+            message: '다 적었다면 일기를 저장해 보세요! 💾\n저장하면 다음 단계로 넘어가요!',
             tooltipPosition: 'top',
             controlled: true,
         },
@@ -94,51 +123,91 @@ const TOUR_STEPS = {
     ],
 };
 
+// 현재 로그인된 유저 ID를 localStorage에서 읽어 반환 (계정별 키 분리용)
+const getUserId = () => {
+    try {
+        const u = JSON.parse(localStorage.getItem('diaryUser') || '{}');
+        return u.id ?? 'guest';
+    } catch {
+        return 'guest';
+    }
+};
+
 const TourContext = createContext(null);
 
 export const TourProvider = ({ children }) => {
     const [isTourActive, setIsTourActive] = useState(false);
     const [tourType, setTourType] = useState(null);
     const [tourStepIndex, setTourStepIndex] = useState(0);
+    const [canSkip, setCanSkip] = useState(false);
 
-    // ref로 최신 tourType 추적 (stale closure 방지)
+    // ref로 최신 값 추적 (stale closure 방지)
     const tourTypeRef = useRef(null);
+    const tourQueueRef = useRef([]);
+    const canSkipRef = useRef(false);
+
     useEffect(() => {
         tourTypeRef.current = tourType;
     }, [tourType]);
 
+    useEffect(() => {
+        canSkipRef.current = canSkip;
+    }, [canSkip]);
+
     const currentSteps = tourType ? (TOUR_STEPS[tourType] || []) : [];
     const currentStep = currentSteps[tourStepIndex] || null;
 
-    const endTourCleanup = useCallback((type) => {
-        if (type === 'main') {
-            localStorage.setItem('hasSeenMainTour', 'true');
-        } else if (type && type !== 'levelup') {
-            localStorage.setItem(`hasSeenTour_${type}`, 'true');
-        }
-        setIsTourActive(false);
-        setTourType(null);
-        setTourStepIndex(0);
-    }, []);
-
-    const startMainTour = useCallback(() => {
-        const hasSeen = localStorage.getItem('hasSeenMainTour');
-        if (hasSeen) return;
-        setTourType('main');
+    const startTourType = useCallback((type) => {
+        setTourType(type);
         setTourStepIndex(0);
         setIsTourActive(true);
     }, []);
+
+    const endTourCleanup = useCallback((type) => {
+        const uid = getUserId();
+        if (type === 'main') {
+            localStorage.setItem(`hasSeenMainTour_${uid}`, 'true');
+        } else if (type && type !== 'levelup') {
+            localStorage.setItem(`hasSeenTour_${type}_${uid}`, 'true');
+        }
+
+        // 큐에 다음 투어가 있으면 자동으로 이어서 시작
+        const queue = tourQueueRef.current;
+        if (queue.length > 0) {
+            const nextType = queue[0];
+            tourQueueRef.current = queue.slice(1);
+            setTimeout(() => startTourType(nextType), 300);
+        } else {
+            setCanSkip(false);
+            setIsTourActive(false);
+            setTourType(null);
+            setTourStepIndex(0);
+        }
+    }, [startTourType]);
+
+    const startMainTour = useCallback(() => {
+        const hasSeen = localStorage.getItem(`hasSeenMainTour_${getUserId()}`);
+        if (hasSeen) return;
+        startTourType('main');
+    }, [startTourType]);
 
     const startConditionalTour = useCallback((type) => {
         if (isTourActive) return;
         if (type !== 'levelup') {
-            const hasSeen = localStorage.getItem(`hasSeenTour_${type}`);
+            const hasSeen = localStorage.getItem(`hasSeenTour_${type}_${getUserId()}`);
             if (hasSeen) return;
         }
-        setTourType(type);
-        setTourStepIndex(0);
-        setIsTourActive(true);
-    }, [isTourActive]);
+        startTourType(type);
+    }, [isTourActive, startTourType]);
+
+    // 모든 투어를 순서대로 실행 (테스트용)
+    const startTourSequence = useCallback((types) => {
+        if (!types || types.length === 0) return;
+        const [first, ...rest] = types;
+        tourQueueRef.current = rest;
+        setCanSkip(true);
+        startTourType(first);
+    }, [startTourType]);
 
     const advanceTour = useCallback(() => {
         if (!isTourActive) return;
@@ -156,14 +225,17 @@ export const TourProvider = ({ children }) => {
     }, [isTourActive, endTourCleanup]);
 
     const endTour = useCallback(() => {
+        // 건너뛰기: 큐 비우고 완전 종료
+        tourQueueRef.current = [];
         endTourCleanup(tourTypeRef.current);
     }, [endTourCleanup]);
 
     // 투어 초기화 (테스트용)
     const resetTours = useCallback(() => {
-        localStorage.removeItem('hasSeenMainTour');
-        localStorage.removeItem('hasSeenTour_affection');
-        localStorage.removeItem('hasSeenTour_lamp');
+        const uid = getUserId();
+        localStorage.removeItem(`hasSeenMainTour_${uid}`);
+        localStorage.removeItem(`hasSeenTour_affection_${uid}`);
+        localStorage.removeItem(`hasSeenTour_lamp_${uid}`);
     }, []);
 
     return (
@@ -172,8 +244,10 @@ export const TourProvider = ({ children }) => {
             tourType,
             tourStepIndex,
             currentStep,
+            canSkip,
             startMainTour,
             startConditionalTour,
+            startTourSequence,
             advanceTour,
             endTour,
             resetTours,

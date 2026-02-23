@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { FaHandSparkles, FaUtensils, FaMoon, FaStore } from 'react-icons/fa';
 import { usePet } from '../../context/PetContext';
 import { useStore } from '../../context/StoreContext';
+import MongleIcon from '../common/MongleIcons';
 
 /**
  * BottomSheet — 간소화된 2단계 시스템 (3단계 EXPANDED 제거)
@@ -25,7 +26,7 @@ const SNAP_POINTS = {
 
 // 액션 버튼 컴포넌트 (퍼센트 상시 표시)
 // eslint-disable-next-line no-unused-vars
-const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor }) => {
+const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor, primaryColor, buttonColor, gtm }) => {
     const gaugeHeight = Math.min(100, Math.max(0, value));
 
     const getIconColor = () => {
@@ -53,6 +54,7 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor,
                     : 'bg-white hover:shadow-lg'
                 } border border-white`}
             style={isHome ? { background: `linear-gradient(to bottom right, ${accentColor}, ${buttonColor})` } : undefined}
+            data-gtm={gtm}
         >
             {/* 게이지 배경 */}
             {!isHome && (
@@ -89,7 +91,8 @@ const ActionButton = ({ icon: Icon, value, onClick, isHome = false, accentColor,
 const BottomSheet = ({
     onWrite,
     onSleepClick,
-    onStoreClick
+    onStoreClick,
+    onSnapChange,
 }) => {
     const [snapPoint, setSnapPoint] = useState('COLLAPSED'); // COLLAPSED, HALF만 사용
     const [dragStartY, setDragStartY] = useState(0);
@@ -207,6 +210,11 @@ const BottomSheet = ({
         }
     };
 
+    // snapPoint 변경 시 부모에게 알림 (투어 연동용)
+    useEffect(() => {
+        onSnapChange?.(snapPoint);
+    }, [snapPoint, onSnapChange]);
+
     const handleSubmit = () => {
         if (!input.trim()) return;
         onWrite(input);
@@ -269,6 +277,7 @@ const BottomSheet = ({
                     className="w-10 h-1 rounded-full mx-auto mb-1 cursor-pointer transition-colors"
                     style={{ backgroundColor: `${accentColor}66` }}
                     onClick={handleHandleClick}
+                    data-gtm="bottomsheet-drag-handle"
                 ></div>
             </div>
 
@@ -282,7 +291,7 @@ const BottomSheet = ({
                     }}
                     data-gtm="chat-input-area"
                 >
-                    <div className="pl-2.5 pr-1 text-base opacity-70">✏️</div>
+                    <div className="pl-2.5 pr-1 opacity-70"><MongleIcon name="pencil" size={16} color="#9CA3AF" /></div>
                     <input
                         type="text"
                         value={input}
@@ -326,6 +335,7 @@ const BottomSheet = ({
                             accentColor={accentColor}
                             primaryColor={primaryColor}
                             buttonColor={buttonColor}
+                            gtm="action-btn-hunger"
                         />
                         <ActionButton
                             icon={FaMoon}

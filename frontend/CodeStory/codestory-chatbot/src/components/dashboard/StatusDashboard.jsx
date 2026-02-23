@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePet } from '../../context/PetContext';
+import MongleIcon from '../common/MongleIcons';
 
 // ─── 색상 로직: 퍼센트에 따라 적합한 클래스 반환 ───
 const getBarColor = (percent) => {
@@ -43,7 +44,7 @@ const StatusCard = ({ icon, label, value, locked, gtmKey }) => {
 
             {/* 아이콘 + 라벨 */}
             <div className="flex flex-col items-center gap-0.5">
-                <span className="text-xl">{icon}</span>
+                <MongleIcon name={icon} size={22} />
                 <span className="text-[10px] font-bold text-slate-500">{label}</span>
             </div>
 
@@ -80,14 +81,14 @@ const StatusDashboard = () => {
             data-gtm="status-dashboard"
         >
             <StatusCard
-                icon="🤚"
+                icon="heart"
                 label="쓰다듬기"
                 value={affectionGauge}
                 locked={isAffectionLocked}
                 gtmKey="status-card-affection"
             />
             <StatusCard
-                icon="🌙"
+                icon="moon"
                 label="잠자기"
                 value={energyGauge}
                 locked={isEnergyLocked}

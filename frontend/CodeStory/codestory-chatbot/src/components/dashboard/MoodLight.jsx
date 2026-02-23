@@ -181,11 +181,11 @@ const MushroomLamp = ({ on, shadeColor, shadeColorDark, standColor }) => (
    D. 달/구름 램프 (Moon) — 초승달 + 별 + 구름
    ════════════════════════════════════════════════ */
 const MoonLamp = ({ on, shadeColor, shadeColorDark }) => (
-    <div className="relative w-20 h-36" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.25))' }}>
-        <svg viewBox="0 0 80 144" width="80" height="144" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative w-28 h-48">
+        <svg viewBox="0 0 112 192" width="112" height="192" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <radialGradient id="moonGlow">
-                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.6" />
+                    <stop offset="0%" stopColor={shadeColor} stopOpacity="0.7" />
                     <stop offset="100%" stopColor={shadeColor} stopOpacity="0" />
                 </radialGradient>
                 <linearGradient id="moonFill" x1="0" y1="0" x2="1" y2="1">
@@ -194,43 +194,44 @@ const MoonLamp = ({ on, shadeColor, shadeColorDark }) => (
                 </linearGradient>
             </defs>
             {/* 빛 확산 */}
-            {on && <circle cx="40" cy="40" r="50" fill="url(#moonGlow)" opacity="0.3" />}
+            {on && <circle cx="56" cy="54" r="65" fill="url(#moonGlow)" opacity="0.35" />}
             {/* 초승달 */}
             <g style={on ? { animation: 'moonBob 4s ease-in-out infinite' } : {}}>
-                {/* 달 원 */}
-                <circle cx="38" cy="38" r="24" fill="url(#moonFill)" opacity={on ? 1 : 0.5} />
+                {/* 달 원 — 크고 선명 */}
+                <circle cx="52" cy="52" r="34" fill="url(#moonFill)" opacity={on ? 1 : 0.55}
+                    stroke={on ? 'rgba(255,255,240,0.35)' : 'none'} strokeWidth="1.5" />
                 {/* 그림자 원 (초승달 만들기) */}
-                <circle cx="48" cy="32" r="20" fill={on ? '#1A1A3E' : '#888'} opacity={on ? 0.6 : 0.35} />
+                <circle cx="66" cy="44" r="28" fill={on ? '#1A1A3E' : '#888'} opacity={on ? 0.55 : 0.35} />
                 {/* 달 크레이터 */}
                 {on && <>
-                    <circle cx="28" cy="35" r="3" fill={shadeColorDark} opacity="0.2" />
-                    <circle cx="34" cy="48" r="2" fill={shadeColorDark} opacity="0.15" />
-                    <circle cx="24" cy="44" r="1.5" fill={shadeColorDark} opacity="0.2" />
+                    <circle cx="38" cy="48" r="4" fill={shadeColorDark} opacity="0.2" />
+                    <circle cx="46" cy="66" r="2.8" fill={shadeColorDark} opacity="0.15" />
+                    <circle cx="32" cy="60" r="2" fill={shadeColorDark} opacity="0.2" />
                 </>}
             </g>
             {/* 별 (크로스 형태) */}
             {on && <>
-                <g transform="translate(65,14)" opacity="0.8" style={{ animation: 'starTwinkle 2s ease-in-out infinite' }}>
-                    <line x1="0" y1="-4" x2="0" y2="4" stroke="#FFFACD" strokeWidth="1.5" strokeLinecap="round" />
-                    <line x1="-4" y1="0" x2="4" y2="0" stroke="#FFFACD" strokeWidth="1.5" strokeLinecap="round" />
+                <g transform="translate(92,18)" opacity="0.9" style={{ animation: 'starTwinkle 2s ease-in-out infinite' }}>
+                    <line x1="0" y1="-5" x2="0" y2="5" stroke="#FFFACD" strokeWidth="2" strokeLinecap="round" />
+                    <line x1="-5" y1="0" x2="5" y2="0" stroke="#FFFACD" strokeWidth="2" strokeLinecap="round" />
                 </g>
-                <g transform="translate(10,16)" opacity="0.5" style={{ animation: 'starTwinkle 3s ease-in-out infinite 1s' }}>
-                    <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#E8E0FF" strokeWidth="1" strokeLinecap="round" />
-                    <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#E8E0FF" strokeWidth="1" strokeLinecap="round" />
+                <g transform="translate(12,22)" opacity="0.6" style={{ animation: 'starTwinkle 3s ease-in-out infinite 1s' }}>
+                    <line x1="0" y1="-3.5" x2="0" y2="3.5" stroke="#E8E0FF" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1="-3.5" y1="0" x2="3.5" y2="0" stroke="#E8E0FF" strokeWidth="1.5" strokeLinecap="round" />
                 </g>
-                <circle cx="70" cy="50" r="1" fill="#FFFACD" opacity="0.6" style={{ animation: 'starTwinkle 2.5s ease-in-out infinite 0.5s' }} />
-                <circle cx="6" cy="55" r="0.8" fill="#E8E0FF" opacity="0.5" style={{ animation: 'starTwinkle 3.5s ease-in-out infinite 1.5s' }} />
+                <circle cx="98" cy="68" r="1.5" fill="#FFFACD" opacity="0.7" style={{ animation: 'starTwinkle 2.5s ease-in-out infinite 0.5s' }} />
+                <circle cx="8" cy="74" r="1.2" fill="#E8E0FF" opacity="0.6" style={{ animation: 'starTwinkle 3.5s ease-in-out infinite 1.5s' }} />
             </>}
             {/* 구름 */}
-            <g style={on ? { animation: 'cloudDrift 6s ease-in-out infinite 1s' } : {}} opacity={on ? 0.6 : 0.25}>
-                <ellipse cx="28" cy="78" rx="10" ry="6" fill={on ? 'white' : '#CCC'} />
-                <ellipse cx="40" cy="75" rx="14" ry="8" fill={on ? 'white' : '#CCC'} />
-                <ellipse cx="52" cy="78" rx="10" ry="6" fill={on ? 'white' : '#CCC'} />
+            <g style={on ? { animation: 'cloudDrift 6s ease-in-out infinite 1s' } : {}} opacity={on ? 0.7 : 0.3}>
+                <ellipse cx="36" cy="106" rx="14" ry="8" fill={on ? 'white' : '#CCC'} />
+                <ellipse cx="56" cy="102" rx="20" ry="11" fill={on ? 'white' : '#CCC'} />
+                <ellipse cx="74" cy="106" rx="14" ry="8" fill={on ? 'white' : '#CCC'} />
             </g>
             {/* 투명한 실 */}
-            <line x1="40" y1="86" x2="40" y2="125" stroke="rgba(180,180,180,0.3)" strokeWidth="0.8" strokeDasharray="2,2" />
+            <line x1="56" y1="116" x2="56" y2="166" stroke="rgba(180,180,180,0.3)" strokeWidth="1" strokeDasharray="3,3" />
             {/* 작은 받침대 */}
-            <ellipse cx="40" cy="128" rx="12" ry="4" fill="rgba(180,180,180,0.35)" />
+            <ellipse cx="56" cy="170" rx="14" ry="4.5" fill="rgba(180,180,180,0.35)" />
         </svg>
         <style>{`
             @keyframes moonBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Lottie from 'lottie-react';
 import mongleEATING from '../../assets/mongleEATING.json';
 import mongleIDLE from '../../assets/mongleIDLE.json';
+import MongleIcon from '../common/MongleIcons';
 import { usePet } from '../../context/PetContext';
 import { HeartShard, StarShard, DropShard, FireShard } from './EmotionShardSVG';
 import { getEmotionBase, getShardGlow } from './emotionShardUtils';
@@ -33,22 +34,22 @@ const EMOTION_COLORS = {
     angry: '#FF8A80',   // alias
 };
 
-// 감정별 이모지
-const EMOTION_EMOJIS = {
-    anger: '🔥',
-    happiness: '💖',
-    sadness: '💧',
-    depression: '☁️',
-    anxiety: '⚡',
-    fear: '👻',
-    surprise: '✨',
-    love: '🎀',
-    calm: '🌿',
-    neutral: '⚪',
-    bored: '😴',
-    happy: '💖',
-    sad: '💧',
-    angry: '🔥',
+// 감정별 아이콘 이름 (MongleIcon name)
+const EMOTION_ICONS = {
+    anger: 'fire',
+    happiness: 'heart',
+    sadness: 'water',
+    depression: 'cloud',
+    anxiety: 'lightning',
+    fear: 'cloud',
+    surprise: 'sparkle',
+    love: 'ribbon',
+    calm: 'leaf',
+    neutral: 'star',
+    bored: 'sleepy',
+    happy: 'heart',
+    sad: 'water',
+    angry: 'fire',
 };
 
 // 감정별 한글 이름
@@ -86,9 +87,9 @@ const DigestionView = ({ onClose, userId }) => {
     // 배고픔 상태에 따른 메시지
     useEffect(() => {
         if (hungerGauge >= 90) {
-            setMongleBubble('더 못 먹겠어요! 배불러요 🥰');
+            setMongleBubble(<>더 못 먹겠어요! 배불러요 <MongleIcon name="faceHappy" size={16} /></>);
         } else if (hungerGauge >= 50) {
-            setMongleBubble('맛있어요! 더 주세요~ 😋');
+            setMongleBubble(<>맛있어요! 더 주세요~ <MongleIcon name="faceYummy" size={16} /></>);
         } else {
             setMongleBubble('배고파요... ( •̀ ω •́ )');
         }
@@ -97,19 +98,19 @@ const DigestionView = ({ onClose, userId }) => {
     // 감정 조각 먹이기
     const handleFeedEmotion = (shard) => {
         if (hungerGauge >= 100) {
-            setMongleBubble('더 못 먹겠어요! 🤭');
+            setMongleBubble(<>더 못 먹겠어요! <MongleIcon name="faceHappy" size={16} /></>);
             return;
         }
 
         const color = EMOTION_COLORS[shard.emotion] || '#FFFFFF';
-        const emoji = EMOTION_EMOJIS[shard.emotion] || '⚪';
+        const iconName = EMOTION_ICONS[shard.emotion] || 'star';
 
         // 날아가는 애니메이션 시작
         // eslint-disable-next-line react-hooks/purity
         const flyId = Date.now() + Math.random();
         setFlyingShards(prev => [...prev, {
             id: flyId,
-            emoji,
+            iconName,
             color,
             startX: `${shard.x}%`,
             startY: `${shard.y}%`
@@ -122,7 +123,7 @@ const DigestionView = ({ onClose, userId }) => {
 
         // 먹는 애니메이션
         setIsEating(true);
-        setMongleBubble('냠냠... 😋');
+        setMongleBubble(<>냠냠... <MongleIcon name="faceYummy" size={16} /></>);
 
         // 하트 떠오르는 효과 (3개)
         // eslint-disable-next-line react-hooks/purity
@@ -154,9 +155,9 @@ const DigestionView = ({ onClose, userId }) => {
         setTimeout(() => {
             setIsEating(false);
             if (hungerGauge >= 90) {
-                setMongleBubble('배불러요! 🥰');
+                setMongleBubble(<>배불러요! <MongleIcon name="faceHappy" size={16} /></>);
             } else {
-                setMongleBubble('더 주세요~ 😊');
+                setMongleBubble(<>더 주세요~ <MongleIcon name="faceSmile" size={16} /></>);
             }
         }, 1500);
 
@@ -259,7 +260,7 @@ const DigestionView = ({ onClose, userId }) => {
                             className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
                             style={{ backgroundColor: fly.color }}
                         >
-                            {fly.emoji}
+                            <MongleIcon name={fly.iconName} size={20} />
                         </div>
                     </div>
                 ))}
@@ -276,19 +277,19 @@ const DigestionView = ({ onClose, userId }) => {
                             animationDelay: `${heart.delay}ms`
                         }}
                     >
-                        <div className="text-4xl">💕</div>
+                        <MongleIcon name="floatingHeart" size={36} />
                     </div>
                 ))}
 
                 {/* 전경 - 미니멀한 식탁 */}
                 <div className="absolute bottom-24 z-40">
-                    <div className="text-6xl opacity-30">🍽️</div>
+                    <MongleIcon name="plate" size={60} className="opacity-30" />
                 </div>
 
                 {/* 배고픔 게이지 */}
                 <div className="mt-8 bg-white/60 backdrop-blur-md rounded-full px-6 py-3 shadow-lg border border-white/40">
                     <div className="flex items-center gap-3">
-                        <span className="text-lg">🍽️</span>
+                        <MongleIcon name="plate" size={20} />
                         <div className="w-32 h-3 bg-white/40 rounded-full overflow-hidden">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${
@@ -358,10 +359,10 @@ const DigestionView = ({ onClose, userId }) => {
                     ) : (
                         <div className="w-full text-center py-8 px-6">
                             <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-gray-300">
-                                <div className="text-5xl mb-3 opacity-40">🍽️</div>
+                                <div className="mb-3 opacity-40"><MongleIcon name="plate" size={48} /></div>
                                 <p className="text-sm font-bold text-gray-500 mb-2">아직 감정 조각이 없어요</p>
                                 <p className="text-xs text-gray-400">일기를 작성하면 감정 조각을 얻을 수 있어요!</p>
-                                <p className="text-xs text-gray-400 mt-1">💝 수집한 조각으로 몽글이를 먹여주세요</p>
+                                <p className="text-xs text-gray-400 mt-1"><MongleIcon name="heart" size={14} color="#FF69B4" /> 수집한 조각으로 몽글이를 먹여주세요</p>
                             </div>
                         </div>
                     )}

@@ -5,6 +5,7 @@ import { FaQuoteLeft, FaImage, FaListUl, FaHashtag, FaRobot, FaArrowLeft } from 
 import { useNavigate } from 'react-router-dom';
 import './MonthlyReport.css';
 import MoodGraph from './MoodGraph';
+import MongleIcon, { SmartEmoji } from '../common/MongleIcons';
 
 const MonthlyReport = ({ diaries, currentMonth }) => {
     const navigate = useNavigate();
@@ -47,9 +48,9 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
         const count = monthlyDiaries.length;
         if (count === 0) return "아직 기록이 없어서 분석할 수 없어요. 첫 일기를 써보세요!";
         const avgMood = monthlyDiaries.reduce((sum, d) => sum + (d.mood || 3), 0) / count;
-        if (avgMood >= 4) return "이번 달은 정말 긍정적인 에너지가 가득했네요! 웃음이 끊이지 않았던 한 달, 이 기운을 다음 달까지 쭉 이어가 볼까요? 🥰";
-        if (avgMood >= 3) return "무난하고 평온한 일상을 보내셨군요. 소소한 행복들을 놓치지 않고 기록한 당신, 아주 칭찬해요! 🍵";
-        return "조금 지치고 힘든 날들이 있었나 봐요. 하지만 기록하며 마음을 다독인 것만으로도 대단해요. 다음 달엔 더 좋은 일이 생길 거예요! 💪";
+        if (avgMood >= 4) return "이번 달은 정말 긍정적인 에너지가 가득했네요! 웃음이 끊이지 않았던 한 달, 이 기운을 다음 달까지 쭉 이어가 볼까요?";
+        if (avgMood >= 3) return "무난하고 평온한 일상을 보내셨군요. 소소한 행복들을 놓치지 않고 기록한 당신, 아주 칭찬해요!";
+        return "조금 지치고 힘든 날들이 있었나 봐요. 하지만 기록하며 마음을 다독인 것만으로도 대단해요. 다음 달엔 더 좋은 일이 생길 거예요!";
     }, [monthlyDiaries]);
 
     return (
@@ -92,7 +93,7 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                     <div className="cover-footer">
                         {!showTimeline && (
                             <div className="click-guide-badge">
-                                👆 카드를 눌러 타임라인 보기
+                                <MongleIcon name="tapFinger" size={16} className="mr-1" /> 카드를 눌러 타임라인 보기
                             </div>
                         )}
                         <h3 className="cover-title">
@@ -126,7 +127,7 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                                         </span>
                                     ))
                                 ) : (
-                                    <p className="no-data-text">행복했던 날의 태그가 아직 없어요 🥲</p>
+                                    <p className="no-data-text">행복했던 날의 태그가 아직 없어요</p>
                                 )}
                             </div>
                         </div>
@@ -137,7 +138,7 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                             <p className="ai-text">
                                 "{monthlyComment}"
                             </p>
-                            <div className="ai-decoration">💌</div>
+                            <div className="ai-decoration"><MongleIcon name="envelope" size={24} /></div>
                         </div>
                     </div>
                 ) : (
@@ -168,7 +169,7 @@ const MonthlyReport = ({ diaries, currentMonth }) => {
                                         </div>
                                         <div className="timeline-content-card">
                                             <div className="card-header">
-                                                <span className="mood-emoji">{diary.emoji}</span>
+                                                <span className="mood-emoji"><SmartEmoji value={diary.emoji} size={20} /></span>
                                                 <span className="card-tags">
                                                     {diary.tags?.map(t => `#${t} `)}
                                                 </span>

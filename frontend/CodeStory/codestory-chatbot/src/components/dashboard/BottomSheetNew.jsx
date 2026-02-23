@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaChevronUp } from 'react-icons/fa';
+import { SmartEmoji } from '../common/MongleIcons';
 
 /**
  * BottomSheet — 세련된 미니멀 디자인 (2030 여성 타겟)
@@ -153,7 +154,7 @@ const BottomSheetNew = ({
                                             {formatDate(diary.date)}
                                         </span>
                                         {diary.emoji && (
-                                            <span className="text-lg">{diary.emoji}</span>
+                                            <SmartEmoji value={diary.emoji} size={18} />
                                         )}
                                     </div>
                                     <p className="text-body text-gray-800 line-clamp-2 leading-relaxed">

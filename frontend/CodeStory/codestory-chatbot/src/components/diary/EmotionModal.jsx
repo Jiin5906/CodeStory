@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FaTimes, FaCheck } from 'react-icons/fa';
+import { FaCheck } from 'react-icons/fa';
+import MongleIcon from '../common/MongleIcons';
 
 const EmotionModal = ({ onClose, onSave }) => {
-    const [selectedEmoji, setSelectedEmoji] = useState('🙂');
-    
+    const [selectedIcon, setSelectedIcon] = useState('faceNeutral');
+
     const [stats, setStats] = useState({
         mood: 3,    // 기분
         tension: 3, // 텐션
@@ -11,15 +12,15 @@ const EmotionModal = ({ onClose, onSave }) => {
     });
 
     const emotions = [
-        { icon: '🥰', label: '행복', id: 'happy', preset: { mood: 5, tension: 4, fun: 4 } },
-        { icon: '🙂', label: '평범', id: 'neutral', preset: { mood: 3, tension: 3, fun: 3 } },
-        { icon: '😫', label: '피곤', id: 'tired', preset: { mood: 2, tension: 1, fun: 1 } },
-        { icon: '😢', label: '우울', id: 'sad', preset: { mood: 1, tension: 2, fun: 1 } },
-        { icon: '🔥', label: '열정', id: 'passionate', preset: { mood: 5, tension: 5, fun: 5 } },
+        { icon: 'faceHappy', label: '행복', id: 'happy', preset: { mood: 5, tension: 4, fun: 4 } },
+        { icon: 'faceNeutral', label: '평범', id: 'neutral', preset: { mood: 3, tension: 3, fun: 3 } },
+        { icon: 'faceTired', label: '피곤', id: 'tired', preset: { mood: 2, tension: 1, fun: 1 } },
+        { icon: 'faceSad', label: '우울', id: 'sad', preset: { mood: 1, tension: 2, fun: 1 } },
+        { icon: 'fire', label: '열정', id: 'passionate', preset: { mood: 5, tension: 5, fun: 5 } },
     ];
 
     const handleEmojiClick = (emotion) => {
-        setSelectedEmoji(emotion.icon);
+        setSelectedIcon(emotion.icon);
         setStats(emotion.preset);
     };
 
@@ -29,7 +30,7 @@ const EmotionModal = ({ onClose, onSave }) => {
 
     const handleSave = () => {
         onSave({
-            emoji: selectedEmoji,
+            emoji: selectedIcon,
             ...stats
         });
     };
@@ -43,15 +44,16 @@ const EmotionModal = ({ onClose, onSave }) => {
                 {/* 1. 이모티콘 선택 - 각 이모지별로 고유한 값을 부여했습니다 */}
                 <div className="flex justify-between mb-8 px-2">
                     {emotions.map((em) => (
-                        <div 
+                        <div
                             key={em.label}
-                            className={`flex flex-col items-center gap-2 cursor-pointer transition-transform hover:scale-110 ${selectedEmoji === em.icon ? 'scale-110' : 'opacity-60'}`}
+                            className={`flex flex-col items-center gap-2 cursor-pointer transition-transform hover:scale-110 ${selectedIcon === em.icon ? 'scale-110' : 'opacity-60'}`}
                             onClick={() => handleEmojiClick(em)}
-                            /* ✅ 친구가 구분하기 가장 쉽게 각각 'emotion-happy', 'emotion-sad' 등으로 분리했습니다 */
                             data-gtm={`emotion-select-${em.id}`}
                         >
-                            <span className="text-4xl drop-shadow-md pointer-events-none">{em.icon}</span>
-                            <span className={`text-xs font-bold pointer-events-none ${selectedEmoji === em.icon ? 'text-[#6C5CE7]' : 'text-gray-400'}`}>
+                            <span className="drop-shadow-md pointer-events-none">
+                                <MongleIcon name={em.icon} size={36} />
+                            </span>
+                            <span className={`text-xs font-bold pointer-events-none ${selectedIcon === em.icon ? 'text-[#6C5CE7]' : 'text-gray-400'}`}>
                                 {em.label}
                             </span>
                         </div>

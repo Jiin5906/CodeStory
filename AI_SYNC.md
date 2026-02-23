@@ -2,7 +2,35 @@
 
 ---
 
-## ✅ 완료: MVP 출시 전 TodoList 처리 (1, 3~7, 9~11번)
+## ✅ 완료: MVP 출시 전 TodoList 전체 처리 (1~11번)
+
+> 📅 완료일: 2026-02-23
+> 🔖 커밋: `4c33100`
+
+---
+
+## ✅ 추가 완료: JWT 인증 토큰 구현 + 테스트 버튼 복구
+
+> 📅 완료일: 2026-02-23
+> 🔖 커밋: `4c33100`
+
+### 2번: JWT 보안 구현 ✅
+- **백엔드**: `ApiController.java`에 `JwtTokenProvider` 주입
+- **백엔드**: `POST /api/auth/login`, `POST /api/auth/signup` → 응답에 `accessToken`, `refreshToken` 포함
+- **백엔드**: `POST /api/auth/refresh` 엔드포인트 신규 추가 (토큰 갱신)
+- **프론트엔드**: `App.jsx` `handleLoginSuccess`에서 `accessToken`, `refreshToken` localStorage 저장
+- **프론트엔드**: `handleLogout`에서 `accessToken`, `refreshToken` localStorage 삭제
+- 기존 `api.js` 인터셉터가 `localStorage.getItem('accessToken')`을 자동으로 Authorization 헤더에 추가함 → 별도 수정 불필요
+
+### 1번: 테스트 버튼 복구 ✅
+- `HomeView.jsx` `usePet()` destructuring에 `triggerLevelUpModal` 추가
+- `HomeView.jsx` `useTour()` destructuring에 `startTourSequence`, `resetTours` 추가
+- MVP 확인용 테스트 버튼 블록 재추가 (온보딩 테스트, 레벨업 테스트, 투어 테스트)
+- 배포 시 해당 블록 제거 필요
+
+---
+
+## ✅ 이전 완료: MVP 출시 전 TodoList 처리 (1, 3~7, 9~11번)
 
 > 📅 완료일: 2026-02-23
 > 🔖 커밋: 준비 중

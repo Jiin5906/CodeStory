@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 import { useStore } from '../../context/StoreContext';
+import MongleIcon from '../common/MongleIcons';
 
 /**
  * EmotionRadarChart - 대화 감정 분포 방사형 차트
@@ -73,7 +74,7 @@ const EmotionRadarChart = ({ emotionData }) => {
                 }}
             >
                 <p className="text-sm font-cute text-gray-600 text-center">
-                    이번 달은 <span className="font-bold" style={{ color: accentColor }}>{topEmotion.emotion}</span>한 대화를 많이 했네요! ✨
+                    이번 달은 <span className="font-bold" style={{ color: accentColor }}>{topEmotion.emotion}</span>한 대화를 많이 했네요! <MongleIcon name="sparkle" size={14} className="inline-block ml-0.5" />
                 </p>
             </div>
         </div>

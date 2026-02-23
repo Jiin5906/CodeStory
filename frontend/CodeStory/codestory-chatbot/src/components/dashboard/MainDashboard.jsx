@@ -5,6 +5,7 @@ import { FaTrash, FaGlobe, FaLock, FaChevronLeft, FaChevronRight, FaQuoteLeft } 
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import { diaryApi } from '../../services/api';
+import { SmartEmoji } from '../common/MongleIcons';
 import mongleAnimation from '../../assets/mongleIDLE.json';
 
 const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh }) => {
@@ -178,7 +179,7 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                                         className="flex items-center gap-3 px-4 py-2 rounded-2xl"
                                         style={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
                                     >
-                                        <span className="text-2xl">{diary.emoji}</span>
+                                        <SmartEmoji value={diary.emoji} size={24} />
                                         <div
                                             className="h-4 w-[1px]"
                                             style={{ backgroundColor: 'var(--border-color)' }}
@@ -295,7 +296,7 @@ const MainDashboard = ({ user, diaries, selectedDate, onDateChange, onRefresh })
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
-                        <div className="text-6xl mb-4 grayscale opacity-50">📝</div>
+                        <div className="text-6xl mb-4 grayscale opacity-50"></div>
                         <p
                             className="font-medium text-lg"
                             style={{ color: 'var(--sub-text-color)' }}

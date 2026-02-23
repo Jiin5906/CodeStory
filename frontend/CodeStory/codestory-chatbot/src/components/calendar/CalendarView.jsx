@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { format, eachDayOfInterval, isSameDay, getDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import MongleIcon, { SmartEmoji } from '../common/MongleIcons';
 import './CalendarView.css';
 
 const CalendarView = ({ diaries }) => {
@@ -135,7 +136,7 @@ const CalendarView = ({ diaries }) => {
                 {selectedDiary ? (
                     <div className="preview-card" data-gtm="calendar-diary-card">
                         <div className="preview-header">
-                            <span className="preview-emoji">{selectedDiary.emoji}</span>
+                            <span className="preview-emoji"><SmartEmoji value={selectedDiary.emoji} size={24} /></span>
                             <div className="preview-meta">
                                 <span className="preview-mood">기분 {selectedDiary.mood}점</span>
                                 <div className="preview-tags">
@@ -159,7 +160,7 @@ const CalendarView = ({ diaries }) => {
                     </div>
                 ) : (
                     <div className="empty-preview" data-gtm="calendar-empty-preview">
-                        <div className="empty-circle">📝</div>
+                        <div className="empty-circle"><MongleIcon name="note" size={28} /></div>
                         <p>이 날 작성된 일기가 없어요.</p>
                     </div>
                 )}

@@ -1,30 +1,211 @@
-식당을 없애고 대화를 해서 감정 조각을 클릭하는 것 만으로도 이제 몽글이의 css가 변화하도록 하면 된다. 식당을 아싸리 없애고, 지금 상점을 추가하든가. 혹은 메인 대쉬보드를 잘 꾸미는 것이 우선인듯. 우측 상단에 있는 켜짐 버튼 없애버리고 좌측 하단에 옛날처럼 무드등이 생기고 무드등을 껐다가 키면 몽글이가 자게끔. 하는 거지. 그리고 방석에 몽글이가 정확하게 올라가 있어야 함. 이 점을 수정하고. 캐릭터가 지금 너무 작음 크게 바꿔야 하고, 보상체계가 너무 적음. 지금 바꿀 수 있는 스킨은 현재 집의 톤, 몽글이의 모습, 여러 가구들을 사서 직접 꾸밀 수 있도록 만들어야 함.
-좆같은 환기 없애버려야함.
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마이 플랜테리어</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-8 font-sans">
+  <div class="mb-10 text-center">
+    <h1 class="text-3xl font-extrabold text-slate-700 mb-3">🪴 마이 플랜테리어</h1>
+    <p class="text-slate-500 font-medium">나만의 화분을 골라보세요</p>
+  </div>
 
- 이후 온보딩을 통해 튜토리얼을 하도록 하는 거임. 
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl w-full">
 
-그리고 나중에 이걸 다 했는데 뭔가 부족하다? 그럼 다마고치 원작 감성으로다가 8bit, 16bit 레트로 전환을 고려해 볼 것.
+    <!-- 1. 피치 선인장 -->
+    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center">
+      <div class="h-40 w-full flex items-center justify-center mb-2">
+        <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+          <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#CF6A38"/>
+          <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#E07848" opacity="0.7"/>
+          <g transform="translate(0, 8)">
+            <ellipse cx="32" cy="65" rx="14" ry="22" fill="#43A047" transform="rotate(-20 32 65)"/>
+            <ellipse cx="88" cy="60" rx="12" ry="18" fill="#43A047" transform="rotate(25 88 60)"/>
+            <ellipse cx="60" cy="65" rx="22" ry="40" fill="#43A047"/>
+            <ellipse cx="43" cy="68" rx="8" ry="10" fill="#43A047" transform="rotate(-20 43 68)"/>
+            <ellipse cx="77" cy="64" rx="7" ry="9" fill="#43A047" transform="rotate(25 77 64)"/>
+            <ellipse cx="55" cy="50" rx="7" ry="14" fill="#66BB6A" opacity="0.5"/>
+            <ellipse cx="28" cy="60" rx="4" ry="8" fill="#66BB6A" opacity="0.4" transform="rotate(-20 28 60)"/>
+            <ellipse cx="84" cy="56" rx="3.5" ry="7" fill="#66BB6A" opacity="0.4" transform="rotate(25 84 56)"/>
+            <circle cx="60" cy="40" r="2" fill="white" opacity="0.6"/>
+            <circle cx="50" cy="55" r="2" fill="white" opacity="0.6"/>
+            <circle cx="70" cy="65" r="2" fill="white" opacity="0.6"/>
+            <circle cx="60" cy="80" r="2" fill="white" opacity="0.6"/>
+            <circle cx="30" cy="57" r="1.5" fill="white" opacity="0.5"/>
+            <circle cx="85" cy="55" r="1.5" fill="white" opacity="0.5"/>
+            <circle cx="55" cy="22" r="5" fill="#F06292"/>
+            <circle cx="65" cy="22" r="5" fill="#F06292"/>
+            <circle cx="60" cy="17" r="5" fill="#F06292"/>
+            <circle cx="60" cy="25" r="8" fill="#E91E63"/>
+            <circle cx="60" cy="25" r="3" fill="#FFF176"/>
+          </g>
+          <ellipse cx="60" cy="108" rx="27" ry="6" fill="#A04820"/>
+          <ellipse cx="60" cy="106" rx="27" ry="6" fill="#B85530"/>
+          <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+          <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+        </svg>
+      </div>
+      <h3 class="text-sm font-extrabold text-slate-700 mb-1">피치 선인장</h3>
+      <p class="text-[11px] text-slate-400 mb-4">통통하고 귀여운 토분</p>
+      <button class="w-full text-xs font-bold px-4 py-2.5 rounded-full bg-slate-100 text-slate-400">장착 중</button>
+    </div>
 
-그리고 음성도 넣어야 함. 추임새 느낌으로 허엉?> 이런 느낌
+    <!-- 2. 기본 화분 -->
+    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center">
+      <div class="h-40 w-full flex items-center justify-center mb-2">
+        <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <defs>
+            <linearGradient id="leaf-dark2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#00897B"/>
+              <stop offset="100%" stop-color="#004D40"/>
+            </linearGradient>
+            <linearGradient id="leaf-mid2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#26A69A"/>
+              <stop offset="100%" stop-color="#00796B"/>
+            </linearGradient>
+            <linearGradient id="leaf-light2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4DB6AC"/>
+              <stop offset="100%" stop-color="#00897B"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+          <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#B8956A"/>
+          <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#CDAA80" opacity="0.7"/>
+          <g transform="translate(0, 8)">
+            <path d="M 30 95 Q 60 30 90 95 Z" fill="url(#leaf-dark2)"/>
+            <ellipse cx="60" cy="40" rx="16" ry="34" fill="url(#leaf-dark2)"/>
+            <ellipse cx="35" cy="55" rx="14" ry="30" fill="url(#leaf-dark2)" transform="rotate(-30 35 55)"/>
+            <ellipse cx="85" cy="55" rx="14" ry="30" fill="url(#leaf-dark2)" transform="rotate(30 85 55)"/>
+            <ellipse cx="20" cy="75" rx="12" ry="24" fill="url(#leaf-dark2)" transform="rotate(-55 20 75)"/>
+            <ellipse cx="100" cy="75" rx="12" ry="24" fill="url(#leaf-dark2)" transform="rotate(55 100 75)"/>
+            <ellipse cx="45" cy="55" rx="16" ry="32" fill="url(#leaf-mid2)" transform="rotate(-15 45 55)"/>
+            <ellipse cx="75" cy="55" rx="16" ry="32" fill="url(#leaf-mid2)" transform="rotate(15 75 55)"/>
+            <ellipse cx="60" cy="65" rx="18" ry="34" fill="url(#leaf-light2)"/>
+            <ellipse cx="35" cy="80" rx="14" ry="24" fill="url(#leaf-light2)" transform="rotate(-40 35 80)"/>
+            <ellipse cx="85" cy="80" rx="14" ry="24" fill="url(#leaf-light2)" transform="rotate(40 85 80)"/>
+            <path d="M60,35 Q60,65 60,95" stroke="rgba(255,255,255,0.45)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M45,30 Q50,65 55,95" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M75,30 Q70,65 65,95" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <ellipse cx="60" cy="108" rx="27" ry="6" fill="#8D6340"/>
+          <ellipse cx="60" cy="106" rx="27" ry="6" fill="#A07048"/>
+          <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+          <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+        </svg>
+      </div>
+      <h3 class="text-sm font-extrabold text-slate-700 mb-1">기본 화분</h3>
+      <p class="text-[11px] text-slate-400 mb-4">싱그러운 잎사귀가 가득</p>
+      <button class="w-full text-xs font-bold px-4 py-2.5 rounded-full bg-gradient-to-r from-emerald-300 to-teal-400 text-white">구매 (100)</button>
+    </div>
 
-자 상담냥 앱이 지금 내가 배낄 수 있는 최고의 앱임
+    <!-- 3. 스프링 데이지 -->
+    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center">
+      <div class="h-40 w-full flex items-center justify-center mb-2">
+        <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+          <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E8789A"/>
+          <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#F29AB4" opacity="0.7"/>
+          <path d="M 50 88 Q 30 73 35 63 Q 45 78 50 88" fill="#7CB342"/>
+          <path d="M 70 88 Q 90 73 85 63 Q 75 78 70 88" fill="#7CB342"/>
+          <path d="M 60 112 Q 40 68 30 40" fill="none" stroke="#558B2F" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 60 112 L 60 30" fill="none" stroke="#558B2F" stroke-width="4" stroke-linecap="round"/>
+          <path d="M 60 112 Q 80 68 90 45" fill="none" stroke="#558B2F" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="30" cy="40" r="14" fill="#FFF176"/>
+          <circle cx="23" cy="35" r="8" fill="#FFEE58"/><circle cx="37" cy="35" r="8" fill="#FFEE58"/><circle cx="30" cy="28" r="8" fill="#FFEE58"/>
+          <circle cx="30" cy="38" r="6" fill="#FDD835"/><circle cx="30" cy="38" r="3" fill="#F57F17"/>
+          <circle cx="60" cy="30" r="16" fill="#F48FB1"/>
+          <circle cx="51" cy="23" r="9" fill="#E91E63"/><circle cx="69" cy="23" r="9" fill="#E91E63"/><circle cx="60" cy="15" r="9" fill="#E91E63"/>
+          <circle cx="60" cy="28" r="7" fill="#C2185B"/><circle cx="60" cy="28" r="3.5" fill="#FFF176"/>
+          <circle cx="90" cy="45" r="12" fill="#CE93D8"/>
+          <circle cx="84" cy="39" r="7" fill="#AB47BC"/><circle cx="96" cy="39" r="7" fill="#AB47BC"/><circle cx="90" cy="33" r="7" fill="#AB47BC"/>
+          <circle cx="90" cy="43" r="5" fill="#7B1FA2"/><circle cx="90" cy="43" r="2.5" fill="#FFF176"/>
+          <ellipse cx="60" cy="108" rx="27" ry="6" fill="#AD1457"/>
+          <ellipse cx="60" cy="106" rx="27" ry="6" fill="#C2185B"/>
+          <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+          <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+        </svg>
+      </div>
+      <h3 class="text-sm font-extrabold text-slate-700 mb-1">스프링 데이지</h3>
+      <p class="text-[11px] text-slate-400 mb-4">화사한 블러쉬 핑크</p>
+      <button class="w-full text-xs font-bold px-4 py-2.5 rounded-full bg-gradient-to-r from-emerald-300 to-teal-400 text-white">구매 (150)</button>
+    </div>
 
-여기의 UI를 다 배끼셈, 지금 다 할 수 있음. 내가 만든 것 중 없는 기능은 없음.
+    <!-- 4. 라일락 라벤더 -->
+    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center">
+      <div class="h-40 w-full flex items-center justify-center mb-2">
+        <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+          <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#9C6DC8"/>
+          <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#B490DC" opacity="0.7"/>
+          <path d="M 60 112 Q 30 73 25 30" fill="none" stroke="#558B2F" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M 60 112 Q 45 68 40 20" fill="none" stroke="#558B2F" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M 60 112 L 60 15" fill="none" stroke="#558B2F" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 60 112 Q 75 68 80 20" fill="none" stroke="#558B2F" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M 60 112 Q 90 73 95 30" fill="none" stroke="#558B2F" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="25" cy="45" r="5" fill="#CE93D8"/><circle cx="22" cy="38" r="5" fill="#AB47BC"/><circle cx="28" cy="34" r="4" fill="#8E24AA"/><circle cx="25" cy="28" r="4" fill="#6A1B9A"/>
+          <circle cx="40" cy="35" r="5" fill="#CE93D8"/><circle cx="37" cy="28" r="5" fill="#AB47BC"/><circle cx="43" cy="24" r="4" fill="#8E24AA"/><circle cx="40" cy="18" r="4" fill="#6A1B9A"/>
+          <circle cx="60" cy="30" r="5.5" fill="#CE93D8"/><circle cx="56" cy="22" r="5.5" fill="#AB47BC"/><circle cx="64" cy="18" r="4.5" fill="#8E24AA"/><circle cx="60" cy="12" r="4.5" fill="#6A1B9A"/>
+          <circle cx="80" cy="35" r="5" fill="#CE93D8"/><circle cx="83" cy="28" r="5" fill="#AB47BC"/><circle cx="77" cy="24" r="4" fill="#8E24AA"/><circle cx="80" cy="18" r="4" fill="#6A1B9A"/>
+          <circle cx="95" cy="45" r="5" fill="#CE93D8"/><circle cx="98" cy="38" r="5" fill="#AB47BC"/><circle cx="92" cy="34" r="4" fill="#8E24AA"/><circle cx="95" cy="28" r="4" fill="#6A1B9A"/>
+          <ellipse cx="60" cy="108" rx="27" ry="6" fill="#4A148C"/>
+          <ellipse cx="60" cy="106" rx="27" ry="6" fill="#6A1B9A"/>
+          <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+          <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+        </svg>
+      </div>
+      <h3 class="text-sm font-extrabold text-slate-700 mb-1">라일락 라벤더</h3>
+      <p class="text-[11px] text-slate-400 mb-4">은은한 연보라빛 무드</p>
+      <button class="w-full text-xs font-bold px-4 py-2.5 rounded-full bg-gradient-to-r from-emerald-300 to-teal-400 text-white">구매 (200)</button>
+    </div>
 
-얘는 아싸리 채팅으로 갔음. 나는 대화 형식으로 갈거임. 직접 먹여주고 쓰다듬어주고 재워주고
+    <!-- 5. 로즈 골드 팟 -->
+    <div class="bg-white rounded-[2rem] p-5 shadow-sm border border-stone-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center">
+      <div class="h-40 w-full flex items-center justify-center mb-2">
+        <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
+          <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E9909A"/>
+          <path d="M 33 108 L 39 145 L 43 144 L 37 108 Z" fill="#F4B0B8" opacity="0.7"/>
+          <g transform="translate(0, 8)">
+            <ellipse cx="60" cy="70" rx="42" ry="32" fill="#43A047"/>
+            <ellipse cx="40" cy="75" rx="22" ry="16" fill="#2E7D32" transform="rotate(-25 40 75)"/>
+            <ellipse cx="80" cy="75" rx="22" ry="16" fill="#2E7D32" transform="rotate(25 80 75)"/>
+            <g transform="translate(35, 50)">
+              <circle r="13" fill="#F48FB1"/>
+              <circle r="10" fill="#E91E63"/>
+              <circle r="7" fill="#C2185B"/>
+              <path d="M -3 -1 C -1 -4, 3 -3, 4 0 C 5 4, 1 6, -2 5 C -6 3, -6 -2, -3 -5 C 2 -8, 7 -5, 6 1" fill="none" stroke="#FF80AB" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
+            <g transform="translate(60, 65)">
+              <circle r="17" fill="#F48FB1"/>
+              <circle r="13" fill="#E91E63"/>
+              <circle r="9" fill="#C2185B"/>
+              <circle r="5" fill="#AD1457"/>
+              <circle r="2" fill="#FCE4EC"/>
+              <path d="M -4 -2 C -2 -6, 4 -5, 6 -1 C 7 5, 1 8, -3 6 C -8 4, -8 -3, -4 -7 C 3 -11, 10 -7, 8 2 C 6 10, -5 10, -8 3" fill="none" stroke="#FF4081" stroke-width="2" stroke-linecap="round"/>
+            </g>
+            <g transform="translate(85, 55)">
+              <circle r="15" fill="#F48FB1"/>
+              <circle r="11" fill="#E91E63"/>
+              <circle r="8" fill="#C2185B"/>
+              <path d="M -3 -1 C -1 -5, 4 -4, 5 0 C 6 5, 1 7, -3 5 C -7 3, -7 -3, -3 -6 C 2 -10, 8 -6, 7 0" fill="none" stroke="#FF80AB" stroke-width="1.8" stroke-linecap="round"/>
+            </g>
+          </g>
+          <ellipse cx="60" cy="108" rx="27" ry="6" fill="#880E4F"/>
+          <ellipse cx="60" cy="106" rx="27" ry="6" fill="#AD1457"/>
+          <ellipse cx="60" cy="106" rx="23" ry="4.5" fill="#4E342E"/>
+          <ellipse cx="56" cy="104" rx="7" ry="2" fill="#6D4C41" opacity="0.6"/>
+        </svg>
+      </div>
+      <h3 class="text-sm font-extrabold text-slate-700 mb-1">로즈 골드 팟</h3>
+      <p class="text-[11px] text-slate-400 mb-4">고급스러운 감성 핑크</p>
+      <button class="w-full text-xs font-bold px-4 py-2.5 rounded-full bg-gradient-to-r from-emerald-300 to-teal-400 text-white">구매 (250)</button>
+    </div>
 
-바텀 시트 아래 저렇게 대화 일기 리포트 설정 이런것들이 존재하고, 바텀시트를 스냅탭으로 해서 1단계는 그냥 입력만, 2단계는 몽글이와의 대화 + 상점 열기 기능으로 가면 됨. 
-
-이런 식으로 가면 일기 기능도 부활시킬 수 있음. 일기에 뭘 적으면 AI가 일기의 내용에 가중치를 두도록 하는 거지.
-그래서 일기는
-
-아직 작성된 일기가 없어요.
-
-일기를 자주 쓸 수록 몽글이가 여러분을 더 잘 이해할 수 있어요.
-
-이제 디자인은 끝남
-
-그니까.. 일단 시장조사를 최대한을 뽑아보셈. 그리고 결국 내 돈을 써서 실패를 해 봐야 될 것 같음. 이게 진짜 존나 중요함. 포트폴리오를 만드는데 자기 돈 써 가면서 실패를 했던 경험을 쓰는 경우는 거의 없음. 물론 성공하면 좋겠지. 이걸 바탕으로 다음 방학에 더 업그레이드를 해서 개발을 하나 더 해보자. 근데 실패할 것을 알지만, 실패하지 않게끔 최선을 다해야 하는 게 중요함. 이 말은 너무나도 큰 기대를 걸어서 실패했을 때 부러지지 말라는 거임. 
-
-
-
+  </div>
+</div>
+</body>
+</html>

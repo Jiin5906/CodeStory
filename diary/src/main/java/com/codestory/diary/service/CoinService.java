@@ -1,19 +1,21 @@
 package com.codestory.diary.service;
 
-import com.codestory.diary.entity.CoinRewardStatus;
-import com.codestory.diary.entity.Member;
-import com.codestory.diary.repository.CoinRewardStatusRepository;
-import com.codestory.diary.repository.DiaryRepository;
-import com.codestory.diary.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.util.Map;
+
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.Map;
+import com.codestory.diary.entity.CoinRewardStatus;
+import com.codestory.diary.entity.Member;
+import com.codestory.diary.repository.CoinRewardStatusRepository;
+import com.codestory.diary.repository.DiaryRepository;
+import com.codestory.diary.repository.MemberRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +70,7 @@ public class CoinService {
         status.markGaugeRewardGiven(gaugeType);
         coinRewardStatusRepository.save(status);
 
-        System.out.println("💰 [CoinService] 게이지 보상 +" + GAUGE_REWARD + "원 (" + gaugeType + ") - User: " + userId);
+        System.out.println("[CoinService] 게이지 보상 +" + GAUGE_REWARD + "원 (" + gaugeType + ") - User: " + userId);
 
         return Map.of("userId", userId, "coins", member.getCoins(), "rewarded", true, "amount", GAUGE_REWARD);
     }
@@ -86,7 +88,7 @@ public class CoinService {
         member.addCoins(SHARD_REWARD);
         memberRepository.save(member);
 
-        System.out.println("💰 [CoinService] 감정 조각 보상 +" + SHARD_REWARD + "원 - User: " + userId);
+        System.out.println("[CoinService] 감정 조각 보상 +" + SHARD_REWARD + "원 - User: " + userId);
 
         return Map.of("userId", userId, "coins", member.getCoins(), "rewarded", true, "amount", SHARD_REWARD);
     }
@@ -114,7 +116,7 @@ public class CoinService {
         status.setLastDiaryRewardDate(today);
         coinRewardStatusRepository.save(status);
 
-        System.out.println("💰 [CoinService] 일기 보상 +" + DIARY_REWARD + "원 - User: " + userId);
+        System.out.println("[CoinService] 일기 보상 +" + DIARY_REWARD + "원 - User: " + userId);
 
         return Map.of("userId", userId, "coins", member.getCoins(), "rewarded", true, "amount", DIARY_REWARD);
     }
