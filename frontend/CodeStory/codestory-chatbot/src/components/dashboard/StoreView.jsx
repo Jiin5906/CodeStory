@@ -686,42 +686,6 @@ const ItemPreview = ({ item }) => {
 /**
  * StoreView — 상점 (방 꾸미기 중심)
  */
-// 아이템 ID별 정교한 아이콘 매핑
-const getItemIcon = (item) => {
-    const idMap = {
-        // 테마
-        theme_ocean:   { name: 'cloud',   color: '#4FC3F7' },
-        theme_autumn:  { name: 'leaf',    color: '#FF7043' },
-        theme_galaxy:  { name: 'star',    color: '#9370DB' },
-        theme_default: { name: 'sun',     color: '#FFB74D' },
-        // 무드등
-        light_warm:    { name: 'sun',     color: '#FF8A65' },
-        light_pink:    { name: 'flower',  color: '#F48FB1' },
-        light_mint:    { name: 'leaf',    color: '#EF5350' },
-        light_blue:    { name: 'moon',    color: '#FFE082' },
-        light_rainbow: { name: 'water',   color: '#CE93D8' },
-        // 선반
-        shelf_wood:     { name: 'leaf',    color: '#D4A373' },
-        shelf_white:    { name: 'sparkle', color: '#90A4AE' },
-        shelf_pastel:   { name: 'heart',   color: '#F48FB1' },
-        shelf_mint:     { name: 'leaf',    color: '#66BB6A' },
-        shelf_lavender: { name: 'moon',    color: '#B39DDB' },
-        // 화분
-        pot_monstera:  { name: 'leaf',   color: '#4CAF50' },
-        pot_cactus:    { name: 'sun',    color: '#388E3C' },
-        pot_flower:    { name: 'flower', color: '#EC407A' },
-        pot_lavender:  { name: 'flower', color: '#AB47BC' },
-        pot_rose:      { name: 'rose',   color: '#E53935' },
-        // 방석
-        cushion_pink:   { name: 'heart',   color: '#F48FB1' },
-        cushion_blue:   { name: 'cloud',   color: '#4FC3F7' },
-        cushion_purple: { name: 'sparkle', color: '#CE93D8' },
-        cushion_yellow: { name: 'flower',  color: '#FFB74D' },
-        cushion_mint:   { name: 'leaf',    color: '#66BB6A' },
-    };
-    return idMap[item.id] || { name: 'sparkle', color: '#FFD59E' };
-};
-
 const StoreView = ({ isOpen, onClose }) => {
     const { coins, buyItem, equipItem, isOwned, isEquipped } = useStore();
 
@@ -872,9 +836,8 @@ const StoreView = ({ isOpen, onClose }) => {
                                 </div>
 
                                 {/* 아이템 정보 */}
-                                <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-gray-800 text-center mb-1 flex items-center justify-center gap-1.5">
-                                        <MongleIcon name={getItemIcon(item).name} size={16} color={getItemIcon(item).color} />
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-sm font-bold text-gray-800 text-center mb-1 truncate whitespace-nowrap">
                                         {item.name}
                                     </h3>
                                     <p className="text-xs text-gray-500 text-center mb-3 truncate">
