@@ -242,20 +242,6 @@ const SettingsView = ({ user }) => {
                         지원 및 정보
                     </h3>
                     <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ border: `2px solid ${accentColor}33` }}>
-                        {/* 온보딩 통계 (관리자용) */}
-                        <button
-                            onClick={() => navigate('/analytics')}
-                            className="w-full flex items-center gap-3 p-4 rounded-2xl transition-all duration-200 mb-3"
-                            data-gtm="settings-analytics"
-                        >
-                            <div className="w-11 h-11 bg-gradient-to-br from-[#7C71F5] to-[#5B4FCF] rounded-2xl flex items-center justify-center shadow-md">
-                                <FaChartBar className="text-white text-lg" />
-                            </div>
-                            <span className="text-[#4A4A4A] font-bold text-lg font-cute">
-                                온보딩 데이터 통계
-                            </span>
-                        </button>
-
                         {/* 문의하기 */}
                         <button
                             onClick={handleContact}

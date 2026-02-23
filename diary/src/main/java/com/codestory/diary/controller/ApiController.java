@@ -44,11 +44,15 @@ import com.codestory.diary.service.PetService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class ApiController {
+
+    @Value("${admin.secret.key}")
+    private String adminSecretKey;
 
     private final AuthService authService;
     private final DiaryService diaryService;
@@ -383,9 +387,14 @@ public class ApiController {
     /**
      * 관리자용 성별/유입경로 통계 집계
      * GET /api/admin/analytics
+     * 헤더 X-Admin-Key 필수 (개발자 전용)
      */
     @GetMapping("/admin/analytics")
-    public ResponseEntity<?> getAnalytics() {
+    public ResponseEntity<?> getAnalytics(
+            @org.springframework.web.bind.annotation.RequestHeader(value = "X-Admin-Key", required = false) String adminKey) {
+        if (adminKey == null || !adminKey.equals(adminSecretKey)) {
+            return ResponseEntity.status(403).body(Map.of("error", "접근 권한이 없습니다."));
+        }
         List<Member> members = memberRepository.findAll();
         long total = members.size();
 
