@@ -11,7 +11,7 @@ export const THEMES = [
         category: 'theme',
         price: 150,
         emoji: '',
-        description: '시원한 여름 바다 배경',
+        description: '시원한 바다 배경',
         gradient: 'from-sky-300 via-sky-200 to-cyan-100',
         wallColor: '#87CEEB',
         floorColor: '#C8B88A',
@@ -32,7 +32,7 @@ export const THEMES = [
         category: 'theme',
         price: 150,
         emoji: '',
-        description: '가을 단풍이 아름다운 배경',
+        description: '가을 단풍 배경',
         gradient: 'from-orange-100 via-yellow-50 to-white',
         wallColor: '#FFB347',
         floorColor: '#FFE5B4',
@@ -53,7 +53,7 @@ export const THEMES = [
         category: 'theme',
         price: 200,
         emoji: '',
-        description: '반짝이는 별빛 은하수 배경',
+        description: '반짝이는 은하수',
         gradient: 'from-purple-900 via-indigo-800 to-blue-900',
         wallColor: '#4B0082',
         floorColor: '#5C4D7D',
@@ -74,7 +74,7 @@ export const THEMES = [
         category: 'theme',
         price: 0,
         emoji: '',
-        description: '따뜻한 기본 배경',
+        description: '기본 따뜻한 배경',
         gradient: 'from-purple-100 via-pink-50 to-yellow-50',
         wallColor: '#FF9EAA',
         floorColor: '#FFCC80',
@@ -102,7 +102,7 @@ export const SHELVES = [
         emoji: '',
         color: '#D7B896',
         colorLight: '#E8CBA8',
-        description: '아늑한 기본 원목 선반'
+        description: '기본 원목 선반'
     },
     {
         id: 'shelf_white',
@@ -113,7 +113,7 @@ export const SHELVES = [
         emoji: '',
         color: '#FFFFFF',
         colorLight: '#F8F8F8',
-        description: '깔끔한 화이트 선반'
+        description: '깔끔한 흰색 선반'
     },
     {
         id: 'shelf_pastel',
@@ -124,7 +124,7 @@ export const SHELVES = [
         emoji: '',
         color: '#FFB6C1',
         colorLight: '#FFC8D3',
-        description: '부드러운 파스텔 핑크 선반'
+        description: '파스텔 핑크 선반'
     },
     {
         id: 'shelf_mint',
@@ -135,7 +135,7 @@ export const SHELVES = [
         emoji: '',
         color: '#98FF98',
         colorLight: '#B0FFB0',
-        description: '상쾌한 민트 선반'
+        description: '민트 컬러 선반'
     },
     {
         id: 'shelf_lavender',
@@ -146,7 +146,7 @@ export const SHELVES = [
         emoji: '',
         color: '#E6E6FA',
         colorLight: '#F0F0FF',
-        description: '우아한 라벤더 선반'
+        description: '라벤더 선반'
     }
 ];
 
@@ -163,7 +163,7 @@ export const LIGHTS = [
         shadeColor: '#FFF8DC',
         shadeColorDark: '#FFE4B5',
         standColor: '#2C2C2C',
-        description: '따뜻하고 아늑한 기본 무드등'
+        description: '기본 무드등'
     },
     {
         id: 'light_pink',
@@ -176,7 +176,7 @@ export const LIGHTS = [
         shadeColor: '#FFB6C1',
         shadeColorDark: '#FF69B4',
         standColor: '#5B8C3E',
-        description: '사랑스러운 꽃봉오리 형태 램프'
+        description: '꽃봉오리 램프'
     },
     {
         id: 'light_mint',
@@ -189,7 +189,7 @@ export const LIGHTS = [
         shadeColor: '#98FF98',
         shadeColorDark: '#7FFF7F',
         standColor: '#F5F5DC',
-        description: '귀여운 버섯 모양 램프'
+        description: '버섯 모양 램프'
     },
     {
         id: 'light_blue',
@@ -202,7 +202,7 @@ export const LIGHTS = [
         shadeColor: '#C8D8F0',
         shadeColorDark: '#A0B4D8',
         standColor: '#191970',
-        description: '몽환적인 초승달 램프'
+        description: '초승달 램프'
     },
     {
         id: 'light_rainbow',
@@ -215,7 +215,7 @@ export const LIGHTS = [
         shadeColor: '#FFD700',
         shadeColorDark: '#FFA500',
         standColor: '#4B0082',
-        description: '화려한 네온 라바 램프'
+        description: '네온 라바 램프'
     }
 ];
 
@@ -230,7 +230,7 @@ export const POTS = [
         emoji: '',
         potColor: '#D4BCA0',
         plantColor: '#A0D0BC',
-        description: '싱그러운 기본 화분'
+        description: '기본 화분'
     },
     {
         id: 'pot_cactus',
@@ -241,7 +241,7 @@ export const POTS = [
         emoji: '',
         potColor: '#EDCBA8',
         plantColor: '#B8DCAC',
-        description: '귀여운 선인장'
+        description: '사막의 선인장'
     },
     {
         id: 'pot_flower',
@@ -252,7 +252,7 @@ export const POTS = [
         emoji: '',
         potColor: '#F8D0E0',
         plantColor: '#F8B4C8',
-        description: '화사한 꽃 화분'
+        description: '화사한 꽃화분'
     },
     {
         id: 'pot_lavender',
@@ -263,7 +263,7 @@ export const POTS = [
         emoji: '',
         potColor: '#DDD8F8',
         plantColor: '#C0B4EC',
-        description: '향기로운 라벤더'
+        description: '라벤더 화분'
     },
     {
         id: 'pot_rose',
@@ -274,7 +274,7 @@ export const POTS = [
         emoji: 'rose',
         potColor: '#F4D4D0',
         plantColor: '#C0D0A8',
-        description: '고급스러운 장미'
+        description: '고급 장미 화분'
     }
 ];
 
@@ -289,7 +289,7 @@ export const CUSHIONS = [
         emoji: '',
         color: '#FFC0CB',
         colorDark: '#FFB6C1',
-        description: '보들보들 기본 핑크 방석'
+        description: '기본 핑크 방석'
     },
     {
         id: 'cushion_blue',
@@ -300,7 +300,7 @@ export const CUSHIONS = [
         emoji: '',
         color: '#87CEEB',
         colorDark: '#6495ED',
-        description: '몽글몽글 구름 방석'
+        description: '구름 방석'
     },
     {
         id: 'cushion_purple',
@@ -311,7 +311,7 @@ export const CUSHIONS = [
         emoji: '',
         color: '#DA70D6',
         colorDark: '#BA55D3',
-        description: '고급스러운 벨벳 원형 방석'
+        description: '고급 벨벳 방석'
     },
     {
         id: 'cushion_yellow',
@@ -322,7 +322,7 @@ export const CUSHIONS = [
         emoji: '',
         color: '#FFD700',
         colorDark: '#FFA500',
-        description: '꽃잎처럼 펼쳐진 화사하고 푹신한 방석'
+        description: '꽃 모양 방석'
     },
     {
         id: 'cushion_mint',
@@ -333,7 +333,7 @@ export const CUSHIONS = [
         emoji: '',
         color: '#98FF98',
         colorDark: '#7FFF7F',
-        description: '싱그러운 나뭇잎 방석'
+        description: '나뭇잎 방석'
     }
 ];
 

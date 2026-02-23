@@ -766,7 +766,7 @@ const StoreView = ({ isOpen, onClose }) => {
     const currentItems = getCurrentItems();
 
     return (
-        <div className="fixed inset-0 z-[80] bg-gradient-to-b from-purple-100 via-pink-50 to-yellow-50 flex flex-col">
+        <div className="fixed inset-0 z-[150] bg-gradient-to-b from-[#FFF8F3] via-[#FFE8F0] to-[#F5E8FF] flex flex-col">
             {/* 헤더 */}
             <header className="relative z-50 pt-14 px-6 flex items-center justify-between">
                 {/* 닫기 버튼 */}
@@ -863,7 +863,7 @@ const StoreView = ({ isOpen, onClose }) => {
                         return (
                             <div
                                 key={item.id}
-                                className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-md border-2 border-white hover:shadow-xl transition-all"
+                                className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-md border-2 border-white hover:shadow-xl transition-all flex flex-col"
                                 data-gtm={`store-item-${item.id}`}
                             >
                                 {/* 아이템 미리보기 */}
@@ -872,16 +872,18 @@ const StoreView = ({ isOpen, onClose }) => {
                                 </div>
 
                                 {/* 아이템 정보 */}
-                                <h3 className="text-sm font-bold text-gray-800 text-center mb-1 flex items-center justify-center gap-1.5">
-                                    <MongleIcon name={getItemIcon(item).name} size={16} color={getItemIcon(item).color} />
-                                    {item.name}
-                                </h3>
-                                <p className="text-xs text-gray-500 text-center mb-3 h-8">
-                                    {item.description}
-                                </p>
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-bold text-gray-800 text-center mb-1 flex items-center justify-center gap-1.5">
+                                        <MongleIcon name={getItemIcon(item).name} size={16} color={getItemIcon(item).color} />
+                                        {item.name}
+                                    </h3>
+                                    <p className="text-xs text-gray-500 text-center mb-3 truncate">
+                                        {item.description}
+                                    </p>
+                                </div>
 
                                 {/* 가격 및 버튼 */}
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-col gap-2 mt-auto">
                                     {!owned && (
                                         <>
                                             <div className="flex items-center justify-center">
