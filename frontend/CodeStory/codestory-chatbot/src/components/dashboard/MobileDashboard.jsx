@@ -434,8 +434,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                         {/* 홈 탭: 다마고치 룸 표시 */}
                         {activeTab === 'home' && (
                             <div className="absolute inset-0">
-                                {/* 💡 무드등 OFF 시 어두운 오버레이 */}
-                                {!moodLightOn && (
+                                {/* 💡 무드등 OFF 시 어두운 오버레이 (상점 열려 있을 때는 비활성화) */}
+                                {!moodLightOn && !isStoreViewOpen && (
                                     <div
                                         className="absolute inset-0 bg-black/60 z-[100] pointer-events-none transition-opacity duration-700"
                                         style={{ mixBlendMode: 'multiply' }}
