@@ -566,18 +566,7 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                 <>
                                     {/* 상단 선반 */}
                                     <div className="relative w-28 h-2.5 rounded-md mb-8" style={shelfStyle}>
-                                        <div className="absolute bottom-full left-1 z-10 flex gap-1.5 items-end">
-                                            {/* 파스텔 책 3권 (세로) */}
-                                            <div className="flex gap-0.5 items-end">
-                                                <div className="w-3 h-9 bg-[#FBBCCC] rounded-sm" style={{ boxShadow: 'inset -2px 0 3px rgba(0,0,0,0.08)' }}>
-                                                    <div className="mt-1 mx-0.5 h-px bg-white/40"></div>
-                                                    <div className="mt-1 mx-0.5 h-px bg-white/30"></div>
-                                                </div>
-                                                <div className="w-2.5 h-7 bg-[#C4B5FD] rounded-sm" style={{ boxShadow: 'inset -2px 0 3px rgba(0,0,0,0.08)' }}></div>
-                                                <div className="w-3 h-8 bg-[#FDE68A] rounded-sm" style={{ boxShadow: 'inset -2px 0 3px rgba(0,0,0,0.08)' }}>
-                                                    <div className="mt-1 mx-0.5 h-px bg-white/40"></div>
-                                                </div>
-                                            </div>
+                                        <div className="absolute bottom-full left-3 z-10 flex gap-3 items-end">
                                             {/* 곰인형 */}
                                             <div className="relative w-9 h-11">
                                                 {/* 귀 */}
@@ -624,8 +613,8 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                     </div>
                                     {/* 하단 선반 */}
                                     <div className="relative w-28 h-2.5 rounded-md" style={shelfStyle}>
-                                        <div className="absolute bottom-full left-1.5 z-10 flex gap-1.5 items-end">
-                                            {/* 향수병 (개선) */}
+                                        <div className="absolute bottom-full left-3 z-10 flex gap-3 items-end">
+                                            {/* 향수병 */}
                                             <div className="relative w-7 h-11">
                                                 {/* 병 몸통 - 타원형 */}
                                                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-7 rounded-2xl border border-[#C084FC]/40"
@@ -640,58 +629,25 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                                                 {/* 라벨 */}
                                                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3 h-2 bg-white/60 rounded-sm"></div>
                                             </div>
-                                            {/* 미니 딸기 케이크 */}
-                                            <div className="relative w-9 h-9">
-                                                {/* 케이크 몸통 2단 */}
-                                                <div className="absolute bottom-0 w-9 h-3.5 bg-[#FDE68A] rounded-b-sm" style={{ boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.05)' }}></div>
-                                                {/* 크림 레이어 (중간) */}
-                                                <div className="absolute bottom-3 w-9 h-1.5 bg-white"></div>
-                                                {/* 케이크 윗단 */}
-                                                <div className="absolute bottom-4 w-9 h-3 bg-[#FCD34D]"></div>
-                                                {/* 윗면 크림 (물결) */}
-                                                <div className="absolute bottom-6.5 left-1/2 -translate-x-1/2 w-10 h-2.5 bg-[#FBBCCC] rounded-full" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}></div>
-                                                {/* 딸기 */}
-                                                <div className="absolute" style={{ bottom: '29px', left: '5px' }}>
-                                                    <div className="w-3 h-3.5 bg-[#EF4444] rounded-t-full rounded-b-sm" style={{ boxShadow: 'inset -1px -1px 2px rgba(0,0,0,0.15)' }}></div>
-                                                    <div className="w-3 h-1 bg-[#22C55E] rounded-sm -mt-0.5"></div>
-                                                </div>
-                                                {/* 딸기 2 */}
-                                                <div className="absolute" style={{ bottom: '29px', right: '4px' }}>
-                                                    <div className="w-2.5 h-3 bg-[#F87171] rounded-t-full rounded-b-sm" style={{ boxShadow: 'inset -1px -1px 2px rgba(0,0,0,0.1)' }}></div>
-                                                    <div className="w-2.5 h-1 bg-[#16A34A] rounded-sm -mt-0.5"></div>
-                                                </div>
-                                            </div>
                                             {/* 리본 선물상자 */}
-                                            <div className="relative w-8 h-8">
+                                            <div className="relative w-9 h-9">
                                                 {/* 상자 본체 */}
-                                                <div className="absolute bottom-0 w-8 h-5 bg-[#FDE68A] rounded-sm" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}></div>
+                                                <div className="absolute bottom-0 w-9 h-6 bg-[#FDE68A] rounded-sm" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}></div>
                                                 {/* 뚜껑 */}
-                                                <div className="absolute w-8 h-2.5 bg-[#FCD34D] rounded-sm" style={{ bottom: '18px' }}></div>
+                                                <div className="absolute w-9 h-2.5 bg-[#FCD34D] rounded-sm" style={{ bottom: '20px' }}></div>
                                                 {/* 리본 세로줄 */}
-                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-7 bg-[#F472B6]"></div>
+                                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-8 bg-[#F472B6]"></div>
                                                 {/* 리본 가로줄 */}
-                                                <div className="absolute left-0 w-8 h-1 bg-[#F472B6]" style={{ bottom: '18px' }}></div>
+                                                <div className="absolute left-0 w-9 h-1 bg-[#F472B6]" style={{ bottom: '20px' }}></div>
                                                 {/* 리본 활 - 왼쪽 */}
-                                                <div className="absolute bg-[#F472B6] rounded-full" style={{ width: '12px', height: '9px', bottom: '24px', left: '2px', transform: 'rotate(-25deg)', transformOrigin: 'right bottom' }}></div>
+                                                <div className="absolute bg-[#F472B6] rounded-full" style={{ width: '13px', height: '10px', bottom: '27px', left: '2px', transform: 'rotate(-25deg)', transformOrigin: 'right bottom' }}></div>
                                                 {/* 리본 활 - 오른쪽 */}
-                                                <div className="absolute bg-[#F472B6] rounded-full" style={{ width: '12px', height: '9px', bottom: '24px', right: '2px', transform: 'rotate(25deg)', transformOrigin: 'left bottom' }}></div>
+                                                <div className="absolute bg-[#F472B6] rounded-full" style={{ width: '13px', height: '10px', bottom: '27px', right: '2px', transform: 'rotate(25deg)', transformOrigin: 'left bottom' }}></div>
                                                 {/* 리본 중심 */}
-                                                <div className="absolute w-2 h-2 bg-[#EC4899] rounded-full" style={{ bottom: '26px', left: '50%', transform: 'translateX(-50%)' }}></div>
+                                                <div className="absolute w-2 h-2 bg-[#EC4899] rounded-full" style={{ bottom: '29px', left: '50%', transform: 'translateX(-50%)' }}></div>
                                                 {/* 점 장식 */}
                                                 <div className="absolute w-1 h-1 bg-[#F472B6] rounded-full" style={{ bottom: '3px', left: '3px' }}></div>
                                                 <div className="absolute w-1 h-1 bg-[#F472B6] rounded-full" style={{ bottom: '3px', right: '3px' }}></div>
-                                            </div>
-                                            {/* 미니 편지봉투 */}
-                                            <div className="relative w-7 h-5">
-                                                <div className="absolute inset-0 bg-[#FDE68A] rounded-sm border border-[#FCD34D]"></div>
-                                                {/* V자 접힘 */}
-                                                <svg className="absolute inset-0" viewBox="0 0 28 20" width="28" height="20">
-                                                    <path d="M0,0 L14,11 L28,0" fill="none" stroke="#FCD34D" strokeWidth="1.2"/>
-                                                </svg>
-                                                {/* 하트 씰 */}
-                                                <svg className="absolute" style={{ bottom: '2px', left: '50%', transform: 'translateX(-50%)' }} viewBox="0 0 10 9" width="8" height="7">
-                                                    <path d="M5,8 Q1,5 1,3 Q1,1 3,1 Q4,1 5,3 Q6,1 7,1 Q9,1 9,3 Q9,5 5,8 Z" fill="#F472B6"/>
-                                                </svg>
                                             </div>
                                         </div>
                                     </div>
