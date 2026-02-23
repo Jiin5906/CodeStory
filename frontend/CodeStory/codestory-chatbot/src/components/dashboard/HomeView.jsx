@@ -42,12 +42,12 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
     const ALIVE_MIN_MS = 180000; // 3분
     const ALIVE_MAX_MS = 300000; // 5분
 
-    const { petStatus, spawnEmotionShard, moodLightOn, affectionGauge, coins, coinToast, isSleeping, sleepToast, showSleepToast, showLevelUpModal, levelUpInfo, closeLevelUpModal } = usePet();
+    const { petStatus, spawnEmotionShard, moodLightOn, affectionGauge, coins, coinToast, isSleeping, sleepToast, showSleepToast, showLevelUpModal, levelUpInfo, triggerLevelUpModal, closeLevelUpModal } = usePet();
     // TODO: 로티 진화 구현 후 true로 변경 — 레벨/EXP UI 임시 숨김
     const SHOW_LEVEL_UP_UI = false;
     const isSleepingRef = useRef(isSleeping);
     const { equippedItems, getEquippedItem } = useStore();
-    const { isTourActive, currentStep, startMainTour, startConditionalTour, advanceTour } = useTour();
+    const { isTourActive, currentStep, startMainTour, startConditionalTour, advanceTour, startTourSequence, resetTours } = useTour();
 
     // 장착된 테마 및 가구 (equippedItems 변경 시 자동 재계산)
     const equippedTheme = useMemo(() => getEquippedItem('theme'), [equippedItems, getEquippedItem]);
@@ -1335,6 +1335,33 @@ const HomeView = ({ user, diaries, onWriteClick }) => {
                 rewardCoins={levelUpInfo.rewardCoins}
             />
             )}
+
+            {/* 🧪 임시 테스트 버튼 - 배포 전 삭제 (좌측 하단 고정 - 탭바 위) */}
+            <div className="fixed bottom-20 left-2 z-[500] flex flex-col gap-2">
+                <button
+                    className="flex items-center bg-yellow-200/90 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md border border-yellow-400 active:scale-95 transition-all"
+                    onClick={() => navigate('/onboarding')}
+                    data-gtm="test-onboarding-btn"
+                >
+                    <MongleIcon name="testTube" size={14} className="mr-1" /> 온보딩 테스트
+                </button>
+                {SHOW_LEVEL_UP_UI && (
+                    <button
+                        className="flex items-center bg-purple-200/90 text-purple-900 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md border border-purple-400 active:scale-95 transition-all"
+                        onClick={() => triggerLevelUpModal(petStatus?.level || 5, (petStatus?.level || 5) + 1, 150)}
+                        data-gtm="test-levelup-btn"
+                    >
+                        <MongleIcon name="testTube" size={14} className="mr-1" /> 레벨업 테스트
+                    </button>
+                )}
+                <button
+                    className="flex items-center bg-sky-200/90 text-sky-900 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md border border-sky-400 active:scale-95 transition-all"
+                    onClick={() => { resetTours(); setTimeout(() => startTourSequence(['main', 'affection', 'lamp', 'levelup']), 100); }}
+                    data-gtm="test-tour-btn"
+                >
+                    <MongleIcon name="testTube" size={14} className="mr-1" /> 투어 테스트
+                </button>
+            </div>
 
         </div>
     );

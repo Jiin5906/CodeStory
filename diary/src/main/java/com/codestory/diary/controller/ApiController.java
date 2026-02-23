@@ -33,6 +33,7 @@ import com.codestory.diary.repository.DiaryRepository;
 import com.codestory.diary.repository.LikesRepository;
 import com.codestory.diary.repository.MemberRepository;
 import com.codestory.diary.dto.PetActionRequestDto;
+import com.codestory.diary.security.JwtTokenProvider;
 import com.codestory.diary.service.AuthService;
 import com.codestory.diary.service.ChatService;
 import com.codestory.diary.service.CoinService;
@@ -60,16 +61,49 @@ public class ApiController {
     private final MemberRepository memberRepository;
     private final LikesRepository likesRepository;
     private final CommentRepository commentRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // --- 인증 API ---
     @PostMapping("/auth/signup")
     public ResponseEntity<?> signup(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.signup(request));
+        Member member = authService.signup(request);
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        return ResponseEntity.ok(Map.of(
+                "id", member.getId(),
+                "email", member.getEmail(),
+                "nickname", member.getNickname(),
+                "accessToken", accessToken,
+                "refreshToken", refreshToken
+        ));
     }
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        return ResponseEntity.ok(authService.login(request.getEmail(), request.getPassword()));
+        Member member = authService.login(request.getEmail(), request.getPassword());
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        return ResponseEntity.ok(Map.of(
+                "id", member.getId(),
+                "email", member.getEmail(),
+                "nickname", member.getNickname(),
+                "accessToken", accessToken,
+                "refreshToken", refreshToken
+        ));
+    }
+
+    // Access Token 갱신
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refreshToken");
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            return ResponseEntity.status(401).body(Map.of("error", "유효하지 않은 리프레시 토큰입니다."));
+        }
+        Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        String newAccessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
     // --- 일기 및 AI API ---

@@ -121,8 +121,17 @@ function AppContent() {
     };
 
     const handleLoginSuccess = (userInfo) => {
-        setUser(userInfo);
-        localStorage.setItem('diaryUser', JSON.stringify(userInfo));
+        // JWT 토큰 저장
+        if (userInfo.accessToken) {
+            localStorage.setItem('accessToken', userInfo.accessToken);
+        }
+        if (userInfo.refreshToken) {
+            localStorage.setItem('refreshToken', userInfo.refreshToken);
+        }
+        // 사용자 기본 정보만 diaryUser에 저장 (토큰 제외)
+        const userData = { id: userInfo.id, email: userInfo.email, nickname: userInfo.nickname };
+        setUser(userData);
+        localStorage.setItem('diaryUser', JSON.stringify(userData));
         fetchDiaries(userInfo.id);
         fetchPetStatus(userInfo.id);
         const hasSeenOnboarding = localStorage.getItem(`hasSeenOnboarding_${userInfo.id}`);
@@ -135,6 +144,8 @@ function AppContent() {
 
     const handleLogout = () => {
         localStorage.removeItem('diaryUser');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         setUser(null);
         setDiaries([]);
         navigate('/login');
