@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FaUser, FaDatabase, FaUndo, FaEnvelope, FaInfoCircle, FaSignOutAlt, FaTimes } from 'react-icons/fa';
+import { FaUser, FaDatabase, FaUndo, FaEnvelope, FaInfoCircle, FaSignOutAlt, FaTimes, FaChartBar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { feedbackApi } from '../../services/api';
 import { useStore } from '../../context/StoreContext';
@@ -62,16 +62,8 @@ const SettingsView = ({ user }) => {
         }
     };
 
-    const handleBackup = () => {
-        alert('데이터 백업 기능은 곧 출시될 예정이에요! 📦');
-    };
-
-    const handleRestore = () => {
-        alert('데이터 복원 기능은 곧 출시될 예정이에요! 📂');
-    };
-
     const handleReset = () => {
-        if (window.confirm('⚠️ 모든 데이터가 삭제됩니다. 정말 초기화하시겠습니까?')) {
+        if (window.confirm('모든 데이터가 삭제됩니다. 정말 초기화하시겠습니까?')) {
             if (window.confirm('정말로 진행하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
                 // TODO: 데이터 초기화 API 호출
                 alert('데이터 초기화 기능은 곧 출시될 예정이에요!');
@@ -250,6 +242,20 @@ const SettingsView = ({ user }) => {
                         지원 및 정보
                     </h3>
                     <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 shadow-lg" style={{ border: `2px solid ${accentColor}33` }}>
+                        {/* 온보딩 통계 (관리자용) */}
+                        <button
+                            onClick={() => navigate('/analytics')}
+                            className="w-full flex items-center gap-3 p-4 rounded-2xl transition-all duration-200 mb-3"
+                            data-gtm="settings-analytics"
+                        >
+                            <div className="w-11 h-11 bg-gradient-to-br from-[#7C71F5] to-[#5B4FCF] rounded-2xl flex items-center justify-center shadow-md">
+                                <FaChartBar className="text-white text-lg" />
+                            </div>
+                            <span className="text-[#4A4A4A] font-bold text-lg font-cute">
+                                온보딩 데이터 통계
+                            </span>
+                        </button>
+
                         {/* 문의하기 */}
                         <button
                             onClick={handleContact}

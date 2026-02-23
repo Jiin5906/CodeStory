@@ -22,7 +22,8 @@ import CalendarModal from './components/calendar/CalendarModal';
 import MonthlyReport from './components/stats/MonthlyReport';
 import Settings from './components/layout/Settings';
 import SharedFeed from './components/feed/SharedFeed';
-import ShopPage from './components/shop/ShopPage';
+import StoreView from './components/dashboard/StoreView';
+import AnalyticsView from './components/dashboard/AnalyticsView';
 import OnboardingFlow from './components/onboarding/OnboardingFlow';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { PetProvider, usePet } from './context/PetContext';
@@ -45,6 +46,7 @@ function AppContent() {
     const [showEmotionModal, setShowEmotionModal] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [showCalendarModal, setShowCalendarModal] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
 
     // 화면 크기 변경 감지
     useEffect(() => {
@@ -123,7 +125,7 @@ function AppContent() {
         localStorage.setItem('diaryUser', JSON.stringify(userInfo));
         fetchDiaries(userInfo.id);
         fetchPetStatus(userInfo.id);
-        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+        const hasSeenOnboarding = localStorage.getItem(`hasSeenOnboarding_${userInfo.id}`);
         if (!hasSeenOnboarding) {
             navigate('/onboarding');
         } else {
@@ -155,7 +157,8 @@ function AppContent() {
                 window.dataLayer.push({ event: 'diary_save_success' });
             }
             
-            alert('일기가 저장되었습니다!');
+            setSuccessMsg('일기가 저장되었습니다!');
+            setTimeout(() => setSuccessMsg(''), 3000);
             fetchDiaries(user.id);
             setShowEmotionModal(false);
             navigate('/dashboard');
@@ -177,10 +180,17 @@ function AppContent() {
     return (
         <div className="app-root" style={themeStyles} data-theme={currentTheme.id} data-gtm="app-root-container">
             <Routes>
-                <Route path="/login" element={<Login onLogin={(e, p) => authApi.login(e,p).then(handleLoginSuccess)} onSignup={(e,p,n) => authApi.signup(e,p,n).then(handleLoginSuccess)} onGuestLogin={() => handleLoginSuccess({id:0, nickname:'게스트'})} />} />
+                <Route path="/login" element={<Login onLogin={(e, p) => authApi.login(e,p).then(handleLoginSuccess)} onSignup={(e,p,n) => authApi.signup(e,p,n).then(handleLoginSuccess)} />} />
                 
                 <Route path="/onboarding" element={
-                    <OnboardingFlow onComplete={() => navigate('/dashboard')} />
+                    <OnboardingFlow onComplete={(data) => {
+                        if (data?.nickname) {
+                            const updatedUser = { ...user, nickname: data.nickname };
+                            setUser(updatedUser);
+                            localStorage.setItem('diaryUser', JSON.stringify(updatedUser));
+                        }
+                        navigate('/dashboard');
+                    }} />
                 } />
 
                 <Route path="/editor" element={
@@ -198,8 +208,12 @@ function AppContent() {
                         <Route element={<MobileLayout />}>
                             <Route path="dashboard" element={<HomeView user={user} diaries={diaries} onWriteClick={() => fetchDiaries(user?.id)} />} />
                             <Route path="diary" element={<DiaryView />} />
+                            <Route path="diary/:id" element={<DiaryDetail />} />
                             <Route path="calendar" element={<CalendarView diaries={diaries} />} />
                             <Route path="stats" element={<ReportView user={user} diaries={diaries} />} />
+                            <Route path="shared" element={<SharedFeed />} />
+                            <Route path="shop" element={<StoreView />} />
+                            <Route path="analytics" element={<AnalyticsView user={user} />} />
                             <Route path="settings" element={<SettingsView user={user} />} />
                         </Route>
                     </>
@@ -220,7 +234,8 @@ function AppContent() {
                             <Route path="calendar" element={<CalendarView diaries={diaries} />} />
                             <Route path="stats" element={<MonthlyReport diaries={diaries} currentMonth={selectedDate} />} />
                             <Route path="shared" element={<SharedFeed />} />
-                            <Route path="shop" element={<ShopPage />} />
+                            <Route path="shop" element={<StoreView />} />
+                            <Route path="analytics" element={<AnalyticsView user={user} />} />
                             <Route path="diary/:id" element={<DiaryDetail />} />
                             <Route path="settings" element={<Settings user={user} onNicknameChange={(n) => {const u={...user, nickname:n}; setUser(u); localStorage.setItem('diaryUser', JSON.stringify(u));}} onLogout={handleLogout} />} />
                         </Route>
@@ -229,6 +244,16 @@ function AppContent() {
             </Routes>
 
             <ErrorBanner message={error} />
+
+            {/* 성공 토스트 */}
+            {successMsg && (
+                <div
+                    style={{position:'fixed', bottom:'5rem', left:'50%', transform:'translateX(-50%)', zIndex:1000, background:'#22c55e', color:'white', padding:'12px 24px', borderRadius:'16px', fontWeight:'bold', boxShadow:'0 4px 12px rgba(0,0,0,0.2)', whiteSpace:'nowrap'}}
+                    data-gtm="success-toast"
+                >
+                    ✓ {successMsg}
+                </div>
+            )}
             
             {loading && (
                 <div 

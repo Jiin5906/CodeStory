@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useRef } from 'react';
 import Lottie from 'lottie-react';
 import mongleIDLE from '../../assets/mongleIDLE.json';
@@ -46,6 +47,7 @@ const MainRoom = ({ latestLog, emotion, isAiThinking, user, windowColdAnimation,
     }, [isSleeping]);
 
     // 0. 애니메이션 전환 로직 (확장됨)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         // 1. 수면 중: SLEEPING 애니메이션
         if (isSleeping) {

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { DEFAULT_EQUIPPED, getItemById } from '../data/StoreData';
 import { usePet } from '../context/PetContext';
@@ -65,10 +66,12 @@ export const StoreProvider = ({ children }) => {
             return { success: false, message: `코인이 부족합니다. (필요: ${item.price}원)` };
         }
 
-        // 구매 처리 (PetContext의 spendCoins를 통해 백엔드 연동)
-        const result = await petSpendCoins(item.price);
-        if (!result?.success) {
-            return { success: false, message: result?.message || '코인 차감에 실패했습니다.' };
+        // 구매 처리 (0원 아이템은 API 호출 없이 바로 지급)
+        if (item.price > 0) {
+            const result = await petSpendCoins(item.price);
+            if (!result?.success) {
+                return { success: false, message: result?.message || '코인 차감에 실패했습니다.' };
+            }
         }
 
         setOwnedItems(prev => [...prev, itemId]);

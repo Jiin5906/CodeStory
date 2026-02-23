@@ -1,23 +1,19 @@
-import { useState, useEffect } from 'react';
 import { usePet } from '../../context/PetContext';
+import MongleIcon from '../common/MongleIcons';
 
 const EVOLUTION_LABELS = {
-    BABY: '🐣 아기몽글이',
-    KID: '🌱 꼬리몽글이',
-    ADULT: '🌸 성인몽글이'
+    BABY: { icon: 'babyChick', text: '아기몽글이' },
+    KID: { icon: 'sprout', text: '꼬리몽글이' },
+    ADULT: { icon: 'flower', text: '성인몽글이' }
 };
 
 export default function ExpBar() {
     const { petStatus } = usePet();
-    const [displayProgress, setDisplayProgress] = useState(0);
-
-    useEffect(() => {
-        if (!petStatus) return;
-        const target = (petStatus.currentExp / petStatus.requiredExp) * 100;
-        setDisplayProgress(target);
-    }, [petStatus]);
 
     if (!petStatus) return null;
+
+    // 파생 값은 state 없이 직접 계산
+    const displayProgress = (petStatus.currentExp / petStatus.requiredExp) * 100;
 
     return (
         <div style={{
@@ -31,13 +27,24 @@ export default function ExpBar() {
             minWidth: '180px'
         }} data-gtm="exp-bar">
             <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
                 fontSize: '12px',
                 fontWeight: 600,
                 color: '#fff',
                 textShadow: '0 1px 3px rgba(0,0,0,0.4)',
                 whiteSpace: 'nowrap'
             }}>
-                {EVOLUTION_LABELS[petStatus.evolutionStage] || '🐣 아기몽글이'} Lv.{petStatus.level}
+                {(() => {
+                    const label = EVOLUTION_LABELS[petStatus.evolutionStage] || EVOLUTION_LABELS.BABY;
+                    return (
+                        <>
+                            <MongleIcon name={label.icon} size={16} />
+                            {label.text} Lv.{petStatus.level}
+                        </>
+                    );
+                })()}
             </span>
             <div style={{
                 flex: 1,

@@ -41,7 +41,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
     const { petStatus, emotionShards, handleCollectShard, spawnEmotionShard, moodLightOn, coins, coinToast, showLevelUpModal, levelUpInfo, triggerLevelUpModal, closeLevelUpModal } = usePet();
     // TODO: 로티 진화 구현 후 true로 변경 — 레벨/EXP UI 임시 숨김
     const SHOW_LEVEL_UP_UI = false;
-    const { equippedItems, getEquippedItem } = useStore();
+    const { getEquippedItem } = useStore();
 
     // 장착된 아이템 가져오기 (equippedItems 변경 시 자동 재계산)
     const equippedTheme = useMemo(() => {
@@ -60,7 +60,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         const svgStyle = { width: '13vw', height: '17.4vw', display: 'block', overflow: 'visible' };
 
         if (potId === 'pot_cactus') return (
-            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+            <div className="absolute bottom-[26%] right-[4%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                 <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
                     <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
                     <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#CF6A38"/>
@@ -95,7 +95,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         );
 
         if (potId === 'pot_monstera') return (
-            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+            <div className="absolute bottom-[26%] right-[4%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                 <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
                     <defs>
                         <linearGradient id="md-leaf-dark" x1="0" y1="0" x2="1" y2="1">
@@ -139,7 +139,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         );
 
         if (potId === 'pot_flower') return (
-            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+            <div className="absolute bottom-[26%] right-[4%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                 <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
                     <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
                     <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E8789A"/>
@@ -178,7 +178,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         );
 
         if (potId === 'pot_lavender') return (
-            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+            <div className="absolute bottom-[26%] right-[4%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                 <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
                     <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
                     <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#9C6DC8"/>
@@ -219,7 +219,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
         );
 
         if (potId === 'pot_rose') return (
-            <div className="absolute bottom-[2%] right-[8%] z-20 pointer-events-none">
+            <div className="absolute bottom-[26%] right-[4%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                 <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" style={svgStyle}>
                     <ellipse cx="60" cy="150" rx="22" ry="4" fill="rgba(0,0,0,0.14)"/>
                     <path d="M 33 108 L 39 145 Q 60 153 81 145 L 87 108 Z" fill="#E9909A"/>
@@ -734,7 +734,8 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                     <MoodLight />
                                 </div>
 
-                                {/* 🪴 우측 하단 대형 화분 (크기 증가) */}
+                                {/* 🪴 우측 하단 대형 화분 (장착된 화분 없을 때만 기본 표시) */}
+                                {!equippedPot && (
                                 <div className="absolute bottom-[26%] right-[4%] z-20 pointer-events-none" style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}>
                                     <div className="relative w-[22.33%] h-[10.23%]">
                                         {/* 화분 */}
@@ -771,6 +772,7 @@ const MobileDashboard = ({ user, diaries, onWriteClick, onCalendarClick, onStats
                                         }}></div>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* 🧩 감정 조각 렌더링 (바닥 위에 표시) */}
                                 {emotionShards && emotionShards.map(shard => (

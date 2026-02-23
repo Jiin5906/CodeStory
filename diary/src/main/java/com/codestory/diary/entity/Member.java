@@ -32,6 +32,14 @@ public class Member {
     @Column(nullable = false)
     private Long coins = 0L;
 
+    // 온보딩 데이터: 성별 (남성/여성/기타)
+    @Column(nullable = true)
+    private String gender;
+
+    // 온보딩 데이터: 유입 경로 (family/google/naver/youtube/appstore/instagram)
+    @Column(nullable = true)
+    private String channel;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -43,5 +51,11 @@ public class Member {
 
     public void addCoins(long amount) {
         this.coins = Math.max(0, this.coins + amount);
+    }
+
+    // 온보딩 프로필 정보 업데이트
+    public void updateProfile(String gender, String channel) {
+        if (gender != null) this.gender = gender;
+        if (channel != null) this.channel = channel;
     }
 }

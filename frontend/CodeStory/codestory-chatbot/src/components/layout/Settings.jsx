@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaUserCircle, FaMask, FaSignInAlt, FaSignOutAlt, FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const Settings = ({ user, onNicknameChange, onLogout }) => {
     const navigate = useNavigate();
-    const [nickname, setNickname] = useState('');
-    const [isAnonymousDefault, setIsAnonymousDefault] = useState(false);
+    const [nickname, setNickname] = useState(user?.nickname || '');
+    const savedPref = localStorage.getItem('anonymousDefault');
+    const [isAnonymousDefault, setIsAnonymousDefault] = useState(savedPref === 'true');
 
-    useEffect(() => {
-        if (user && user.nickname) {
-            setNickname(user.nickname);
-        }
-        const savedPreference = localStorage.getItem('anonymousDefault');
-        if (savedPreference !== null) {
-            setIsAnonymousDefault(savedPreference === 'true');
-        }
-    }, [user]);
 
     const handleNicknameSave = () => {
         if (nickname.trim() && onNicknameChange) {

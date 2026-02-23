@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaHeart, FaRegHeart } from 'react-icons/fa';
 import api from '../../services/api';
+import { SmartEmoji } from '../common/MongleIcons';
 
 const DiaryDetail = () => {
     const { id } = useParams();
@@ -27,6 +28,7 @@ const DiaryDetail = () => {
     }, [id]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchDiaryDetail();
     }, [fetchDiaryDetail]);
 
@@ -144,7 +146,7 @@ const DiaryDetail = () => {
                     <span>{new Date(diary.date).toLocaleDateString('ko-KR')}</span>
                     <span>•</span>
                     <span>{diary.nickname}</span>
-                    {diary.emoji && <span style={{ fontSize: '20px' }}>{diary.emoji}</span>}
+                    {diary.emoji && <SmartEmoji value={diary.emoji} size={20} />}
                 </div>
 
                 {/* 이미지 */}

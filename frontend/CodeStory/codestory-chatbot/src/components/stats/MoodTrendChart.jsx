@@ -4,6 +4,23 @@ import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useStore } from '../../context/StoreContext';
 
+// 커스텀 툴팁 컴포넌트 (렌더링 중 생성 방지를 위해 외부 정의)
+const CustomTooltip = ({ active, payload, accentColor, primaryColor }) => {
+    if (active && payload && payload.length) {
+        const data = payload[0].payload;
+        return (
+            <div
+                className="bg-white rounded-xl shadow-md p-3 border"
+                style={{ borderColor: `${primaryColor}66` }}
+            >
+                <p className="text-xs font-cute text-gray-500">{data.displayDate}</p>
+                <p className="text-sm font-cute font-bold" style={{ color: accentColor }}>{data.score}점</p>
+            </div>
+        );
+    }
+    return null;
+};
+
 /**
  * MoodTrendChart - 일기 기분 점수 추이 영역 차트
  *
@@ -46,25 +63,8 @@ const MoodTrendChart = ({ diaries }) => {
         ? Math.round(chartData.reduce((sum, item) => sum + item.score, 0) / chartData.length)
         : 0;
 
-    // 고유 gradient ID (동일 페이지에 여러 차트 방지)
-    const gradientId = useMemo(() => `colorScore-${Math.random().toString(36).substr(2, 9)}`, []);
-
-    // 커스텀 툴팁
-    const CustomTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-            const data = payload[0].payload;
-            return (
-                <div
-                    className="bg-white rounded-xl shadow-md p-3 border"
-                    style={{ borderColor: `${primaryColor}66` }}
-                >
-                    <p className="text-xs font-cute text-gray-500">{data.displayDate}</p>
-                    <p className="text-sm font-cute font-bold" style={{ color: accentColor }}>{data.score}점</p>
-                </div>
-            );
-        }
-        return null;
-    };
+    // 고유 gradient ID (컴포넌트 인스턴스당 1회 생성)
+    const gradientId = useMemo(() => `colorScore-mood-trend`, []);
 
     return (
         <div className="bg-white rounded-3xl shadow-sm p-6" data-gtm="mood-trend-chart">
@@ -96,7 +96,7 @@ const MoodTrendChart = ({ diaries }) => {
                             tick={{ fill: '#9CA3AF', fontSize: 11 }}
                             axisLine={{ stroke: '#E5E7EB' }}
                         />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<CustomTooltip accentColor={accentColor} primaryColor={primaryColor} />} />
                         <Area
                             type="monotone"
                             dataKey="score"

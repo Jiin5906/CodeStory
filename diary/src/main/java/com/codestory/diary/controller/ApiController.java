@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -316,6 +317,56 @@ public class ApiController {
     @GetMapping("/feedback")
     public ResponseEntity<List<Feedback>> getFeedbackByUserId(@RequestParam Long userId) {
         return ResponseEntity.ok(feedbackService.getFeedbackByUserId(userId));
+    }
+
+    // --- 온보딩 프로필 API ---
+
+    /**
+     * 온보딩 완료 시 성별/유입경로 저장
+     * PATCH /api/member/{id}/profile
+     */
+    @PatchMapping("/member/{id}/profile")
+    public ResponseEntity<?> updateProfile(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request
+    ) {
+        return memberRepository.findById(id).map(member -> {
+            member.updateProfile(request.get("gender"), request.get("channel"));
+            memberRepository.save(member);
+            return ResponseEntity.ok(Map.of("success", true));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * 관리자용 성별/유입경로 통계 집계
+     * GET /api/admin/analytics
+     */
+    @GetMapping("/admin/analytics")
+    public ResponseEntity<?> getAnalytics() {
+        List<Member> members = memberRepository.findAll();
+        long total = members.size();
+
+        // 성별 집계
+        Map<String, Long> genderStats = members.stream()
+                .filter(m -> m.getGender() != null)
+                .collect(Collectors.groupingBy(Member::getGender, Collectors.counting()));
+
+        // 유입경로 집계
+        Map<String, Long> channelStats = members.stream()
+                .filter(m -> m.getChannel() != null)
+                .collect(Collectors.groupingBy(Member::getChannel, Collectors.counting()));
+
+        // 온보딩 완료 수 (gender 또는 channel이 있으면 완료로 간주)
+        long onboardingCompleted = members.stream()
+                .filter(m -> m.getGender() != null || m.getChannel() != null)
+                .count();
+
+        return ResponseEntity.ok(Map.of(
+                "totalMembers", total,
+                "onboardingCompleted", onboardingCompleted,
+                "genderStats", genderStats,
+                "channelStats", channelStats
+        ));
     }
 
     // Helper: 클라이언트 IP 추출

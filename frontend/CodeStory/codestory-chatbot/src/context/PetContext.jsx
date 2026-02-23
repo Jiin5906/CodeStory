@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useContext, useCallback, useEffect, useRef } from 'react';
 import { petApi, coinApi } from '../services/api';
 
@@ -30,7 +31,7 @@ const FORCE_SLEEP_THRESHOLD = 10; // 수면 게이지 10% 이하
 const INACTIVITY_TIME_MS = 300000; // 5분 동안 입력 없으면
 
 // 자동 수면 (비활동 3시간)
-const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 300000 : 10800000; // 5분 or 3시간
+const AUTO_SLEEP_INACTIVITY_MS = IS_DEV_MODE ? 900000 : 10800000; // 15분 or 3시간
 
 // 쓰다듬기 Lock 유지 시간
 const AFFECTION_LOCK_DURATION_MS = IS_DEV_MODE ? 60000 : 300000; // 1분 or 5분
@@ -104,8 +105,13 @@ export const PetProvider = ({ children }) => {
     const [isEnergyLocked, setIsEnergyLocked] = useState(false);
 
     // ━━━ 코인 시스템 ━━━
-    const [coins, setCoins] = useState(0);
+    const [coins, setCoins] = useState(1000); // TODO: 테스트용 임시 1000원 (원래 0)
     const [coinToast, setCoinToast] = useState(null);
+
+    // ━━━ 레벨업 축하 모달 ━━━
+    const [showLevelUpModal, setShowLevelUpModal] = useState(false);
+    const [levelUpInfo, setLevelUpInfo] = useState({ prevLevel: 0, newLevel: 0, rewardCoins: 0 });
+    const prevLevelRef = useRef(null); // 최초 로딩 구분용 (null = 아직 초기화 안됨)
 
     // ━━━ 수면 토스트 (2단계) ━━━
     const [sleepToast, setSleepToast] = useState(null);
@@ -138,12 +144,26 @@ export const PetProvider = ({ children }) => {
         setTimeout(() => setSleepToast(null), 3000);
     }, []);
 
+    // ─── 레벨업 축하 모달 트리거 ───
+    const triggerLevelUpModal = useCallback((prev, next, reward) => {
+        setLevelUpInfo({ prevLevel: prev, newLevel: next, rewardCoins: reward || 0 });
+        setShowLevelUpModal(true);
+    }, []);
+
+    const closeLevelUpModal = useCallback(() => {
+        setShowLevelUpModal(false);
+    }, []);
+
     // ─── 서버에서 PetStatus 조회 및 로컬 state 동기화 ───
     const fetchPetStatus = useCallback(async (userId) => {
         if (!userId) return;
         try {
             const data = await petApi.getStatus(userId);
             if (data) {
+                // 최초 로딩 시 prevLevelRef 초기화 (모달 뜨지 않음)
+                if (prevLevelRef.current === null && data.level !== undefined) {
+                    prevLevelRef.current = data.level;
+                }
                 setPetStatus(data);
 
                 // CRITICAL: Lock이 유효한 경우 affectionGauge는 서버 값으로 덮어쓰지 않음
@@ -265,8 +285,11 @@ export const PetProvider = ({ children }) => {
             // CRITICAL: affectionGauge는 서버 응답으로 덮어쓰지 않고 100% 유지
             if (data.energyGauge !== undefined) setEnergyGauge(data.energyGauge);
 
-            // 레벨업 보상 토스트
+            // 레벨업 보상 → 축하 모달
             if (data.levelUpReward) {
+                const prev = prevLevelRef.current || (data.level - 1);
+                triggerLevelUpModal(prev, data.level, data.levelUpReward.amount);
+                prevLevelRef.current = data.level;
                 showCoinToast(data.levelUpReward.amount);
                 setCoins(data.levelUpReward.totalCoins);
             }
@@ -290,8 +313,11 @@ export const PetProvider = ({ children }) => {
             // 감정 조각 수집 코인 보상
             triggerShardReward();
 
-            // 레벨업 보상 토스트
+            // 레벨업 보상 → 축하 모달
             if (data.levelUpReward) {
+                const prev = prevLevelRef.current || (data.level - 1);
+                triggerLevelUpModal(prev, data.level, data.levelUpReward.amount);
+                prevLevelRef.current = data.level;
                 showCoinToast(data.levelUpReward.amount);
                 setCoins(data.levelUpReward.totalCoins);
             }
@@ -597,6 +623,11 @@ export const PetProvider = ({ children }) => {
             // 수면 토스트
             sleepToast,
             showSleepToast,
+            // 레벨업 축하 모달
+            showLevelUpModal,
+            levelUpInfo,
+            triggerLevelUpModal,
+            closeLevelUpModal,
         }}>
             {children}
         </PetContext.Provider>

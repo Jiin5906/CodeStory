@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { FaHeart, FaCloudSun, FaCoffee } from 'react-icons/fa';
 
 const QUICK_ACTIONS = [
