@@ -293,6 +293,15 @@ public class ApiController {
         return ResponseEntity.ok(coinService.spendCoins(userId, amount));
     }
 
+    // 게이지 20% 미만 진입 시 보상 플래그 리셋 (재보상 가능하게)
+    @PostMapping("/coins/gauge-reset")
+    public ResponseEntity<?> resetGaugeReward(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf(request.get("userId").toString());
+        String gaugeType = request.get("gaugeType").toString();
+        coinService.resetGaugeReward(userId, gaugeType);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
     // --- 몽글이 능동적 대화 API ---
 
     @GetMapping("/mongle/greeting")

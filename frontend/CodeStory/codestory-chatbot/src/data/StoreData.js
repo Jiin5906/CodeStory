@@ -10,7 +10,7 @@ export const THEMES = [
         name: '바다 테마',
         category: 'theme',
         price: 150,
-        emoji: '🌊',
+        emoji: '',
         description: '시원한 여름 바다 배경',
         gradient: 'from-sky-300 via-sky-200 to-cyan-100',
         wallColor: '#87CEEB',
@@ -31,7 +31,7 @@ export const THEMES = [
         name: '단풍 테마',
         category: 'theme',
         price: 150,
-        emoji: '🍂',
+        emoji: '',
         description: '가을 단풍이 아름다운 배경',
         gradient: 'from-orange-100 via-yellow-50 to-white',
         wallColor: '#FFB347',
@@ -52,7 +52,7 @@ export const THEMES = [
         name: '은하수 테마',
         category: 'theme',
         price: 200,
-        emoji: '🌌',
+        emoji: '',
         description: '반짝이는 별빛 은하수 배경',
         gradient: 'from-purple-900 via-indigo-800 to-blue-900',
         wallColor: '#4B0082',
@@ -73,7 +73,7 @@ export const THEMES = [
         name: '기본 테마',
         category: 'theme',
         price: 0,
-        emoji: '🏠',
+        emoji: '',
         description: '따뜻한 기본 배경',
         gradient: 'from-purple-100 via-pink-50 to-yellow-50',
         wallColor: '#FF9EAA',
@@ -91,26 +91,26 @@ export const THEMES = [
     }
 ];
 
-// ─── 가구: 벽 선반 (Wall Shelf) ─── (Beta: 0원)
+// ─── 가구: 벽 선반 (Wall Shelf) ───
 export const SHELVES = [
     {
         id: 'shelf_wood',
-        name: '나무 선반',
+        name: '기본 선반',
         type: 'shelf',
         category: 'furniture',
         price: 0,
-        emoji: '📦',
+        emoji: '',
         color: '#D7B896',
         colorLight: '#E8CBA8',
-        description: '따뜻한 원목 선반'
+        description: '아늑한 기본 원목 선반'
     },
     {
         id: 'shelf_white',
         name: '화이트 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 0,
-        emoji: '🗄️',
+        price: 100,
+        emoji: '',
         color: '#FFFFFF',
         colorLight: '#F8F8F8',
         description: '깔끔한 화이트 선반'
@@ -120,8 +120,8 @@ export const SHELVES = [
         name: '파스텔 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 0,
-        emoji: '💝',
+        price: 80,
+        emoji: '',
         color: '#FFB6C1',
         colorLight: '#FFC8D3',
         description: '부드러운 파스텔 핑크 선반'
@@ -131,8 +131,8 @@ export const SHELVES = [
         name: '민트 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 0,
-        emoji: '🍃',
+        price: 100,
+        emoji: '',
         color: '#98FF98',
         colorLight: '#B0FFB0',
         description: '상쾌한 민트 선반'
@@ -142,111 +142,116 @@ export const SHELVES = [
         name: '라벤더 선반',
         type: 'shelf',
         category: 'furniture',
-        price: 0,
-        emoji: '💜',
+        price: 120,
+        emoji: '',
         color: '#E6E6FA',
         colorLight: '#F0F0FF',
         description: '우아한 라벤더 선반'
     }
 ];
 
-// ─── 가구: 무드등 (Mood Light) ─── (Beta: 0원)
+// ─── 가구: 무드등 (Mood Light) ───
 export const LIGHTS = [
     {
         id: 'light_warm',
-        name: '웜 무드등',
+        name: '기본 무드등',
         type: 'light',
         category: 'furniture',
+        designType: 'classic',
         price: 0,
-        emoji: '💡',
+        emoji: '',
         shadeColor: '#FFF8DC',
         shadeColorDark: '#FFE4B5',
         standColor: '#2C2C2C',
-        description: '따뜻한 노란빛 무드등'
+        description: '따뜻하고 아늑한 기본 무드등'
     },
     {
         id: 'light_pink',
-        name: '핑크 무드등',
+        name: '튤립 램프',
         type: 'light',
         category: 'furniture',
-        price: 0,
-        emoji: '💖',
+        designType: 'tulip',
+        price: 80,
+        emoji: '',
         shadeColor: '#FFB6C1',
         shadeColorDark: '#FF69B4',
-        standColor: '#8B4789',
-        description: '로맨틱 핑크 무드등'
+        standColor: '#5B8C3E',
+        description: '사랑스러운 꽃봉오리 형태 램프'
     },
     {
         id: 'light_mint',
-        name: '민트 무드등',
+        name: '버섯 램프',
         type: 'light',
         category: 'furniture',
-        price: 0,
-        emoji: '🌿',
+        designType: 'mushroom',
+        price: 80,
+        emoji: '',
         shadeColor: '#98FF98',
         shadeColorDark: '#7FFF7F',
-        standColor: '#2F4F2F',
-        description: '상쾌한 민트 무드등'
+        standColor: '#F5F5DC',
+        description: '귀여운 버섯 모양 램프'
     },
     {
         id: 'light_blue',
-        name: '블루 무드등',
+        name: '달 램프',
         type: 'light',
         category: 'furniture',
-        price: 0,
-        emoji: '💙',
-        shadeColor: '#ADD8E6',
-        shadeColorDark: '#87CEEB',
+        designType: 'moon',
+        price: 120,
+        emoji: '',
+        shadeColor: '#C8D8F0',
+        shadeColorDark: '#A0B4D8',
         standColor: '#191970',
-        description: '차분한 블루 무드등'
+        description: '몽환적인 초승달 램프'
     },
     {
         id: 'light_rainbow',
-        name: '레인보우 무드등',
+        name: '라바 램프',
         type: 'light',
         category: 'furniture',
-        price: 0,
-        emoji: '🌈',
+        designType: 'lava',
+        price: 150,
+        emoji: '',
         shadeColor: '#FFD700',
         shadeColorDark: '#FFA500',
         standColor: '#4B0082',
-        description: '화려한 무지개 무드등'
+        description: '화려한 네온 라바 램프'
     }
 ];
 
-// ─── 가구: 거대한 화분 (Giant Pot) ─── (Beta: 0원)
+// ─── 가구: 거대한 화분 (Giant Pot) ───
 export const POTS = [
+    {
+        id: 'pot_monstera',
+        name: '기본 화분',
+        type: 'pot',
+        category: 'furniture',
+        price: 0,
+        emoji: '',
+        potColor: '#D4BCA0',
+        plantColor: '#A0D0BC',
+        description: '싱그러운 기본 화분'
+    },
     {
         id: 'pot_cactus',
         name: '선인장 화분',
         type: 'pot',
         category: 'furniture',
-        price: 0,
-        emoji: '🌵',
-        potColor: '#D2691E',
-        plantColor: '#228B22',
+        price: 80,
+        emoji: '',
+        potColor: '#EDCBA8',
+        plantColor: '#B8DCAC',
         description: '귀여운 선인장'
-    },
-    {
-        id: 'pot_monstera',
-        name: '몬스테라 화분',
-        type: 'pot',
-        category: 'furniture',
-        price: 0,
-        emoji: '🌿',
-        potColor: '#8B4513',
-        plantColor: '#2E8B57',
-        description: '싱그러운 몬스테라'
     },
     {
         id: 'pot_flower',
         name: '꽃 화분',
         type: 'pot',
         category: 'furniture',
-        price: 0,
-        emoji: '🌺',
-        potColor: '#FF69B4',
-        plantColor: '#FF1493',
+        price: 100,
+        emoji: '',
+        potColor: '#F8D0E0',
+        plantColor: '#F8B4C8',
         description: '화사한 꽃 화분'
     },
     {
@@ -254,10 +259,10 @@ export const POTS = [
         name: '라벤더 화분',
         type: 'pot',
         category: 'furniture',
-        price: 0,
-        emoji: '💜',
-        potColor: '#DDA0DD',
-        plantColor: '#9370DB',
+        price: 100,
+        emoji: '',
+        potColor: '#DDD8F8',
+        plantColor: '#C0B4EC',
         description: '향기로운 라벤더'
     },
     {
@@ -265,70 +270,70 @@ export const POTS = [
         name: '장미 화분',
         type: 'pot',
         category: 'furniture',
-        price: 0,
-        emoji: '🌹',
-        potColor: '#8B0000',
-        plantColor: '#DC143C',
+        price: 150,
+        emoji: 'rose',
+        potColor: '#F4D4D0',
+        plantColor: '#C0D0A8',
         description: '고급스러운 장미'
     }
 ];
 
-// ─── 가구: 바닥 방석 (Floor Cushion) ─── (Beta: 0원)
+// ─── 가구: 바닥 방석 (Floor Cushion) ───
 export const CUSHIONS = [
     {
         id: 'cushion_pink',
-        name: '핑크 방석',
+        name: '기본 방석',
         type: 'cushion',
         category: 'furniture',
         price: 0,
-        emoji: '💗',
+        emoji: '',
         color: '#FFC0CB',
         colorDark: '#FFB6C1',
-        description: '보들보들 핑크 방석'
+        description: '보들보들 기본 핑크 방석'
     },
     {
         id: 'cushion_blue',
-        name: '블루 방석',
+        name: '구름 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 0,
-        emoji: '💙',
+        price: 80,
+        emoji: '',
         color: '#87CEEB',
         colorDark: '#6495ED',
-        description: '시원한 블루 방석'
+        description: '몽글몽글 구름 방석'
     },
     {
         id: 'cushion_purple',
-        name: '퍼플 방석',
+        name: '벨벳 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 0,
-        emoji: '💜',
+        price: 100,
+        emoji: '',
         color: '#DA70D6',
         colorDark: '#BA55D3',
-        description: '우아한 퍼플 방석'
+        description: '고급스러운 벨벳 원형 방석'
     },
     {
         id: 'cushion_yellow',
-        name: '옐로우 방석',
+        name: '꽃 모양 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 0,
-        emoji: '💛',
+        price: 120,
+        emoji: '',
         color: '#FFD700',
         colorDark: '#FFA500',
-        description: '밝은 옐로우 방석'
+        description: '꽃잎처럼 펼쳐진 화사하고 푹신한 방석'
     },
     {
         id: 'cushion_mint',
-        name: '민트 방석',
+        name: '나뭇잎 방석',
         type: 'cushion',
         category: 'furniture',
-        price: 0,
-        emoji: '💚',
+        price: 80,
+        emoji: '',
         color: '#98FF98',
         colorDark: '#7FFF7F',
-        description: '상쾌한 민트 방석'
+        description: '싱그러운 나뭇잎 방석'
     }
 ];
 

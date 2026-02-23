@@ -224,6 +224,11 @@ export const coinApi = {
         const response = await api.post('/coins/spend', { userId, amount });
         return response.data;
     },
+    // 게이지 20% 미만 진입 시 보상 플래그 리셋 (재보상 가능하게)
+    resetGaugeReward: async (userId, gaugeType) => {
+        const response = await api.post('/coins/gauge-reset', { userId, gaugeType });
+        return response.data;
+    },
 };
 
 // Mongle Talk API (능동적 대화)

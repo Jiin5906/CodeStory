@@ -105,7 +105,7 @@ export const PetProvider = ({ children }) => {
     const [isEnergyLocked, setIsEnergyLocked] = useState(false);
 
     // ━━━ 코인 시스템 ━━━
-    const [coins, setCoins] = useState(1000); // TODO: 테스트용 임시 1000원 (원래 0)
+    const [coins, setCoins] = useState(200); // 신규 가입 기본 지급 코인
     const [coinToast, setCoinToast] = useState(null);
 
     // ━━━ 레벨업 축하 모달 ━━━
@@ -215,6 +215,17 @@ export const PetProvider = ({ children }) => {
             console.error('[PetContext] triggerGaugeReward 실패:', e);
         }
     }, [showCoinToast]);
+
+    // ─── 게이지 20% 미만 진입 시 보상 플래그 리셋 (다음 100% 달성 시 재보상 가능) ───
+    const triggerGaugeReset = useCallback(async (gaugeType) => {
+        const user = JSON.parse(localStorage.getItem('diaryUser'));
+        if (!user?.id) return;
+        try {
+            await coinApi.resetGaugeReward(user.id, gaugeType);
+        } catch (e) {
+            console.error('[PetContext] triggerGaugeReset 실패:', e);
+        }
+    }, []);
 
     // ─── 감정 조각 코인 보상 ───
     const triggerShardReward = useCallback(async () => {
@@ -445,9 +456,11 @@ export const PetProvider = ({ children }) => {
         }
     }, [fetchPetStatus, fetchCoins]);
 
-    // ─── 게이지 100% 코인 보상 자동 감지 ───
+    // ─── 게이지 100% 보상 / 20% 미만 리셋 자동 감지 ───
     useEffect(() => {
         const prev = prevGaugesRef.current;
+
+        // 100% 도달 시 코인 보상
         if (affectionGauge >= 100 && prev.affectionGauge < 100) {
             triggerGaugeReward('affection');
         }
@@ -457,8 +470,20 @@ export const PetProvider = ({ children }) => {
         if (sleepGauge >= 100 && prev.sleepGauge < 100) {
             triggerGaugeReward('sleep');
         }
+
+        // 20% 미만 진입 시 보상 플래그 리셋 → 다시 100% 채우면 재보상 가능
+        if (affectionGauge < 20 && prev.affectionGauge >= 20) {
+            triggerGaugeReset('affection');
+        }
+        if (hungerGauge < 20 && prev.hungerGauge >= 20) {
+            triggerGaugeReset('hunger');
+        }
+        if (sleepGauge < 20 && prev.sleepGauge >= 20) {
+            triggerGaugeReset('sleep');
+        }
+
         prevGaugesRef.current = { affectionGauge, hungerGauge, sleepGauge };
-    }, [affectionGauge, hungerGauge, sleepGauge, triggerGaugeReward]);
+    }, [affectionGauge, hungerGauge, sleepGauge, triggerGaugeReward, triggerGaugeReset]);
 
     // ─── 게이지 자연 감소 (Decay) ───
     useEffect(() => {
