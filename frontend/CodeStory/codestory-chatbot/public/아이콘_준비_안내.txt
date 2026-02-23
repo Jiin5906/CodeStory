@@ -1,0 +1,7 @@
+아래 3개 파일을 이 폴더(public/)에 직접 넣어주세요:
+
+1. pwa-192x192.png   — 192×192 픽셀 앱 아이콘
+2. pwa-512x512.png   — 512×512 픽셀 앱 아이콘 (일반)
+3. pwa-maskable-512x512.png — 512×512 픽셀 앱 아이콘 (Adaptive Icon용, 안전 영역 80% 이내에 로고)
+
+※ maskable 아이콘은 https://maskable.app/ 에서 무료로 생성 가능합니다.
