@@ -29,7 +29,8 @@ jobs:
       - name: Copy Frontend Build to Spring Boot
         run: |
           mkdir -p diary/src/main/resources/static
-          cp -r frontend/CodeStory/codestory-chatbot/dist/* diary/src/main/resources/static/
+          # dist/. 표기: 숨김 디렉터리(.well-known/ 등)를 포함한 전체 복사
+          cp -r frontend/CodeStory/codestory-chatbot/dist/. diary/src/main/resources/static/
 
       # 3. Java 빌드 (프론트 파일이 포함된 상태로 패키징)
       - name: Set up JDK 21
